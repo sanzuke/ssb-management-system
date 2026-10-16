@@ -25,7 +25,7 @@ Folder kode baru dibuat saat pekerjaan kodenya dimulai.
 ## Cara kerja checkpoint
 
 - Tiap langkah penting menjadi satu atau beberapa commit dengan pesan yang jelas.
-- Tiap checkpoint diberi tag dengan format `cp-<nomor>-<nama>`, misalnya `cp-0-rancangan-v1`.
-- Ringkasan tiap checkpoint dicatat di `docs/checkpoints.md`.
-- Melihat daftar checkpoint: `git tag --list 'cp-*'`.
-- Melihat perubahan antar checkpoint: `git diff cp-0-rancangan-v1 cp-1-<nama>`.
+- Tiap checkpoint diberi nama dengan format `cp-<nomor>-<nama>`, misalnya `cp-0-rancangan-v1`.
+- Nama, hash commit, dan ringkasan tiap checkpoint dicatat di `docs/checkpoints.md`. Catatan ini menjadi acuan utama.
+- Melihat perubahan antar checkpoint: `git diff <hash-lama> <hash-baru>`.
+- Tag git dengan nama yang sama dibuat di salinan lokal. Bila ingin tag muncul di GitHub, buat dari hash yang tercatat (Releases atau `git tag <nama> <hash>` lalu `git push origin <nama>`).
