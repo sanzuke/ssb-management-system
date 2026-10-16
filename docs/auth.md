@@ -53,3 +53,11 @@ Admin SSB membuat undangan (`POST /invitations`) untuk role pelatih, korlas, ata
 ## Belum ada
 
 Pembatasan laju login, reset kata sandi lewat email, tautan manual Google, penghapusan akun, CORS untuk web di origin berbeda, matriks izin per endpoint.
+
+## Layar web dan uji e2e
+
+Browser hanya bicara ke origin web. `apps/web/src/routes/api/[...path].ts` meneruskan `/api/**` ke API (`API_URL`, bawaan `http://localhost:3000`) tanpa mengikuti redirect, sehingga cookie sesi satu origin dan pengalihan Google sampai ke browser.
+
+- Dev: `PUBLIC_API_URL=http://localhost:3001/api`, `WEB_URL=http://localhost:3001`. Redirect URI Google: `<origin web>/api/auth/google/callback`.
+- Rute: `/masuk`, `/daftar`, `/pilih-ssb`, `/undangan/<token>`, `/akun`, `/` (beranda). Kegagalan Google kembali ke halaman asal alur dengan `?error=<kode>`.
+- E2E 360 px: jalankan `bun apps/api/e2e/harness.ts` (API dengan Google tiruan, hanya untuk uji), `bun run dev:web`, lalu `python3 tools/e2e/run.py <folder-screenshot>`.

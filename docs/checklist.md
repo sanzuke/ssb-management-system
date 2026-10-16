@@ -35,7 +35,7 @@ Butir bertanda **(butuh keputusan)** terhambat oleh pertanyaan terbuka di `docs/
 - [ ] Tautkan Google ke akun kata sandi (dan sebaliknya) dari pengaturan akun
 - [ ] Penghapusan akun: keanggotaan dan kaitan data (pembuat undangan, pencatat absensi) ditangani tanpa merusak riwayat
 - [ ] Kirim tautan undangan lewat WhatsApp otomatis (fase 2; fase 1 admin menyalin tautan)
-- [ ] Layar login (tombol Google + email), halaman terima undangan, pemilih SSB, dan pengaturan akun di web, nyaman di layar 360 px
+- [x] Layar login (tombol Google + email), halaman terima undangan, pemilih SSB, dan pengaturan akun di web, nyaman di layar 360 px
 
 ## C. Master data
 

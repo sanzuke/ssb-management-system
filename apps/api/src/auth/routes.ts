@@ -1,7 +1,7 @@
 import { and, eq, ne } from "drizzle-orm";
 import { Hono } from "hono";
 import { deleteCookie, getCookie } from "hono/cookie";
-import { zValidator } from "@hono/zod-validator";
+import { zv } from "../validator";
 import { schema, type Db } from "@ssb/db";
 import { changePasswordSchema, loginSchema, registerSsbSchema, selectSsbSchema, ssbInputSchema, type Me } from "@ssb/shared";
 import { HttpError } from "../errors";
@@ -15,7 +15,7 @@ export function authRoutes(db: Db, opts: { secureCookie: boolean }) {
 
   return new Hono<AppEnv>()
     // Akun baru + SSB baru + admin pertama, dengan email dan kata sandi.
-    .post("/register-ssb", zValidator("json", registerSsbSchema), async (c) => {
+    .post("/register-ssb", zv("json", registerSsbSchema), async (c) => {
       const body = c.req.valid("json");
       const passwordHash = await hashPassword(body.password);
       let accountId: string;
@@ -31,7 +31,7 @@ export function authRoutes(db: Db, opts: { secureCookie: boolean }) {
       return c.json({ accountId, ssbId, userId }, 201);
     })
 
-    .post("/login", zValidator("json", loginSchema), async (c) => {
+    .post("/login", zv("json", loginSchema), async (c) => {
       const { email, password, slug } = c.req.valid("json");
       const [acc] = await db.select().from(schema.account).where(eq(schema.account.email, email)).limit(1);
       // Selalu verifikasi hash, termasuk hash tiruan, agar waktu respons tidak membocorkan akun mana yang ada.
@@ -55,12 +55,13 @@ export function authRoutes(db: Db, opts: { secureCookie: boolean }) {
       const a = c.get("auth")!;
       const memberships = await listMemberships(db, a.accountId);
       const active = a.member ? (memberships.find((m) => m.userId === a.member!.userId) ?? null) : null;
-      const me: Me = { accountId: a.accountId, name: a.accountName, email: a.email, active, memberships };
+      const [acc] = await db.select({ hasPassword: schema.account.passwordHash }).from(schema.account).where(eq(schema.account.id, a.accountId)).limit(1);
+      const me: Me = { accountId: a.accountId, name: a.accountName, email: a.email, hasPassword: acc?.hasPassword != null, active, memberships };
       return c.json(me);
     })
 
     // Pilih SSB aktif untuk sesi ini; hanya SSB tempat akun menjadi anggota.
-    .post("/select", requireAccount, zValidator("json", selectSsbSchema), async (c) => {
+    .post("/select", requireAccount, zv("json", selectSsbSchema), async (c) => {
       const a = c.get("auth")!;
       const { ssbId } = c.req.valid("json");
       const m = (await listMemberships(db, a.accountId)).find((x) => x.ssbId === ssbId);
@@ -70,14 +71,14 @@ export function authRoutes(db: Db, opts: { secureCookie: boolean }) {
     })
 
     // Akun yang sudah ada membuat SSB tambahan.
-    .post("/ssb", requireAccount, zValidator("json", ssbInputSchema), async (c) => {
+    .post("/ssb", requireAccount, zv("json", ssbInputSchema), async (c) => {
       const a = c.get("auth")!;
       const created = await createSsb(db, a.accountId, a.accountName, c.req.valid("json"));
       await setActive(db, a.sessionHash, created);
       return c.json(created, 201);
     })
 
-    .post("/change-password", requireAccount, zValidator("json", changePasswordSchema), async (c) => {
+    .post("/change-password", requireAccount, zv("json", changePasswordSchema), async (c) => {
       const a = c.get("auth")!;
       const { currentPassword, newPassword } = c.req.valid("json");
       const [acc] = await db.select().from(schema.account).where(eq(schema.account.id, a.accountId)).limit(1);

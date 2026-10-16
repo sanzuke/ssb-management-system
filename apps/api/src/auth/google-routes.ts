@@ -30,7 +30,10 @@ export function googleRoutes(
   db: Db,
   cfg: { provider: GoogleProvider | null; secret: string | undefined; webUrl: string; secureCookie: boolean },
 ) {
-  const back = (error?: string) => `${cfg.webUrl}/${error ? `?error=${error}` : "?login=ok"}`;
+  // Berhasil: ke beranda. Gagal: kembali ke halaman asal alur (masuk, daftar, atau undangan), tempat pesan ditampilkan.
+  const back = (error?: string, page = "/masuk") => (error ? `${cfg.webUrl}${page}?error=${error}` : `${cfg.webUrl}/?login=ok`);
+  const pageOf = (start: Tx["start"]) =>
+    start.intent === "register" ? "/daftar" : start.intent === "invite" ? `/undangan/${encodeURIComponent(start.invite)}` : "/masuk";
 
   return new Hono<AppEnv>()
     .get("/start", async (c) => {
@@ -42,7 +45,7 @@ export function googleRoutes(
         httpOnly: true,
         sameSite: "Lax",
         secure: cfg.secureCookie,
-        path: "/auth/google",
+        path: "/",
         maxAge: 600,
       });
       const challenge = b64(createHash("sha256").update(tx.verifier).digest());
@@ -52,33 +55,34 @@ export function googleRoutes(
     .get("/callback", async (c) => {
       if (!cfg.provider || !cfg.secret) throw new HttpError(501, "google_not_configured", "Login Google belum diaktifkan");
       const raw = await getSignedCookie(c, cfg.secret, TX_COOKIE);
-      deleteCookie(c, TX_COOKIE, { path: "/auth/google" });
+      deleteCookie(c, TX_COOKIE, { path: "/" });
       if (!raw) return c.redirect(back("sesi_google_habis"), 302);
       const tx = JSON.parse(raw) as Tx;
-      if (c.req.query("error")) return c.redirect(back("google_dibatalkan"), 302);
+      const page = pageOf(tx.start);
+      if (c.req.query("error")) return c.redirect(back("google_dibatalkan", page), 302);
       const code = c.req.query("code");
-      if (!code || c.req.query("state") !== tx.state) return c.redirect(back("state_tidak_cocok"), 302);
+      if (!code || c.req.query("state") !== tx.state) return c.redirect(back("state_tidak_cocok", page), 302);
 
       let claims;
       try {
         claims = await cfg.provider.exchange(code, tx.verifier);
       } catch {
-        return c.redirect(back("verifikasi_google_gagal"), 302);
+        return c.redirect(back("verifikasi_google_gagal", page), 302);
       }
-      if (claims.nonce !== tx.nonce) return c.redirect(back("verifikasi_google_gagal"), 302);
+      if (claims.nonce !== tx.nonce) return c.redirect(back("verifikasi_google_gagal", page), 302);
       // Email dari Google hanya dipercaya bila Google sudah memverifikasinya.
-      if (!claims.emailVerified || !claims.email) return c.redirect(back("email_belum_terverifikasi"), 302);
+      if (!claims.emailVerified || !claims.email) return c.redirect(back("email_belum_terverifikasi", page), 302);
 
       let [acc] = await db.select().from(schema.account).where(eq(schema.account.googleSub, claims.sub)).limit(1);
       if (!acc) {
-        if (tx.start.intent === "login") return c.redirect(back("akun_belum_terdaftar"), 302);
+        if (tx.start.intent === "login") return c.redirect(back("akun_belum_terdaftar", page), 302);
         const [byEmail] = await db.select().from(schema.account).where(eq(schema.account.email, claims.email)).limit(1);
         // Tidak menautkan otomatis ke akun yang sudah ada hanya karena emailnya sama.
-        if (byEmail) return c.redirect(back("email_sudah_terdaftar"), 302);
+        if (byEmail) return c.redirect(back("email_sudah_terdaftar", page), 302);
         try {
           [acc] = await db.insert(schema.account).values({ email: claims.email, name: claims.name, googleSub: claims.sub }).returning();
         } catch (e) {
-          if (isUniqueViolation(e)) return c.redirect(back("email_sudah_terdaftar"), 302);
+          if (isUniqueViolation(e)) return c.redirect(back("email_sudah_terdaftar", page), 302);
           throw e;
         }
       }
@@ -101,6 +105,6 @@ export function googleRoutes(
       // Akun tetap masuk meski langkah SSB/undangan gagal, supaya bisa mencoba lagi.
       if (!active && !error) active = pickActive(await listMemberships(db, account.id));
       await startSession(db, c, account.id, active, cfg.secureCookie);
-      return c.redirect(back(error), 302);
+      return c.redirect(back(error, page), 302);
     });
 }

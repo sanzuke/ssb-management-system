@@ -101,6 +101,9 @@ run("autentikasi, akun global, dan undangan", () => {
     expect((await json(sameEmail)).error.code).toBe("email_taken");
     const short = await post("/auth/register-ssb", { ssbName: "Pendek", slug: `pendek-${uid}`, adminName: "X", email: `p-${uid}@uji.test`, password: "pendek" });
     expect(short.status).toBe(400);
+    const err = await json(short);
+    expect(err.error.code).toBe("validation");
+    expect(err.error.fields.password).toBe("minimal 10 karakter");
   });
 
   test("login berhasil; gagal dengan respons sama untuk semua sebab", async () => {
@@ -300,7 +303,7 @@ run("autentikasi, akun global, dan undangan", () => {
   test("Google: login akun yang belum terdaftar ditolak dan tidak membuat akun", async () => {
     const email = `g-baru-${uid}@uji.test`;
     const r = await googleFlow("intent=login", { email });
-    expect(r.location).toBe("http://web.test/?error=akun_belum_terdaftar");
+    expect(r.location).toBe("http://web.test/masuk?error=akun_belum_terdaftar");
     expect(r.cookie).toBeUndefined();
     expect(await db.select().from(schema.account).where(eq(schema.account.email, email))).toHaveLength(0);
   });

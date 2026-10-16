@@ -86,7 +86,7 @@ export const changePasswordSchema = z.object({
 
 /** Bentuk baku error API. */
 export const apiErrorSchema = z.object({
-  error: z.object({ code: z.string(), message: z.string() }),
+  error: z.object({ code: z.string(), message: z.string(), fields: z.record(z.string(), z.string()).optional() }),
 });
 export type ApiError = z.infer<typeof apiErrorSchema>;
 
@@ -102,6 +102,8 @@ export const meSchema = z.object({
   accountId: z.string(),
   name: z.string(),
   email: z.string(),
+  /** Apakah akun punya kata sandi (akun yang hanya login Google belum punya). */
+  hasPassword: z.boolean(),
   /** SSB aktif pada sesi ini; kosong bila akun belum memilih SSB. */
   active: membershipSchema.nullable(),
   memberships: z.array(membershipSchema),

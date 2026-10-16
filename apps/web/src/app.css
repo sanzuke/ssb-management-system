@@ -1,1 +1,181 @@
-body{font-family:sans-serif}
+:root {
+  --rumput: #1b4d36;
+  --rumput-tua: #143a29;
+  --kapur: #f4f6ef;
+  --tinta: #14201a;
+  --redup: #56655b;
+  --garis: #c9d1c4;
+  --kolom: #7e8c83;
+  --kuning: #f0c23b;
+  --kuning-tua: #dcab1c;
+  --merah: #b3372a;
+  --merah-muda: #fbeae7;
+  --radius: 6px;
+  --judul: "Bricolage Grotesque Variable", "Segoe UI", system-ui, sans-serif;
+  --isi: "Atkinson Hyperlegible Next", "Segoe UI", system-ui, sans-serif;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--kapur);
+  color: var(--tinta);
+  font-family: var(--isi);
+  font-size: 1rem;
+  line-height: 1.55;
+  -webkit-text-size-adjust: 100%;
+}
+
+h1, h2 {
+  font-family: var(--judul);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+  margin: 0 0 0.5rem;
+}
+h1 { font-size: clamp(1.75rem, 7vw, 2.25rem); }
+h2 { font-size: 1.25rem; }
+p { margin: 0 0 1rem; max-width: 60ch; }
+a { color: var(--rumput); text-underline-offset: 3px; }
+
+:focus-visible { outline: 3px solid var(--kuning); outline-offset: 2px; box-shadow: 0 0 0 5px var(--tinta); }
+
+/* ---- Latar lapangan untuk layar masuk, daftar, dan undangan ---- */
+.lapangan {
+  position: relative;
+  min-height: 100dvh;
+  overflow: hidden;
+  background: var(--rumput);
+  padding: 20px 16px 48px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.pitch {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  fill: none;
+  stroke: var(--kapur);
+  stroke-opacity: 0.2;
+  stroke-width: 2;
+  pointer-events: none;
+}
+.pitch * { stroke-dasharray: 1; stroke-dashoffset: 0; animation: gambar 1.8s ease-out both; }
+@keyframes gambar { from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }
+
+.merek {
+  position: relative;
+  z-index: 1;
+  align-self: flex-start;
+  width: min(100%, 26rem);
+  margin: 0 auto 28px;
+  font-family: var(--judul);
+  font-weight: 700;
+  font-size: 1.25rem;
+  letter-spacing: -0.01em;
+  color: var(--kapur);
+}
+
+.kotak {
+  position: relative;
+  z-index: 1;
+  width: min(100%, 26rem);
+  background: var(--kapur);
+  border-radius: var(--radius);
+  padding: 28px 22px 26px;
+  outline: 2px solid rgba(244, 246, 239, 0.55);
+  outline-offset: 6px;
+}
+.kotak > :last-child { margin-bottom: 0; }
+
+/* ---- Formulir ---- */
+.form { display: grid; gap: 16px; }
+.field { display: grid; gap: 6px; }
+.field label { font-weight: 700; font-size: 0.95rem; }
+.field input {
+  width: 100%;
+  min-height: 48px;
+  padding: 10px 12px;
+  font: inherit;
+  color: var(--tinta);
+  background: #fff;
+  border: 1.5px solid var(--kolom);
+  border-radius: var(--radius);
+}
+.field input:focus-visible { border-color: var(--tinta); }
+.field[data-salah] input { border-color: var(--merah); }
+.petunjuk { color: var(--redup); font-size: 0.9rem; }
+.pesan-salah { color: var(--merah); font-size: 0.9rem; font-weight: 700; }
+
+.peringatan {
+  background: var(--merah-muda);
+  border-left: 4px solid var(--merah);
+  border-radius: 0 var(--radius) var(--radius) 0;
+  padding: 10px 12px;
+  margin-bottom: 16px;
+  font-size: 0.95rem;
+}
+.info {
+  background: #e9efe3;
+  border-left: 4px solid var(--rumput);
+  border-radius: 0 var(--radius) var(--radius) 0;
+  padding: 10px 12px;
+  margin-bottom: 16px;
+}
+
+/* ---- Tombol ---- */
+.tombol {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 48px;
+  padding: 10px 16px;
+  font: inherit;
+  font-weight: 700;
+  text-decoration: none;
+  color: var(--tinta);
+  border: 1.5px solid var(--tinta);
+  border-radius: var(--radius);
+  background: #fff;
+  cursor: pointer;
+}
+.tombol:hover { background: #eef1e8; }
+.tombol[disabled], .tombol[aria-disabled="true"] { opacity: 0.6; cursor: progress; }
+.tombol.utama { background: var(--kuning); border-color: var(--tinta); }
+.tombol.utama:hover { background: var(--kuning-tua); }
+.tombol.tipis { width: auto; min-height: 44px; background: transparent; border-color: transparent; color: var(--rumput); text-decoration: underline; text-underline-offset: 3px; }
+.tombol svg { flex: none; }
+
+.pemisah { display: flex; align-items: center; gap: 12px; color: var(--redup); font-size: 0.9rem; margin: 18px 0; }
+.pemisah::before, .pemisah::after { content: ""; flex: 1; height: 1px; background: var(--garis); }
+
+.tautan-bawah { margin-top: 20px; font-size: 0.95rem; }
+
+/* ---- Halaman setelah masuk ---- */
+.bar {
+  background: var(--rumput);
+  color: var(--kapur);
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.bar a, .bar button { color: var(--kapur); }
+.bar .nama-ssb { font-family: var(--judul); font-weight: 700; font-size: 1.1rem; line-height: 1.2; }
+.bar .peran { font-size: 0.85rem; opacity: 0.85; }
+.bar .aksi { display: flex; gap: 4px; flex-wrap: wrap; justify-content: flex-end; }
+.bar .tombol.tipis { color: var(--kapur); padding: 6px 10px; }
+.halaman { padding: 24px 16px 48px; max-width: 40rem; margin: 0 auto; }
+.daftar-pilihan { list-style: none; margin: 0 0 8px; padding: 0; display: grid; gap: 10px; }
+.pilihan { justify-content: space-between; text-align: left; }
+.pilihan small { display: block; font-weight: 400; color: var(--redup); }
+
+@media (prefers-reduced-motion: reduce) {
+  .pitch * { animation: none; }
+}

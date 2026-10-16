@@ -1,5 +1,5 @@
 import { Hono } from "hono";
-import { zValidator } from "@hono/zod-validator";
+import { zv } from "./validator";
 import { schema, type Db } from "@ssb/db";
 import { acceptInvitationSchema, createInvitationSchema } from "@ssb/shared";
 import { HttpError } from "./errors";
@@ -10,7 +10,7 @@ import { acceptInvitation, createInvitation, isUniqueViolation, previewInvitatio
 export function invitationRoutes(db: Db, opts: { secureCookie: boolean; webUrl: string }) {
   return new Hono<AppEnv>()
     // Admin SSB membuat tautan undangan; token hanya ditampilkan sekali.
-    .post("/", requireRole("admin_ssb"), zValidator("json", createInvitationSchema), async (c) => {
+    .post("/", requireRole("admin_ssb"), zv("json", createInvitationSchema), async (c) => {
       const m = c.get("auth")!.member!;
       const { token, expiresAt } = await createInvitation(db, m, c.req.valid("json"));
       return c.json({ token, url: `${opts.webUrl}/undangan/${token}`, expiresAt }, 201);
