@@ -10,3 +10,4 @@ Satu baris per checkpoint, yang terbaru di atas. Hash commit menjadi acuan utama
 | cp-3-kerangka-monorepo | `9013d73` | 2026-10-17 | Monorepo Bun workspaces: apps/api (Hono), apps/web (SolidStart), packages/shared (Zod); typecheck, test, build lolos |
 | cp-4-skema-db | `8fd00d7` | 2026-10-17 | Skema PostgreSQL inti dengan Drizzle, RLS dan FORCE, FK komposit lintas tenant, 6 test isolasi |
 | cp-5-checklist | `a9e9a99` | 2026-10-17 | Checklist pengerjaan terukur (69 butir) dan skrip kemajuan |
+| cp-6-autentikasi | (diisi setelah commit) | 2026-10-17 | Autentikasi API: daftar SSB, login, sesi, logout, ganti sandi, guard role, validasi env; 13 test di api |

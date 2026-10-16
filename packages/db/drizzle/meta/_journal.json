@@ -15,6 +15,13 @@
       "when": 1792185184287,
       "tag": "0001_grants_dan_force_rls",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1792187393543,
+      "tag": "0002_auth",
+      "breakpoints": true
     }
   ]
 }

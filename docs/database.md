@@ -35,7 +35,7 @@ Mengubah skema: edit `packages/db/src/schema.ts`, lalu `bun run db:generate` dan
 
 ## Tabel saat ini
 
-`ssb`, `app_user`, `age_group`, `period`, `player`, `player_guardian`, `coach_assignment`, `training_session`, `attendance`.
+`ssb`, `app_user`, `age_group`, `period`, `player`, `player_guardian`, `coach_assignment`, `training_session`, `attendance`, ditambah `ssb_directory` (kode SSB ke id) dan `user_session` (sesi login). Dua tabel terakhir sengaja tanpa RLS karena dicari sebelum konteks tenant ada; keduanya hanya berisi pemetaan dan hash token.
 
 Belum ada: template assessment, assessment, skor, dan development plan. Tabel ini menunggu keputusan skala nilai dan frekuensi assessment (lihat pertanyaan terbuka di rancangan).
 

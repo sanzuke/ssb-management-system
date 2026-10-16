@@ -74,6 +74,7 @@ export const appUser = pgTable(
     name: text("name").notNull(),
     email: text("email"),
     whatsapp: text("whatsapp"),
+    passwordHash: text("password_hash"),
     role: userRole("role").notNull(),
     createdAt: createdAt(),
   },
@@ -211,3 +212,32 @@ export const attendance = pgTable(
     tenantPolicy("attendance"),
   ],
 ).enableRLS();
+
+/**
+ * Direktori kode SSB (slug) ke id. Sengaja TANPA RLS: login butuh mencari tenant
+ * sebelum konteks tenant ada. Isinya hanya pemetaan slug ke id, bukan data SSB.
+ */
+export const ssbDirectory = pgTable("ssb_directory", {
+  slug: text("slug").primaryKey(),
+  ssbId: uuid("ssb_id").notNull().unique().references(() => ssb.id, { onDelete: "cascade" }),
+});
+
+/**
+ * Sesi login. Sengaja TANPA RLS: sesi dicari lewat hash token (acak, 256 bit) sebelum
+ * konteks tenant diketahui. Hanya hash yang disimpan, token asli hanya ada di cookie.
+ */
+export const userSession = pgTable(
+  "user_session",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    tokenHash: text("token_hash").notNull().unique(),
+    ssbId: uuid("ssb_id").notNull(),
+    userId: uuid("user_id").notNull(),
+    createdAt: createdAt(),
+    expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+  },
+  (t) => [
+    foreignKey({ columns: [t.ssbId, t.userId], foreignColumns: [appUser.ssbId, appUser.id], name: "user_session_user_fk" }).onDelete("cascade"),
+    index("user_session_user_idx").on(t.userId),
+  ],
+);

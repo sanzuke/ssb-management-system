@@ -12,7 +12,10 @@
   },
   "dependencies": {
     "@hono/zod-validator": "^0.7.0",
+    "@ssb/db": "workspace:*",
     "@ssb/shared": "workspace:*",
-    "hono": "^4.13.0"
+    "drizzle-orm": "^0.45.0",
+    "hono": "^4.13.0",
+    "zod": "^4.0.0"
   }
 }

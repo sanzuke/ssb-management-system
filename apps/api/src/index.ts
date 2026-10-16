@@ -1,6 +1,9 @@
-import { app } from "./app";
+import { createDb } from "@ssb/db";
+import { createApp } from "./app";
+import { loadEnv } from "./env";
 
-export default {
-  port: Number(process.env.PORT ?? 3000),
-  fetch: app.fetch,
-};
+const env = loadEnv();
+const { db } = createDb(env.DATABASE_URL);
+const app = createApp(db, env);
+
+export default { port: env.PORT, fetch: app.fetch };

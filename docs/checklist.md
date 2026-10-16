@@ -16,17 +16,18 @@ Butir bertanda **(butuh keputusan)** terhambat oleh pertanyaan terbuka di `docs/
 - [x] RLS aktif dan dipaksa di semua tabel; 6 test isolasi tenant lolos
 - [ ] CI (GitHub Actions): typecheck + test + build tiap push, dengan service PostgreSQL untuk test RLS
 - [ ] Lint dan format (satu perintah `bun run lint`, lolos di CI)
-- [ ] Konfigurasi lingkungan: validasi env saat start (gagal bila `DATABASE_URL` kosong)
+- [x] Konfigurasi lingkungan: validasi env saat start (gagal bila `DATABASE_URL` kosong)
 - [ ] Logging terstruktur dan penanganan error seragam di API (format error baku di `packages/shared`)
 - [ ] Docker Compose untuk pengembangan lokal (PostgreSQL + API + web), `docker compose up` cukup untuk mulai
 
 ## B. Akun dan tenant
 
-- [ ] Putuskan identitas pengguna: akun per SSB atau akun global **(butuh keputusan)**
+- [ ] Putuskan identitas pengguna: akun per SSB atau akun global **(butuh keputusan; sementara dipakai akun per SSB dengan login memakai kode SSB, menunggu konfirmasi)**
 - [ ] Jalur admin platform untuk membuat SSB baru tanpa konteks tenant
-- [ ] Daftar SSB baru: membuat SSB + admin pertama dalam satu transaksi (test)
-- [ ] Autentikasi: login, sesi aman (cookie HttpOnly), logout, ganti dan reset kata sandi
-- [ ] Middleware tenant: `ssb_id` dari sesi, bukan dari input klien (test: input `ssbId` palsu diabaikan)
+- [x] Daftar SSB baru: membuat SSB + admin pertama dalam satu transaksi (test)
+- [x] Autentikasi: login, sesi aman (cookie HttpOnly, hash token di database, argon2id), logout, ganti kata sandi (test)
+- [ ] Lupa dan reset kata sandi lewat tautan yang kedaluwarsa
+- [x] Middleware tenant: `ssb_id` dari sesi, bukan dari input klien (test: input `ssbId` palsu diabaikan)
 - [ ] Guard role untuk empat role; matriks izin tertulis dan diuji per endpoint (test per role)
 - [ ] Undang pelatih dan orang tua lewat tautan atau WhatsApp; tautan kedaluwarsa
 - [ ] Layar login dan pengaturan akun di web, nyaman di layar 360 px
