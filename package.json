@@ -2,13 +2,18 @@
   "name": "ssb-management-system",
   "private": true,
   "type": "module",
-  "workspaces": ["apps/*", "packages/*"],
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
   "scripts": {
     "dev:api": "bun --filter @ssb/api dev",
     "dev:web": "bun --filter @ssb/web dev",
     "build": "bun --filter '*' build",
     "typecheck": "bun --filter '*' typecheck",
-    "test": "bun --filter '*' test"
+    "test": "bun --filter '*' test",
+    "db:generate": "bun --filter @ssb/db generate",
+    "db:migrate": "bun --filter @ssb/db migrate"
   },
   "devDependencies": {
     "typescript": "^5.9.0",

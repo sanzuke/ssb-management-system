@@ -11,6 +11,7 @@ docs/               Dokumen rancangan dan catatan checkpoint
 apps/api/           Hono di Bun (API)
 apps/web/           SolidStart (PWA)
 packages/shared/    Skema Zod dan tipe yang dipakai bersama
+packages/db/        Skema Drizzle, migrasi, dan RLS (lihat docs/database.md)
 tools/bench/        Skrip benchmark untuk keputusan tech stack
 ```
 

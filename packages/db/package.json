@@ -1,0 +1,20 @@
+{
+  "name": "@ssb/db",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": { ".": "./src/index.ts", "./schema": "./src/schema.ts" },
+  "scripts": {
+    "generate": "drizzle-kit generate",
+    "migrate": "bun src/migrate.ts",
+    "typecheck": "tsc -p .",
+    "test": "bun test"
+  },
+  "dependencies": {
+    "drizzle-orm": "^0.45.0",
+    "postgres": "^3.4.0"
+  },
+  "devDependencies": {
+    "drizzle-kit": "^0.31.0"
+  }
+}
