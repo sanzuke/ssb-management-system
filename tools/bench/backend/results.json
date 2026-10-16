@@ -1,0 +1,259 @@
+{
+  "conns": 64,
+  "duration": 4,
+  "rounds": 3,
+  "results": [
+    {
+      "name": "Hono",
+      "rt": "Node",
+      "control": false,
+      "startupMs": 268.83555299999995,
+      "idleRss": 70.8125,
+      "verifyOk": true,
+      "invalidStatus": 400,
+      "ping": {
+        "rps": 19424,
+        "min": 17412,
+        "max": 20132,
+        "p50": 3,
+        "p99": 7,
+        "errors": 0,
+        "non2xx": 0
+      },
+      "echo": {
+        "rps": 10372,
+        "min": 10078,
+        "max": 10440,
+        "p50": 5,
+        "p99": 11,
+        "errors": 0,
+        "non2xx": 0
+      },
+      "loadRss": 99.0625
+    },
+    {
+      "name": "Hono",
+      "rt": "Bun",
+      "control": false,
+      "startupMs": 79.47782400000142,
+      "idleRss": 29.9921875,
+      "verifyOk": true,
+      "invalidStatus": 400,
+      "ping": {
+        "rps": 32136,
+        "min": 30922,
+        "max": 32836,
+        "p50": 1,
+        "p99": 6,
+        "errors": 0,
+        "non2xx": 0
+      },
+      "echo": {
+        "rps": 25168,
+        "min": 24264,
+        "max": 27152,
+        "p50": 2,
+        "p99": 7,
+        "errors": 0,
+        "non2xx": 0
+      },
+      "loadRss": 49.5625
+    },
+    {
+      "name": "Nest + Fastify",
+      "rt": "Node",
+      "control": false,
+      "startupMs": 1225.0198309999978,
+      "idleRss": 105.578125,
+      "verifyOk": true,
+      "invalidStatus": 400,
+      "ping": {
+        "rps": 14878,
+        "min": 14173,
+        "max": 16153,
+        "p50": 4,
+        "p99": 9,
+        "errors": 0,
+        "non2xx": 0
+      },
+      "echo": {
+        "rps": 10186,
+        "min": 9360,
+        "max": 10794,
+        "p50": 6,
+        "p99": 12,
+        "errors": 0,
+        "non2xx": 0
+      },
+      "loadRss": 126.90234375
+    },
+    {
+      "name": "Nest + Fastify",
+      "rt": "Bun",
+      "control": false,
+      "startupMs": 704.4053649999987,
+      "idleRss": 78.70703125,
+      "verifyOk": true,
+      "invalidStatus": 400,
+      "ping": {
+        "rps": 22980,
+        "min": 19400,
+        "max": 25132,
+        "p50": 2,
+        "p99": 7,
+        "errors": 0,
+        "non2xx": 0
+      },
+      "echo": {
+        "rps": 12662,
+        "min": 11596,
+        "max": 13688,
+        "p50": 4,
+        "p99": 12,
+        "errors": 0,
+        "non2xx": 0
+      },
+      "loadRss": 117.328125
+    },
+    {
+      "name": "Nest + Express",
+      "rt": "Node",
+      "control": false,
+      "startupMs": 1002.1779340000066,
+      "idleRss": 107.50390625,
+      "verifyOk": true,
+      "invalidStatus": 400,
+      "ping": {
+        "rps": 3428,
+        "min": 3367.5,
+        "max": 3446,
+        "p50": 15,
+        "p99": 61,
+        "errors": 0,
+        "non2xx": 0
+      },
+      "echo": {
+        "rps": 2628,
+        "min": 2528,
+        "max": 2660,
+        "p50": 20,
+        "p99": 63,
+        "errors": 0,
+        "non2xx": 0
+      },
+      "loadRss": 196.8203125
+    },
+    {
+      "name": "Nest + Express",
+      "rt": "Bun",
+      "control": false,
+      "startupMs": 527.6718730000139,
+      "idleRss": 66.5546875,
+      "verifyOk": true,
+      "invalidStatus": 400,
+      "ping": {
+        "rps": 14267,
+        "min": 10835.5,
+        "max": 15103,
+        "p50": 4,
+        "p99": 11,
+        "errors": 0,
+        "non2xx": 0
+      },
+      "echo": {
+        "rps": 7047,
+        "min": 6571.5,
+        "max": 8019,
+        "p50": 8,
+        "p99": 21,
+        "errors": 0,
+        "non2xx": 0
+      },
+      "loadRss": 103.98828125
+    },
+    {
+      "name": "Mentah (tanpa framework)",
+      "rt": "Node",
+      "control": false,
+      "startupMs": 147.61173599999165,
+      "idleRss": 55.61328125,
+      "verifyOk": true,
+      "invalidStatus": 200,
+      "ping": {
+        "rps": 20704,
+        "min": 17130,
+        "max": 22456,
+        "p50": 2,
+        "p99": 7,
+        "errors": 0,
+        "non2xx": 0
+      },
+      "echo": {
+        "rps": 16169,
+        "min": 16006,
+        "max": 18616,
+        "p50": 3,
+        "p99": 9,
+        "errors": 0,
+        "non2xx": 0
+      },
+      "loadRss": 92.234375
+    },
+    {
+      "name": "Mentah (tanpa framework)",
+      "rt": "Bun",
+      "control": false,
+      "startupMs": 17.317099000007147,
+      "idleRss": 18.23046875,
+      "verifyOk": true,
+      "invalidStatus": 200,
+      "ping": {
+        "rps": 26744,
+        "min": 25554,
+        "max": 37432,
+        "p50": 1,
+        "p99": 6,
+        "errors": 0,
+        "non2xx": 0
+      },
+      "echo": {
+        "rps": 32448,
+        "min": 32222,
+        "max": 34266,
+        "p50": 1,
+        "p99": 5,
+        "errors": 0,
+        "non2xx": 0
+      },
+      "loadRss": 30.81640625
+    },
+    {
+      "name": "Hono (kontrol ulang)",
+      "rt": "Node",
+      "control": true,
+      "startupMs": 314.62593600002583,
+      "idleRss": 70.80859375,
+      "verifyOk": true,
+      "invalidStatus": 400,
+      "ping": {
+        "rps": 19392,
+        "min": 19161,
+        "max": 19992,
+        "p50": 2,
+        "p99": 9,
+        "errors": 0,
+        "non2xx": 0
+      },
+      "echo": {
+        "rps": 10352,
+        "min": 10010,
+        "max": 11250,
+        "p50": 5,
+        "p99": 11,
+        "errors": 0,
+        "non2xx": 0
+      },
+      "loadRss": 98.8203125
+    }
+  ]
+}

@@ -212,24 +212,51 @@ Keputusan teknis yang masih terbuka:
 - Perlu tidaknya input offline saat sinyal di lapangan lemah
 - Tempat penyimpanan foto dan dokumen pemain
 - Cara membuat rapor PDF
-- Persetujuan atas usulan tech stack dan infrastruktur
+- Keputusan framework frontend: SolidStart atau Next.js
+- Persetujuan atas usulan infrastruktur
 
 ## Tech stack
 
-Usulan stack memakai satu bahasa, TypeScript, dari web sampai API, dengan PostgreSQL sebagai database dan Python hanya untuk AI di fase 4. Semua pilihan di bawah masih usulan dan belum dikunci.
+Usulan stack memakai satu bahasa, TypeScript, dari web sampai API, dengan PostgreSQL sebagai database dan Python hanya untuk AI di fase 4. Backend sudah diputuskan (Hono, dengan Bun untuk tooling dan runtime). Pilihan frontend sudah dibenchmark dan menunggu keputusan; sisanya masih usulan.
 
 | Lapisan | Usulan | Alasan |
 | --- | --- | --- |
-| Web (fase 1) | SolidJS (SolidStart) sebagai PWA | Mobile-first, bisa dipasang di layar HP, kamera browser cukup untuk scan QR |
-| Backend | Node.js dengan TypeScript (NestJS, atau Fastify/Hono bila ingin lebih ringan) | Satu bahasa dengan frontend; modular monolith cukup untuk MVP |
+| Web (fase 1) | PWA, framework belum dikunci: SolidStart atau Next.js (lihat benchmark frontend) | Mobile-first, bisa dipasang di layar HP, kamera browser cukup untuk scan QR |
+| Backend | **Hono** (TypeScript), berjalan di Bun | Diputuskan. Ringan, API berbasis standar web, satu bahasa dengan frontend; modular monolith cukup untuk MVP |
 | Database | PostgreSQL, multi-tenant dengan kolom ssb_id dan Row Level Security | Data antar SSB terisolasi di level database, bukan hanya di kode |
-| ORM dan validasi | Drizzle atau Prisma, validasi dengan Zod | Skema dan tipe data dipakai bersama frontend lewat monorepo (pnpm workspace) |
+| ORM dan validasi | Drizzle atau Prisma, validasi dengan Zod | Skema dan tipe data dipakai bersama frontend lewat monorepo (Bun workspaces) |
 | Penyimpanan file | S3-compatible (R2 atau MinIO di VPS) | Foto dan dokumen pemain tidak membebani database |
-| Rapor PDF | Render HTML ke PDF di server dengan Playwright | Tampilan rapor dirancang dengan HTML dan CSS biasa, grafik ikut tercetak |
+| Rapor PDF | Render HTML ke PDF di server dengan Playwright, dijalankan di Node (bukan Bun) | Tampilan rapor dirancang dengan HTML dan CSS biasa, grafik ikut tercetak |
 | Job terjadwal (fase 2) | BullMQ dengan Redis | Pembuatan tagihan SPP bulanan dan pengingat WhatsApp |
 | Pembayaran (fase 2) | Midtrans atau Xendit | QRIS dan VA siap pakai |
 | Deploy | Docker Compose di VPS, Caddy atau Nginx, cadangan pg_dump ke object storage | Murah dan cukup untuk tahap awal |
 | AI dan CV (fase 4) | Service Python terpisah (FastAPI) | Ekosistem AI paling matang; dipisah agar tidak mengganggu API utama |
+
+### Keputusan backend: Hono di atas Bun
+
+Bun dipakai sebagai package manager, test runner, dan runtime API. Hindari modul native (bcrypt, argon2; sharp belum diverifikasi), dan jalankan worker PDF Playwright di Node.
+
+Benchmark (sandbox 2 vCPU, server dipin ke satu core, autocannon 64 koneksi, median 3 putaran; skrip di `tools/bench/backend`):
+
+- Hono di Bun dan Hono di Node jauh lebih ringan daripada NestJS, baik dari sisi start server, memori, maupun req/s.
+- NestJS + Express di Node ternyata lambat karena Express 5 sendiri lambat di Node, bukan karena NestJS; di Bun tidak terlihat.
+- Angka detail ada di `tools/bench/backend/results.json`. Angka sintetis tanpa database, jadi dibaca sebagai arah, bukan target produksi.
+
+### Benchmark frontend: Next.js vs SolidStart
+
+Halaman uji: absensi 200 pemain, dirender di server, dengan pencarian dan checkbox di klien. Next.js 16.4.2, SolidStart 2 (beta). Skrip di `tools/bench/frontend`.
+
+| | Next.js 16 | SolidStart 2 |
+| --- | ---: | ---: |
+| JS klien halaman pertama (mentah / gzip / brotli) | 571 / 176 / 151 KB | 67 / 23 / 21 KB |
+| HTML mentah | 48 KB | 33 KB |
+| Start server | sekitar 0,9 dtk | sekitar 0,2 dtk |
+| RSS idle / setelah beban | 131 / 320 MB | 65 / 190 MB |
+| 1 request | 25 ms | 6 ms |
+| req/s, 1 core, 64 koneksi | 62-70 (default), 141 (mode klasik) | 596-644 |
+| p99 | 6,7 dtk (default), 3,2 dtk (klasik) | 0,26-0,33 dtk |
+
+Batasan: tidak ada browser sehingga hydration dan LCP tidak terukur; halaman sintetis tanpa database; SolidStart 2 masih beta. Pertimbangan di luar angka: ekosistem dan ketersediaan developer Next.js jauh lebih besar. **Keputusan framework frontend: menunggu.**
 
 ### Aplikasi mobile: dua opsi
 

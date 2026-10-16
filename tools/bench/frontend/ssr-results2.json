@@ -1,0 +1,82 @@
+{
+  "conns": 64,
+  "duration": 8,
+  "rounds": 3,
+  "results": [
+    {
+      "name": "Next.js 16 (default: cacheComponents+PPR)",
+      "startupMs": 905.8965349999999,
+      "li": 200,
+      "htmlBytes": 48996,
+      "idleRss": 131.34375,
+      "latencySingleMs": 24.905046500000935,
+      "rps": 68,
+      "min": 60,
+      "max": 70,
+      "p50": 640,
+      "p99": 6816,
+      "bad": 0,
+      "loadRss": 322.23828125
+    },
+    {
+      "name": "Next.js 16 (klasik: force-dynamic, tanpa cacheComponents)",
+      "startupMs": 838.7343619999956,
+      "li": 200,
+      "htmlBytes": 43860,
+      "idleRss": 124.44140625,
+      "latencySingleMs": 15.980703499997617,
+      "rps": 140.75,
+      "min": 131.63,
+      "max": 148,
+      "p50": 384,
+      "p99": 3192,
+      "bad": 0,
+      "loadRss": 284.671875
+    },
+    {
+      "name": "SolidStart 2",
+      "startupMs": 225.3701629999996,
+      "li": 200,
+      "htmlBytes": 33406,
+      "idleRss": 65.0078125,
+      "latencySingleMs": 6.148621499996807,
+      "rps": 644,
+      "min": 591.25,
+      "max": 681.25,
+      "p50": 81,
+      "p99": 260,
+      "bad": 0,
+      "loadRss": 192.58984375
+    },
+    {
+      "name": "SolidStart 2 (kontrol ulang)",
+      "startupMs": 186.28969499999948,
+      "li": 200,
+      "htmlBytes": 33406,
+      "idleRss": 64.98046875,
+      "latencySingleMs": 6.229057500007912,
+      "rps": 596.25,
+      "min": 509.5,
+      "max": 666.63,
+      "p50": 89,
+      "p99": 332,
+      "bad": 0,
+      "loadRss": 186.2890625
+    },
+    {
+      "name": "Next.js 16 (kontrol ulang)",
+      "startupMs": 924.734226999979,
+      "li": 200,
+      "htmlBytes": 48996,
+      "idleRss": 131.06640625,
+      "latencySingleMs": 25.83903149999969,
+      "rps": 62,
+      "min": 58.13,
+      "max": 68,
+      "p50": 677,
+      "p99": 6751,
+      "bad": 0,
+      "loadRss": 318.9921875
+    }
+  ]
+}
