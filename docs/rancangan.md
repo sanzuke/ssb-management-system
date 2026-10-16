@@ -212,16 +212,15 @@ Keputusan teknis yang masih terbuka:
 - Perlu tidaknya input offline saat sinyal di lapangan lemah
 - Tempat penyimpanan foto dan dokumen pemain
 - Cara membuat rapor PDF
-- Keputusan framework frontend: SolidStart atau Next.js
 - Persetujuan atas usulan infrastruktur
 
 ## Tech stack
 
-Usulan stack memakai satu bahasa, TypeScript, dari web sampai API, dengan PostgreSQL sebagai database dan Python hanya untuk AI di fase 4. Backend sudah diputuskan (Hono, dengan Bun untuk tooling dan runtime). Pilihan frontend sudah dibenchmark dan menunggu keputusan; sisanya masih usulan.
+Usulan stack memakai satu bahasa, TypeScript, dari web sampai API, dengan PostgreSQL sebagai database dan Python hanya untuk AI di fase 4. Backend (Hono, dengan Bun untuk tooling dan runtime) dan frontend (SolidStart) sudah diputuskan setelah benchmark; sisanya masih usulan.
 
 | Lapisan | Usulan | Alasan |
 | --- | --- | --- |
-| Web (fase 1) | PWA, framework belum dikunci: SolidStart atau Next.js (lihat benchmark frontend) | Mobile-first, bisa dipasang di layar HP, kamera browser cukup untuk scan QR |
+| Web (fase 1) | **SolidStart** sebagai PWA | Diputuskan. JS klien sekitar 8x lebih kecil dan SSR jauh lebih cepat daripada Next.js (lihat benchmark); mobile-first, bisa dipasang di layar HP, kamera browser cukup untuk scan QR |
 | Backend | **Hono** (TypeScript), berjalan di Bun | Diputuskan. Ringan, API berbasis standar web, satu bahasa dengan frontend; modular monolith cukup untuk MVP |
 | Database | PostgreSQL, multi-tenant dengan kolom ssb_id dan Row Level Security | Data antar SSB terisolasi di level database, bukan hanya di kode |
 | ORM dan validasi | Drizzle atau Prisma, validasi dengan Zod | Skema dan tipe data dipakai bersama frontend lewat monorepo (Bun workspaces) |
@@ -256,7 +255,7 @@ Halaman uji: absensi 200 pemain, dirender di server, dengan pencarian dan checkb
 | req/s, 1 core, 64 koneksi | 62-70 (default), 141 (mode klasik) | 596-644 |
 | p99 | 6,7 dtk (default), 3,2 dtk (klasik) | 0,26-0,33 dtk |
 
-Batasan: tidak ada browser sehingga hydration dan LCP tidak terukur; halaman sintetis tanpa database; SolidStart 2 masih beta. Pertimbangan di luar angka: ekosistem dan ketersediaan developer Next.js jauh lebih besar. **Keputusan framework frontend: menunggu.**
+Batasan: tidak ada browser sehingga hydration dan LCP tidak terukur; halaman sintetis tanpa database; SolidStart 2 masih beta. Pertimbangan di luar angka: ekosistem dan ketersediaan developer Next.js jauh lebih besar. **Keputusan: SolidStart.** Risikonya, v2 masih beta dan komunitasnya lebih kecil; versi dikunci di lockfile dan upgrade dilakukan terencana.
 
 ### Aplikasi mobile: dua opsi
 
