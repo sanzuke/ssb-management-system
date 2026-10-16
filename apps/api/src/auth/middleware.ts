@@ -3,10 +3,19 @@ import { getCookie } from "hono/cookie";
 import { createMiddleware } from "hono/factory";
 import { schema, withTenant, type Db } from "@ssb/db";
 import type { UserRole } from "@ssb/shared";
-import { forbidden, unauthorized } from "../errors";
+import { forbidden, HttpError, unauthorized } from "../errors";
 import { SESSION_COOKIE, hashToken } from "./session";
 
-export type Auth = { userId: string; ssbId: string; name: string; email: string | null; role: UserRole };
+export type Member = { ssbId: string; userId: string; role: UserRole; name: string };
+export type Auth = {
+  accountId: string;
+  email: string;
+  accountName: string;
+  /** Hash token sesi saat ini. */
+  sessionHash: string;
+  /** SSB aktif pada sesi; null bila akun belum memilih SSB. */
+  member: Member | null;
+};
 export type AppEnv = { Variables: { auth?: Auth } };
 
 /** Membaca cookie sesi dan mengisi c.var.auth bila sesi masih berlaku. Tidak menolak permintaan. */
@@ -14,32 +23,50 @@ export const loadAuth = (db: Db) =>
   createMiddleware<AppEnv>(async (c, next) => {
     const token = getCookie(c, SESSION_COOKIE);
     if (token) {
+      const sessionHash = hashToken(token);
       const [s] = await db
         .select()
         .from(schema.userSession)
-        .where(and(eq(schema.userSession.tokenHash, hashToken(token)), gt(schema.userSession.expiresAt, new Date())))
+        .where(and(eq(schema.userSession.tokenHash, sessionHash), gt(schema.userSession.expiresAt, new Date())))
         .limit(1);
       if (s) {
-        // ssb_id berasal dari sesi di server, tidak pernah dari input klien.
-        const [u] = await withTenant(db, s.ssbId, (tx) =>
-          tx.select().from(schema.appUser).where(eq(schema.appUser.id, s.userId)).limit(1),
-        );
-        if (u) c.set("auth", { userId: u.id, ssbId: u.ssbId, name: u.name, email: u.email, role: u.role });
+        const [acc] = await db.select().from(schema.account).where(eq(schema.account.id, s.accountId)).limit(1);
+        if (acc) {
+          let member: Member | null = null;
+          if (s.ssbId && s.userId) {
+            // ssb_id berasal dari sesi di server, tidak pernah dari input klien.
+            const [u] = await withTenant(db, s.ssbId, (tx) =>
+              tx.select().from(schema.appUser).where(eq(schema.appUser.id, s.userId!)).limit(1),
+            );
+            if (u && u.accountId === acc.id) member = { ssbId: u.ssbId, userId: u.id, role: u.role, name: u.name };
+          }
+          c.set("auth", { accountId: acc.id, email: acc.email, accountName: acc.name, sessionHash, member });
+        }
       }
     }
     await next();
   });
 
-export const requireAuth = createMiddleware<AppEnv>(async (c, next) => {
+/** Butuh sesi login, boleh belum memilih SSB. */
+export const requireAccount = createMiddleware<AppEnv>(async (c, next) => {
   if (!c.get("auth")) throw unauthorized();
   await next();
 });
 
-/** Hanya role yang disebut yang lolos; selain itu 403. Sudah termasuk requireAuth. */
+/** Butuh sesi login dengan SSB aktif. */
+export const requireMember = createMiddleware<AppEnv>(async (c, next) => {
+  const a = c.get("auth");
+  if (!a) throw unauthorized();
+  if (!a.member) throw new HttpError(403, "ssb_not_selected", "Pilih SSB terlebih dahulu");
+  await next();
+});
+
+/** Hanya role yang disebut yang lolos; selain itu 403. Sudah termasuk requireMember. */
 export const requireRole = (...roles: UserRole[]) =>
   createMiddleware<AppEnv>(async (c, next) => {
     const a = c.get("auth");
     if (!a) throw unauthorized();
-    if (!roles.includes(a.role)) throw forbidden();
+    if (!a.member) throw new HttpError(403, "ssb_not_selected", "Pilih SSB terlebih dahulu");
+    if (!roles.includes(a.member.role)) throw forbidden();
     await next();
   });

@@ -1,5 +1,6 @@
 import { sql } from "drizzle-orm";
 import {
+  check,
   date,
   foreignKey,
   index,
@@ -63,26 +64,58 @@ export const ssb = pgTable(
       using: sql`id = nullif(current_setting('app.ssb_id', true), '')::uuid`,
       withCheck: sql`id = nullif(current_setting('app.ssb_id', true), '')::uuid`,
     }),
+    // Anggota boleh membaca SSB tempat mereka menjadi anggota (untuk memilih SSB setelah login).
+    pgPolicy("ssb_member_read", {
+      as: "permissive",
+      for: "select",
+      to: appRole,
+      using: sql`id in (select ssb_id from app_user where account_id = nullif(current_setting('app.account_id', true), '')::uuid)`,
+    }),
   ],
 ).enableRLS();
 
+/**
+ * Akun global: satu orang satu akun, bisa menjadi anggota beberapa SSB.
+ * Sengaja TANPA RLS karena dicari sebelum konteks tenant ada (login). Kode hanya
+ * boleh mengaksesnya lewat id, email, atau google_sub, dan menampilkan data akun
+ * lain hanya lewat join dengan app_user di dalam konteks tenant.
+ */
+export const account = pgTable(
+  "account",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    email: text("email").notNull().unique(),
+    name: text("name").notNull(),
+    passwordHash: text("password_hash"),
+    googleSub: text("google_sub").unique(),
+    createdAt: createdAt(),
+  },
+  (t) => [check("account_has_credential", sql`${t.passwordHash} is not null or ${t.googleSub} is not null`)],
+);
+
+/** Keanggotaan akun di satu SSB: nama tampilan, kontak, dan role di SSB itu. */
 export const appUser = pgTable(
   "app_user",
   {
     id: uuid("id").primaryKey().defaultRandom(),
     ssbId: ssbId().references(() => ssb.id, { onDelete: "cascade" }),
+    accountId: uuid("account_id").notNull().references(() => account.id, { onDelete: "cascade" }),
     name: text("name").notNull(),
-    email: text("email"),
     whatsapp: text("whatsapp"),
-    passwordHash: text("password_hash"),
     role: userRole("role").notNull(),
     createdAt: createdAt(),
   },
   (t) => [
-    // Email unik per SSB. Login lintas SSB (satu orang tua di beberapa SSB) belum dirancang.
-    unique("app_user_ssb_email").on(t.ssbId, t.email),
+    unique("app_user_ssb_account").on(t.ssbId, t.accountId),
     unique("app_user_ssb_id").on(t.ssbId, t.id),
     tenantPolicy("app_user"),
+    // Akun boleh membaca daftar keanggotaannya sendiri lintas SSB.
+    pgPolicy("app_user_own_memberships", {
+      as: "permissive",
+      for: "select",
+      to: appRole,
+      using: sql`account_id = nullif(current_setting('app.account_id', true), '')::uuid`,
+    }),
   ],
 ).enableRLS();
 
@@ -231,13 +264,43 @@ export const userSession = pgTable(
   {
     id: uuid("id").primaryKey().defaultRandom(),
     tokenHash: text("token_hash").notNull().unique(),
-    ssbId: uuid("ssb_id").notNull(),
-    userId: uuid("user_id").notNull(),
+    accountId: uuid("account_id").notNull().references(() => account.id, { onDelete: "cascade" }),
+    // SSB aktif; kosong sampai akun yang punya beberapa SSB memilih salah satu.
+    ssbId: uuid("ssb_id"),
+    userId: uuid("user_id"),
     createdAt: createdAt(),
     expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
   },
   (t) => [
     foreignKey({ columns: [t.ssbId, t.userId], foreignColumns: [appUser.ssbId, appUser.id], name: "user_session_user_fk" }).onDelete("cascade"),
-    index("user_session_user_idx").on(t.userId),
+    index("user_session_account_idx").on(t.accountId),
+    check("user_session_membership_pair", sql`(${t.ssbId} is null) = (${t.userId} is null)`),
   ],
 );
+
+/**
+ * Undangan bergabung ke SSB. Token = "<ssb_id>.<rahasia>"; hanya hash rahasia yang
+ * disimpan. Awalan ssb_id memungkinkan konteks tenant diatur sebelum mencari undangan.
+ */
+export const invitation = pgTable(
+  "invitation",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    ssbId: ssbId().references(() => ssb.id, { onDelete: "cascade" }),
+    secretHash: text("secret_hash").notNull().unique(),
+    role: userRole("role").notNull(),
+    /** Catatan admin, misalnya nama orang yang diundang. */
+    label: text("label"),
+    /** Untuk undangan orang tua: pemain yang langsung dihubungkan saat undangan diterima. */
+    playerId: uuid("player_id"),
+    createdBy: uuid("created_by"),
+    expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+    acceptedAt: timestamp("accepted_at", { withTimezone: true }),
+    createdAt: createdAt(),
+  },
+  (t) => [
+    foreignKey({ columns: [t.ssbId, t.playerId], foreignColumns: [player.ssbId, player.id], name: "invitation_player_fk" }).onDelete("cascade"),
+    foreignKey({ columns: [t.ssbId, t.createdBy], foreignColumns: [appUser.ssbId, appUser.id], name: "invitation_created_by_fk" }),
+    tenantPolicy("invitation"),
+  ],
+).enableRLS();

@@ -11,3 +11,4 @@ Satu baris per checkpoint, yang terbaru di atas. Hash commit menjadi acuan utama
 | cp-4-skema-db | `8fd00d7` | 2026-10-17 | Skema PostgreSQL inti dengan Drizzle, RLS dan FORCE, FK komposit lintas tenant, 6 test isolasi |
 | cp-5-checklist | `a9e9a99` | 2026-10-17 | Checklist pengerjaan terukur (69 butir) dan skrip kemajuan |
 | cp-6-autentikasi | `6a18f4e` | 2026-10-17 | Autentikasi API: daftar SSB, login, sesi, logout, ganti sandi, guard role, validasi env; 13 test di api |
+| cp-7-akun-global-google | (diisi setelah commit) | 2026-10-17 | Akun global + keanggotaan per SSB, login Google (OIDC + PKCE), undangan sekali pakai; 24 test api |

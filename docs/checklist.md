@@ -22,15 +22,20 @@ Butir bertanda **(butuh keputusan)** terhambat oleh pertanyaan terbuka di `docs/
 
 ## B. Akun dan tenant
 
-- [ ] Putuskan identitas pengguna: akun per SSB atau akun global **(butuh keputusan; sementara dipakai akun per SSB dengan login memakai kode SSB, menunggu konfirmasi)**
+- [x] Putuskan identitas pengguna: akun global (`account`) dengan keanggotaan per SSB (`app_user`); satu akun bisa menjadi anggota beberapa SSB
 - [ ] Jalur admin platform untuk membuat SSB baru tanpa konteks tenant
-- [x] Daftar SSB baru: membuat SSB + admin pertama dalam satu transaksi (test)
+- [x] Daftar SSB baru: membuat akun + SSB + admin pertama dalam satu transaksi (test); akun yang sudah ada bisa membuat SSB tambahan
 - [x] Autentikasi: login, sesi aman (cookie HttpOnly, hash token di database, argon2id), logout, ganti kata sandi (test)
 - [ ] Lupa dan reset kata sandi lewat tautan yang kedaluwarsa
 - [x] Middleware tenant: `ssb_id` dari sesi, bukan dari input klien (test: input `ssbId` palsu diabaikan)
 - [ ] Guard role untuk empat role; matriks izin tertulis dan diuji per endpoint (test per role)
-- [ ] Undang pelatih dan orang tua lewat tautan atau WhatsApp; tautan kedaluwarsa
-- [ ] Layar login dan pengaturan akun di web, nyaman di layar 360 px
+- [x] Undang pelatih, korlas, dan orang tua lewat tautan sekali pakai yang kedaluwarsa dalam 7 hari; undangan orang tua langsung menghubungkan ke pemain (test)
+- [x] Login dan daftar dengan Google (OIDC, authorization code + PKCE, `email_verified` wajib, tanpa tautan otomatis lewat email); diuji dengan penyedia Google tiruan
+- [ ] Uji alur Google sungguhan: kredensial OAuth dari Google Cloud diisi di env, lalu coba daftar, login, dan terima undangan dari browser
+- [ ] Tautkan Google ke akun kata sandi (dan sebaliknya) dari pengaturan akun
+- [ ] Penghapusan akun: keanggotaan dan kaitan data (pembuat undangan, pencatat absensi) ditangani tanpa merusak riwayat
+- [ ] Kirim tautan undangan lewat WhatsApp otomatis (fase 2; fase 1 admin menyalin tautan)
+- [ ] Layar login (tombol Google + email), halaman terima undangan, pemilih SSB, dan pengaturan akun di web, nyaman di layar 360 px
 
 ## C. Master data
 

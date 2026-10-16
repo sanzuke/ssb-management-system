@@ -10,3 +10,9 @@ test("env valid mendapat nilai bawaan", () => {
   expect(env.PORT).toBe(3000);
   expect(env.NODE_ENV).toBe("development");
 });
+
+test("Google aktif wajib berpasangan dan butuh SESSION_SECRET", () => {
+  expect(() => loadEnv({ DATABASE_URL: "x", GOOGLE_CLIENT_ID: "id" })).toThrow(/GOOGLE_CLIENT_SECRET/);
+  expect(() => loadEnv({ DATABASE_URL: "x", GOOGLE_CLIENT_ID: "id", GOOGLE_CLIENT_SECRET: "s" })).toThrow(/SESSION_SECRET/);
+  expect(loadEnv({ DATABASE_URL: "x", GOOGLE_CLIENT_ID: "id", GOOGLE_CLIENT_SECRET: "s", SESSION_SECRET: "y".repeat(32) }).GOOGLE_CLIENT_ID).toBe("id");
+});

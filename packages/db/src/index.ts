@@ -32,3 +32,15 @@ export async function withTenant<T>(db: Db, ssbId: string, fn: (tx: Tx) => Promi
     return fn(tx);
   });
 }
+
+/**
+ * Jalankan fn dengan konteks akun, untuk membaca keanggotaan akun lintas SSB.
+ * Hanya memberi akses baca ke keanggotaan dan SSB milik akun itu.
+ */
+export async function withAccount<T>(db: Db, accountId: string, fn: (tx: Tx) => Promise<T>): Promise<T> {
+  if (!UUID.test(accountId)) throw new Error("accountId bukan UUID");
+  return db.transaction(async (tx) => {
+    await tx.execute(sql`select set_config('app.account_id', ${accountId}, true)`);
+    return fn(tx);
+  });
+}

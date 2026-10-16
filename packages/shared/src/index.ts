@@ -35,26 +35,52 @@ export const emailSchema = z.string().trim().toLowerCase().pipe(z.email().max(20
 
 export const passwordSchema = z.string().min(10, "minimal 10 karakter").max(200);
 
-export const registerSsbSchema = z.object({
+export const ssbInputSchema = z.object({
   ssbName: z.string().trim().min(2).max(120),
   slug: slugSchema,
   city: z.string().trim().max(100).optional(),
   province: z.string().trim().max(100).optional(),
+});
+export type SsbInput = z.infer<typeof ssbInputSchema>;
+
+/** Daftar akun baru sekaligus SSB baru, dengan email + kata sandi. */
+export const registerSsbSchema = ssbInputSchema.extend({
   adminName: z.string().trim().min(1).max(120),
   email: emailSchema,
   password: passwordSchema,
 });
 export type RegisterSsb = z.infer<typeof registerSsbSchema>;
 
+/** Kode SSB opsional: dipakai bila akun punya beberapa SSB dan ingin langsung memilih salah satu. */
 export const loginSchema = z.object({
-  slug: slugSchema,
   email: emailSchema,
   password: z.string().min(1).max(200),
+  slug: slugSchema.optional(),
 });
 export type Login = z.infer<typeof loginSchema>;
 
+export const selectSsbSchema = z.object({ ssbId: z.uuid() });
+
+/** Peran yang bisa diundang. Admin SSB pertama dibuat saat pendaftaran SSB. */
+export const invitableRoleSchema = z.enum(["pelatih", "korlas", "orang_tua"]);
+
+export const createInvitationSchema = z.object({
+  role: invitableRoleSchema,
+  label: z.string().trim().max(120).optional(),
+  /** Untuk orang tua: pemain yang langsung dihubungkan. */
+  playerId: z.uuid().optional(),
+});
+
+/** Menerima undangan dengan akun baru (email + kata sandi). Akun yang sudah login tidak perlu body. */
+export const acceptInvitationSchema = z.object({
+  name: z.string().trim().min(1).max(120),
+  email: emailSchema,
+  password: passwordSchema,
+});
+
 export const changePasswordSchema = z.object({
-  currentPassword: z.string().min(1).max(200),
+  /** Wajib bila akun sudah punya kata sandi; akun yang hanya login Google boleh mengosongkannya. */
+  currentPassword: z.string().max(200).optional(),
   newPassword: passwordSchema,
 });
 
@@ -64,11 +90,20 @@ export const apiErrorSchema = z.object({
 });
 export type ApiError = z.infer<typeof apiErrorSchema>;
 
-export const meSchema = z.object({
-  userId: z.string(),
+export const membershipSchema = z.object({
   ssbId: z.string(),
-  name: z.string(),
-  email: z.string().nullable(),
+  userId: z.string(),
+  ssbName: z.string(),
   role: userRoleSchema,
+});
+export type Membership = z.infer<typeof membershipSchema>;
+
+export const meSchema = z.object({
+  accountId: z.string(),
+  name: z.string(),
+  email: z.string(),
+  /** SSB aktif pada sesi ini; kosong bila akun belum memilih SSB. */
+  active: membershipSchema.nullable(),
+  memberships: z.array(membershipSchema),
 });
 export type Me = z.infer<typeof meSchema>;

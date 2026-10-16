@@ -1,76 +1,47 @@
-import { randomUUID } from "node:crypto";
 import { and, eq, ne } from "drizzle-orm";
 import { Hono } from "hono";
-import { deleteCookie, getCookie, setCookie } from "hono/cookie";
+import { deleteCookie, getCookie } from "hono/cookie";
 import { zValidator } from "@hono/zod-validator";
-import { schema, withTenant, type Db } from "@ssb/db";
-import { changePasswordSchema, loginSchema, registerSsbSchema, type Me } from "@ssb/shared";
+import { schema, type Db } from "@ssb/db";
+import { changePasswordSchema, loginSchema, registerSsbSchema, selectSsbSchema, ssbInputSchema, type Me } from "@ssb/shared";
 import { HttpError } from "../errors";
-import { requireAuth, type AppEnv } from "./middleware";
+import { requireAccount, type AppEnv } from "./middleware";
 import { dummyHash, hashPassword, verifyPassword } from "./password";
-import { SESSION_COOKIE, SESSION_TTL_MS, hashToken, newToken } from "./session";
-
-const isUniqueViolation = (e: unknown) => (e as { code?: string })?.code === "23505" || (e as { cause?: { code?: string } })?.cause?.code === "23505";
+import { SESSION_COOKIE, hashToken } from "./session";
+import { createSsb, isUniqueViolation, listMemberships, pickActive, setActive, ssbIdBySlug, startSession } from "./service";
 
 export function authRoutes(db: Db, opts: { secureCookie: boolean }) {
-  const startSession = async (c: Parameters<typeof setCookie>[0], ssbId: string, userId: string) => {
-    const token = newToken();
-    await db.insert(schema.userSession).values({
-      tokenHash: hashToken(token),
-      ssbId,
-      userId,
-      expiresAt: new Date(Date.now() + SESSION_TTL_MS),
-    });
-    setCookie(c, SESSION_COOKIE, token, {
-      httpOnly: true,
-      sameSite: "Lax",
-      secure: opts.secureCookie,
-      path: "/",
-      maxAge: SESSION_TTL_MS / 1000,
-    });
-  };
-
-  const invalidLogin = () => new HttpError(401, "invalid_credentials", "Kode SSB, email, atau kata sandi salah");
+  const invalidLogin = () => new HttpError(401, "invalid_credentials", "Email atau kata sandi salah");
 
   return new Hono<AppEnv>()
-    // Daftar SSB baru + admin pertama dalam satu transaksi.
+    // Akun baru + SSB baru + admin pertama, dengan email dan kata sandi.
     .post("/register-ssb", zValidator("json", registerSsbSchema), async (c) => {
       const body = c.req.valid("json");
-      const ssbId = randomUUID();
-      const userId = randomUUID();
       const passwordHash = await hashPassword(body.password);
+      let accountId: string;
       try {
-        await withTenant(db, ssbId, async (tx) => {
-          await tx.insert(schema.ssb).values({ id: ssbId, name: body.ssbName, city: body.city, province: body.province });
-          await tx.insert(schema.ssbDirectory).values({ slug: body.slug, ssbId });
-          await tx.insert(schema.appUser).values({
-            id: userId,
-            ssbId,
-            name: body.adminName,
-            email: body.email,
-            passwordHash,
-            role: "admin_ssb",
-          });
-        });
+        const [a] = await db.insert(schema.account).values({ email: body.email, name: body.adminName, passwordHash }).returning({ id: schema.account.id });
+        accountId = a!.id;
       } catch (e) {
-        if (isUniqueViolation(e)) throw new HttpError(409, "slug_taken", "Kode SSB sudah dipakai");
+        if (isUniqueViolation(e)) throw new HttpError(409, "email_taken", "Email sudah terdaftar. Masuk, lalu buat SSB dari akun Anda");
         throw e;
       }
-      await startSession(c, ssbId, userId);
-      return c.json({ ssbId, userId }, 201);
+      const { ssbId, userId } = await createSsb(db, accountId, body.adminName, body);
+      await startSession(db, c, accountId, { ssbId, userId }, opts.secureCookie);
+      return c.json({ accountId, ssbId, userId }, 201);
     })
 
     .post("/login", zValidator("json", loginSchema), async (c) => {
-      const { slug, email, password } = c.req.valid("json");
-      const [dir] = await db.select().from(schema.ssbDirectory).where(eq(schema.ssbDirectory.slug, slug)).limit(1);
-      const [user] = dir
-        ? await withTenant(db, dir.ssbId, (tx) => tx.select().from(schema.appUser).where(eq(schema.appUser.email, email)).limit(1))
-        : [];
+      const { email, password, slug } = c.req.valid("json");
+      const [acc] = await db.select().from(schema.account).where(eq(schema.account.email, email)).limit(1);
       // Selalu verifikasi hash, termasuk hash tiruan, agar waktu respons tidak membocorkan akun mana yang ada.
-      const ok = await verifyPassword(password, user?.passwordHash ?? (await dummyHash()));
-      if (!user || !user.passwordHash || !ok) throw invalidLogin();
-      await startSession(c, user.ssbId, user.id);
-      return c.json({ ok: true });
+      const ok = await verifyPassword(password, acc?.passwordHash ?? (await dummyHash()));
+      if (!acc || !acc.passwordHash || !ok) throw invalidLogin();
+      const memberships = await listMemberships(db, acc.id);
+      const slugSsbId = slug ? await ssbIdBySlug(db, slug) : undefined;
+      const active = pickActive(memberships, slugSsbId);
+      await startSession(db, c, acc.id, active, opts.secureCookie);
+      return c.json({ ok: true, selected: active !== null, memberships });
     })
 
     .post("/logout", async (c) => {
@@ -80,24 +51,43 @@ export function authRoutes(db: Db, opts: { secureCookie: boolean }) {
       return c.json({ ok: true });
     })
 
-    .get("/me", requireAuth, (c) => {
+    .get("/me", requireAccount, async (c) => {
       const a = c.get("auth")!;
-      const me: Me = { userId: a.userId, ssbId: a.ssbId, name: a.name, email: a.email, role: a.role };
+      const memberships = await listMemberships(db, a.accountId);
+      const active = a.member ? (memberships.find((m) => m.userId === a.member!.userId) ?? null) : null;
+      const me: Me = { accountId: a.accountId, name: a.accountName, email: a.email, active, memberships };
       return c.json(me);
     })
 
-    .post("/change-password", requireAuth, zValidator("json", changePasswordSchema), async (c) => {
+    // Pilih SSB aktif untuk sesi ini; hanya SSB tempat akun menjadi anggota.
+    .post("/select", requireAccount, zValidator("json", selectSsbSchema), async (c) => {
+      const a = c.get("auth")!;
+      const { ssbId } = c.req.valid("json");
+      const m = (await listMemberships(db, a.accountId)).find((x) => x.ssbId === ssbId);
+      if (!m) throw new HttpError(403, "not_a_member", "Anda bukan anggota SSB tersebut");
+      await setActive(db, a.sessionHash, { ssbId: m.ssbId, userId: m.userId });
+      return c.json({ ok: true, active: m });
+    })
+
+    // Akun yang sudah ada membuat SSB tambahan.
+    .post("/ssb", requireAccount, zValidator("json", ssbInputSchema), async (c) => {
+      const a = c.get("auth")!;
+      const created = await createSsb(db, a.accountId, a.accountName, c.req.valid("json"));
+      await setActive(db, a.sessionHash, created);
+      return c.json(created, 201);
+    })
+
+    .post("/change-password", requireAccount, zValidator("json", changePasswordSchema), async (c) => {
       const a = c.get("auth")!;
       const { currentPassword, newPassword } = c.req.valid("json");
-      const [u] = await withTenant(db, a.ssbId, (tx) => tx.select().from(schema.appUser).where(eq(schema.appUser.id, a.userId)).limit(1));
-      if (!u?.passwordHash || !(await verifyPassword(currentPassword, u.passwordHash))) {
+      const [acc] = await db.select().from(schema.account).where(eq(schema.account.id, a.accountId)).limit(1);
+      // Akun yang hanya punya login Google boleh menambahkan kata sandi tanpa kata sandi lama.
+      if (acc?.passwordHash && !(currentPassword && (await verifyPassword(currentPassword, acc.passwordHash)))) {
         throw new HttpError(400, "wrong_password", "Kata sandi saat ini salah");
       }
-      const newHash = await hashPassword(newPassword);
-      await withTenant(db, a.ssbId, (tx) => tx.update(schema.appUser).set({ passwordHash: newHash }).where(eq(schema.appUser.id, a.userId)));
-      // Sesi lain milik pengguna ini dicabut; sesi yang sedang dipakai tetap berlaku.
-      const current = hashToken(getCookie(c, SESSION_COOKIE)!);
-      await db.delete(schema.userSession).where(and(eq(schema.userSession.userId, a.userId), ne(schema.userSession.tokenHash, current)));
+      await db.update(schema.account).set({ passwordHash: await hashPassword(newPassword) }).where(eq(schema.account.id, a.accountId));
+      // Sesi lain milik akun ini dicabut; sesi yang sedang dipakai tetap berlaku.
+      await db.delete(schema.userSession).where(and(eq(schema.userSession.accountId, a.accountId), ne(schema.userSession.tokenHash, a.sessionHash)));
       return c.json({ ok: true });
     });
 }

@@ -35,11 +35,11 @@ Mengubah skema: edit `packages/db/src/schema.ts`, lalu `bun run db:generate` dan
 
 ## Tabel saat ini
 
-`ssb`, `app_user`, `age_group`, `period`, `player`, `player_guardian`, `coach_assignment`, `training_session`, `attendance`, ditambah `ssb_directory` (kode SSB ke id) dan `user_session` (sesi login). Dua tabel terakhir sengaja tanpa RLS karena dicari sebelum konteks tenant ada; keduanya hanya berisi pemetaan dan hash token.
+`ssb`, `app_user`, `age_group`, `period`, `player`, `player_guardian`, `coach_assignment`, `training_session`, `attendance`, ditambah `account` (akun global), `invitation` (undangan, dengan RLS), `ssb_directory` (kode SSB ke id), dan `user_session` (sesi login). `account`, `ssb_directory`, dan `user_session` sengaja tanpa RLS karena dicari sebelum konteks tenant ada. `app_user` adalah keanggotaan akun di satu SSB dan punya satu policy tambahan agar akun bisa membaca keanggotaannya sendiri lintas SSB (konteks `app.account_id`).
 
 Belum ada: template assessment, assessment, skor, dan development plan. Tabel ini menunggu keputusan skala nilai dan frekuensi assessment (lihat pertanyaan terbuka di rancangan).
 
 ## Keputusan yang tertunda
 
-- Login lintas SSB: email unik per SSB, sehingga satu orang tua di dua SSB punya dua akun. Perlu rancangan identitas global bila itu penting.
+- Penghapusan akun: keanggotaan ikut terhapus, tetapi kaitan seperti pembuat undangan dan pencatat absensi masih memakai foreign key tanpa aksi hapus; perlu ditangani sebelum fitur hapus akun dibuat.
 - Jalur admin platform untuk membuat dan mengelola SSB tanpa konteks tenant.

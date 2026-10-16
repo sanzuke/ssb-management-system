@@ -16,6 +16,7 @@
     "@ssb/shared": "workspace:*",
     "drizzle-orm": "^0.45.0",
     "hono": "^4.13.0",
+    "jose": "^6.0.0",
     "zod": "^4.0.0"
   }
 }
