@@ -1,0 +1,101 @@
+# Checklist pengerjaan
+
+Daftar kerja terukur untuk MVP (fase 1) dan fondasinya. Tiap butir punya kriteria selesai yang bisa diperiksa. Centang `[x]` hanya bila kriterianya terpenuhi dan terbukti (test lolos, endpoint dicoba, atau dokumen ada). Hitung kemajuan dengan `bun run progress`.
+
+Butir bertanda **(butuh keputusan)** terhambat oleh pertanyaan terbuka di `docs/rancangan.md`.
+
+## A. Fondasi
+
+- [x] Dokumen rancangan lengkap (visi, scope, modul, model data, roadmap, tech stack)
+- [x] Repo GitHub dan konvensi checkpoint (`docs/checkpoints.md`)
+- [x] Keputusan stack: Hono + Bun (backend), SolidStart (frontend), PostgreSQL + Drizzle
+- [x] Benchmark backend dan frontend tersimpan di `tools/bench`
+- [x] Monorepo Bun workspaces: `apps/api`, `apps/web`, `packages/shared`, `packages/db`
+- [x] `bun run typecheck`, `test`, `build` lolos di semua paket
+- [x] Skema inti: ssb, app_user, age_group, period, player, player_guardian, coach_assignment, training_session, attendance
+- [x] RLS aktif dan dipaksa di semua tabel; 6 test isolasi tenant lolos
+- [ ] CI (GitHub Actions): typecheck + test + build tiap push, dengan service PostgreSQL untuk test RLS
+- [ ] Lint dan format (satu perintah `bun run lint`, lolos di CI)
+- [ ] Konfigurasi lingkungan: validasi env saat start (gagal bila `DATABASE_URL` kosong)
+- [ ] Logging terstruktur dan penanganan error seragam di API (format error baku di `packages/shared`)
+- [ ] Docker Compose untuk pengembangan lokal (PostgreSQL + API + web), `docker compose up` cukup untuk mulai
+
+## B. Akun dan tenant
+
+- [ ] Putuskan identitas pengguna: akun per SSB atau akun global **(butuh keputusan)**
+- [ ] Jalur admin platform untuk membuat SSB baru tanpa konteks tenant
+- [ ] Daftar SSB baru: membuat SSB + admin pertama dalam satu transaksi (test)
+- [ ] Autentikasi: login, sesi aman (cookie HttpOnly), logout, ganti dan reset kata sandi
+- [ ] Middleware tenant: `ssb_id` dari sesi, bukan dari input klien (test: input `ssbId` palsu diabaikan)
+- [ ] Guard role untuk empat role; matriks izin tertulis dan diuji per endpoint (test per role)
+- [ ] Undang pelatih dan orang tua lewat tautan atau WhatsApp; tautan kedaluwarsa
+- [ ] Layar login dan pengaturan akun di web, nyaman di layar 360 px
+
+## C. Master data
+
+- [ ] CRUD KU (nama, rentang usia) dengan validasi rentang tidak tumpang tindih
+- [ ] CRUD periode (musim atau semester) dengan validasi tanggal
+- [ ] CRUD lokasi latihan
+- [ ] Layar admin untuk ketiganya di web
+
+## D. Pemain dan pelatih
+
+- [ ] CRUD pemain: biodata, posisi, sekolah, status; nomor anggota otomatis dan unik per SSB
+- [ ] Riwayat perubahan KU dan status tersimpan (tabel riwayat + test)
+- [ ] Unggah foto dan dokumen ke penyimpanan S3-compatible; batas ukuran dan tipe berkas **(butuh keputusan: tempat penyimpanan)**
+- [ ] Persetujuan orang tua untuk foto dan dokumen tercatat
+- [ ] Hubungkan orang tua ke satu atau beberapa anak
+- [ ] Profil pelatih dan penugasan ke KU per periode
+- [ ] Pelatih hanya melihat pemain di KU yang ditugaskan (test: pelatih KU lain mendapat 404 atau daftar kosong)
+- [ ] Layar daftar, detail, dan formulir pemain di web; pencarian dan filter KU
+- [ ] Impor pemain dari CSV dengan laporan baris gagal
+
+## E. Latihan dan absensi
+
+- [ ] Jadwal latihan: buat, ubah, hapus; jadwal berulang mingguan
+- [ ] Endpoint absensi massal per sesi (satu permintaan untuk satu KU)
+- [ ] Pelatih hanya bisa mengisi absensi KU yang ditugaskan (test)
+- [ ] Layar absensi sekali ketuk: 20 pemain terisi dalam kurang dari 60 detik pada uji di HP
+- [ ] Rekap kehadiran per pemain dan per periode (persentase benar terhadap data uji)
+- [ ] Absensi dengan scan QR dari kamera browser
+
+## F. Assessment dan rapor
+
+- [ ] Putuskan skala nilai dan frekuensi assessment **(butuh keputusan)**
+- [ ] Putuskan rujukan indikator dan pelibatan pelatih berlisensi **(butuh keputusan)**
+- [ ] Tabel template assessment, assessment, skor, development plan (migrasi + RLS + test)
+- [ ] Template indikator per KU (aspek, indikator, skala)
+- [ ] Input penilaian per pemain per periode; skor di luar skala ditolak (test)
+- [ ] Jejak perubahan skor (siapa, kapan, nilai lama dan baru)
+- [ ] Layar input penilaian ramah sentuh di HP
+- [ ] Grafik perkembangan dan radar chart per pemain
+- [ ] Development plan per pemain per periode
+- [ ] Rapor PDF dari HTML dengan Playwright di Node; satu rapor selesai dalam kurang dari 10 detik
+- [ ] Wewenang Korlas atas rapor diputuskan dan diterapkan **(butuh keputusan)**
+
+## G. Portal orang tua dan kartu pemain
+
+- [ ] Orang tua hanya melihat data anak sendiri (test: akses anak orang lain ditolak)
+- [ ] Halaman beranda orang tua: jadwal, absensi, rapor
+- [ ] Unduh rapor PDF dari portal
+- [ ] Kartu pemain digital dengan QR (nomor anggota, KU, posisi, status)
+- [ ] PWA dapat dipasang di layar HP (manifest, ikon, uji pasang di Android)
+
+## H. Kualitas dan keamanan
+
+- [ ] Uji end-to-end alur utama dengan Playwright: daftar SSB, tambah pemain, absen, nilai, lihat rapor sebagai orang tua
+- [ ] Uji beban dasar pada API (target ditetapkan bersama pilot)
+- [ ] Audit akses: tiap endpoint punya test untuk role yang tidak berhak
+- [ ] Pembatasan laju (rate limit) pada login dan undangan
+- [ ] Header keamanan dan CORS dikonfigurasi
+- [ ] Tinjauan aspek hukum UU Pelindungan Data Pribadi untuk data anak
+- [ ] Cadangan `pg_dump` terjadwal dan uji pemulihan tercatat
+
+## I. Rilis dan pilot
+
+- [ ] Server produksi (VPS), Docker Compose, Caddy atau Nginx, HTTPS
+- [ ] Node 24 untuk web dan worker PDF; versi dikunci
+- [ ] Pilih satu SSB percontohan dan tetapkan kriteria keberhasilan pilot **(butuh keputusan)**
+- [ ] Data nyata pilot dimuat (impor CSV) dan dipakai satu siklus latihan penuh
+- [ ] Umpan balik pelatih dan orang tua dicatat; daftar perbaikan diprioritaskan
+- [ ] Kriteria lanjut ke fase 2 ditetapkan **(butuh keputusan)**

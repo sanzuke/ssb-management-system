@@ -13,7 +13,8 @@
     "typecheck": "bun --filter '*' typecheck",
     "test": "bun --filter '*' test",
     "db:generate": "bun --filter @ssb/db generate",
-    "db:migrate": "bun --filter @ssb/db migrate"
+    "db:migrate": "bun --filter @ssb/db migrate",
+    "progress": "bun tools/progress.ts"
   },
   "devDependencies": {
     "typescript": "^5.9.0",
