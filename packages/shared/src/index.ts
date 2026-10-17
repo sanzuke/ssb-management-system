@@ -41,6 +41,7 @@ export const permissions = {
   "assessment.write": { roles: ["admin_ssb", "pelatih"], desc: "Mengisi penilaian pemain" },
   "assessment.read": { roles: ["admin_ssb", "pelatih", "korlas", "orang_tua"], desc: "Melihat penilaian (orang tua: anaknya, setelah terbit)" },
   "session.manage": { roles: ["admin_ssb"], desc: "Menjadwalkan, mengubah, dan menghapus sesi latihan" },
+  "guardian.sessions": { roles: ["admin_ssb", "orang_tua"], desc: "Portal orang tua: jadwal KU anak sendiri beserta status kehadiran anak, tanpa daftar pemain lain (admin tidak punya anak, jadi daftarnya kosong)" },
   "session.read": { roles: ["admin_ssb", "pelatih", "korlas"], desc: "Melihat jadwal sesi latihan (pelatih dan korlas: KU yang ditugaskan)" },
   "assignment.manage": { roles: ["admin_ssb"], desc: "Menugaskan pelatih dan korlas ke KU per periode" },
   "report.publish": { roles: ["admin_ssb", "korlas"], desc: "Menerbitkan rapor ke orang tua (wewenang korlas: menunggu keputusan)" },
@@ -276,4 +277,16 @@ export type AttendanceSummary = {
   /** Jumlah sesi pada rentang ini yang sudah punya catatan absensi. */
   sessionsHeld: number;
   players: AttendanceSummaryRow[];
+};
+
+export type GuardianSession = {
+  sessionId: string;
+  sessionDate: string;
+  startTime: string | null;
+  ageGroup: { id: string; name: string };
+  location: { id: string; name: string } | null;
+  playerId: string;
+  playerName: string;
+  /** Status kehadiran anak pada sesi ini; null bila belum dicatat. */
+  status: AttendanceStatus | null;
 };

@@ -1,7 +1,7 @@
 import { Hono } from "hono";
 import { and, asc, desc, eq, gte, inArray, lte, sql, type SQL } from "drizzle-orm";
 import { schema, withTenant, type Db, type Tx } from "@ssb/db";
-import { attendanceInputSchema, sessionCreateSchema, sessionInputSchema, type AttendanceRoster, type AttendanceSummary, type TrainingSession } from "@ssb/shared";
+import { attendanceInputSchema, sessionCreateSchema, sessionInputSchema, type AttendanceRoster, type AttendanceSummary, type GuardianSession, type TrainingSession } from "@ssb/shared";
 import { HttpError } from "./errors";
 import { requirePermission, type AppEnv, type Member } from "./auth/middleware";
 import { zv } from "./validator";
@@ -238,6 +238,37 @@ export function sessionRoutes(db: Db) {
           .filter((r) => r.status === "aktif" || r.recorded > 0);
         return { period: period ?? null, ageGroup: group ?? null, sessionsHeld: held?.n ?? 0, players: rows };
       });
+      return c.json(out);
+    })
+
+    // Portal orang tua: jadwal KU anak sendiri + status anak. Tidak membuka daftar pemain lain.
+    .get("/guardian/sessions", requirePermission("guardian.sessions"), async (c) => {
+      const m = member(c);
+      const from = c.req.query("from") ?? addDays(new Date().toISOString().slice(0, 10), -30);
+      const to = c.req.query("to") ?? addDays(new Date().toISOString().slice(0, 10), 30);
+      if (!ISO.test(from) || !ISO.test(to)) throw new HttpError(400, "bad_request", "Tanggal harus berformat YYYY-MM-DD");
+      const rows = await withTenant(db, m.ssbId, (tx) =>
+        tx
+          .select({
+            sessionId: ts.id, sessionDate: ts.sessionDate, startTime: ts.startTime,
+            kuId: schema.ageGroup.id, kuName: schema.ageGroup.name, locId: schema.location.id, locName: schema.location.name,
+            playerId: schema.player.id, playerName: schema.player.fullName, status: schema.attendance.status,
+          })
+          .from(schema.playerGuardian)
+          .innerJoin(schema.player, and(eq(schema.player.ssbId, schema.playerGuardian.ssbId), eq(schema.player.id, schema.playerGuardian.playerId)))
+          .innerJoin(ts, and(eq(ts.ssbId, schema.player.ssbId), eq(ts.ageGroupId, schema.player.ageGroupId)))
+          .innerJoin(schema.ageGroup, and(eq(schema.ageGroup.ssbId, ts.ssbId), eq(schema.ageGroup.id, ts.ageGroupId)))
+          .leftJoin(schema.location, and(eq(schema.location.ssbId, ts.ssbId), eq(schema.location.id, ts.locationId)))
+          .leftJoin(schema.attendance, and(eq(schema.attendance.sessionId, ts.id), eq(schema.attendance.playerId, schema.player.id)))
+          .where(and(eq(schema.playerGuardian.userId, m.userId), gte(ts.sessionDate, from), lte(ts.sessionDate, to)))
+          .orderBy(asc(ts.sessionDate), asc(ts.startTime), asc(schema.player.fullName))
+          .limit(300),
+      );
+      const out: GuardianSession[] = rows.map((r) => ({
+        sessionId: r.sessionId, sessionDate: r.sessionDate, startTime: r.startTime ? r.startTime.slice(0, 5) : null,
+        ageGroup: { id: r.kuId, name: r.kuName }, location: r.locId ? { id: r.locId, name: r.locName! } : null,
+        playerId: r.playerId, playerName: r.playerName, status: r.status ?? null,
+      }));
       return c.json(out);
     })
 

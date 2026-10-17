@@ -272,4 +272,41 @@ run("jadwal latihan dan absensi", () => {
     expect((await call("GET", "/attendance/summary")).status).toBe(401);
   });
 
+  test("portal orang tua: jadwal KU anak sendiri dengan status anak; anak orang lain tertutup", async () => {
+    const w = await world("portal");
+    const mk = async (ageGroupId: string, offset: number) => (await json(await call("POST", "/sessions", w.admin, { ageGroupId, sessionDate: iso(offset), startTime: "16:00", locationId: w.loc })))[0].id as string;
+    const s10 = await mk(w.ku10, -1);
+    const s10b = await mk(w.ku10, 3);
+    const s12 = await mk(w.ku12, 2);
+    expect((await call("PUT", `/sessions/${s10}/attendance`, w.admin, { entries: [{ playerId: w.a1, status: "sakit" }, { playerId: w.a2, status: "hadir" }] })).status).toBe(200);
+    const parent = async (playerId: string, tag: string) => {
+      const inv = await json(await call("POST", "/invitations", w.admin, { role: "orang_tua", playerId }));
+      const acc = await call("POST", `/invitations/${inv.token}/accept`, undefined, { name: `Ortu ${tag}`, email: `ortu-${tag}-${uid}@uji.test`, password: PASS });
+      expect(acc.status).toBe(201);
+      return sessionOf(acc);
+    };
+    const ortuAli = await parent(w.a1, "ali");
+    const ortuEko = await parent(w.b1, "eko");
+
+    const ali = await json(await call("GET", "/guardian/sessions", ortuAli));
+    expect(ali.map((r: any) => [r.sessionId, r.playerId, r.status])).toEqual([[s10, w.a1, "sakit"], [s10b, w.a1, null]]);
+    expect(ali[0]).toMatchObject({ playerName: "Ali", startTime: "16:00", ageGroup: { name: "KU-10" }, location: { name: "Lapangan Utama" } });
+    const eko = await json(await call("GET", "/guardian/sessions", ortuEko));
+    expect(eko.map((r: any) => [r.sessionId, r.playerId])).toEqual([[s12, w.b1]]);
+    // rentang tanggal
+    expect((await json(await call("GET", `/guardian/sessions?from=${iso(2)}&to=${iso(5)}`, ortuAli))).map((r: any) => r.sessionId)).toEqual([s10b]);
+    expect((await call("GET", "/guardian/sessions?from=kemarin", ortuAli)).status).toBe(400);
+    // anak dan sesi orang lain tertutup; daftar pemain lain tidak bocor lewat absensi
+    expect((await call("GET", `/players/${w.b1}`, ortuAli)).status).toBe(404);
+    expect((await call("GET", `/sessions/${s10}/attendance`, ortuAli)).status).toBe(404);
+    expect((await call("GET", `/sessions/${s12}/attendance`, ortuAli)).status).toBe(404);
+    expect((await json(await call("GET", "/attendance/summary", ortuEko))).players.map((p: any) => p.playerId)).toEqual([w.b1]);
+    // peran lain dan tanpa login
+    expect(await json(await call("GET", "/guardian/sessions", w.admin))).toEqual([]); // admin tidak punya anak
+    expect((await call("GET", "/guardian/sessions", w.pelatih.cookie)).status).toBe(403);
+    expect((await call("GET", "/guardian/sessions")).status).toBe(401);
+    const other = await world("portalB");
+    expect(await json(await call("GET", "/guardian/sessions", other.admin))).toEqual([]);
+  });
+
 });
