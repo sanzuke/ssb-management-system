@@ -1,5 +1,6 @@
 import { sql } from "drizzle-orm";
 import {
+  boolean,
   check,
   date,
   foreignKey,
@@ -10,6 +11,7 @@ import {
   pgRole,
   pgTable,
   primaryKey,
+  smallint,
   text,
   time,
   timestamp,
@@ -27,6 +29,7 @@ export const appRole = pgRole("ssb_app").existing();
 export const userRole = pgEnum("user_role", ["admin_ssb", "pelatih", "korlas", "orang_tua"]);
 export const playerStatus = pgEnum("player_status", ["aktif", "cuti", "keluar"]);
 export const playerPosition = pgEnum("player_position", ["GK", "DF", "MF", "FW"]);
+export const assessmentAspect = pgEnum("assessment_aspect", ["technical", "physical", "tactical", "mental", "movement", "game_intelligence"]);
 export const attendanceStatus = pgEnum("attendance_status", ["hadir", "izin", "sakit", "alpa"]);
 
 /** Syarat tenant: baris hanya terlihat bila ssb_id sama dengan konteks transaksi. */
@@ -289,6 +292,92 @@ export const attendance = pgTable(
     foreignKey({ columns: [t.ssbId, t.recordedBy], foreignColumns: [appUser.ssbId, appUser.id], name: "attendance_recorded_by_fk" }),
     index("attendance_player_idx").on(t.ssbId, t.playerId),
     tenantPolicy("attendance"),
+  ],
+).enableRLS();
+
+/** Indikator penilaian per KU. Dinonaktifkan (bukan dihapus) bila sudah dipakai skor, agar riwayat tetap utuh. */
+export const assessmentIndicator = pgTable(
+  "assessment_indicator",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    ssbId: ssbId().references(() => ssb.id, { onDelete: "cascade" }),
+    ageGroupId: uuid("age_group_id").notNull(),
+    aspect: assessmentAspect("aspect").notNull(),
+    name: text("name").notNull(),
+    sortOrder: integer("sort_order").notNull().default(0),
+    active: boolean("active").notNull().default(true),
+  },
+  (t) => [
+    unique("assessment_indicator_ssb_id").on(t.ssbId, t.id),
+    unique("assessment_indicator_group_name").on(t.ssbId, t.ageGroupId, t.name),
+    foreignKey({ columns: [t.ssbId, t.ageGroupId], foreignColumns: [ageGroup.ssbId, ageGroup.id], name: "assessment_indicator_age_group_fk" }),
+    tenantPolicy("assessment_indicator"),
+  ],
+).enableRLS();
+
+/** Satu penilaian per pemain per periode (skala 1 sampai 10). KU dicatat saat dinilai karena pemain bisa pindah KU. */
+export const assessment = pgTable(
+  "assessment",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    ssbId: ssbId().references(() => ssb.id, { onDelete: "cascade" }),
+    playerId: uuid("player_id").notNull(),
+    periodId: uuid("period_id").notNull(),
+    ageGroupId: uuid("age_group_id").notNull(),
+    assessedOn: date("assessed_on").notNull(),
+    note: text("note"),
+    assessorId: uuid("assessor_id"),
+    publishedAt: timestamp("published_at", { withTimezone: true }),
+    createdAt: createdAt(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    unique("assessment_ssb_id").on(t.ssbId, t.id),
+    unique("assessment_player_period").on(t.ssbId, t.playerId, t.periodId),
+    foreignKey({ columns: [t.ssbId, t.playerId], foreignColumns: [player.ssbId, player.id], name: "assessment_player_fk" }).onDelete("cascade"),
+    foreignKey({ columns: [t.ssbId, t.periodId], foreignColumns: [period.ssbId, period.id], name: "assessment_period_fk" }),
+    foreignKey({ columns: [t.ssbId, t.ageGroupId], foreignColumns: [ageGroup.ssbId, ageGroup.id], name: "assessment_age_group_fk" }),
+    foreignKey({ columns: [t.ssbId, t.assessorId], foreignColumns: [appUser.ssbId, appUser.id], name: "assessment_assessor_fk" }),
+    tenantPolicy("assessment"),
+  ],
+).enableRLS();
+
+export const assessmentScore = pgTable(
+  "assessment_score",
+  {
+    ssbId: ssbId(),
+    assessmentId: uuid("assessment_id").notNull(),
+    indicatorId: uuid("indicator_id").notNull(),
+    score: smallint("score").notNull(),
+  },
+  (t) => [
+    primaryKey({ columns: [t.assessmentId, t.indicatorId] }),
+    check("assessment_score_range", sql`${t.score} between 1 and 10`),
+    foreignKey({ columns: [t.ssbId, t.assessmentId], foreignColumns: [assessment.ssbId, assessment.id], name: "assessment_score_assessment_fk" }).onDelete("cascade"),
+    foreignKey({ columns: [t.ssbId, t.indicatorId], foreignColumns: [assessmentIndicator.ssbId, assessmentIndicator.id], name: "assessment_score_indicator_fk" }),
+    tenantPolicy("assessment_score"),
+  ],
+).enableRLS();
+
+/** Jejak perubahan skor: siapa, kapan, nilai lama dan baru. Hanya ditambah, tidak diubah. */
+export const assessmentScoreLog = pgTable(
+  "assessment_score_log",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    ssbId: ssbId().references(() => ssb.id, { onDelete: "cascade" }),
+    assessmentId: uuid("assessment_id").notNull(),
+    indicatorId: uuid("indicator_id").notNull(),
+    oldScore: smallint("old_score"),
+    newScore: smallint("new_score").notNull(),
+    changedBy: uuid("changed_by"),
+    changedAt: timestamp("changed_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    foreignKey({ columns: [t.ssbId, t.assessmentId], foreignColumns: [assessment.ssbId, assessment.id], name: "assessment_score_log_assessment_fk" }).onDelete("cascade"),
+    foreignKey({ columns: [t.ssbId, t.indicatorId], foreignColumns: [assessmentIndicator.ssbId, assessmentIndicator.id], name: "assessment_score_log_indicator_fk" }),
+    foreignKey({ columns: [t.ssbId, t.changedBy], foreignColumns: [appUser.ssbId, appUser.id], name: "assessment_score_log_changed_by_fk" }),
+    index("assessment_score_log_assessment_idx").on(t.ssbId, t.assessmentId, t.changedAt),
+    tenantPolicy("assessment_score_log"),
   ],
 ).enableRLS();
 

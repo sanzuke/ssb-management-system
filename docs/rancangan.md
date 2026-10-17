@@ -115,7 +115,7 @@ Cara kerjanya:
 - Sistem menampilkan radar chart per periode dan grafik perkembangan antar periode.
 - Rapor PDF merangkum skor, grafik, catatan pelatih, dan development plan.
 
-Keputusan yang masih terbuka: skala nilai (usulan awal 1 sampai 5), frekuensi assessment, dan apakah kurikulum Filanesia dari PSSI dipakai sebagai acuan indikator.
+Keputusan: skala nilai 1 sampai 10 (diputuskan pemilik produk, 17 Okt 2026). Frekuensi kerja sementara: satu penilaian per pemain per periode, boleh diperbarui, dengan jejak perubahan tiap skor. Masih terbuka: apakah kurikulum Filanesia dari PSSI dipakai sebagai acuan indikator, dan wewenang korlas atas rapor.
 
 ## Model data
 

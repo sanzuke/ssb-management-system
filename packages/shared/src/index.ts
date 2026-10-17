@@ -290,3 +290,63 @@ export type GuardianSession = {
   /** Status kehadiran anak pada sesi ini; null bila belum dicatat. */
   status: AttendanceStatus | null;
 };
+
+// ---- Assessment (skala 1 sampai 10) ----
+export const assessmentAspects = ["technical", "physical", "tactical", "mental", "movement", "game_intelligence"] as const;
+export const aspectSchema = z.enum(assessmentAspects);
+export type AssessmentAspect = z.infer<typeof aspectSchema>;
+export const aspectLabel: Record<AssessmentAspect, string> = {
+  technical: "Teknik",
+  physical: "Fisik",
+  tactical: "Taktik",
+  mental: "Mental",
+  movement: "Gerak",
+  game_intelligence: "Kecerdasan bermain",
+};
+export const SCORE_MIN = 1;
+export const SCORE_MAX = 10;
+
+/** Usulan awal dari rancangan; perlu divalidasi pelatih berlisensi sebelum dikunci. */
+export const defaultIndicators: Record<AssessmentAspect, string[]> = {
+  technical: ["Kontrol bola", "Passing", "Dribbling", "Shooting"],
+  physical: ["Kecepatan", "Kelincahan", "Daya tahan"],
+  tactical: ["Penempatan posisi", "Pemahaman peran"],
+  mental: ["Fokus", "Kerja sama", "Sportivitas"],
+  movement: ["Koordinasi", "Keseimbangan"],
+  game_intelligence: ["Pengambilan keputusan", "Membaca permainan"],
+};
+
+export const indicatorInputSchema = z.object({ ageGroupId: uuidStr, aspect: aspectSchema, name: nameField });
+export const indicatorPatchSchema = z.object({ name: nameField, active: z.boolean(), sortOrder: z.number().int().min(0).max(999).optional() });
+export const indicatorDefaultsSchema = z.object({ ageGroupId: uuidStr });
+export const assessmentInputSchema = z.object({
+  assessedOn: isoDate.optional(),
+  note: z.string().trim().max(1000, "maksimal 1000 karakter").nullable().optional(),
+  scores: z
+    .array(
+      z.object({
+        indicatorId: uuidStr,
+        score: z.number({ message: "harus berupa angka" }).int("harus bilangan bulat").min(SCORE_MIN, `minimal ${SCORE_MIN}`).max(SCORE_MAX, `maksimal ${SCORE_MAX}`),
+      }),
+    )
+    .min(1, "minimal satu skor")
+    .max(60, "maksimal 60 skor"),
+});
+export type AssessmentInput = z.infer<typeof assessmentInputSchema>;
+
+export type AssessmentIndicator = { id: string; ageGroupId: string; aspect: AssessmentAspect; name: string; sortOrder: number; active: boolean };
+export type AssessmentView = {
+  id: string;
+  period: { id: string; name: string; startDate: string; endDate: string };
+  ageGroup: { id: string; name: string };
+  assessedOn: string;
+  note: string | null;
+  assessor: string | null;
+  publishedAt: string | null;
+  scores: { indicatorId: string; aspect: AssessmentAspect; name: string; score: number }[];
+  /** Rata-rata per aspek (satu desimal). */
+  aspects: { aspect: AssessmentAspect; average: number }[];
+  /** Rata-rata semua skor (satu desimal); null bila belum ada skor. */
+  overall: number | null;
+};
+export type AssessmentHistoryRow = { indicator: string; aspect: AssessmentAspect; from: number | null; to: number; by: string | null; at: string };

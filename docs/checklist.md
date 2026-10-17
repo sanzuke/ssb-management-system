@@ -67,12 +67,12 @@ Butir bertanda **(butuh keputusan)** terhambat oleh pertanyaan terbuka di `docs/
 
 ## F. Assessment dan rapor
 
-- [ ] Putuskan skala nilai dan frekuensi assessment **(butuh keputusan)**
+- [x] Putuskan skala nilai dan frekuensi assessment: skala 1 sampai 10 (diputuskan pemilik); frekuensi: satu penilaian per pemain per periode, boleh diperbarui (asumsi kerja, bisa diubah)
 - [ ] Putuskan rujukan indikator dan pelibatan pelatih berlisensi **(butuh keputusan)**
-- [ ] Tabel template assessment, assessment, skor, development plan (migrasi + RLS + test)
-- [ ] Template indikator per KU (aspek, indikator, skala)
-- [ ] Input penilaian per pemain per periode; skor di luar skala ditolak (test)
-- [ ] Jejak perubahan skor (siapa, kapan, nilai lama dan baru)
+- [x] Tabel indikator, assessment, skor, dan jejak skor (migrasi 0012 + RLS + test); development plan menyusul di butir tersendiri di bawah
+- [ ] Template indikator per KU (aspek, indikator, skala) (API sudah ada: usulan awal 14 indikator, tambah, ubah, nonaktifkan, hapus bila belum dipakai; layar admin menyusul)
+- [x] Input penilaian per pemain per periode; skor di luar skala ditolak (test: 0, 11, -1, 5,5, teks, null ditolak; 1 dan 10 sah; juga dijaga CHECK di database)
+- [x] Jejak perubahan skor (siapa, kapan, nilai lama dan baru; test)
 - [ ] Layar input penilaian ramah sentuh di HP
 - [ ] Grafik perkembangan dan radar chart per pemain
 - [ ] Development plan per pemain per periode

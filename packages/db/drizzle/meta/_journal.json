@@ -85,6 +85,13 @@
       "when": 1792223497300,
       "tag": "0011_absensi_pencatat_set_null",
       "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1792244233837,
+      "tag": "0012_assessment",
+      "breakpoints": true
     }
   ]
 }

@@ -37,7 +37,7 @@ Mengubah skema: edit `packages/db/src/schema.ts`, lalu `bun run db:generate` dan
 
 `ssb`, `app_user`, `age_group`, `period`, `player`, `player_guardian`, `coach_assignment`, `training_session`, `attendance`, ditambah `account` (akun global), `invitation` (undangan, dengan RLS), `ssb_directory` (kode SSB ke id), dan `user_session` (sesi login). `account`, `ssb_directory`, dan `user_session` sengaja tanpa RLS karena dicari sebelum konteks tenant ada. `app_user` adalah keanggotaan akun di satu SSB dan punya satu policy tambahan agar akun bisa membaca keanggotaannya sendiri lintas SSB (konteks `app.account_id`).
 
-Belum ada: template assessment, assessment, skor, dan development plan. Tabel ini menunggu keputusan skala nilai dan frekuensi assessment (lihat pertanyaan terbuka di rancangan).
+Belum ada: development plan dan rapor PDF. Assessment ada di bagian berikut.
 
 ## Keputusan yang tertunda
 
@@ -74,3 +74,17 @@ Rentang usia KU tidak boleh tumpang tindih dalam satu SSB: dicek di API dalam tr
 ### Kartu pemain
 
 Halaman `/kartu/<id>` memakai `GET /players/:id`, jadi batas aksesnya sama dengan profil (admin semua; pelatih dan korlas KU yang ditugaskan; orang tua anaknya). Isi QR adalah alamat profil `<asal web>/pemain/<id>` (UUID, bukan nomor anggota yang berurutan). QR tidak membawa data pribadi: profil tetap butuh login dan hak akses. QR digambar di browser dari matriks pustaka `qrcode` sebagai SVG, tanpa layanan luar. Untuk absensi scan QR nanti, pemindai cukup mengambil UUID dari alamat ini.
+
+## Assessment (skala 1 sampai 10)
+
+Tabel (semua RLS dan FORCE RLS, migrasi 0012): `assessment_indicator` (indikator per KU, enam aspek: technical, physical, tactical, mental, movement, game_intelligence; nama unik per KU; `active` untuk menonaktifkan), `assessment` (satu baris per pemain per periode, KU dicatat saat dinilai, `published_at` untuk penerbitan ke orang tua), `assessment_score` (CHECK `score between 1 and 10`), `assessment_score_log` (jejak: nilai lama dan baru, siapa, kapan; hanya ditambah). `assessor_id` dan `changed_by` memakai `ON DELETE SET NULL (kolom)` seperti `attendance.recorded_by` (migrasi 0012 sudah menulisnya manual; jangan terima hasil `db:generate` yang mengembalikannya).
+
+Endpoint:
+
+- `GET/POST /assessment-indicators`, `POST /assessment-indicators/defaults` (memasang 14 indikator usulan awal untuk satu KU; aman diulang), `PATCH/DELETE /assessment-indicators/:id`. Baca: `master.read`; ubah: `master.write` (admin). Hapus ditolak 409 `in_use` bila sudah dipakai skor; nonaktifkan saja.
+- `PUT /players/:playerId/assessments/:periodId` (izin `assessment.write`: admin dan pelatih; pelatih hanya KU yang ditugaskan). Isi: `scores` (1 sampai 10, bilangan bulat, tanpa duplikat, indikator harus aktif dan milik KU pemain), `note`, `assessedOn`. Skor yang tidak berubah tidak masuk jejak.
+- `GET /players/:playerId/assessments` (izin `assessment.read`): skor, rata-rata per aspek, rata-rata keseluruhan. Orang tua hanya melihat penilaian anaknya yang sudah diterbitkan.
+- `POST` dan `DELETE /players/:playerId/assessments/:periodId/publish` (izin `report.publish`: admin dan korlas, sementara): terbitkan dan tarik kembali.
+- `GET /players/:playerId/assessments/:periodId/history`: jejak perubahan skor (tidak untuk orang tua).
+
+Indikator usulan awal berasal dari rancangan dan perlu divalidasi pelatih berlisensi sebelum dikunci.
