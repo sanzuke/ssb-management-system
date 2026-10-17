@@ -28,6 +28,7 @@ const data = (a: AssessmentView) => ({
   player: { fullName: "Ali & Bima", memberNo: "SSB-0001", birthDate: "2015-05-05", position: null },
   assessment: a,
   attendance: { hadir: 8, izin: 1, sakit: 0, alpa: 1, percent: 80 },
+  plan: [{ id: "x", aspect: "mental" as const, area: "Tenang <di> depan gawang", target: "Gol dari 3 peluang", note: null }],
   generatedAt: new Date("2026-10-17T10:00:00Z"),
 });
 
@@ -41,6 +42,8 @@ test("semua teks dari data di-escape; tidak ada skrip atau sumber luar", () => {
   expect(html).not.toMatch(/(src|href)=["']https?:/);
   expect(html).toContain("7,7");
   expect(html).toContain("80%");
+  expect(html).toContain("Tenang &lt;di&gt; depan gawang");
+  expect(html).not.toContain("<di>");
 });
 
 test("radar hanya dengan >= 3 aspek; pembanding periode lalu digambar putus-putus", () => {

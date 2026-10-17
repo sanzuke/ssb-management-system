@@ -783,3 +783,41 @@ a {
 .tabel-nilai thead th:first-child {
   text-align: left;
 }
+
+/* Rencana pengembangan */
+.butir-rencana {
+  border: 1px solid var(--garis);
+  border-radius: var(--radius);
+  padding: 12px 14px 16px;
+  margin: 0 0 16px;
+  display: grid;
+  gap: 4px;
+}
+.butir-rencana legend {
+  font-weight: 700;
+  padding: 0 6px;
+}
+.rencana {
+  margin-top: 16px;
+}
+.daftar-rencana {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.daftar-rencana li {
+  padding: 10px 0;
+  border-bottom: 1px solid var(--garis);
+}
+.daftar-rencana p {
+  margin: 4px 0 0;
+}
+.label-aspek {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 1px 8px;
+  border: 1px solid var(--garis);
+  border-radius: 999px;
+  font-size: 0.85rem;
+  color: var(--redup);
+}

@@ -37,7 +37,7 @@ Mengubah skema: edit `packages/db/src/schema.ts`, lalu `bun run db:generate` dan
 
 `ssb`, `app_user`, `age_group`, `period`, `player`, `player_guardian`, `coach_assignment`, `training_session`, `attendance`, ditambah `account` (akun global), `invitation` (undangan, dengan RLS), `ssb_directory` (kode SSB ke id), dan `user_session` (sesi login). `account`, `ssb_directory`, dan `user_session` sengaja tanpa RLS karena dicari sebelum konteks tenant ada. `app_user` adalah keanggotaan akun di satu SSB dan punya satu policy tambahan agar akun bisa membaca keanggotaannya sendiri lintas SSB (konteks `app.account_id`).
 
-Belum ada: development plan dan rapor PDF. Assessment ada di bagian berikut.
+Assessment, development plan, dan rapor PDF ada di bagian berikut.
 
 ## Keputusan yang tertunda
 
@@ -94,3 +94,9 @@ Layar: `/indikator` (admin mengatur template per KU; pelatih dan korlas hanya me
 ## Rapor PDF
 
 Tidak ada tabel baru. `GET /players/:playerId/assessments/:periodId/report` (izin `assessment.read`) menyusun data dari penilaian yang sama dengan layar penilaian, ditambah rekap kehadiran pemain pada sesi berperiode itu, lalu membuat HTML mandiri (`apps/api/src/report/html.ts`, semua teks di-escape, tanpa skrip dan tanpa sumber luar) dan mengubahnya menjadi PDF lewat proses Node + Chromium (`render-pdf.mjs`: JavaScript dimatikan, semua permintaan jaringan ditolak). Paling banyak dua render sekaligus, batas 30 detik. Orang tua hanya bisa mengunduh penilaian yang sudah terbit dan hanya untuk anaknya (selain itu 404). Respons `Cache-Control: private, no-store`.
+
+## Rencana pengembangan (migrasi 0013)
+
+Tabel `development_plan_item`: satu baris per butir rencana untuk satu pemain pada satu periode (`area`, `aspect` opsional, `target`, `note`, `sort_order`). RLS dipaksa; FK komposit ke pemain (hapus pemain menghapus rencananya) dan periode; `created_by` memakai `ON DELETE SET NULL (created_by)` (manual, jangan dikembalikan oleh `db:generate`).
+
+API: `GET` dan `PUT /players/:playerId/development-plan/:periodId`. `PUT` mengganti seluruh daftar (maksimal 8 butir, daftar kosong menghapus) dalam satu transaksi. Menulis: `assessment.write` (admin, pelatih KU-nya). Membaca: `assessment.read`; orang tua hanya bila penilaian pemain itu pada periode tersebut sudah terbit (selain itu 404), sehingga menarik penerbitan juga menutup rencananya. Rencana tidak punya status terbit sendiri.

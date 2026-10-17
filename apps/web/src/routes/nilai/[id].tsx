@@ -4,11 +4,12 @@ import { createMemo, createSignal, For, onMount, Show } from "solid-js";
 import AppBar from "~/components/AppBar";
 import GrafikNilai from "~/components/GrafikNilai";
 import HasilNilai from "~/components/HasilNilai";
+import RencanaBaca from "~/components/RencanaBaca";
 import SelectField from "~/components/SelectField";
 import { api, ApiError, getMe, type Me } from "~/lib/api";
 import { createSubmit } from "~/lib/form";
 import { assessmentAspects, aspectLabel } from "@ssb/shared/aspects";
-import type { AssessmentHistoryRow, AssessmentIndicator, AssessmentView, Period, PlayerDetail } from "@ssb/shared";
+import type { AssessmentHistoryRow, AssessmentIndicator, AssessmentView, DevelopmentPlanItem, Period, PlayerDetail } from "@ssb/shared";
 
 const tgl = (s: string) => new Date(s).toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" });
 const NILAI = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
@@ -31,6 +32,7 @@ export default function NilaiPemain() {
   const [notice, setNotice] = createSignal("");
   const [error, setError] = createSignal("");
   const [history, setHistory] = createSignal<AssessmentHistoryRow[] | null>(null);
+  const [plans, setPlans] = createSignal<Record<string, DevelopmentPlanItem[]>>({});
 
   const role = () => me()?.active?.role;
   const parent = () => role() === "orang_tua";
@@ -59,6 +61,14 @@ export default function NilaiPemain() {
       const player = await api<PlayerDetail>(`/players/${encodeURIComponent(p.id)}`);
       setPl(player);
       const l = await reload();
+      if (m.active.role === "orang_tua") {
+        const rs = await Promise.all(
+          l.map((a) =>
+            api<{ items: DevelopmentPlanItem[] }>(`/players/${encodeURIComponent(p.id)}/development-plan/${a.period.id}`).catch(() => ({ items: [] })),
+          ),
+        );
+        setPlans(Object.fromEntries(l.map((a, i) => [a.period.id, rs[i]!.items])));
+      }
       if (m.active.role !== "orang_tua") {
         const per = await api<Period[]>("/periods").catch(() => []);
         setPeriods(per);
@@ -169,6 +179,7 @@ export default function NilaiPemain() {
                       </a>
                     </p>
                     <HasilNilai a={a} />
+                    <RencanaBaca items={plans()[a.period.id] ?? []} />
                   </section>
                 )}
               </For>
@@ -192,6 +203,11 @@ export default function NilaiPemain() {
                     <a class="tombol" href={`/api/players/${encodeURIComponent(p.id)}/assessments/${current()!.period.id}/report`} download="">
                       Unduh rapor (PDF)
                     </a>
+                  </p>
+                  <p>
+                    <A class="tombol" href={`/rencana/${encodeURIComponent(p.id)}`}>
+                      Rencana pengembangan
+                    </A>
                   </p>
                   <p class="petunjuk" role="status">
                     {current()!.publishedAt ? `Sudah diterbitkan ke orang tua pada ${tgl(current()!.publishedAt!)}.` : "Belum diterbitkan ke orang tua."}

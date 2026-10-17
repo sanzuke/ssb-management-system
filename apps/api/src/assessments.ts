@@ -12,6 +12,8 @@ import {
   type AssessmentHistoryRow,
   type AssessmentIndicator,
   type AssessmentView,
+  developmentPlanInputSchema,
+  type DevelopmentPlanItem,
 } from "@ssb/shared";
 import { HttpError } from "./errors";
 import { requirePermission, type AppEnv, type Member } from "./auth/middleware";
@@ -86,6 +88,16 @@ async function views(tx: Tx, where: ReturnType<typeof and>, publishedOnly: boole
       overall: mine.length ? round1(mine.reduce((t, y) => t + y.score, 0) / mine.length) : null,
     };
   });
+}
+
+const D = schema.developmentPlanItem;
+async function planItems(tx: Tx, playerId: string, periodId: string): Promise<DevelopmentPlanItem[]> {
+  const rows = await tx
+    .select({ id: D.id, aspect: D.aspect, area: D.area, target: D.target, note: D.note })
+    .from(D)
+    .where(and(eq(D.playerId, playerId), eq(D.periodId, periodId)))
+    .orderBy(asc(D.sortOrder), asc(D.createdAt));
+  return rows.map((r) => ({ ...r, aspect: r.aspect as AssessmentAspect | null }));
 }
 
 export function assessmentRoutes(db: Db) {
@@ -257,7 +269,8 @@ export function assessmentRoutes(db: Db) {
           const attendance = { hadir: n("hadir"), izin: n("izin"), sakit: n("sakit"), alpa: n("alpa"), percent: null as number | null };
           const total = attendance.hadir + attendance.izin + attendance.sakit + attendance.alpa;
           if (total > 0) attendance.percent = Math.round((attendance.hadir / total) * 1000) / 10;
-          return { ssbName: s?.name ?? "", player: pl!, assessment: all[i]!, previous: all[i + 1], attendance, generatedAt: new Date() };
+          const plan = await planItems(tx, playerId, periodId);
+          return { ssbName: s?.name ?? "", player: pl!, assessment: all[i]!, previous: all[i + 1], attendance, plan, generatedAt: new Date() };
         });
         let pdf: Uint8Array;
         try {
@@ -272,6 +285,55 @@ export function assessmentRoutes(db: Db) {
           "Content-Disposition": `attachment; filename="rapor.pdf"; filename*=UTF-8''${encodeURIComponent(file)}.pdf`,
           "Cache-Control": "private, no-store",
         });
+      })
+
+      // ---- Rencana pengembangan per pemain per periode ----
+      // Orang tua hanya melihatnya bila penilaian periode itu sudah terbit (rencana ikut dalam rapor periode itu).
+      .get("/players/:playerId/development-plan/:periodId", requirePermission("assessment.read"), async (c) => {
+        const m = member(c);
+        const playerId = idOf(c.req.param("playerId"), "Pemain");
+        const periodId = idOf(c.req.param("periodId"), "Periode");
+        const items = await withTenant(db, m.ssbId, async (tx) => {
+          await visiblePlayer(tx, m, playerId);
+          if (m.role === "orang_tua") {
+            const [pub] = await tx
+              .select({ id: A.id })
+              .from(A)
+              .where(and(eq(A.playerId, playerId), eq(A.periodId, periodId), isNotNull(A.publishedAt)))
+              .limit(1);
+            if (!pub) throw notFound("Rencana pengembangan");
+          }
+          return planItems(tx, playerId, periodId);
+        });
+        return c.json({ items });
+      })
+      .put("/players/:playerId/development-plan/:periodId", requirePermission("assessment.write"), zv("json", developmentPlanInputSchema), async (c) => {
+        const m = member(c);
+        const playerId = idOf(c.req.param("playerId"), "Pemain");
+        const periodId = idOf(c.req.param("periodId"), "Periode");
+        const b = c.req.valid("json");
+        const items = await withTenant(db, m.ssbId, async (tx) => {
+          await visiblePlayer(tx, m, playerId);
+          const [per] = await tx.select({ id: schema.period.id }).from(schema.period).where(eq(schema.period.id, periodId)).limit(1);
+          if (!per) throw notFound("Periode");
+          await tx.delete(D).where(and(eq(D.playerId, playerId), eq(D.periodId, periodId)));
+          if (b.items.length > 0)
+            await tx.insert(D).values(
+              b.items.map((x, n) => ({
+                ssbId: m.ssbId,
+                playerId,
+                periodId,
+                aspect: x.aspect ?? null,
+                area: x.area,
+                target: x.target || null,
+                note: x.note || null,
+                sortOrder: n,
+                createdBy: m.userId,
+              })),
+            );
+          return planItems(tx, playerId, periodId);
+        });
+        return c.json({ items });
       })
 
       .put("/players/:playerId/assessments/:periodId", requirePermission("assessment.write"), zv("json", assessmentInputSchema), async (c) => {

@@ -69,14 +69,14 @@ Butir bertanda **(butuh keputusan)** terhambat oleh pertanyaan terbuka di `docs/
 
 - [x] Putuskan skala nilai dan frekuensi assessment: skala 1 sampai 10 (diputuskan pemilik); frekuensi: satu penilaian per pemain per periode, boleh diperbarui (asumsi kerja, bisa diubah)
 - [ ] Putuskan rujukan indikator dan pelibatan pelatih berlisensi **(butuh keputusan)**
-- [x] Tabel indikator, assessment, skor, dan jejak skor (migrasi 0012 + RLS + test); development plan menyusul di butir tersendiri di bawah
+- [x] Tabel indikator, assessment, skor, dan jejak skor (migrasi 0012 + RLS + test); development plan dikerjakan di butir tersendiri di bawah
 - [x] Template indikator per KU (aspek, indikator, skala): API dan layar admin (usulan awal 16 indikator, tambah, nonaktifkan, hapus bila belum dipakai); lolos e2e 360 px
 - [x] Input penilaian per pemain per periode; skor di luar skala ditolak (test: 0, 11, -1, 5,5, teks, null ditolak; 1 dan 10 sah; juga dijaga CHECK di database)
 - [x] Jejak perubahan skor (siapa, kapan, nilai lama dan baru; test)
 - [x] Layar input penilaian ramah sentuh di HP (tombol skor 1-10 setinggi 48 px, simpan di bar bawah; pelatih menilai, admin dan korlas menerbitkan, orang tua membaca; lolos e2e 360 px; uji waktu isi di HP oleh manusia belum)
 - [x] Grafik perkembangan dan radar chart per pemain (SVG sendiri, tanpa pustaka; radar butuh minimal 3 aspek terisi; lolos e2e 360 px, tabel angka tersedia)
-- [ ] Development plan per pemain per periode
-- [x] Rapor PDF dari HTML dengan Playwright di Node; satu rapor selesai dalam kurang dari 10 detik (terukur 1,3 sampai 1,4 dtk di e2e; isi: identitas, rata-rata, radar, skor per indikator, kehadiran periode, catatan; belum memuat development plan; Node 22 di sesi ini, produksi Node 24)
+- [x] Development plan per pemain per periode (migrasi 0013 + RLS; maksimal 8 butir: area, aspek, target, catatan; pelatih dan admin menulis, korlas membaca, orang tua membaca setelah penilaian periode itu terbit; ikut di rapor PDF; lolos tes dan e2e 360 px)
+- [x] Rapor PDF dari HTML dengan Playwright di Node; satu rapor selesai dalam kurang dari 10 detik (terukur 1,3 sampai 1,4 dtk di e2e; isi: identitas, rata-rata, radar, skor per indikator, kehadiran periode, catatan; memuat rencana pengembangan; Node 22 di sesi ini, produksi Node 24)
 - [ ] Wewenang Korlas atas rapor diputuskan dan diterapkan **(butuh keputusan)**
 
 ## G. Portal orang tua dan kartu pemain

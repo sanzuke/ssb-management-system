@@ -219,6 +219,24 @@ with sync_playwright() as pw:
     page.goto(f"{WEB}/nilai/{cakra}"); expect(page.get_by_text("Belum diterbitkan ke orang tua")).to_be_visible()
     page.get_by_role("button", name="Terbitkan ke orang tua").click(); expect(page.get_by_text("Penilaian diterbitkan")).to_be_visible()
     pc.reload(); expect(pc.get_by_text("Kontrol bola", exact=True)).to_be_visible(); expect(pc.get_by_text("Cepat belajar")).to_be_visible(); expect(pc.locator(".hasil-total .persen").first).to_have_text("7,7")
+    # Rencana pengembangan: pelatih menulis di HP, orang tua membaca setelah terbit, ikut di PDF
+    p2.goto(f"{WEB}/nilai/{cakra}"); p2.get_by_role("link", name="Rencana pengembangan").click()
+    expect(p2.get_by_role("heading", name="Rencana pengembangan Cakra Uji")).to_be_visible()
+    p2.get_by_role("button", name="Tambah butir").click()
+    p2.get_by_label("Area pengembangan").fill("Tenang di depan gawang"); p2.get_by_label("Aspek terkait (boleh dikosongkan)").select_option(label="Mental")
+    p2.get_by_label("Target (boleh dikosongkan)").fill("Gol dari 3 dari 5 peluang"); p2.get_by_label("Catatan (boleh dikosongkan)").fill("Latihan finishing tiap sesi")
+    p2.get_by_role("button", name="Tambah butir").click()
+    p2.get_by_label("Area pengembangan").nth(1).fill("Kekuatan kaki kiri")
+    expect(p2.get_by_text("2 butir terisi")).to_be_visible()
+    p2.screenshot(path=f"{OUT}/28-rencana-input.png", full_page=True); no_overflow(p2, "rencana input")
+    p2.get_by_role("button", name="Simpan rencana").click(); expect(p2.get_by_text("Rencana disimpan")).to_be_visible()
+    p2.reload(); expect(p2.get_by_label("Area pengembangan").first).to_have_value("Tenang di depan gawang")
+    p2.get_by_role("button", name="Hapus butir 2").click(); expect(p2.get_by_text("1 butir terisi")).to_be_visible()
+    p2.get_by_role("button", name="Tambah butir").click(); p2.get_by_label("Area pengembangan").nth(1).fill("Kekuatan kaki kiri")
+    p2.get_by_role("button", name="Simpan rencana").click(); expect(p2.get_by_text("Rencana disimpan")).to_be_visible()
+    pc.reload(); expect(pc.get_by_text("Tenang di depan gawang", exact=True)).to_be_visible(); expect(pc.get_by_text("Gol dari 3 dari 5 peluang")).to_be_visible()
+    pc.screenshot(path=f"{OUT}/29-rencana-orang-tua.png", full_page=True); no_overflow(pc, "rencana orang tua")
+    po.goto(f"{WEB}/rencana/{cakra}"); expect(po.get_by_role("heading", name="Pemain tidak ditemukan")).to_be_visible()  # orang tua anak lain
     # Rapor PDF: orang tua (setelah terbit) dan admin mengunduh lewat tombol; isi dibaca dengan pdftotext
     import subprocess, time as _t
     def unduh(pg, nama):
@@ -229,7 +247,7 @@ with sync_playwright() as pw:
         dt = _t.time() - t0
         assert open(path, "rb").read(4) == b"%PDF", "bukan PDF"
         txt = subprocess.run(["pdftotext", "-layout", path, "-"], capture_output=True, text=True).stdout
-        for kata in ("Cakra Uji", "Musim 2026/27", "Kontrol bola", "7,7", "Cepat belajar"): assert kata in txt, (kata, txt[:400])
+        for kata in ("Cakra Uji", "Musim 2026/27", "Kontrol bola", "7,7", "Cepat belajar", "Tenang di depan gawang", "Kekuatan kaki kiri"): assert kata in txt, (kata, txt[:400])
         assert dt < 10, f"rapor {dt:.1f} dtk"
         print(f"rapor {nama}: {dt:.1f} dtk, {os.path.getsize(path)//1024} KB")
     unduh(pc, "rapor-orang-tua")

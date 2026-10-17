@@ -13,8 +13,8 @@ Endpoint dijaga dengan `requirePermission(<izin>)`. Pembatasan data per baris (p
 | `player.write` | Menambah dan mengubah pemain | ya | - | - | - |
 | `attendance.record` | Mencatat absensi latihan | ya | ya | ya | - |
 | `attendance.read` | Melihat absensi (orang tua: anaknya) | ya | ya | ya | ya |
-| `assessment.write` | Mengisi penilaian pemain | ya | ya | - | - |
-| `assessment.read` | Melihat penilaian (orang tua: anaknya, setelah terbit) | ya | ya | ya | ya |
+| `assessment.write` | Mengisi penilaian pemain dan rencana pengembangannya | ya | ya | - | - |
+| `assessment.read` | Melihat penilaian dan rencana pengembangan (orang tua: anaknya, setelah terbit) | ya | ya | ya | ya |
 | `session.manage` | Menjadwalkan, mengubah, dan menghapus sesi latihan | ya | - | - | - |
 | `guardian.sessions` | Portal orang tua: jadwal KU anak sendiri beserta status kehadiran anak, tanpa daftar pemain lain (admin tidak punya anak, jadi daftarnya kosong) | ya | - | - | ya |
 | `session.read` | Melihat jadwal sesi latihan (pelatih dan korlas: KU yang ditugaskan) | ya | ya | ya | - |

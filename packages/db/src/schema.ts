@@ -460,3 +460,29 @@ export const invitation = pgTable(
     tenantPolicy("invitation"),
   ],
 ).enableRLS();
+
+/** Rencana pengembangan: area yang dilatih lebih lanjut untuk satu pemain pada satu periode (dibaca orang tua setelah penilaian periode itu terbit). */
+export const developmentPlanItem = pgTable(
+  "development_plan_item",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    ssbId: ssbId().references(() => ssb.id, { onDelete: "cascade" }),
+    playerId: uuid("player_id").notNull(),
+    periodId: uuid("period_id").notNull(),
+    aspect: assessmentAspect("aspect"),
+    area: text("area").notNull(),
+    target: text("target"),
+    note: text("note"),
+    sortOrder: smallint("sort_order").notNull().default(0),
+    createdBy: uuid("created_by"),
+    createdAt: createdAt(),
+  },
+  (t) => [
+    unique("development_plan_item_ssb_id").on(t.ssbId, t.id),
+    index("development_plan_item_player_period_idx").on(t.ssbId, t.playerId, t.periodId, t.sortOrder),
+    foreignKey({ columns: [t.ssbId, t.playerId], foreignColumns: [player.ssbId, player.id], name: "development_plan_item_player_fk" }).onDelete("cascade"),
+    foreignKey({ columns: [t.ssbId, t.periodId], foreignColumns: [period.ssbId, period.id], name: "development_plan_item_period_fk" }),
+    foreignKey({ columns: [t.ssbId, t.createdBy], foreignColumns: [appUser.ssbId, appUser.id], name: "development_plan_item_created_by_fk" }),
+    tenantPolicy("development_plan_item"),
+  ],
+).enableRLS();

@@ -280,6 +280,66 @@ run("penilaian pemain (skala 1-10)", () => {
     expect((await call("GET", `/players/${w.ali}/assessments`, lain.cookie)).status).toBe(404);
   });
 
+  test("rencana pengembangan: tulis ganti-semua, urutan, batas role, orang tua hanya setelah terbit, isolasi tenant", async () => {
+    const w = await world("rencana");
+    const url = (pl: string, per = w.period) => `/players/${pl}/development-plan/${per}`;
+    const put = (pl: string, items: unknown[], cookie = w.pelatih.cookie, per = w.period) => call("PUT", url(pl, per), cookie, { items });
+    expect(await json(await call("GET", url(w.ali), w.pelatih.cookie))).toEqual({ items: [] });
+    const ok = await put(w.ali, [
+      { aspect: "mental", area: "Tenang di depan gawang", target: "Gol dari 3 dari 5 peluang", note: "Latihan finishing tiap sesi" },
+      { area: "Kekuatan kaki kiri" },
+    ]);
+    expect(ok.status).toBe(200);
+    const got = (await json(await call("GET", url(w.ali), w.korlas.cookie))).items;
+    expect(got.map((x: any) => x.area)).toEqual(["Tenang di depan gawang", "Kekuatan kaki kiri"]);
+    expect(got[0]).toMatchObject({ aspect: "mental", target: "Gol dari 3 dari 5 peluang" });
+    expect(got[1]).toMatchObject({ aspect: null, target: null, note: null });
+    // ganti semua: yang lama hilang, urutan mengikuti kiriman
+    expect((await put(w.ali, [{ area: "Kecepatan" }, { area: "Passing jauh" }, { area: "Fokus" }])).status).toBe(200);
+    expect((await json(await call("GET", url(w.ali), w.admin))).items.map((x: any) => x.area)).toEqual(["Kecepatan", "Passing jauh", "Fokus"]);
+    // penolakan: area kosong, terlalu panjang, aspek salah, lebih dari 8, periode tak dikenal, pemain di luar KU
+    expect((await put(w.ali, [{ area: "  " }])).status).toBe(400);
+    expect((await put(w.ali, [{ area: "x".repeat(121) }])).status).toBe(400);
+    expect((await put(w.ali, [{ area: "A", aspect: "bukan" }])).status).toBe(400);
+    expect(
+      (
+        await put(
+          w.ali,
+          Array.from({ length: 9 }, (_, i) => ({ area: `A${i}` })),
+        )
+      ).status,
+    ).toBe(400);
+    expect((await put(w.ali, [{ area: "A" }], w.pelatih.cookie, randomUUID())).status).toBe(404);
+    expect((await put(w.eko, [{ area: "A" }])).status).toBe(404); // KU-12: di luar tugas pelatih
+    // yang gagal tidak mengubah apa pun
+    expect((await json(await call("GET", url(w.ali), w.admin))).items).toHaveLength(3);
+    // korlas dan orang tua tidak boleh menulis; tanpa login 401
+    const ortu = await w.join("orang_tua", w.ali);
+    expect((await put(w.ali, [{ area: "A" }], w.korlas.cookie)).status).toBe(403);
+    expect((await put(w.ali, [{ area: "A" }], ortu.cookie)).status).toBe(403);
+    expect((await call("GET", url(w.ali))).status).toBe(401);
+    // orang tua: 404 sebelum penilaian periode itu terbit, lalu hanya anaknya
+    expect((await call("GET", url(w.ali), ortu.cookie)).status).toBe(404);
+    expect(
+      (await call("PUT", `/players/${w.ali}/assessments/${w.period}`, w.pelatih.cookie, { scores: [{ indicatorId: w.byName(w.ind10, "Fokus"), score: 7 }] }))
+        .status,
+    ).toBe(200);
+    expect((await call("GET", url(w.ali), ortu.cookie)).status).toBe(404); // dinilai tetapi belum terbit
+    expect((await call("POST", `/players/${w.ali}/assessments/${w.period}/publish`, w.admin)).status).toBe(200);
+    expect((await json(await call("GET", url(w.ali), ortu.cookie))).items).toHaveLength(3);
+    expect((await call("GET", url(w.bima), ortu.cookie)).status).toBe(404); // anak orang lain
+    // tarik penilaian: rencana ikut tertutup bagi orang tua
+    expect((await call("DELETE", `/players/${w.ali}/assessments/${w.period}/publish`, w.admin)).status).toBe(200);
+    expect((await call("GET", url(w.ali), ortu.cookie)).status).toBe(404);
+    // daftar kosong menghapus rencana
+    expect((await put(w.ali, [], w.admin)).status).toBe(200);
+    expect((await json(await call("GET", url(w.ali), w.admin))).items).toEqual([]);
+    // SSB lain tidak bisa membaca atau menulis
+    const b = await world("rencanaB");
+    expect((await call("GET", url(w.ali), b.admin)).status).toBe(404);
+    expect((await call("PUT", url(w.ali, b.period), b.admin, { items: [{ area: "A" }] })).status).toBe(404);
+  });
+
   test("rapor PDF: akses seperti penilaian, dan berkas PDF sungguhan bila Chromium tersedia", async () => {
     const w = await world("rapor");
     const id = (n: string) => w.byName(w.ind10, n);
@@ -295,6 +355,13 @@ run("penilaian pemain (skala 1-10)", () => {
     expect((await call("PUT", `/players/${w.ali}/assessments/${w.period}`, w.pelatih.cookie, { scores, note: "Rajin <b>berlatih</b> & tekun" })).status).toBe(
       200,
     );
+    expect(
+      (
+        await call("PUT", `/players/${w.ali}/development-plan/${w.period}`, w.pelatih.cookie, {
+          items: [{ aspect: "mental", area: "Tenang <di> depan gawang", target: "Gol 3 dari 5" }],
+        })
+      ).status,
+    ).toBe(200);
     const ortu = await w.join("orang_tua", w.ali);
     expect((await rapor(w.ali, ortu.cookie)).status).toBe(404); // belum terbit: orang tua tidak bisa mengunduh
     expect((await call("POST", `/players/${w.ali}/assessments/${w.period}/publish`, w.admin)).status).toBe(200);
@@ -324,6 +391,8 @@ run("penilaian pemain (skala 1-10)", () => {
         expect(text).toContain("Semester 1");
         expect(text).toContain("7,5"); // (7+9+6+8)/4... = 7,5
         expect(text).toContain("Rajin <b>berlatih</b> & tekun"); // tampil sebagai teks, bukan markup
+        expect(text).toContain("Tenang <di> depan gawang");
+        expect(text).toContain("Target: Gol 3 dari 5");
       }
     }
   }, 60_000);

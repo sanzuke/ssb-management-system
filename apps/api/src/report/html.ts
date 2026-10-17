@@ -1,5 +1,5 @@
 import { assessmentAspects, aspectLabel, SCORE_MAX } from "@ssb/shared/aspects";
-import type { AssessmentView } from "@ssb/shared";
+import type { AssessmentView, DevelopmentPlanItem } from "@ssb/shared";
 
 export type ReportData = {
   ssbName: string;
@@ -8,6 +8,7 @@ export type ReportData = {
   /** Penilaian periode sebelumnya yang boleh dilihat pembaca ini; dipakai sebagai pembanding di radar. */
   previous?: AssessmentView;
   attendance: { hadir: number; izin: number; sakit: number; alpa: number; percent: number | null };
+  plan: DevelopmentPlanItem[];
   generatedAt: Date;
 };
 
@@ -95,6 +96,10 @@ h2 { font-size: 12pt; margin: 14px 0 6px; padding-bottom: 3px; border-bottom: 2p
 .hadir b { display: block; font-size: 15pt; }
 .hadir span { font-size: 9pt; color: #56655b; }
 .catatan { background: #f4f6ef; border-left: 4px solid #f0c23b; padding: 8px 12px; margin: 0; white-space: pre-wrap; break-inside: avoid; }
+.rencana { break-inside: avoid; margin: 0 0 6px; padding: 6px 0; border-bottom: 1px solid #e3e8df; }
+.rencana b { display: block; }
+.rencana small { color: #56655b; }
+.rencana p { margin: 2px 0 0; white-space: pre-wrap; }
 .kosong { color: #56655b; margin: 4px 0; }
 footer { margin-top: 14px; font-size: 8.5pt; color: #56655b; border-top: 1px solid #c9d1c4; padding-top: 6px; }
 `;
@@ -114,6 +119,14 @@ export function reportHtml(d: ReportData): string {
           .join("")}</section>`,
     )
     .join("");
+  const plan = d.plan.length
+    ? d.plan
+        .map(
+          (x) =>
+            `<div class="rencana"><b>${esc(x.area)}</b>${x.aspect ? `<small>${esc(aspectLabel[x.aspect])}</small>` : ""}${x.target ? `<p>Target: ${esc(x.target)}</p>` : ""}${x.note ? `<p>${esc(x.note)}</p>` : ""}</div>`,
+        )
+        .join("")
+    : `<p class="kosong">Belum ada rencana pengembangan.</p>`;
   const att = d.attendance;
   const enoughForRadar = a.aspects.length >= 3;
   const attendance =
@@ -143,6 +156,8 @@ export function reportHtml(d: ReportData): string {
 ${aspects || `<p class="kosong">Belum ada skor.</p>`}
 <h2>Kehadiran latihan</h2>
 ${attendance}
+<h2>Rencana pengembangan</h2>
+${plan}
 <h2>Catatan pelatih</h2>
 ${a.note ? `<p class="catatan">${esc(a.note)}</p>` : `<p class="kosong">Tidak ada catatan.</p>`}
 <footer>Skala skor 1 sampai ${SCORE_MAX}. Dibuat ${esc(d.generatedAt.toLocaleString("id-ID", { dateStyle: "long", timeStyle: "short", timeZone: "Asia/Jakarta" }))} WIB.</footer>

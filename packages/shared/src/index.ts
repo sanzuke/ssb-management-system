@@ -41,8 +41,11 @@ export const permissions = {
   "player.write": { roles: ["admin_ssb"], desc: "Menambah dan mengubah pemain" },
   "attendance.record": { roles: ["admin_ssb", "pelatih", "korlas"], desc: "Mencatat absensi latihan" },
   "attendance.read": { roles: ["admin_ssb", "pelatih", "korlas", "orang_tua"], desc: "Melihat absensi (orang tua: anaknya)" },
-  "assessment.write": { roles: ["admin_ssb", "pelatih"], desc: "Mengisi penilaian pemain" },
-  "assessment.read": { roles: ["admin_ssb", "pelatih", "korlas", "orang_tua"], desc: "Melihat penilaian (orang tua: anaknya, setelah terbit)" },
+  "assessment.write": { roles: ["admin_ssb", "pelatih"], desc: "Mengisi penilaian pemain dan rencana pengembangannya" },
+  "assessment.read": {
+    roles: ["admin_ssb", "pelatih", "korlas", "orang_tua"],
+    desc: "Melihat penilaian dan rencana pengembangan (orang tua: anaknya, setelah terbit)",
+  },
   "session.manage": { roles: ["admin_ssb"], desc: "Menjadwalkan, mengubah, dan menghapus sesi latihan" },
   "guardian.sessions": {
     roles: ["admin_ssb", "orang_tua"],
@@ -343,3 +346,14 @@ export type AssessmentView = {
   overall: number | null;
 };
 export type AssessmentHistoryRow = { indicator: string; aspect: AssessmentAspect; from: number | null; to: number; by: string | null; at: string };
+
+export const developmentPlanItemInputSchema = z.object({
+  aspect: aspectSchema.nullable().optional(),
+  area: z.string().trim().min(1, "wajib diisi").max(120, "maksimal 120 karakter"),
+  target: z.string().trim().max(200, "maksimal 200 karakter").nullable().optional(),
+  note: z.string().trim().max(500, "maksimal 500 karakter").nullable().optional(),
+});
+/** Mengganti seluruh rencana satu pemain pada satu periode; daftar kosong menghapusnya. */
+export const developmentPlanInputSchema = z.object({ items: z.array(developmentPlanItemInputSchema).max(8, "maksimal 8 butir") });
+export type DevelopmentPlanInput = z.infer<typeof developmentPlanInputSchema>;
+export type DevelopmentPlanItem = { id: string; aspect: AssessmentAspect | null; area: string; target: string | null; note: string | null };
