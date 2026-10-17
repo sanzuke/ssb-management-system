@@ -54,6 +54,8 @@ export const ssb = pgTable(
     city: text("city"),
     province: text("province"),
     plan: text("plan").notNull().default("dasar"),
+    /** Penghitung nomor anggota pemain; dinaikkan atomik saat pemain dibuat. */
+    memberSeq: integer("member_seq").notNull().default(0),
     createdAt: createdAt(),
   },
   () => [
@@ -189,6 +191,27 @@ export const player = pgTable(
     // FK komposit: KU harus berasal dari SSB yang sama.
     foreignKey({ columns: [t.ssbId, t.ageGroupId], foreignColumns: [ageGroup.ssbId, ageGroup.id], name: "player_age_group_fk" }),
     tenantPolicy("player"),
+  ],
+).enableRLS();
+
+/** Riwayat perubahan KU dan status pemain. Nilai disimpan sebagai label yang terbaca saat itu. */
+export const playerHistory = pgTable(
+  "player_history",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    ssbId: ssbId(),
+    playerId: uuid("player_id").notNull(),
+    field: text("field").notNull(),
+    fromValue: text("from_value"),
+    toValue: text("to_value"),
+    changedBy: uuid("changed_by"),
+    changedAt: timestamp("changed_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    index("player_history_player_idx").on(t.ssbId, t.playerId, t.changedAt),
+    check("player_history_field", sql`${t.field} in ('age_group', 'status')`),
+    foreignKey({ columns: [t.ssbId, t.playerId], foreignColumns: [player.ssbId, player.id], name: "player_history_player_fk" }).onDelete("cascade"),
+    tenantPolicy("player_history"),
   ],
 ).enableRLS();
 

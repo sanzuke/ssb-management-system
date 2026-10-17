@@ -40,6 +40,7 @@ export const permissions = {
   "attendance.read": { roles: ["admin_ssb", "pelatih", "korlas", "orang_tua"], desc: "Melihat absensi (orang tua: anaknya)" },
   "assessment.write": { roles: ["admin_ssb", "pelatih"], desc: "Mengisi penilaian pemain" },
   "assessment.read": { roles: ["admin_ssb", "pelatih", "korlas", "orang_tua"], desc: "Melihat penilaian (orang tua: anaknya, setelah terbit)" },
+  "assignment.manage": { roles: ["admin_ssb"], desc: "Menugaskan pelatih dan korlas ke KU per periode" },
   "report.publish": { roles: ["admin_ssb", "korlas"], desc: "Menerbitkan rapor ke orang tua (wewenang korlas: menunggu keputusan)" },
 } as const satisfies Record<string, { roles: readonly UserRole[]; desc: string }>;
 export type Permission = keyof typeof permissions;
@@ -172,3 +173,42 @@ export const locationSchema = z.object({ id: z.string(), name: z.string(), addre
 export type AgeGroup = z.infer<typeof ageGroupSchema>;
 export type Period = z.infer<typeof periodSchema>;
 export type Location = z.infer<typeof locationSchema>;
+
+// ---- Pemain ----
+
+export const playerStatusSchema = z.enum(["aktif", "cuti", "keluar"]);
+export type PlayerStatus = z.infer<typeof playerStatusSchema>;
+
+const uuidStr = z.string().regex(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i, "id tidak valid");
+const today = () => new Date().toISOString().slice(0, 10);
+
+/** Biodata pemain. Dipakai untuk membuat dan mengubah (ubah mengirim seluruh isian). */
+export const playerFormSchema = z.object({
+  fullName: z.string().trim().min(2, "minimal 2 karakter").max(120, "maksimal 120 karakter"),
+  birthDate: isoDate.refine((d) => d <= today(), "tidak boleh di masa depan").refine((d) => d >= "1990-01-01", "terlalu lama"),
+  position: positionSchema.nullable().optional(),
+  school: z.string().trim().max(120, "maksimal 120 karakter").nullable().optional(),
+  ageGroupId: uuidStr.nullable().optional(),
+  status: playerStatusSchema.default("aktif"),
+});
+export type PlayerForm = z.input<typeof playerFormSchema>;
+
+export const guardianInputSchema = z.object({ userId: uuidStr, relationship: z.string().trim().max(40).optional() });
+export const assignmentInputSchema = z.object({ userId: uuidStr, ageGroupId: uuidStr, periodId: uuidStr });
+
+export type PlayerSummary = {
+  id: string;
+  memberNo: string | null;
+  fullName: string;
+  birthDate: string;
+  position: Position | null;
+  school: string | null;
+  status: PlayerStatus;
+  ageGroup: { id: string; name: string } | null;
+};
+export type PlayerDetail = PlayerSummary & {
+  history: { field: "age_group" | "status"; from: string | null; to: string | null; at: string }[];
+  /** Hanya untuk admin SSB. */
+  guardians?: { userId: string; name: string; relationship: string | null }[];
+};
+export type Assignment = { userId: string; userName: string; role: UserRole; ageGroupId: string; ageGroupName: string; periodId: string; periodName: string };

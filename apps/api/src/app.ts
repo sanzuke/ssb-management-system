@@ -10,6 +10,7 @@ import { googleRoutes } from "./auth/google-routes";
 import { createGoogleProvider, type GoogleProvider } from "./auth/google";
 import { invitationRoutes } from "./invitations";
 import { masterRoutes } from "./master";
+import { playerRoutes } from "./players";
 import type { Env } from "./env";
 
 export type AppDeps = { google?: GoogleProvider | null };
@@ -49,6 +50,7 @@ export function createApp(
     .route("/auth", authRoutes(db, { secureCookie }))
     .route("/invitations", invitationRoutes(db, { secureCookie, webUrl }))
     .route("/", masterRoutes(db))
+    .route("/", playerRoutes(db))
     // Daftar anggota SSB sendiri; hanya admin SSB.
     .get("/users", requirePermission("user.list"), async (c) => {
       const m = c.get("auth")!.member!;

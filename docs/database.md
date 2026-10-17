@@ -48,3 +48,10 @@ Belum ada: template assessment, assessment, skor, dan development plan. Tabel in
 
 `age_group` (KU, rentang usia 0-30, `max >= min` dijaga CHECK), `period` (`end_date >= start_date` dijaga CHECK, nama unik per SSB), dan `location` (lokasi latihan, nama unik per SSB). Semuanya bertenant dengan RLS FORCE.
 Rentang usia KU tidak boleh tumpang tindih dalam satu SSB: dicek di API dalam transaksi dengan `pg_advisory_xact_lock` per SSB, supaya dua perubahan serentak tidak lolos bersamaan. Menghapus KU atau periode yang masih dipakai (pemain, penugasan, jadwal) dijawab 409 `in_use`. `training_session.location` masih teks bebas; menautkannya ke `location` dikerjakan bersama jadwal latihan.
+
+## Pemain
+
+- `player.member_no` otomatis `P0001`, `P0002`, ... per SSB dari penghitung `ssb.member_seq` yang dinaikkan atomik di transaksi yang sama dengan pembuatan pemain (unik walau serentak; nomor tidak dipakai ulang).
+- `player_history` mencatat perubahan KU dan status (label terbaca saat itu, siapa, kapan).
+- Batas data per role ditegakkan di query (`visibleTo` di `apps/api/src/players.ts`): admin semua; pelatih dan korlas hanya KU yang ditugaskan di periode yang tanggalnya mencakup hari ini; orang tua hanya anaknya. Di luar batas dijawab 404, bukan 403, supaya keberadaan pemain tidak bocor.
+- Ubah pemain (PATCH) mengganti seluruh isian; klien mengirim formulir lengkap.

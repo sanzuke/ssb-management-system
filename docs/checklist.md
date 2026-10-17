@@ -46,13 +46,13 @@ Butir bertanda **(butuh keputusan)** terhambat oleh pertanyaan terbuka di `docs/
 
 ## D. Pemain dan pelatih
 
-- [ ] CRUD pemain: biodata, posisi, sekolah, status; nomor anggota otomatis dan unik per SSB
-- [ ] Riwayat perubahan KU dan status tersimpan (tabel riwayat + test)
+- [x] CRUD pemain: biodata, posisi, sekolah, status; nomor anggota otomatis dan unik per SSB (penghitung atomik per SSB; test serentak)
+- [x] Riwayat perubahan KU dan status tersimpan (tabel riwayat + test)
 - [ ] Unggah foto dan dokumen ke penyimpanan S3-compatible; batas ukuran dan tipe berkas **(butuh keputusan: tempat penyimpanan)**
 - [ ] Persetujuan orang tua untuk foto dan dokumen tercatat
-- [ ] Hubungkan orang tua ke satu atau beberapa anak
+- [x] Hubungkan orang tua ke satu atau beberapa anak (lewat undangan atau manual oleh admin)
 - [ ] Profil pelatih dan penugasan ke KU per periode
-- [ ] Pelatih hanya melihat pemain di KU yang ditugaskan (test: pelatih KU lain mendapat 404 atau daftar kosong)
+- [x] Pelatih hanya melihat pemain di KU yang ditugaskan pada periode berjalan (test: KU lain 404, daftar kosong tanpa penugasan; korlas sama, orang tua hanya anaknya)
 - [ ] Layar daftar, detail, dan formulir pemain di web; pencarian dan filter KU
 - [ ] Impor pemain dari CSV dengan laporan baris gagal
 
