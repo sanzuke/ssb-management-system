@@ -226,6 +226,14 @@ export type PlayerDetail = PlayerSummary & {
   /** Hanya untuk admin SSB. */
   guardians?: { userId: string; name: string; relationship: string | null }[];
 };
+/** Ringkasan per pemain untuk tabel pemain: wali utama (hanya admin SSB) dan penilaian terakhir. */
+export type PlayerOverview = {
+  playerId: string;
+  /** Hanya diisi untuk admin SSB. `total` = jumlah wali yang terhubung; yang ditampilkan wali pertama. */
+  guardian: { name: string; whatsapp: string | null; relationship: string | null; total: number } | null;
+  /** Penilaian pada periode terbaru. Orang tua hanya mendapat yang sudah terbit. */
+  latestAssessment: { periodName: string; overall: number | null; assessedOn: string; published: boolean } | null;
+};
 export type Assignment = { userId: string; userName: string; role: UserRole; ageGroupId: string; ageGroupName: string; periodId: string; periodName: string };
 
 // ---- Sesi latihan dan absensi ----

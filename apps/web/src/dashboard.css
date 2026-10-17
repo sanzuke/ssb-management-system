@@ -168,7 +168,7 @@
   border: 1px solid var(--garis);
   border-radius: 12px;
   background: #fff;
-  overflow: hidden;
+  overflow-x: auto;
 }
 .tabel-pemain {
   width: 100%;
@@ -176,7 +176,7 @@
   text-align: left;
 }
 .tabel-pemain thead th {
-  padding: 10px 14px;
+  padding: 10px 10px;
   background: #edf1e7;
   color: var(--redup);
   font-size: 0.72rem;
@@ -186,7 +186,7 @@
   white-space: nowrap;
 }
 .tabel-pemain tbody td {
-  padding: 10px 14px;
+  padding: 10px 10px;
   vertical-align: middle;
   border-top: 1px solid var(--garis);
 }
@@ -201,6 +201,12 @@
 }
 .tabel-pemain td > .petunjuk {
   display: block;
+}
+.tabel-pemain .sel-profil {
+  min-width: 14rem;
+}
+.tabel-pemain .profil-baris .petunjuk {
+  white-space: nowrap;
 }
 .kode-induk {
   padding: 2px 8px;
@@ -288,6 +294,28 @@
   color: var(--rumput);
 }
 
+.sel-kontak {
+  min-width: 10rem;
+}
+.sel-kontak .nama-wali {
+  display: block;
+  font-weight: 700;
+}
+.tautan-wa {
+  display: block;
+  font-variant-numeric: tabular-nums;
+  font-size: 0.9rem;
+}
+.nilai-rapor {
+  display: block;
+  font-family: var(--judul);
+  font-size: 1.35rem;
+  font-weight: 800;
+  line-height: 1.2;
+  color: var(--rumput);
+  font-variant-numeric: tabular-nums;
+}
+
 /* ---- Paging ---- */
 .paging {
   display: flex;
@@ -358,6 +386,13 @@
   }
   .tabel-pemain td.kanan {
     margin-left: auto;
+  }
+  .tabel-pemain td.sel-kontak {
+    flex-basis: 100%;
+  }
+  .tabel-pemain td .nilai-rapor {
+    display: inline;
+    font-size: 1.1rem;
   }
   .tabel-pemain td > .petunjuk {
     display: inline;

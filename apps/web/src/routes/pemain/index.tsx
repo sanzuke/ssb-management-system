@@ -5,10 +5,16 @@ import AppBar from "~/components/AppBar";
 import Ikon from "~/components/Ikon";
 import { api, getMe, type Me } from "~/lib/api";
 import { inisial, posisiLabel, statusLabel, usia, tanggal, type AgeGroup, type PlayerSummary } from "~/lib/pemain";
-import type { AttendanceSummary } from "@ssb/shared";
+import type { AttendanceSummary, PlayerOverview } from "@ssb/shared";
 
 const PER_HALAMAN = 10;
 const koma = (n: number) => String(n).replace(".", ",");
+/** Tautan WhatsApp dari nomor lokal (08...) atau internasional; null bila tidak terbaca sebagai nomor. */
+const linkWa = (nomor: string | null) => {
+  const d = (nomor ?? "").replace(/D/g, "");
+  if (d.length < 8) return null;
+  return `https://wa.me/${d.startsWith("0") ? `62${d.slice(1)}` : d}`;
+};
 
 export default function DaftarPemain() {
   const nav = useNavigate();
@@ -40,6 +46,13 @@ export default function DaftarPemain() {
     () => api<AttendanceSummary>("/attendance/summary").catch(() => null),
   );
   const stat = (id: string) => sum()?.players.find((p) => p.playerId === id);
+  // Wali utama dan penilaian terakhir tiap pemain; wali hanya dikirim API untuk admin SSB.
+  const [ringkas] = createResource(
+    () => (me() && !orangTua() ? true : null),
+    () => api<PlayerOverview[]>("/players-overview").catch(() => null),
+  );
+  const info = (id: string) => ringkas()?.find((r) => r.playerId === id);
+  const adminSsb = () => role() === "admin_ssb";
 
   // Filter dan paging dikerjakan di sisi klien: API mengembalikan seluruh pemain yang boleh dilihat.
   const disaring = createMemo(() => {
@@ -246,7 +259,11 @@ export default function DaftarPemain() {
                       <th>No. induk</th>
                       <th>Profil siswa</th>
                       <th>KU dan posisi</th>
+                      <Show when={adminSsb()}>
+                        <th>Kontak wali</th>
+                      </Show>
                       <th class="tengah">Presensi sesi</th>
+                      <th class="tengah">Rapor terakhir</th>
                       <th class="tengah">Status</th>
                       <th class="kanan">Aksi</th>
                     </tr>
@@ -275,12 +292,46 @@ export default function DaftarPemain() {
                             <span class="ku-titik">{pl.ageGroup?.name ?? "Tanpa KU"}</span>
                             <span class="petunjuk">{pl.position ? posisiLabel[pl.position] : "Posisi belum ditentukan"}</span>
                           </td>
+                          <Show when={adminSsb()}>
+                            <td class="sel-kontak" data-label="Wali">
+                              <Show when={info(pl.id)?.guardian} fallback={<span class="petunjuk">Belum ada wali</span>}>
+                                {(w) => (
+                                  <>
+                                    <strong class="nama-wali">{w().name}</strong>
+                                    <Show when={w().total > 1}>
+                                      <span class="petunjuk">+{w().total - 1} wali lain</span>
+                                    </Show>
+                                    <Show when={linkWa(w().whatsapp)} fallback={<span class="petunjuk">Nomor WhatsApp belum ada</span>}>
+                                      {(href) => (
+                                        <a class="tautan-wa" href={href()} target="_blank" rel="noopener noreferrer">
+                                          {w().whatsapp}
+                                        </a>
+                                      )}
+                                    </Show>
+                                  </>
+                                )}
+                              </Show>
+                            </td>
+                          </Show>
                           <td class="tengah" data-label="Presensi">
                             <Show when={stat(pl.id)?.percent != null} fallback={<span class="petunjuk">Belum ada catatan</span>}>
                               <span class="persen-lencana">{koma(stat(pl.id)!.percent!)}%</span>
                               <span class="petunjuk">
                                 {stat(pl.id)!.hadir} dari {stat(pl.id)!.recorded} sesi
                               </span>
+                            </Show>
+                          </td>
+                          <td class="tengah" data-label="Rapor">
+                            <Show when={info(pl.id)?.latestAssessment} fallback={<span class="petunjuk">Belum dinilai</span>}>
+                              {(a) => (
+                                <>
+                                  <span class="nilai-rapor">{a().overall === null ? "–" : koma(a().overall!)}</span>
+                                  <span class="petunjuk">
+                                    {a().periodName}
+                                    <Show when={!a().published}> • belum terbit</Show>
+                                  </span>
+                                </>
+                              )}
                             </Show>
                           </td>
                           <td class="tengah" data-label="Status">
