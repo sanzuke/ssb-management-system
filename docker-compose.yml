@@ -41,6 +41,17 @@ services:
       db:
         condition: service_healthy
 
+  # Data contoh (opsional): docker compose --profile seed run --rm seed
+  # Tambahkan "-- --reset" di akhir untuk membuat ulang. Kata sandi akun contoh: SEED_PASSWORD di tools/seed.ts.
+  seed:
+    <<: *app
+    profiles: ["seed"]
+    command: ["bun", "run", "db:seed"]
+    restart: "no"
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+
   api:
     <<: *app
     command: ["bun", "run", "dev:api"]
