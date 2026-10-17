@@ -165,6 +165,14 @@ with sync_playwright() as pw:
     page.goto(f"{WEB}/jadwal"); expect(page.get_by_text("1 hadir, 1 sakit, 1 alpa")).to_be_visible()
     page.get_by_role("button", name="Hapus").first.click(); page.get_by_role("button", name="Ya, hapus").click()
     expect(page.get_by_role("alert")).to_contain_text("sudah punya absensi")
+    # Rekap kehadiran: admin melihat semua, pelatih hanya KU-nya
+    page.goto(f"{WEB}/kehadiran"); expect(page.get_by_text("1 sesi latihan tercatat pada")).to_be_visible()
+    expect(page.get_by_text("0 hadir, 0 izin, 1 sakit, 0 alpa dari 1 sesi")).to_be_visible()
+    expect(page.get_by_text("100%")).to_be_visible(); expect(page.get_by_text("belum ada catatan").first).to_be_visible()
+    page.screenshot(path=f"{OUT}/19-kehadiran-admin.png", full_page=True); no_overflow(page, "kehadiran admin")
+    page.get_by_label("KU", exact=True).select_option(label="KU-12"); expect(page.get_by_text("Cakra Uji")).to_have_count(0)
+    p2.goto(f"{WEB}/kehadiran"); expect(p2.get_by_text("Cakra Uji")).to_be_visible(); expect(p2.get_by_text("Andi Pratama")).to_have_count(0)
+    p2.screenshot(path=f"{OUT}/20-kehadiran-pelatih.png", full_page=True); no_overflow(p2, "kehadiran pelatih")
 
     # tautan sama tidak bisa dipakai lagi
     p2.goto(f"{WEB}/undangan/{token}"); expect(p2.get_by_role("heading", name="Undangan tidak berlaku")).to_be_visible()
