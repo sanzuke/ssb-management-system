@@ -15,6 +15,51 @@ packages/db/        Skema Drizzle, migrasi, dan RLS (lihat docs/database.md)
 tools/bench/        Skrip benchmark untuk keputusan tech stack
 ```
 
+## Instalasi
+
+Prasyarat: [Bun](https://bun.sh) >= 1.4, Node.js >= 24 (untuk menjalankan hasil build web), dan PostgreSQL 16 atau lebih baru. Alternatifnya cukup Docker (lihat "Dengan Docker Compose").
+
+1. Ambil kode dan pasang dependensi.
+
+   ```
+   git clone https://github.com/sanzuke/ssb-management-system.git
+   cd ssb-management-system
+   bun install
+   ```
+
+2. Siapkan database. Jalankan sebagai superuser PostgreSQL (`CREATE DATABASE` sekali, lalu `tools/db/init.sql` yang membuat role `ssb_owner` dan `ssb_app`; kata sandi di berkas itu hanya untuk lokal).
+
+   ```
+   psql -U postgres -c "CREATE DATABASE ssb"
+   psql -U postgres -d ssb -f tools/db/init.sql
+   ```
+
+   Di Windows, `psql.exe` ada di `C:\Program Files\PostgreSQL\<versi>\bin`. Untuk server, jangan pakai `init.sql` apa adanya: salin isinya dan ganti kata sandinya (lihat "Menjalankan di server").
+
+3. Buat berkas `.env` dari contoh dan sesuaikan.
+
+   ```
+   cp .env.example .env
+   ```
+
+   Untuk database dari langkah 2, isinya `DATABASE_URL_OWNER=postgres://ssb_owner:owner@localhost:5432/ssb` dan `DATABASE_URL=postgres://ssb_app:app@localhost:5432/ssb`.
+
+4. Migrasi dan, bila mau, isi data contoh.
+
+   ```
+   bun run db:migrate
+   bun run db:seed
+   ```
+
+   Atau sekaligus: `bun run db:setup`. Penjelasan data contoh dan akunnya ada di bagian "Data contoh (seed)".
+
+5. Jalankan. API di http://localhost:3000, web di http://localhost:3001.
+
+   ```
+   bun run dev:api
+   bun run dev:web
+   ```
+
 ## Menjalankan
 
 Butuh Bun (>= 1.4). Build web memakai Vite; menjalankan hasil build butuh Node.
@@ -53,6 +98,61 @@ docker compose --profile seed run --rm seed   # lewat Docker Compose
 Akun contoh (domain `garudamuda.test`): `admin@`, `korlas@`, `budi@` (KU-10), `sari@` (KU-12 dan KU-8), `ortu01@` sampai `ortu23@`. Kata sandi semuanya `SEED_PASSWORD`; bawaan lokal ada di `tools/seed.ts`.
 
 Di server demo atau staging: `NODE_ENV=production ALLOW_SEED=1 SEED_PASSWORD=<kata sandi kuat> bun run db:seed`. Tanpa `ALLOW_SEED=1` skrip menolak jalan saat `NODE_ENV=production`, dan `SEED_PASSWORD` wajib diisi. Jangan dijalankan di database produksi yang berisi data sungguhan.
+
+### Menjalankan di server
+
+Contoh untuk satu server Linux (Bun, Node.js 24, dan PostgreSQL terpasang). Semua nilai di `<...>` diganti sendiri.
+
+1. Database dengan kata sandi sendiri. Jalankan sebagai superuser:
+
+   ```sql
+   CREATE ROLE ssb_owner LOGIN CREATEROLE PASSWORD '<kata-sandi-owner>';
+   CREATE ROLE ssb_app LOGIN PASSWORD '<kata-sandi-app>';
+   CREATE DATABASE ssb OWNER ssb_owner;
+   \c ssb
+   GRANT CREATE ON SCHEMA public TO ssb_owner;
+   ```
+
+2. Berkas `.env` di root repositori (atau `EnvironmentFile` pada systemd). Nilai `WEB_URL`, `ALLOWED_ORIGINS`, dan `PUBLIC_API_URL` harus sama dengan alamat publik yang dipakai pengguna, lengkap dengan `https://`:
+
+   ```
+   NODE_ENV=production
+   DATABASE_URL_OWNER=postgres://ssb_owner:<kata-sandi-owner>@localhost:5432/ssb
+   DATABASE_URL=postgres://ssb_app:<kata-sandi-app>@localhost:5432/ssb
+   WEB_URL=https://<domain-web>
+   ALLOWED_ORIGINS=https://<domain-web>
+   PUBLIC_API_URL=https://<domain-web>/api
+   SESSION_SECRET=<acak-minimal-32-karakter>
+   ```
+
+3. Pasang, migrasi, dan build.
+
+   ```
+   bun install --frozen-lockfile
+   bun run db:migrate
+   bun run build
+   ```
+
+4. Isi data contoh (hanya untuk server demo atau staging, jangan di database yang berisi data sungguhan). Di `NODE_ENV=production` skrip menolak jalan tanpa `ALLOW_SEED=1` dan `SEED_PASSWORD`:
+
+   ```
+   ALLOW_SEED=1 SEED_PASSWORD=<kata-sandi-kuat> bun run db:seed
+   ```
+
+   Membuat ulang: tambahkan `-- --reset`. Dengan Docker Compose: `docker compose --profile seed run --rm seed`.
+
+5. Jalankan API dan web sebagai dua proses (di bawah systemd, pm2, atau sejenisnya). Dari root repositori:
+
+   ```
+   bun apps/api/src/index.ts                                           # API, port 3000 (ubah dengan PORT)
+   PORT=3001 API_URL=http://localhost:3000 node apps/web/.output/server/index.mjs   # web, port 3001
+   ```
+
+6. Pasang reverse proxy dengan HTTPS (Caddy atau Nginx) yang meneruskan domain web ke port 3001. Browser hanya bicara ke origin web; permintaan `/api` diteruskan web ke API, jadi port API tidak perlu dibuka ke publik. HTTPS wajib: di `NODE_ENV=production` cookie sesi bertanda `Secure`, sehingga login tidak berjalan lewat HTTP biasa.
+
+Login Google bersifat opsional; cara menyiapkannya ada di `docs/auth.md` (redirect URI: `https://<domain-web>/api/auth/google/callback`).
+
+Pembaruan berikutnya: `git pull`, `bun install --frozen-lockfile`, `bun run db:migrate`, `bun run build`, lalu mulai ulang kedua proses.
 
 ### Rapor PDF
 
