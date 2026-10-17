@@ -1,3 +1,4 @@
+import type { Logger } from "../logger";
 import { and, eq, gt } from "drizzle-orm";
 import { getCookie } from "hono/cookie";
 import { createMiddleware } from "hono/factory";
@@ -16,7 +17,7 @@ export type Auth = {
   /** SSB aktif pada sesi; null bila akun belum memilih SSB. */
   member: Member | null;
 };
-export type AppEnv = { Variables: { auth?: Auth } };
+export type AppEnv = { Variables: { auth?: Auth; reqId?: string; logger?: Logger } };
 
 /** Membaca cookie sesi dan mengisi c.var.auth bila sesi masih berlaku. Tidak menolak permintaan. */
 export const loadAuth = (db: Db) =>

@@ -31,6 +31,8 @@ jobs:
       PGPASSWORD: postgres
       DATABASE_URL: postgres://ssb_app:app@localhost:5432/ssb
       DATABASE_URL_OWNER: postgres://ssb_owner:owner@localhost:5432/ssb
+      # Chrome bawaan runner dipakai untuk tes rapor PDF (render lewat Node + Playwright).
+      CHROMIUM_PATH: /usr/bin/google-chrome
     steps:
       - uses: actions/checkout@v4
       - uses: oven-sh/setup-bun@v2

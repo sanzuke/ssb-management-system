@@ -39,6 +39,10 @@ docker compose up --watch          # sama, dan menyinkronkan perubahan kode
 
 Database dibuat otomatis (role dan kata sandi lokal ada di `tools/db/init.sql`). Untuk login Google, isi `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, dan `SESSION_SECRET` di file `.env` (lihat `docs/auth.md`).
 
+### Rapor PDF
+
+Endpoint `GET /players/:id/assessments/:periodId/report` membuat PDF dari HTML lewat proses Node + Chromium (`playwright-core`, `apps/api/src/report/render-pdf.mjs`). Butuh `node` di PATH dan Chromium: atur `CHROMIUM_PATH` ke berkas Chrome/Chromium, atau pasang bawaan Playwright (`bunx playwright-core install chromium`). Tanpa itu, endpoint menjawab 503 `report_unavailable` dan tes PDF dilewati (tes akses tetap jalan).
+
 ### CI
 
 Workflow GitHub Actions ada di `tools/ci/ci.yml` (lint, typecheck, test dengan PostgreSQL, build). Salin ke `.github/workflows/ci.yml` agar aktif.

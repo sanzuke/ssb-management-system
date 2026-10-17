@@ -280,6 +280,54 @@ run("penilaian pemain (skala 1-10)", () => {
     expect((await call("GET", `/players/${w.ali}/assessments`, lain.cookie)).status).toBe(404);
   });
 
+  test("rapor PDF: akses seperti penilaian, dan berkas PDF sungguhan bila Chromium tersedia", async () => {
+    const w = await world("rapor");
+    const id = (n: string) => w.byName(w.ind10, n);
+    const rapor = (player: string, cookie?: string) => call("GET", `/players/${player}/assessments/${w.period}/report`, cookie);
+    expect((await rapor(w.ali)).status).toBe(401);
+    expect((await rapor(w.ali, w.admin)).status).toBe(404); // belum ada penilaian
+    const scores = [
+      { indicatorId: id("Fokus"), score: 7 },
+      { indicatorId: id("Passing"), score: 9 },
+      { indicatorId: id("Kecepatan"), score: 6 },
+      { indicatorId: id("Penempatan posisi"), score: 8 },
+    ];
+    expect((await call("PUT", `/players/${w.ali}/assessments/${w.period}`, w.pelatih.cookie, { scores, note: "Rajin <b>berlatih</b> & tekun" })).status).toBe(
+      200,
+    );
+    const ortu = await w.join("orang_tua", w.ali);
+    expect((await rapor(w.ali, ortu.cookie)).status).toBe(404); // belum terbit: orang tua tidak bisa mengunduh
+    expect((await call("POST", `/players/${w.ali}/assessments/${w.period}/publish`, w.admin)).status).toBe(200);
+    expect((await rapor(w.bima, ortu.cookie)).status).toBe(404); // anak orang lain
+    const lain = await w.join("pelatih");
+    expect((await rapor(w.ali, lain.cookie)).status).toBe(404); // pelatih di luar KU
+    expect((await rapor(w.ali, w.admin)).status).not.toBe(404);
+
+    const chromium = process.env.CHROMIUM_PATH;
+    if (!chromium) return; // render PDF butuh Chromium; akses di atas sudah teruji
+    for (const cookie of [w.admin, ortu.cookie]) {
+      const t0 = performance.now();
+      const res = await rapor(w.ali, cookie);
+      const ms = performance.now() - t0;
+      expect(res.status).toBe(200);
+      expect(res.headers.get("content-type")).toBe("application/pdf");
+      expect(res.headers.get("cache-control")).toContain("no-store");
+      expect(res.headers.get("content-disposition")).toContain("attachment");
+      const buf = new Uint8Array(await res.arrayBuffer());
+      expect(new TextDecoder().decode(buf.subarray(0, 4))).toBe("%PDF");
+      expect(ms).toBeLessThan(10_000);
+      const file = `/tmp/rapor-uji-${uid}.pdf`;
+      await Bun.write(file, buf);
+      const text = Bun.spawnSync(["pdftotext", "-layout", file, "-"]).stdout.toString();
+      if (text) {
+        expect(text).toContain("Ali");
+        expect(text).toContain("Semester 1");
+        expect(text).toContain("7,5"); // (7+9+6+8)/4... = 7,5
+        expect(text).toContain("Rajin <b>berlatih</b> & tekun"); // tampil sebagai teks, bukan markup
+      }
+    }
+  }, 60_000);
+
   test("isolasi tenant: SSB lain tidak melihat atau menilai pemain ini", async () => {
     const a = await world("isoA");
     const b = await world("isoB");

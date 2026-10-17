@@ -76,14 +76,14 @@ Butir bertanda **(butuh keputusan)** terhambat oleh pertanyaan terbuka di `docs/
 - [x] Layar input penilaian ramah sentuh di HP (tombol skor 1-10 setinggi 48 px, simpan di bar bawah; pelatih menilai, admin dan korlas menerbitkan, orang tua membaca; lolos e2e 360 px; uji waktu isi di HP oleh manusia belum)
 - [x] Grafik perkembangan dan radar chart per pemain (SVG sendiri, tanpa pustaka; radar butuh minimal 3 aspek terisi; lolos e2e 360 px, tabel angka tersedia)
 - [ ] Development plan per pemain per periode
-- [ ] Rapor PDF dari HTML dengan Playwright di Node; satu rapor selesai dalam kurang dari 10 detik
+- [x] Rapor PDF dari HTML dengan Playwright di Node; satu rapor selesai dalam kurang dari 10 detik (terukur 1,3 sampai 1,4 dtk di e2e; isi: identitas, rata-rata, radar, skor per indikator, kehadiran periode, catatan; belum memuat development plan; Node 22 di sesi ini, produksi Node 24)
 - [ ] Wewenang Korlas atas rapor diputuskan dan diterapkan **(butuh keputusan)**
 
 ## G. Portal orang tua dan kartu pemain
 
 - [x] Orang tua hanya melihat data anak sendiri (test: anak, sesi, roster absensi, dan rekap anak orang lain ditolak atau tidak muncul)
-- [ ] Halaman beranda orang tua: jadwal, absensi, rapor (jadwal dan kehadiran sudah jadi dan lolos e2e 360 px; rapor menunggu fitur penilaian)
-- [ ] Unduh rapor PDF dari portal
+- [ ] Halaman beranda orang tua: jadwal, absensi, rapor (jadwal dan kehadiran sudah jadi dan lolos e2e 360 px; rapor sudah bisa diunduh dari halaman penilaian, tetapi beranda belum menampilkan ringkasan rapor)
+- [x] Unduh rapor PDF dari portal (orang tua hanya yang terbit dan hanya anaknya; e2e mengunduh dan membaca isi PDF)
 - [x] Kartu pemain digital dengan QR (nomor anggota, KU, posisi, status); QR dibaca dengan decoder kamera di e2e dan menunjuk profil pemain; kartu anak lain tertutup
 - [ ] PWA dapat dipasang di layar HP (manifest, ikon, uji pasang di Android)
 

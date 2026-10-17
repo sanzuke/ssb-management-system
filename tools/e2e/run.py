@@ -219,6 +219,22 @@ with sync_playwright() as pw:
     page.goto(f"{WEB}/nilai/{cakra}"); expect(page.get_by_text("Belum diterbitkan ke orang tua")).to_be_visible()
     page.get_by_role("button", name="Terbitkan ke orang tua").click(); expect(page.get_by_text("Penilaian diterbitkan")).to_be_visible()
     pc.reload(); expect(pc.get_by_text("Kontrol bola", exact=True)).to_be_visible(); expect(pc.get_by_text("Cepat belajar")).to_be_visible(); expect(pc.locator(".hasil-total .persen").first).to_have_text("7,7")
+    # Rapor PDF: orang tua (setelah terbit) dan admin mengunduh lewat tombol; isi dibaca dengan pdftotext
+    import subprocess, time as _t
+    def unduh(pg, nama):
+        t0 = _t.time()
+        with pg.expect_download() as dl:
+            pg.get_by_role("link", name="Unduh rapor (PDF)").first.click()
+        path = f"{OUT}/{nama}.pdf"; dl.value.save_as(path)
+        dt = _t.time() - t0
+        assert open(path, "rb").read(4) == b"%PDF", "bukan PDF"
+        txt = subprocess.run(["pdftotext", "-layout", path, "-"], capture_output=True, text=True).stdout
+        for kata in ("Cakra Uji", "Musim 2026/27", "Kontrol bola", "7,7", "Cepat belajar"): assert kata in txt, (kata, txt[:400])
+        assert dt < 10, f"rapor {dt:.1f} dtk"
+        print(f"rapor {nama}: {dt:.1f} dtk, {os.path.getsize(path)//1024} KB")
+    unduh(pc, "rapor-orang-tua")
+    page.goto(f"{WEB}/nilai/{cakra}"); expect(page.get_by_role("link", name="Unduh rapor (PDF)")).to_be_visible()
+    unduh(page, "rapor-admin")
     # Periode kedua: grafik perkembangan dan radar (hanya satu periode -> belum ada garis perkembangan)
     pc.reload(); expect(pc.get_by_text("Grafik perkembangan muncul setelah dua periode")).to_be_visible()
     pc.screenshot(path=f"{OUT}/26-grafik-satu-periode.png", full_page=True); no_overflow(pc, "grafik satu periode")

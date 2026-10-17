@@ -163,6 +163,11 @@ export default function NilaiPemain() {
                 {(a) => (
                   <section class="master" aria-label={a.period.name}>
                     <h2>{a.period.name}</h2>
+                    <p>
+                      <a class="tombol" href={`/api/players/${encodeURIComponent(p.id)}/assessments/${a.period.id}/report`} download="">
+                        Unduh rapor (PDF)
+                      </a>
+                    </p>
                     <HasilNilai a={a} />
                   </section>
                 )}
@@ -183,6 +188,11 @@ export default function NilaiPemain() {
                 </div>
 
                 <Show when={current()}>
+                  <p>
+                    <a class="tombol" href={`/api/players/${encodeURIComponent(p.id)}/assessments/${current()!.period.id}/report`} download="">
+                      Unduh rapor (PDF)
+                    </a>
+                  </p>
                   <p class="petunjuk" role="status">
                     {current()!.publishedAt ? `Sudah diterbitkan ke orang tua pada ${tgl(current()!.publishedAt!)}.` : "Belum diterbitkan ke orang tua."}
                   </p>

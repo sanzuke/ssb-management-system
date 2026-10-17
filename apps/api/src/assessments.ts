@@ -18,6 +18,8 @@ import { requirePermission, type AppEnv, type Member } from "./auth/middleware";
 import { isUniqueViolation } from "./auth/service";
 import { visibleTo as playersVisibleTo } from "./players";
 import { zv } from "./validator";
+import { reportHtml } from "./report/html";
+import { renderPdf, reportUnavailable } from "./report/pdf";
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const notFound = (what: string) => new HttpError(404, "not_found", `${what} tidak ditemukan`);
@@ -219,6 +221,57 @@ export function assessmentRoutes(db: Db) {
           return views(tx, eq(A.playerId, playerId), m.role === "orang_tua");
         });
         return c.json(out);
+      })
+
+      // Rapor PDF satu periode. Akses sama dengan membaca penilaian: orang tua hanya yang sudah terbit dan hanya anaknya.
+      .get("/players/:playerId/assessments/:periodId/report", requirePermission("assessment.read"), async (c) => {
+        const m = member(c);
+        const playerId = idOf(c.req.param("playerId"), "Pemain");
+        const periodId = idOf(c.req.param("periodId"), "Periode");
+        const data = await withTenant(db, m.ssbId, async (tx) => {
+          await visiblePlayer(tx, m, playerId);
+          const all = await views(tx, eq(A.playerId, playerId), m.role === "orang_tua");
+          const i = all.findIndex((x) => x.period.id === periodId);
+          if (i < 0) throw notFound("Penilaian");
+          const [pl] = await tx
+            .select({
+              fullName: schema.player.fullName,
+              memberNo: schema.player.memberNo,
+              birthDate: schema.player.birthDate,
+              position: schema.player.position,
+            })
+            .from(schema.player)
+            .where(eq(schema.player.id, playerId))
+            .limit(1);
+          const [s] = await tx.select({ name: schema.ssb.name }).from(schema.ssb).limit(1);
+          const rows = await tx
+            .select({ status: schema.attendance.status, n: sql<number>`count(*)::int` })
+            .from(schema.attendance)
+            .innerJoin(
+              schema.trainingSession,
+              and(eq(schema.trainingSession.ssbId, schema.attendance.ssbId), eq(schema.trainingSession.id, schema.attendance.sessionId)),
+            )
+            .where(and(eq(schema.attendance.playerId, playerId), eq(schema.trainingSession.periodId, periodId)))
+            .groupBy(schema.attendance.status);
+          const n = (st: string) => rows.find((r) => r.status === st)?.n ?? 0;
+          const attendance = { hadir: n("hadir"), izin: n("izin"), sakit: n("sakit"), alpa: n("alpa"), percent: null as number | null };
+          const total = attendance.hadir + attendance.izin + attendance.sakit + attendance.alpa;
+          if (total > 0) attendance.percent = Math.round((attendance.hadir / total) * 1000) / 10;
+          return { ssbName: s?.name ?? "", player: pl!, assessment: all[i]!, previous: all[i + 1], attendance, generatedAt: new Date() };
+        });
+        let pdf: Uint8Array;
+        try {
+          pdf = await renderPdf(reportHtml(data));
+        } catch (e) {
+          c.get("logger")?.log("error", "report_failed", { reqId: c.get("reqId"), err: e instanceof Error ? e.message : String(e) });
+          throw reportUnavailable();
+        }
+        const file = `rapor-${data.player.fullName}-${data.assessment.period.name}`.replace(/[^\p{L}\p{N}]+/gu, "-").replace(/^-|-$/g, "");
+        return c.body(pdf as unknown as ArrayBuffer, 200, {
+          "Content-Type": "application/pdf",
+          "Content-Disposition": `attachment; filename="rapor.pdf"; filename*=UTF-8''${encodeURIComponent(file)}.pdf`,
+          "Cache-Control": "private, no-store",
+        });
       })
 
       .put("/players/:playerId/assessments/:periodId", requirePermission("assessment.write"), zv("json", assessmentInputSchema), async (c) => {

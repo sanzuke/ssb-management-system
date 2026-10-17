@@ -15,6 +15,8 @@ const envSchema = z
     SESSION_SECRET: z.string().min(32, "minimal 32 karakter").optional(),
     GOOGLE_CLIENT_ID: z.string().optional(),
     GOOGLE_CLIENT_SECRET: z.string().optional(),
+    /** Jalur Chromium untuk membuat rapor PDF; kosong = memakai Chromium bawaan Playwright. */
+    CHROMIUM_PATH: z.string().optional(),
   })
   .superRefine((v, ctx) => {
     const g = [v.GOOGLE_CLIENT_ID, v.GOOGLE_CLIENT_SECRET].filter(Boolean).length;

@@ -90,3 +90,7 @@ Endpoint:
 Indikator usulan awal berasal dari rancangan dan perlu divalidasi pelatih berlisensi sebelum dikunci.
 
 Layar: `/indikator` (admin mengatur template per KU; pelatih dan korlas hanya melihat), `/nilai/<id pemain>` (pelatih dan admin mengisi skor 1-10 per indikator dengan catatan; admin dan korlas menerbitkan atau menarik; korlas hanya membaca; orang tua melihat semua penilaian anaknya yang sudah diterbitkan). Konstanta aspek ada di `@ssb/shared/aspects` (tanpa zod) agar bundel web tidak ikut memuat zod.
+
+## Rapor PDF
+
+Tidak ada tabel baru. `GET /players/:playerId/assessments/:periodId/report` (izin `assessment.read`) menyusun data dari penilaian yang sama dengan layar penilaian, ditambah rekap kehadiran pemain pada sesi berperiode itu, lalu membuat HTML mandiri (`apps/api/src/report/html.ts`, semua teks di-escape, tanpa skrip dan tanpa sumber luar) dan mengubahnya menjadi PDF lewat proses Node + Chromium (`render-pdf.mjs`: JavaScript dimatikan, semua permintaan jaringan ditolak). Paling banyak dua render sekaligus, batas 30 detik. Orang tua hanya bisa mengunduh penilaian yang sudah terbit dan hanya untuk anaknya (selain itu 404). Respons `Cache-Control: private, no-store`.
