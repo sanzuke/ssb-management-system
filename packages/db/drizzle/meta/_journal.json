@@ -57,6 +57,34 @@
       "when": 1792220607286,
       "tag": "0007_pemain",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1792223310499,
+      "tag": "0008_sesi_lepas_lokasi_teks",
+      "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1792223311615,
+      "tag": "0009_sesi_lokasi_fk",
+      "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1792223451016,
+      "tag": "0010_sesi_cascade_ssb",
+      "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1792223497300,
+      "tag": "0011_absensi_pencatat_set_null",
+      "breakpoints": true
     }
   ]
 }

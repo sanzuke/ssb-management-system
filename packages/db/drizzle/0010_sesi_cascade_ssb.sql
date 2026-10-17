@@ -1,0 +1,1 @@
+ALTER TABLE "training_session" ADD CONSTRAINT "training_session_ssb_id_ssb_id_fk" FOREIGN KEY ("ssb_id") REFERENCES "public"."ssb"("id") ON DELETE cascade ON UPDATE no action;

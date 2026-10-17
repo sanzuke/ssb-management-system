@@ -254,18 +254,19 @@ export const trainingSession = pgTable(
   "training_session",
   {
     id: uuid("id").primaryKey().defaultRandom(),
-    ssbId: ssbId(),
+    ssbId: ssbId().references(() => ssb.id, { onDelete: "cascade" }),
     ageGroupId: uuid("age_group_id").notNull(),
     periodId: uuid("period_id"),
     sessionDate: date("session_date").notNull(),
     startTime: time("start_time"),
-    location: text("location"),
+    locationId: uuid("location_id"),
   },
   (t) => [
     unique("training_session_ssb_id").on(t.ssbId, t.id),
     index("training_session_group_date_idx").on(t.ssbId, t.ageGroupId, t.sessionDate),
     foreignKey({ columns: [t.ssbId, t.ageGroupId], foreignColumns: [ageGroup.ssbId, ageGroup.id], name: "training_session_age_group_fk" }),
     foreignKey({ columns: [t.ssbId, t.periodId], foreignColumns: [period.ssbId, period.id], name: "training_session_period_fk" }),
+    foreignKey({ columns: [t.ssbId, t.locationId], foreignColumns: [location.ssbId, location.id], name: "training_session_location_fk" }),
     tenantPolicy("training_session"),
   ],
 ).enableRLS();

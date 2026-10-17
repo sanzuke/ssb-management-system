@@ -166,7 +166,11 @@ export function masterRoutes(db: Db) {
     })
     .delete("/locations/:id", write, async (c) => {
       const id = idOf(c.req.param("id"), "Lokasi");
-      const rows = await withTenant(db, ssbOf(c), (tx) => tx.delete(schema.location).where(eq(schema.location.id, id)).returning({ id: schema.location.id }));
+      const rows = await guarded(
+        () => withTenant(db, ssbOf(c), (tx) => tx.delete(schema.location).where(eq(schema.location.id, id)).returning({ id: schema.location.id })),
+        "",
+        "Lokasi tidak bisa dihapus karena masih dipakai jadwal latihan",
+      );
       if (rows.length === 0) throw notFound("Lokasi");
       return c.body(null, 204);
     });

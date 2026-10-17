@@ -1,0 +1,1 @@
+ALTER TABLE "training_session" DROP COLUMN "location";

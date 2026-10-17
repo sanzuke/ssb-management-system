@@ -55,3 +55,10 @@ Rentang usia KU tidak boleh tumpang tindih dalam satu SSB: dicek di API dalam tr
 - `player_history` mencatat perubahan KU dan status (label terbaca saat itu, siapa, kapan).
 - Batas data per role ditegakkan di query (`visibleTo` di `apps/api/src/players.ts`): admin semua; pelatih dan korlas hanya KU yang ditugaskan di periode yang tanggalnya mencakup hari ini; orang tua hanya anaknya. Di luar batas dijawab 404, bukan 403, supaya keberadaan pemain tidak bocor.
 - Ubah pemain (PATCH) mengganti seluruh isian; klien mengirim formulir lengkap.
+
+## Jadwal dan absensi
+
+- `training_session.location_id` menautkan sesi ke `location` (FK komposit; lokasi yang dipakai jadwal tidak bisa dihapus, 409). Kolom teks `location` lama dihapus.
+- Jadwal berulang mingguan membuat sesi biasa yang berdiri sendiri (tanpa entitas seri), maksimal 100 sesi per permintaan. Periode sesi diisi otomatis dari tanggalnya. Sesi tidak boleh ganda untuk KU, tanggal, dan jam yang sama.
+- Absensi disimpan lewat upsert massal per sesi. KU sesi terkunci dan sesi tidak bisa dihapus setelah ada absensi (409). Sesi di masa depan tidak bisa diisi absensinya (toleransi satu hari untuk zona waktu).
+- `attendance.recorded_by` memakai `ON DELETE SET NULL (recorded_by)` (migrasi manual 0011, PostgreSQL 15+): menghapus keanggotaan pencatat tidak menghapus riwayat absensi. Drizzle belum bisa menyatakannya di `schema.ts`; jangan menerima hasil `db:generate` yang mengembalikannya ke NO ACTION.

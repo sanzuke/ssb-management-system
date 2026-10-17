@@ -40,6 +40,8 @@ export const permissions = {
   "attendance.read": { roles: ["admin_ssb", "pelatih", "korlas", "orang_tua"], desc: "Melihat absensi (orang tua: anaknya)" },
   "assessment.write": { roles: ["admin_ssb", "pelatih"], desc: "Mengisi penilaian pemain" },
   "assessment.read": { roles: ["admin_ssb", "pelatih", "korlas", "orang_tua"], desc: "Melihat penilaian (orang tua: anaknya, setelah terbit)" },
+  "session.manage": { roles: ["admin_ssb"], desc: "Menjadwalkan, mengubah, dan menghapus sesi latihan" },
+  "session.read": { roles: ["admin_ssb", "pelatih", "korlas"], desc: "Melihat jadwal sesi latihan (pelatih dan korlas: KU yang ditugaskan)" },
   "assignment.manage": { roles: ["admin_ssb"], desc: "Menugaskan pelatih dan korlas ke KU per periode" },
   "report.publish": { roles: ["admin_ssb", "korlas"], desc: "Menerbitkan rapor ke orang tua (wewenang korlas: menunggu keputusan)" },
 } as const satisfies Record<string, { roles: readonly UserRole[]; desc: string }>;
@@ -212,3 +214,43 @@ export type PlayerDetail = PlayerSummary & {
   guardians?: { userId: string; name: string; relationship: string | null }[];
 };
 export type Assignment = { userId: string; userName: string; role: UserRole; ageGroupId: string; ageGroupName: string; periodId: string; periodName: string };
+
+// ---- Sesi latihan dan absensi ----
+
+export const attendanceStatusSchema = z.enum(["hadir", "izin", "sakit", "alpa"]);
+export type AttendanceStatus = z.infer<typeof attendanceStatusSchema>;
+
+const timeHm = z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/, "format jam HH:MM");
+
+export const sessionInputSchema = z.object({
+  ageGroupId: uuidStr,
+  sessionDate: isoDate,
+  startTime: timeHm.nullable().optional(),
+  locationId: uuidStr.nullable().optional(),
+});
+/** Membuat sesi; `repeatUntil` mengulang tiap minggu di hari yang sama sampai tanggal itu (termasuk). */
+export const sessionCreateSchema = sessionInputSchema
+  .extend({ repeatUntil: isoDate.nullable().optional() })
+  .refine((v) => !v.repeatUntil || v.repeatUntil >= v.sessionDate, { path: ["repeatUntil"], message: "tidak boleh sebelum tanggal sesi" });
+
+export const attendanceInputSchema = z.object({
+  entries: z
+    .array(z.object({ playerId: uuidStr, status: attendanceStatusSchema, note: z.string().trim().max(200).nullable().optional() }))
+    .min(1, "minimal satu pemain")
+    .max(200, "maksimal 200 pemain per permintaan"),
+});
+
+export type TrainingSession = {
+  id: string;
+  sessionDate: string;
+  startTime: string | null;
+  ageGroup: { id: string; name: string };
+  location: { id: string; name: string } | null;
+  period: { id: string; name: string } | null;
+  /** Ringkasan absensi: jumlah per status dan pemain aktif yang belum diisi. */
+  attendance: { hadir: number; izin: number; sakit: number; alpa: number; belum: number };
+};
+export type AttendanceRoster = {
+  session: TrainingSession;
+  players: { playerId: string; fullName: string; memberNo: string | null; status: AttendanceStatus | null; note: string | null }[];
+};

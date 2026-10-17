@@ -1,0 +1,2 @@
+ALTER TABLE "training_session" ADD COLUMN "location_id" uuid;--> statement-breakpoint
+ALTER TABLE "training_session" ADD CONSTRAINT "training_session_location_fk" FOREIGN KEY ("ssb_id","location_id") REFERENCES "public"."location"("ssb_id","id") ON DELETE no action ON UPDATE no action;

@@ -59,8 +59,8 @@ Butir bertanda **(butuh keputusan)** terhambat oleh pertanyaan terbuka di `docs/
 ## E. Latihan dan absensi
 
 - [ ] Jadwal latihan: buat, ubah, hapus; jadwal berulang mingguan
-- [ ] Endpoint absensi massal per sesi (satu permintaan untuk satu KU)
-- [ ] Pelatih hanya bisa mengisi absensi KU yang ditugaskan (test)
+- [x] Endpoint absensi massal per sesi (satu permintaan untuk satu KU; boleh diulang untuk koreksi; sesi yang belum berlangsung ditolak)
+- [x] Pelatih hanya bisa mengisi absensi KU yang ditugaskan (test: KU lain 404; admin boleh semua)
 - [ ] Layar absensi sekali ketuk: 20 pemain terisi dalam kurang dari 60 detik pada uji di HP
 - [ ] Rekap kehadiran per pemain dan per periode (persentase benar terhadap data uji)
 - [ ] Absensi dengan scan QR dari kamera browser
