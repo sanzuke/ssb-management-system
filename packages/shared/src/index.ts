@@ -254,3 +254,26 @@ export type AttendanceRoster = {
   session: TrainingSession;
   players: { playerId: string; fullName: string; memberNo: string | null; status: AttendanceStatus | null; note: string | null }[];
 };
+
+export type AttendanceSummaryRow = {
+  playerId: string;
+  fullName: string;
+  memberNo: string | null;
+  status: PlayerStatus;
+  ageGroup: { id: string; name: string };
+  hadir: number;
+  izin: number;
+  sakit: number;
+  alpa: number;
+  /** hadir + izin + sakit + alpa: sesi yang absensinya tercatat untuk pemain ini. */
+  recorded: number;
+  /** hadir / recorded * 100, satu desimal; null bila belum ada catatan. */
+  percent: number | null;
+};
+export type AttendanceSummary = {
+  period: { id: string; name: string } | null;
+  ageGroup: { id: string; name: string } | null;
+  /** Jumlah sesi pada rentang ini yang sudah punya catatan absensi. */
+  sessionsHeld: number;
+  players: AttendanceSummaryRow[];
+};

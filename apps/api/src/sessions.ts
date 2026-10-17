@@ -1,10 +1,11 @@
 import { Hono } from "hono";
 import { and, asc, desc, eq, gte, inArray, lte, sql, type SQL } from "drizzle-orm";
 import { schema, withTenant, type Db, type Tx } from "@ssb/db";
-import { attendanceInputSchema, sessionCreateSchema, sessionInputSchema, type AttendanceRoster, type TrainingSession } from "@ssb/shared";
+import { attendanceInputSchema, sessionCreateSchema, sessionInputSchema, type AttendanceRoster, type AttendanceSummary, type TrainingSession } from "@ssb/shared";
 import { HttpError } from "./errors";
 import { requirePermission, type AppEnv, type Member } from "./auth/middleware";
 import { zv } from "./validator";
+import { visibleTo as playersVisibleTo } from "./players";
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const ISO = /^\d{4}-\d{2}-\d{2}$/;
@@ -192,6 +193,52 @@ export function sessionRoutes(db: Db) {
         if (rows.length === 0) throw notFound();
       });
       return c.body(null, 204);
+    })
+
+    // Rekap kehadiran per pemain. Pemain yang terlihat mengikuti aturan daftar pemain
+    // (pelatih/korlas: KU ditugaskan; orang tua: anaknya). Persentase = hadir / sesi tercatat.
+    .get("/attendance/summary", requirePermission("attendance.read"), async (c) => {
+      const m = member(c);
+      const periodId = c.req.query("periodId");
+      const ku = c.req.query("ageGroupId");
+      for (const v of [periodId, ku]) if (v && !UUID.test(v)) throw new HttpError(400, "bad_request", "Id periode atau KU tidak valid");
+      const out = await withTenant(db, m.ssbId, async (tx): Promise<AttendanceSummary> => {
+        const inScope = and(periodId ? eq(ts.periodId, periodId) : undefined, ku ? eq(ts.ageGroupId, ku) : undefined);
+        const players = await tx
+          .select({ id: schema.player.id, fullName: schema.player.fullName, memberNo: schema.player.memberNo, status: schema.player.status, kuId: schema.ageGroup.id, kuName: schema.ageGroup.name })
+          .from(schema.player)
+          .innerJoin(schema.ageGroup, and(eq(schema.ageGroup.ssbId, schema.player.ssbId), eq(schema.ageGroup.id, schema.player.ageGroupId)))
+          .where(and(playersVisibleTo(m), ku ? eq(schema.player.ageGroupId, ku) : undefined))
+          .orderBy(asc(schema.player.fullName))
+          .limit(500);
+        const ids = players.map((p) => p.id);
+        const counts = ids.length
+          ? await tx
+              .select({ playerId: schema.attendance.playerId, status: schema.attendance.status, n: sql<number>`count(*)::int` })
+              .from(schema.attendance)
+              .innerJoin(ts, and(eq(ts.ssbId, schema.attendance.ssbId), eq(ts.id, schema.attendance.sessionId)))
+              .where(and(inArray(schema.attendance.playerId, ids), inScope))
+              .groupBy(schema.attendance.playerId, schema.attendance.status)
+          : [];
+        const [held] = await tx
+          .select({ n: sql<number>`count(distinct ${ts.id})::int` })
+          .from(ts)
+          .where(and(inScope, sql`exists (select 1 from attendance a where a.session_id = ${ts.id})`, m.role === "admin_ssb" ? undefined : inArray(ts.ageGroupId, [...new Set(players.map((p) => p.kuId))].concat("00000000-0000-0000-0000-000000000000"))));
+        const [period] = periodId ? await tx.select({ id: schema.period.id, name: schema.period.name }).from(schema.period).where(eq(schema.period.id, periodId)).limit(1) : [];
+        const [group] = ku ? await tx.select({ id: schema.ageGroup.id, name: schema.ageGroup.name }).from(schema.ageGroup).where(eq(schema.ageGroup.id, ku)).limit(1) : [];
+        if ((periodId && !period) || (ku && !group)) throw new HttpError(404, "not_found", "Periode atau KU tidak ditemukan");
+        const rows = players
+          .map((p) => {
+            const t = { hadir: 0, izin: 0, sakit: 0, alpa: 0 };
+            for (const x of counts) if (x.playerId === p.id) t[x.status] = x.n;
+            const recorded = t.hadir + t.izin + t.sakit + t.alpa;
+            return { playerId: p.id, fullName: p.fullName, memberNo: p.memberNo, status: p.status, ageGroup: { id: p.kuId, name: p.kuName }, ...t, recorded, percent: recorded ? Math.round((t.hadir / recorded) * 1000) / 10 : null };
+          })
+          // Pemain tidak aktif hanya tampil bila punya catatan pada rentang ini.
+          .filter((r) => r.status === "aktif" || r.recorded > 0);
+        return { period: period ?? null, ageGroup: group ?? null, sessionsHeld: held?.n ?? 0, players: rows };
+      });
+      return c.json(out);
     })
 
     // ---- Absensi ----

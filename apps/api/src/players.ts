@@ -19,7 +19,7 @@ const isFk = (e: unknown) => (e as { code?: string })?.code === "23503" || (e as
  * Batas data pemain per role. Admin melihat semua; pelatih dan korlas hanya pemain di KU yang
  * ditugaskan pada periode yang sedang berjalan; orang tua hanya anaknya. Selain ini, RLS membatasi ke SSB.
  */
-function visibleTo(m: Member): SQL | undefined {
+export function visibleTo(m: Member): SQL | undefined {
   if (m.role === "admin_ssb") return undefined;
   if (m.role === "orang_tua") {
     return sql`${schema.player.id} in (select player_id from player_guardian where user_id = ${m.userId})`;

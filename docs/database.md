@@ -62,3 +62,7 @@ Rentang usia KU tidak boleh tumpang tindih dalam satu SSB: dicek di API dalam tr
 - Jadwal berulang mingguan membuat sesi biasa yang berdiri sendiri (tanpa entitas seri), maksimal 100 sesi per permintaan. Periode sesi diisi otomatis dari tanggalnya. Sesi tidak boleh ganda untuk KU, tanggal, dan jam yang sama.
 - Absensi disimpan lewat upsert massal per sesi. KU sesi terkunci dan sesi tidak bisa dihapus setelah ada absensi (409). Sesi di masa depan tidak bisa diisi absensinya (toleransi satu hari untuk zona waktu).
 - `attendance.recorded_by` memakai `ON DELETE SET NULL (recorded_by)` (migrasi manual 0011, PostgreSQL 15+): menghapus keanggotaan pencatat tidak menghapus riwayat absensi. Drizzle belum bisa menyatakannya di `schema.ts`; jangan menerima hasil `db:generate` yang mengembalikannya ke NO ACTION.
+
+### Rekap kehadiran
+
+`GET /attendance/summary?periodId=&ageGroupId=` (izin `attendance.read`). Per pemain: jumlah hadir, izin, sakit, alpa, `recorded` (jumlah keempatnya) dan `percent` = hadir / recorded x 100 satu desimal (`null` bila belum ada catatan). Sesi tanpa satu pun catatan tidak dihitung; pemain tanpa catatan pada sesi tertentu tidak dihitung hadir maupun alpa untuk sesi itu. `sessionsHeld` = sesi pada rentang yang sudah punya catatan. Pemain tidak aktif hanya tampil bila punya catatan pada rentang itu. Pembatasan akses sama dengan daftar pemain (pelatih/korlas: KU ditugaskan, orang tua: anaknya).

@@ -208,4 +208,68 @@ run("jadwal latihan dan absensi", () => {
     expect((await call("DELETE", `/sessions/${sa.id}`, b.admin)).status).toBe(404);
     expect((await call("GET", "/sessions?from=kemarin", a.admin)).status).toBe(400);
   });
+  test("rekap kehadiran: persentase per pemain dan per periode, KU, dan batas role", async () => {
+    const w = await world("rekap");
+    const period2 = (await json(await call("POST", "/periods", w.admin, { name: "Musim lalu", startDate: iso(-200), endDate: iso(-100) }))).id as string;
+    const mkSession = async (ageGroupId: string, offset: number) => (await json(await call("POST", "/sessions", w.admin, { ageGroupId, sessionDate: iso(offset) })))[0].id as string;
+    const rec = async (sid: string, entries: { playerId: string; status: string }[]) => expect((await call("PUT", `/sessions/${sid}/attendance`, w.admin, { entries })).status).toBe(200);
+    const [s1, s2, s3, s4] = [await mkSession(w.ku10, -3), await mkSession(w.ku10, -2), await mkSession(w.ku10, -1), await mkSession(w.ku10, 0)];
+    const old = await mkSession(w.ku10, -150);
+    const s12 = await mkSession(w.ku12, -1);
+    await mkSession(w.ku10, 1); // sesi tanpa catatan tidak dihitung
+    await rec(s1, [{ playerId: w.a1, status: "hadir" }, { playerId: w.a2, status: "hadir" }]);
+    await rec(s2, [{ playerId: w.a1, status: "hadir" }, { playerId: w.a2, status: "hadir" }]);
+    await rec(s3, [{ playerId: w.a1, status: "izin" }, { playerId: w.a2, status: "hadir" }, { playerId: w.off, status: "sakit" }]);
+    await rec(s4, [{ playerId: w.a1, status: "alpa" }]); // Bima tidak tercatat
+    await rec(old, [{ playerId: w.a1, status: "hadir" }]);
+    await rec(s12, [{ playerId: w.b1, status: "hadir" }]);
+    const by = (r: any, id: string) => r.players.find((p: any) => p.playerId === id);
+
+    const cur = await json(await call("GET", `/attendance/summary?periodId=${w.period}&ageGroupId=${w.ku10}`, w.admin));
+    expect(cur.sessionsHeld).toBe(4);
+    expect(cur.period.name).toBe("Musim");
+    expect(cur.ageGroup.name).toBe("KU-10");
+    expect(by(cur, w.a1)).toMatchObject({ hadir: 2, izin: 1, sakit: 0, alpa: 1, recorded: 4, percent: 50 });
+    expect(by(cur, w.a2)).toMatchObject({ hadir: 3, recorded: 3, percent: 100 });
+    expect(by(cur, w.a3)).toMatchObject({ recorded: 0, percent: null }); // aktif tapi belum ada catatan
+    expect(by(cur, w.off)).toMatchObject({ sakit: 1, recorded: 1, percent: 0 }); // keluar, tapi punya catatan
+    expect(by(cur, w.b1)).toBeUndefined();
+
+    const prev = await json(await call("GET", `/attendance/summary?periodId=${period2}&ageGroupId=${w.ku10}`, w.admin));
+    expect(prev.sessionsHeld).toBe(1);
+    expect(by(prev, w.a1)).toMatchObject({ hadir: 1, recorded: 1, percent: 100 });
+    expect(by(prev, w.a2)).toMatchObject({ recorded: 0, percent: null });
+    expect(by(prev, w.off)).toBeUndefined(); // keluar dan tanpa catatan di periode ini
+
+    const all = await json(await call("GET", "/attendance/summary", w.admin));
+    expect(all.period).toBeNull();
+    expect(all.sessionsHeld).toBe(6);
+    expect(by(all, w.a1)).toMatchObject({ hadir: 3, recorded: 5, percent: 60 });
+    expect(by(all, w.b1)).toMatchObject({ recorded: 1, percent: 100 });
+
+    // pelatih: hanya KU yang ditugaskan
+    const pel = await json(await call("GET", `/attendance/summary?periodId=${w.period}`, w.pelatih.cookie));
+    expect(pel.players.map((p: any) => p.playerId).sort()).toEqual([w.a1, w.a2, w.a3, w.off].sort());
+    expect(pel.sessionsHeld).toBe(4);
+    expect((await json(await call("GET", `/attendance/summary?ageGroupId=${w.ku12}`, w.pelatih.cookie))).players).toEqual([]);
+    const lain = await w.join("pelatih");
+    expect((await json(await call("GET", "/attendance/summary", lain.cookie))).players).toEqual([]);
+
+    // orang tua: hanya anaknya
+    const inv = await json(await call("POST", "/invitations", w.admin, { role: "orang_tua", playerId: w.a1 }));
+    const acc = await call("POST", `/invitations/${inv.token}/accept`, undefined, { name: "Ortu Ali", email: `ortu-rekap-${uid}@uji.test`, password: PASS });
+    expect(acc.status).toBe(201);
+    const ortu = await json(await call("GET", `/attendance/summary?periodId=${w.period}`, sessionOf(acc)));
+    expect(ortu.players.map((p: any) => p.playerId)).toEqual([w.a1]);
+    expect(ortu.players[0].percent).toBe(50);
+    expect(ortu.sessionsHeld).toBe(4);
+
+    // validasi, isolasi tenant, tanpa login
+    expect((await call("GET", "/attendance/summary?periodId=bukan-uuid", w.admin)).status).toBe(400);
+    const other = await world("rekapB");
+    expect((await call("GET", `/attendance/summary?periodId=${w.period}`, other.admin)).status).toBe(404);
+    expect((await json(await call("GET", "/attendance/summary", other.admin))).players.every((p: any) => p.recorded === 0)).toBe(true);
+    expect((await call("GET", "/attendance/summary")).status).toBe(401);
+  });
+
 });
