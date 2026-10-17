@@ -7,13 +7,15 @@
     "packages/*"
   ],
   "scripts": {
-    "dev:api": "bun --filter @ssb/api dev",
+    "dev:api": "bun --watch apps/api/src/index.ts",
     "dev:web": "bun --filter @ssb/web dev",
     "build": "bun --filter '*' build",
     "typecheck": "bun --filter '*' typecheck",
     "test": "bun --filter '*' test",
     "db:generate": "bun --filter @ssb/db generate",
-    "db:migrate": "bun --filter @ssb/db migrate",
+    "db:migrate": "bun packages/db/src/migrate.ts",
+    "db:seed": "bun tools/seed.ts",
+    "db:setup": "bun run db:migrate && bun run db:seed",
     "docs:izin": "bun tools/permissions-doc.ts",
     "progress": "bun tools/progress.ts",
     "lint": "biome check --diagnostic-level=error .",

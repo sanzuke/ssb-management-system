@@ -39,6 +39,21 @@ docker compose up --watch          # sama, dan menyinkronkan perubahan kode
 
 Database dibuat otomatis (role dan kata sandi lokal ada di `tools/db/init.sql`). Untuk login Google, isi `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, dan `SESSION_SECRET` di file `.env` (lihat `docs/auth.md`).
 
+### Data contoh (seed)
+
+Mengisi SSB contoh lengkap: 1 admin, 1 korlas, 2 pelatih, 23 orang tua, 24 pemain (KU-8, KU-10, KU-12), jadwal, absensi, penilaian, dan rencana pengembangan. Butuh `.env` (lihat `.env.example`) dan database yang sudah dimigrasi.
+
+```
+bun run db:setup             # migrasi lalu seed
+bun run db:seed              # hanya seed; berhenti bila SSB contoh sudah ada
+bun run db:seed -- --reset   # hapus SSB contoh dan akunnya, lalu buat ulang
+docker compose --profile seed run --rm seed   # lewat Docker Compose
+```
+
+Akun contoh (domain `garudamuda.test`): `admin@`, `korlas@`, `budi@` (KU-10), `sari@` (KU-12 dan KU-8), `ortu01@` sampai `ortu23@`. Kata sandi semuanya `SEED_PASSWORD`; bawaan lokal ada di `tools/seed.ts`.
+
+Di server demo atau staging: `NODE_ENV=production ALLOW_SEED=1 SEED_PASSWORD=<kata sandi kuat> bun run db:seed`. Tanpa `ALLOW_SEED=1` skrip menolak jalan saat `NODE_ENV=production`, dan `SEED_PASSWORD` wajib diisi. Jangan dijalankan di database produksi yang berisi data sungguhan.
+
 ### Rapor PDF
 
 Endpoint `GET /players/:id/assessments/:periodId/report` membuat PDF dari HTML lewat proses Node + Chromium (`playwright-core`, `apps/api/src/report/render-pdf.mjs`). Butuh `node` di PATH dan Chromium: atur `CHROMIUM_PATH` ke berkas Chrome/Chromium, atau pasang bawaan Playwright (`bunx playwright-core install chromium`). Tanpa itu, endpoint menjawab 503 `report_unavailable` dan tes PDF dilewati (tes akses tetap jalan).
