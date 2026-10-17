@@ -140,3 +140,35 @@ export const meSchema = z.object({
   memberships: z.array(membershipSchema),
 });
 export type Me = z.infer<typeof meSchema>;
+
+// ---- Data master ----
+
+const nameField = z.string().trim().min(2, "minimal 2 karakter").max(80, "maksimal 80 karakter");
+const isoDate = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "format tanggal YYYY-MM-DD").refine((s) => !Number.isNaN(Date.parse(s)) && new Date(s).toISOString().startsWith(s), "tanggal tidak valid");
+
+export const ageGroupInputSchema = z
+  .object({
+    name: nameField,
+    minAge: z.number().int("harus bilangan bulat").min(0, "minimal 0").max(30, "maksimal 30"),
+    maxAge: z.number().int("harus bilangan bulat").min(0, "minimal 0").max(30, "maksimal 30"),
+  })
+  .refine((v) => v.maxAge >= v.minAge, { path: ["maxAge"], message: "tidak boleh lebih kecil dari usia minimal" });
+export type AgeGroupInput = z.infer<typeof ageGroupInputSchema>;
+
+export const periodInputSchema = z
+  .object({ name: nameField, startDate: isoDate, endDate: isoDate })
+  .refine((v) => v.endDate >= v.startDate, { path: ["endDate"], message: "tidak boleh sebelum tanggal mulai" });
+export type PeriodInput = z.infer<typeof periodInputSchema>;
+
+export const locationInputSchema = z.object({
+  name: nameField,
+  address: z.string().trim().max(200, "maksimal 200 karakter").optional(),
+});
+export type LocationInput = z.infer<typeof locationInputSchema>;
+
+export const ageGroupSchema = z.object({ id: z.string(), name: z.string(), minAge: z.number(), maxAge: z.number() });
+export const periodSchema = z.object({ id: z.string(), name: z.string(), startDate: z.string(), endDate: z.string() });
+export const locationSchema = z.object({ id: z.string(), name: z.string(), address: z.string().nullable() });
+export type AgeGroup = z.infer<typeof ageGroupSchema>;
+export type Period = z.infer<typeof periodSchema>;
+export type Location = z.infer<typeof locationSchema>;

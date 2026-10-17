@@ -129,7 +129,12 @@ export const ageGroup = pgTable(
     minAge: integer("min_age").notNull(),
     maxAge: integer("max_age").notNull(),
   },
-  (t) => [unique("age_group_ssb_name").on(t.ssbId, t.name), unique("age_group_ssb_id").on(t.ssbId, t.id), tenantPolicy("age_group")],
+  (t) => [
+    unique("age_group_ssb_name").on(t.ssbId, t.name),
+    unique("age_group_ssb_id").on(t.ssbId, t.id),
+    check("age_group_range", sql`${t.minAge} >= 0 AND ${t.maxAge} >= ${t.minAge}`),
+    tenantPolicy("age_group"),
+  ],
 ).enableRLS();
 
 /** Periode: musim atau semester. */
@@ -142,7 +147,24 @@ export const period = pgTable(
     startDate: date("start_date").notNull(),
     endDate: date("end_date").notNull(),
   },
-  (t) => [unique("period_ssb_id").on(t.ssbId, t.id), tenantPolicy("period")],
+  (t) => [
+    unique("period_ssb_id").on(t.ssbId, t.id),
+    unique("period_ssb_name").on(t.ssbId, t.name),
+    check("period_dates", sql`${t.endDate} >= ${t.startDate}`),
+    tenantPolicy("period"),
+  ],
+).enableRLS();
+
+/** Lokasi latihan (lapangan). */
+export const location = pgTable(
+  "location",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    ssbId: ssbId().references(() => ssb.id, { onDelete: "cascade" }),
+    name: text("name").notNull(),
+    address: text("address"),
+  },
+  (t) => [unique("location_ssb_name").on(t.ssbId, t.name), unique("location_ssb_id").on(t.ssbId, t.id), tenantPolicy("location")],
 ).enableRLS();
 
 export const player = pgTable(

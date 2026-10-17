@@ -44,6 +44,29 @@ with sync_playwright() as pw:
     page.wait_for_url(HOME); expect(page.get_by_role("heading", name="Halo, Admin Uji")).to_be_visible()
     page.screenshot(path=f"{OUT}/3-beranda.png"); no_overflow(page, "beranda")
 
+    # 2b. Data master: KU (tumpang tindih ditolak), periode, lokasi
+    page.get_by_role("link", name="Data master").click(); page.wait_for_url("**/master")
+    expect(page.get_by_role("heading", name="Data master")).to_be_visible()
+    page.get_by_role("button", name="Tambah KU").click()
+    page.get_by_label("Nama KU").fill("KU-10"); page.get_by_label("Usia minimal (tahun)").fill("9"); page.get_by_label("Usia maksimal (tahun)").fill("10")
+    page.get_by_role("button", name="Simpan").click(); expect(page.get_by_text("KU-10, usia 9 sampai 10 tahun")).to_be_visible()
+    page.get_by_role("button", name="Tambah KU").click()
+    page.get_by_label("Nama KU").fill("KU-12"); page.get_by_label("Usia minimal (tahun)").fill("10"); page.get_by_label("Usia maksimal (tahun)").fill("12")
+    page.get_by_role("button", name="Simpan").click(); expect(page.get_by_role("alert")).to_contain_text("tumpang tindih")
+    page.screenshot(path=f"{OUT}/10-master-tumpang.png", full_page=True); no_overflow(page, "master tumpang")
+    page.get_by_label("Usia minimal (tahun)").fill("11"); page.get_by_role("button", name="Simpan").click()
+    expect(page.get_by_text("KU-12, usia 11 sampai 12 tahun")).to_be_visible()
+    page.get_by_role("button", name="Tambah periode").click()
+    page.get_by_label("Nama periode").fill("Musim 2026/27"); page.get_by_label("Tanggal mulai").fill("2026-08-01"); page.get_by_label("Tanggal selesai").fill("2027-05-31")
+    page.get_by_role("button", name="Simpan").click(); expect(page.get_by_text("Musim 2026/27, ")).to_be_visible()
+    page.get_by_role("button", name="Tambah lokasi").click()
+    page.get_by_label("Nama lokasi").fill("Lapangan Utama"); page.get_by_role("button", name="Simpan").click()
+    expect(page.get_by_text("Lapangan Utama")).to_be_visible()
+    # hapus dengan konfirmasi
+    page.get_by_role("button", name="Hapus").last.click(); page.get_by_role("button", name="Ya, hapus").click()
+    expect(page.get_by_text("Belum ada lokasi")).to_be_visible()
+    page.screenshot(path=f"{OUT}/11-master.png", full_page=True); no_overflow(page, "master")
+
     # 3. Undangan, dibuat admin lewat API (sesi cookie browser)
     inv = api_post(page, "/invitations", {"role": "pelatih", "label": "Pelatih KU-10"})
     assert inv["s"] in (200, 201), inv
@@ -99,7 +122,7 @@ with sync_playwright() as pw:
     p4.wait_for_url("**/masuk?error=*"); expect(p4.get_by_role("alert")).to_be_visible()
     p4.screenshot(path=f"{OUT}/9-google-asing.png"); print("pesan:", p4.get_by_role("alert").inner_text())
 
-    errors = [e for e in errors if "401" not in e and "resolve-uri" not in e]  # 401 = cek sesi saat belum masuk; resolve-uri = galat dev Vite saja
+    errors = [e for e in errors if "401" not in e and "409" not in e and "resolve-uri" not in e]  # 401 = cek sesi saat belum masuk; 409 = penolakan KU tumpang tindih yang disengaja; resolve-uri = galat dev Vite saja
     assert not errors, errors
     print("SEMUA LOLOS; screenshot di", OUT)
     b.close()

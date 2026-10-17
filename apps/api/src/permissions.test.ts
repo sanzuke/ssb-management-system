@@ -96,6 +96,10 @@ run("matriks izin per endpoint (database)", () => {
   const endpoints: { method: string; path: string; perm: Permission; body?: unknown }[] = [
     { method: "GET", path: "/users", perm: "user.list" },
     { method: "POST", path: "/invitations", perm: "invitation.create", body: { role: "pelatih" } },
+    { method: "GET", path: "/age-groups", perm: "master.read" },
+    { method: "GET", path: "/periods", perm: "master.read" },
+    { method: "GET", path: "/locations", perm: "master.read" },
+    { method: "POST", path: "/locations", perm: "master.write", body: { name: "Lokasi uji izin" } },
   ];
   for (const e of endpoints) {
     test(`${e.method} ${e.path}: hanya role dengan izin ${e.perm} yang lolos`, async () => {

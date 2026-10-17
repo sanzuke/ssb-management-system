@@ -39,10 +39,10 @@ Butir bertanda **(butuh keputusan)** terhambat oleh pertanyaan terbuka di `docs/
 
 ## C. Master data
 
-- [ ] CRUD KU (nama, rentang usia) dengan validasi rentang tidak tumpang tindih
-- [ ] CRUD periode (musim atau semester) dengan validasi tanggal
-- [ ] CRUD lokasi latihan
-- [ ] Layar admin untuk ketiganya di web
+- [x] CRUD KU (nama, rentang usia) dengan validasi rentang tidak tumpang tindih (409 `age_overlap`, kunci advisory per SSB; test)
+- [x] CRUD periode (musim atau semester) dengan validasi tanggal
+- [x] CRUD lokasi latihan
+- [x] Layar admin untuk ketiganya di web
 
 ## D. Pemain dan pelatih
 
