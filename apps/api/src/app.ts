@@ -4,7 +4,7 @@ import { schema, withTenant, type Db } from "@ssb/db";
 import { eq } from "drizzle-orm";
 import type { Health } from "@ssb/shared";
 import { errorBody, onError } from "./errors";
-import { loadAuth, requireRole, type AppEnv } from "./auth/middleware";
+import { loadAuth, requirePermission, type AppEnv } from "./auth/middleware";
 import { authRoutes } from "./auth/routes";
 import { googleRoutes } from "./auth/google-routes";
 import { createGoogleProvider, type GoogleProvider } from "./auth/google";
@@ -48,7 +48,7 @@ export function createApp(
     .route("/auth", authRoutes(db, { secureCookie }))
     .route("/invitations", invitationRoutes(db, { secureCookie, webUrl }))
     // Daftar anggota SSB sendiri; hanya admin SSB.
-    .get("/users", requireRole("admin_ssb"), async (c) => {
+    .get("/users", requirePermission("user.list"), async (c) => {
       const m = c.get("auth")!.member!;
       const rows = await withTenant(db, m.ssbId, (tx) =>
         tx

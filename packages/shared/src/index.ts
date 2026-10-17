@@ -24,6 +24,37 @@ export type PlayerInput = z.infer<typeof playerInputSchema>;
 export const userRoleSchema = z.enum(["admin_ssb", "pelatih", "korlas", "orang_tua"]);
 export type UserRole = z.infer<typeof userRoleSchema>;
 
+/**
+ * Matriks izin: satu-satunya sumber kebenaran siapa boleh melakukan apa.
+ * Endpoint API dijaga dengan `requirePermission(<izin>)`; docs/izin.md dibuat dari tabel ini dan diuji sinkron.
+ * Batas data (pelatih hanya KU yang ditugaskan, orang tua hanya anaknya) ditegakkan terpisah di query/RLS.
+ */
+export const permissions = {
+  "user.list": { roles: ["admin_ssb"], desc: "Melihat daftar anggota SSB" },
+  "invitation.create": { roles: ["admin_ssb"], desc: "Membuat tautan undangan" },
+  "master.read": { roles: ["admin_ssb", "pelatih", "korlas"], desc: "Melihat KU, periode, dan lokasi" },
+  "master.write": { roles: ["admin_ssb"], desc: "Mengubah KU, periode, dan lokasi" },
+  "player.read": { roles: ["admin_ssb", "pelatih", "korlas", "orang_tua"], desc: "Melihat pemain (pelatih dan korlas: KU yang ditugaskan; orang tua: anaknya)" },
+  "player.write": { roles: ["admin_ssb"], desc: "Menambah dan mengubah pemain" },
+  "attendance.record": { roles: ["admin_ssb", "pelatih", "korlas"], desc: "Mencatat absensi latihan" },
+  "attendance.read": { roles: ["admin_ssb", "pelatih", "korlas", "orang_tua"], desc: "Melihat absensi (orang tua: anaknya)" },
+  "assessment.write": { roles: ["admin_ssb", "pelatih"], desc: "Mengisi penilaian pemain" },
+  "assessment.read": { roles: ["admin_ssb", "pelatih", "korlas", "orang_tua"], desc: "Melihat penilaian (orang tua: anaknya, setelah terbit)" },
+  "report.publish": { roles: ["admin_ssb", "korlas"], desc: "Menerbitkan rapor ke orang tua (wewenang korlas: menunggu keputusan)" },
+} as const satisfies Record<string, { roles: readonly UserRole[]; desc: string }>;
+export type Permission = keyof typeof permissions;
+export const can = (role: UserRole, p: Permission) => (permissions[p].roles as readonly UserRole[]).includes(role);
+
+const roleOrder: UserRole[] = ["admin_ssb", "pelatih", "korlas", "orang_tua"];
+/** Tabel markdown untuk docs/izin.md. */
+export function renderPermissionTable(): string {
+  const head = `| Izin | Keterangan | ${roleOrder.join(" | ")} |\n|---|---|${roleOrder.map(() => ":-:").join("|")}|`;
+  const rows = (Object.keys(permissions) as Permission[]).map(
+    (p) => `| \`${p}\` | ${permissions[p].desc} | ${roleOrder.map((r) => (can(r, p) ? "ya" : "-")).join(" | ")} |`,
+  );
+  return [head, ...rows].join("\n") + "\n";
+}
+
 /** Kode SSB dipakai saat login, jadi dibatasi huruf kecil, angka, dan tanda hubung. */
 export const slugSchema = z
   .string()

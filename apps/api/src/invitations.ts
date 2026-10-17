@@ -3,14 +3,14 @@ import { zv } from "./validator";
 import { schema, type Db } from "@ssb/db";
 import { acceptInvitationSchema, createInvitationSchema } from "@ssb/shared";
 import { HttpError } from "./errors";
-import { requireRole, type AppEnv } from "./auth/middleware";
+import { requirePermission, type AppEnv } from "./auth/middleware";
 import { hashPassword } from "./auth/password";
 import { acceptInvitation, createInvitation, isUniqueViolation, previewInvitation, setActive, startSession } from "./auth/service";
 
 export function invitationRoutes(db: Db, opts: { secureCookie: boolean; webUrl: string }) {
   return new Hono<AppEnv>()
     // Admin SSB membuat tautan undangan; token hanya ditampilkan sekali.
-    .post("/", requireRole("admin_ssb"), zv("json", createInvitationSchema), async (c) => {
+    .post("/", requirePermission("invitation.create"), zv("json", createInvitationSchema), async (c) => {
       const m = c.get("auth")!.member!;
       const { token, expiresAt } = await createInvitation(db, m, c.req.valid("json"));
       return c.json({ token, url: `${opts.webUrl}/undangan/${token}`, expiresAt }, 201);

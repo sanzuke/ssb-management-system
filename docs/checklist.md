@@ -28,7 +28,7 @@ Butir bertanda **(butuh keputusan)** terhambat oleh pertanyaan terbuka di `docs/
 - [x] Autentikasi: login, sesi aman (cookie HttpOnly, hash token di database, argon2id), logout, ganti kata sandi (test)
 - [ ] Lupa dan reset kata sandi lewat tautan yang kedaluwarsa
 - [x] Middleware tenant: `ssb_id` dari sesi, bukan dari input klien (test: input `ssbId` palsu diabaikan)
-- [ ] Guard role untuk empat role; matriks izin tertulis dan diuji per endpoint (test per role)
+- [x] Guard role untuk empat role; matriks izin tertulis (`docs/izin.md`, dibuat dari kode) dan diuji per endpoint (test per role; test gagal bila ada endpoint tanpa penjaga)
 - [x] Undang pelatih, korlas, dan orang tua lewat tautan sekali pakai yang kedaluwarsa dalam 7 hari; undangan orang tua langsung menghubungkan ke pemain (test)
 - [x] Login dan daftar dengan Google (OIDC, authorization code + PKCE, `email_verified` wajib, tanpa tautan otomatis lewat email); diuji dengan penyedia Google tiruan
 - [ ] Uji alur Google sungguhan: kredensial OAuth dari Google Cloud diisi di env, lalu coba daftar, login, dan terima undangan dari browser

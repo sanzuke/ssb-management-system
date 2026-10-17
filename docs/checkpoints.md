@@ -13,3 +13,4 @@ Satu baris per checkpoint, yang terbaru di atas. Hash commit menjadi acuan utama
 | cp-6-autentikasi | `6a18f4e` | 2026-10-17 | Autentikasi API: daftar SSB, login, sesi, logout, ganti sandi, guard role, validasi env; 13 test di api |
 | cp-7-akun-global-google | `f012f9b` | 2026-10-17 | Akun global + keanggotaan per SSB, login Google (OIDC + PKCE), undangan sekali pakai; 24 test api |
 | cp-8-layar-auth-web | `105f888` | 2026-10-17 | Layar masuk, daftar, undangan, pilih SSB, akun di web (360 px); proxy `/api`; e2e Playwright dengan Google tiruan |
+| cp-9-matriks-izin | `HASH9` | 2026-10-17 | Matriks izin satu sumber (`permissions`), `requirePermission`, docs/izin.md dibuat dari kode, test per role dan test cakupan penjaga; 30 test api |

@@ -14,6 +14,7 @@
     "test": "bun --filter '*' test",
     "db:generate": "bun --filter @ssb/db generate",
     "db:migrate": "bun --filter @ssb/db migrate",
+    "docs:izin": "bun tools/permissions-doc.ts",
     "progress": "bun tools/progress.ts"
   },
   "devDependencies": {
