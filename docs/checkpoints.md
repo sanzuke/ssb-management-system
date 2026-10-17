@@ -28,3 +28,4 @@ Satu baris per checkpoint, yang terbaru di atas. Hash commit menjadi acuan utama
 | cp-21-assessment-web | `4f487b9` | 2026-10-17 | Layar penilaian skor 1-10 di HP, layar admin indikator (16 usulan awal), penerbitan, orang tua membaca; e2e 360 px; checklist 39/75 |
 | cp-22-fondasi-tooling | `4031a1a` | 2026-10-17 | Lint/format Biome, logging terstruktur (reqId), workflow CI di tools/ci (belum aktif), Docker Compose lokal (belum dijalankan); 76 test api; checklist 41/75 |
 | cp-23-grafik-nilai | `76b1572` | 2026-10-17 | Radar 6 aspek (periode terpilih vs sebelumnya) dan garis perkembangan antar periode, tabel angka; staf (lipat) dan orang tua; e2e dua periode 360 px; checklist 42/75 |
+| cp-24-rapor-pdf | `b5724ad` | 2026-10-17 | Rapor PDF A4 (identitas, rata-rata, radar, skor per indikator, kehadiran, catatan) dari HTML lewat Node + Chromium, 1,4 dtk; unduh dari halaman penilaian (staf dan orang tua terbit); 80 test api; checklist 44/75 |
