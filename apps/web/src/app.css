@@ -828,8 +828,36 @@ a {
   display: flex;
   min-height: 100dvh;
   overflow: hidden;
-  background: var(--rumput);
+  background: #0f2e20;
   padding: 24px 16px;
+}
+/* Foto stadion sedikit diburamkan agar perhatian tertuju ke formulir */
+.buku::before {
+  content: "";
+  position: absolute;
+  inset: -20px;
+  background: url("/img/stadion.webp") 58% center / cover no-repeat;
+  filter: blur(4px) saturate(1.05);
+  animation: stadion-pelan 40s ease-in-out infinite alternate;
+}
+.buku::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(12, 38, 26, 0.5), rgba(12, 38, 26, 0.72));
+}
+@keyframes stadion-pelan {
+  from {
+    transform: scale(1);
+  }
+  to {
+    transform: scale(1.08);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .buku::before {
+    animation: none;
+  }
 }
 .buku-isi {
   position: relative;
