@@ -825,33 +825,23 @@ a {
 /* ---- Gaya buku rapor (desain Stitch "Garuda Muda Dossier"): masuk ---- */
 .buku {
   position: relative;
+  display: flex;
   min-height: 100dvh;
   overflow: hidden;
-  background: var(--kapur);
-  padding: 28px 16px 40px;
-}
-.tanda-air {
-  position: absolute;
-  top: 0;
-  left: 50%;
-  width: 340px;
-  height: 340px;
-  transform: translateX(-50%);
-  fill: none;
-  stroke: var(--rumput);
-  stroke-width: 3;
-  opacity: 0.07;
-  pointer-events: none;
-}
-.tanda-air .titik {
-  fill: var(--rumput);
-  stroke: none;
+  background: var(--rumput);
+  padding: 24px 16px;
 }
 .buku-isi {
   position: relative;
   z-index: 1;
+  /* margin auto memusatkan kartu di tengah layar; bila lebih tinggi dari layar, halaman tetap bisa digulir */
+  margin: auto;
   width: min(100%, 26rem);
-  margin: 0 auto;
+  padding: 28px 22px 26px;
+  border-radius: 16px;
+  background: var(--kapur);
+  outline: 2px solid rgba(244, 246, 239, 0.55);
+  outline-offset: 6px;
 }
 .buku-isi > :last-child {
   margin-bottom: 0;
@@ -1544,4 +1534,41 @@ a {
 }
 .bar-simpan .batang {
   height: 6px;
+}
+
+/* Lapangan latar: tegak untuk layar potret, mendatar untuk layar lebar */
+.pitch-mendatar {
+  display: none;
+}
+@media (min-aspect-ratio: 1 / 1) {
+  .pitch-tegak {
+    display: none;
+  }
+  .pitch-mendatar {
+    display: block;
+  }
+}
+
+/* Layar lebar: kartu masuk dipadatkan agar lapangan di sekelilingnya tetap terlihat */
+@media (min-aspect-ratio: 1 / 1) {
+  .buku-isi {
+    padding: 22px 22px 20px;
+  }
+  .buku .lencana {
+    width: 52px;
+    height: 52px;
+    margin-bottom: 10px;
+  }
+  .buku .kepala-buku {
+    margin-bottom: 14px;
+  }
+  .buku .pemisah {
+    margin: 14px 0 12px;
+  }
+  .buku .kartu-bantuan {
+    margin-top: 16px;
+  }
+  .buku .kartu-bantuan p {
+    display: none;
+  }
 }
