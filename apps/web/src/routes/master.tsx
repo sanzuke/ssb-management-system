@@ -1,4 +1,4 @@
-import { useNavigate } from "@solidjs/router";
+import { A, useNavigate } from "@solidjs/router";
 import { Title } from "@solidjs/meta";
 import { createSignal, onMount, Show } from "solid-js";
 import AppBar from "~/components/AppBar";
@@ -55,6 +55,9 @@ export default function Master() {
             ]}
             summary={(i) => `${i.name}, ${tgl(i.startDate)} sampai ${tgl(i.endDate)}`}
           />
+          <Show when={role() === "admin_ssb"}>
+            <p><A href="/penugasan">Atur penugasan pelatih ke KU</A></p>
+          </Show>
           <MasterSection
             title="Lokasi latihan"
             path="/locations"

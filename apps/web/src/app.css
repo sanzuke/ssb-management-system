@@ -191,3 +191,12 @@ a { color: var(--rumput); text-underline-offset: 3px; }
 .butir-aksi .tombol { width: auto; }
 .tombol.bahaya { width: auto; background: var(--merah); border-color: var(--merah); color: #fff; }
 .kosong { color: var(--redup); }
+
+/* Pemain */
+.saring { margin: 12px 0 16px; }
+.pemain-tautan { display: grid; gap: 2px; width: 100%; padding: 4px 0; min-height: 48px; color: var(--tinta); text-decoration: none; }
+.pemain-tautan:hover strong { text-decoration: underline; }
+.rincian { display: grid; grid-template-columns: max-content 1fr; gap: 6px 16px; margin: 0 0 20px; }
+.rincian dt { color: var(--redup); }
+.rincian dd { margin: 0; }
+.field select { min-height: 48px; width: 100%; padding: 8px 10px; font: inherit; border: 1.5px solid var(--tinta); border-radius: 6px; background: #fff; color: var(--tinta); }

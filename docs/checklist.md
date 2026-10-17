@@ -51,9 +51,9 @@ Butir bertanda **(butuh keputusan)** terhambat oleh pertanyaan terbuka di `docs/
 - [ ] Unggah foto dan dokumen ke penyimpanan S3-compatible; batas ukuran dan tipe berkas **(butuh keputusan: tempat penyimpanan)**
 - [ ] Persetujuan orang tua untuk foto dan dokumen tercatat
 - [x] Hubungkan orang tua ke satu atau beberapa anak (lewat undangan atau manual oleh admin)
-- [ ] Profil pelatih dan penugasan ke KU per periode
+- [x] Penugasan pelatih dan korlas ke KU per periode, API dan layar admin (profil pelatih memakai nama anggota; kontak dan lisensi menyusul bila dibutuhkan)
 - [x] Pelatih hanya melihat pemain di KU yang ditugaskan pada periode berjalan (test: KU lain 404, daftar kosong tanpa penugasan; korlas sama, orang tua hanya anaknya)
-- [ ] Layar daftar, detail, dan formulir pemain di web; pencarian dan filter KU
+- [x] Layar daftar, detail, dan formulir pemain di web; pencarian dan filter KU (dicoba di 360 px, termasuk tampilan pelatih)
 - [ ] Impor pemain dari CSV dengan laporan baris gagal
 
 ## E. Latihan dan absensi

@@ -20,6 +20,9 @@ export default function AppBar(props: { me: Me }) {
         <Show when={props.me.memberships.length > 1}>
           <A class="tombol tipis" href="/pilih-ssb">Ganti SSB</A>
         </Show>
+        <Show when={props.me.active}>
+          <A class="tombol tipis" href="/pemain">{props.me.active!.role === "orang_tua" ? "Anak" : "Pemain"}</A>
+        </Show>
         <Show when={["admin_ssb", "pelatih", "korlas"].includes(props.me.active?.role ?? "")}>
           <A class="tombol tipis" href="/master">Data master</A>
         </Show>
