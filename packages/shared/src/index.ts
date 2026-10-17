@@ -115,11 +115,32 @@ export const createInvitationSchema = z.object({
   playerId: z.uuid().optional(),
 });
 
+/**
+ * Nomor WhatsApp: spasi, strip, dan tanda kurung dibuang, awalan "+" dibuang (62... tetap 62...),
+ * dan harus 8 sampai 15 angka. Disimpan sebagai angka saja, mis. 081234567890 atau 6281234567890.
+ */
+export const whatsappSchema = z
+  .string()
+  .trim()
+  .transform((s) => s.replace(/[\s().-]/g, ""))
+  .pipe(z.string().regex(/^\+?\d{8,15}$/, "nomor WhatsApp tidak valid (8 sampai 15 angka)"))
+  .transform((s) => s.replace(/^\+/, ""));
+/** Isian kosong dianggap tidak diisi. */
+const emptyToUndefined = (v: unknown) => (typeof v === "string" && v.trim() === "" ? undefined : v);
+/** Hanya isian kosong yang menghapus; field yang tidak dikirim tetap ditolak agar permintaan kosong tidak menghapus nomor. */
+const emptyToNull = (v: unknown) => (typeof v === "string" && v.trim() === "" ? null : v);
+
 /** Menerima undangan dengan akun baru (email + kata sandi). Akun yang sudah login tidak perlu body. */
 export const acceptInvitationSchema = z.object({
   name: z.string().trim().min(1).max(120),
   email: emailSchema,
   password: passwordSchema,
+  whatsapp: z.preprocess(emptyToUndefined, whatsappSchema.optional()),
+});
+
+/** Mengubah kontak keanggotaan di SSB aktif. Kosong atau null menghapus nomor. */
+export const updateProfileSchema = z.object({
+  whatsapp: z.preprocess(emptyToNull, whatsappSchema.nullable()),
 });
 
 export const changePasswordSchema = z.object({
@@ -148,6 +169,8 @@ export const meSchema = z.object({
   email: z.string(),
   /** Apakah akun punya kata sandi (akun yang hanya login Google belum punya). */
   hasPassword: z.boolean(),
+  /** Nomor WhatsApp pada keanggotaan di SSB aktif; null bila belum diisi atau belum memilih SSB. */
+  whatsapp: z.string().nullable(),
   /** SSB aktif pada sesi ini; kosong bila akun belum memilih SSB. */
   active: membershipSchema.nullable(),
   memberships: z.array(membershipSchema),
@@ -225,6 +248,14 @@ export type PlayerDetail = PlayerSummary & {
   history: { field: "age_group" | "status"; from: string | null; to: string | null; at: string }[];
   /** Hanya untuk admin SSB. */
   guardians?: { userId: string; name: string; relationship: string | null }[];
+};
+/** Ringkasan per pemain untuk tabel pemain: wali utama (hanya admin SSB) dan penilaian terakhir. */
+export type PlayerOverview = {
+  playerId: string;
+  /** Hanya diisi untuk admin SSB. `total` = jumlah wali yang terhubung; yang ditampilkan wali pertama. */
+  guardian: { name: string; whatsapp: string | null; relationship: string | null; total: number } | null;
+  /** Penilaian pada periode terbaru. Orang tua hanya mendapat yang sudah terbit. */
+  latestAssessment: { periodName: string; overall: number | null; assessedOn: string; published: boolean } | null;
 };
 export type Assignment = { userId: string; userName: string; role: UserRole; ageGroupId: string; ageGroupName: string; periodId: string; periodName: string };
 

@@ -1,0 +1,714 @@
+<!DOCTYPE html>
+
+<html lang="id"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="web_dashboard" name="shell-type"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Next:ital,wght@0,400..700;1,400..700&amp;family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config={darkMode:"class",theme:{extend:{colors:{"surface-tint":"#37684f","tertiary":"#640001","surface-container-highest":"#d8e6dc","secondary-container":"#fecf47","on-secondary-fixed-variant":"#594400","error":"#ba1a1a","outline":"#717973","tertiary-fixed":"#ffdad5","on-secondary-container":"#725800","surface-dim":"#cfddd4","primary-fixed":"#b9efcf","surface-bright":"#effdf3","inverse-primary":"#9ed2b4","background":"#effdf3","on-primary-container":"#8abd9f","on-primary-fixed-variant":"#1e5038","on-surface":"#121e18","on-error-container":"#93000a","secondary-fixed":"#ffdf91","outline-variant":"#c0c9c1","on-primary":"#ffffff","inverse-surface":"#27332d","tertiary-container":"#87170f","primary-container":"#1b4d36","surface-container":"#e3f1e7","on-surface-variant":"#414943","surface-container-low":"#e9f7ed","secondary-fixed-dim":"#efc13a","error-container":"#ffdad6","surface-container-high":"#ddece2","surface-variant":"#d8e6dc","on-tertiary-container":"#ff9485","inverse-on-surface":"#e6f4ea","on-background":"#121e18","primary":"#003621","on-tertiary-fixed-variant":"#8b1911","secondary":"#755b00","primary-fixed-dim":"#9ed2b4","on-primary-fixed":"#002113","tertiary-fixed-dim":"#ffb4a9","surface":"#effdf3","on-error":"#ffffff","on-secondary-fixed":"#241a00","on-tertiary":"#ffffff","on-tertiary-fixed":"#410000","on-secondary":"#ffffff","surface-container-lowest":"#ffffff"},borderRadius:{DEFAULT:"0.25rem",lg:"0.5rem",xl:"0.75rem",full:"9999px"},spacing:{"margin-mobile":"1rem","space-sm":"0.5rem",gutter:"1rem",margin:"1.5rem","gutter-mobile":"0.75rem","space-md":"0.75rem","space-lg":"1rem","space-xs":"0.25rem","space-xl":"1.5rem"},fontFamily:{"metric-display":["Atkinson Hyperlegible Next"],"headline-sm":["Bricolage Grotesque"],"body-md":["Atkinson Hyperlegible Next"],"body-lg":["Atkinson Hyperlegible Next"],"display-lg":["Bricolage Grotesque"],"body-sm":["Atkinson Hyperlegible Next"],"label-md":["Atkinson Hyperlegible Next"],"headline-md":["Bricolage Grotesque"],"label-lg":["Atkinson Hyperlegible Next"],"headline-lg":["Bricolage Grotesque"],"label-sm":["Atkinson Hyperlegible Next"],"display-lg-mobile":["Bricolage Grotesque"]},fontSize:{"metric-display":["32px",{lineHeight:"36px",fontWeight:"700"}],"headline-sm":["18px",{lineHeight:"24px",fontWeight:"700"}],"body-md":["14px",{lineHeight:"20px",fontWeight:"400"}],"body-lg":["16px",{lineHeight:"24px",fontWeight:"400"}],"display-lg":["40px",{lineHeight:"48px",fontWeight:"800"}],"body-sm":["12px",{lineHeight:"16px",fontWeight:"400"}],"label-md":["12px",{lineHeight:"16px",fontWeight:"700"}],"headline-md":["22px",{lineHeight:"28px",fontWeight:"700"}],"label-lg":["14px",{lineHeight:"18px",fontWeight:"700"}],"headline-lg":["28px",{lineHeight:"34px",fontWeight:"700"}],"label-sm":["11px",{lineHeight:"14px",fontWeight:"700"}],"display-lg-mobile":["30px",{lineHeight:"36px",fontWeight:"800"}]}}}};</script></head><body class="bg-surface font-body-md text-on-surface antialiased"><aside class="fixed left-0 top-0 h-full w-72 bg-surface-container-lowest border-r border-outline-variant z-50 flex flex-col justify-between shadow-[0_1px_8px_rgba(0,0,0,0.04)]"><div class="flex flex-col"><div class="p-space-lg border-b border-outline-variant bg-surface-container-low"><div class="flex items-center gap-space-sm mb-space-xs"><span class="material-symbols-outlined text-primary text-metric-display">sports_soccer</span><div class="leading-none"><h1 class="font-headline-sm text-headline-sm text-primary tracking-tight uppercase">SSB Garuda Muda</h1><p class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Famili United Academy</p></div></div><div class="mt-space-md flex items-center justify-between pt-space-xs"><span class="inline-flex items-center px-space-xs py-0.5 rounded bg-primary-container text-on-primary font-label-sm text-label-sm">Admin SSB</span><span class="font-label-sm text-label-sm text-on-surface-variant">T.A. 2026/2027</span></div></div><div class="p-space-md"><p class="px-space-sm pb-space-xs font-label-sm text-label-sm text-outline uppercase tracking-wider">Menu Administrasi</p><nav class="flex flex-col gap-1" data-active-classes="bg-primary-container text-on-primary font-bold"><a aria-current="page" class="flex items-center gap-space-md px-space-md py-space-sm rounded transition-colors min-h-[44px] bg-primary-container text-on-primary font-bold" data-path="pemain" href="#"><span class="material-symbols-outlined text-base">badge</span><span class="font-label-lg text-label-lg">Pemain</span></a><a class="flex items-center gap-space-md px-space-md py-space-sm rounded text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors min-h-[44px]" data-path="kehadiran-&amp;-sesi" href="#"><span class="material-symbols-outlined text-base">fact_check</span><span class="font-label-lg text-label-lg">Kehadiran &amp; Sesi</span></a><a class="flex items-center gap-space-md px-space-md py-space-sm rounded text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors min-h-[44px]" data-path="jadwal-latihan" href="#"><span class="material-symbols-outlined text-base">calendar_month</span><span class="font-label-lg text-label-lg">Jadwal Latihan</span></a><a class="flex items-center gap-space-md px-space-md py-space-sm rounded text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors min-h-[44px]" data-path="data-master-&amp;-ku" href="#"><span class="material-symbols-outlined text-base">lan</span><span class="font-label-lg text-label-lg">Data Master &amp; KU</span></a><a class="flex items-center gap-space-md px-space-md py-space-sm rounded text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors min-h-[44px]" data-path="indikator-penilaian" href="#"><span class="material-symbols-outlined text-base">assignment_turned_in</span><span class="font-label-lg text-label-lg">Indikator Penilaian</span></a><a class="flex items-center gap-space-md px-space-md py-space-sm rounded text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors min-h-[44px]" data-path="akun-&amp;-undangan" href="#"><span class="material-symbols-outlined text-base">group_add</span><span class="font-label-lg text-label-lg">Akun &amp; Undangan</span></a></nav></div></div><div class="p-space-md border-t border-outline-variant bg-surface-container-low"><nav><a class="flex items-center gap-space-md px-space-md py-space-sm rounded text-error hover:bg-error-container hover:text-on-error-container transition-colors min-h-[44px]" data-path="keluar" href="#"><span class="material-symbols-outlined text-base">logout</span><span class="font-label-lg text-label-lg">Keluar</span></a></nav></div></aside><div class="pl-72"><header class="fixed top-0 left-72 right-0 h-16 bg-surface-container-lowest/90 backdrop-blur-md border-b border-outline-variant z-40 flex items-center justify-between px-space-xl"><div class="flex items-center gap-space-lg flex-1 max-w-xl"><div class="relative w-full"><span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant">search</span><input class="w-full pl-10 pr-space-md py-1.5 rounded bg-surface-container-low border border-outline-variant font-body-sm text-body-sm text-on-surface placeholder:text-outline focus:outline-none focus:border-primary-container transition-all" placeholder="Cari siswa, NIS, pelatih, atau kelompok umur..." type="text"/></div></div><div class="flex items-center gap-space-md"><div class="hidden md:flex items-center gap-space-xs border-r border-outline-variant pr-space-md"><span class="inline-flex items-center gap-1 px-space-xs py-0.5 rounded bg-surface-container text-on-surface font-label-sm text-label-sm"><span class="material-symbols-outlined text-sm text-secondary">verified</span> SSB Terakreditasi B</span></div><div class="flex items-center gap-space-sm pl-space-xs"><div class="text-right hidden sm:block leading-tight"><p class="font-label-md text-label-md text-on-surface">Koordinator Administrasi</p><p class="font-body-sm text-body-sm text-on-surface-variant">admin@garudamuda.id</p></div><img alt="Profile" class="w-8 h-8 rounded-full object-cover border border-outline-variant" src="https://lh3.googleusercontent.com/aida/AEtjO1UC-6y4GC6buVkPI1F7-jxldMh3QydP5m5gcBF39JAlyX7u86nRndT8bFH9SJECtc83lghMPNBK1bX0T9xgXKeVydutaiCwcgpUi9x7ukN1NUcseq53QfCmc_2IKGwmxpNFEBpjJ3alk_uWygaC3PUv9DDQN43fxpJit6LEZEtLxZ72kmsNsytoYcprU0Pxlo8MsX6Sk8hGRuBI-nYKgBNYiiY3ddVZSY-7vLN1zIqoQ9VdPhMT-J5y-lmyh7WURLhFAnmMF4KzKrc"/></div></div></header><main class="relative pt-16 bg-surface min-h-screen"><div class="flex flex-col w-full">
+<div class="px-space-xl py-space-lg flex flex-col gap-space-lg">
+<!-- Header Bagian Atas & Tombol Operasional -->
+<div class="flex flex-col xl:flex-row xl:items-end justify-between gap-space-md">
+<div>
+<div class="flex items-center gap-2 mb-1">
+<span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-on-surface-variant bg-surface-container font-label-sm text-label-sm uppercase tracking-wider">
+<span class="w-1.5 h-1.5 rounded-full bg-surface-tint"></span>
+            Buku Induk Registrasi
+          </span>
+<span class="text-outline text-label-sm font-label-sm">/</span>
+<span class="text-on-surface-variant font-label-sm text-label-sm">Akademi Famili United</span>
+</div>
+<h2 class="font-headline-lg text-headline-lg text-primary tracking-tight">Kelola Data Pemain &amp; Siswa Didik</h2>
+<p class="font-body-md text-body-md text-on-surface-variant mt-0.5">
+          Musim 2026/2027 • Total <span class="font-bold text-on-surface">128 Siswa</span> Terdaftar di 5 Kelompok Umur (KU)
+        </p>
+</div>
+<div class="flex flex-wrap items-center gap-space-sm">
+<button class="inline-flex items-center gap-2 px-space-md py-2.5 rounded bg-surface-container text-on-surface hover:bg-surface-container-high transition-colors font-label-lg text-label-lg">
+<span class="material-symbols-outlined text-base text-on-surface-variant">file_upload</span>
+<span>Impor Data CSV</span>
+</button>
+<button class="inline-flex items-center gap-2 px-space-md py-2.5 rounded bg-surface-container text-on-surface hover:bg-surface-container-high transition-colors font-label-lg text-label-lg">
+<span class="material-symbols-outlined text-base text-on-surface-variant">print</span>
+<span>Ekspor Buku Induk</span>
+</button>
+<button class="inline-flex items-center gap-2 px-space-lg py-2.5 rounded bg-secondary-container text-on-secondary-container hover:bg-secondary-fixed transition-colors font-label-lg text-label-lg shadow-sm" id="btnTambahPemain">
+<span class="material-symbols-outlined text-lg">person_add</span>
+<span>+ Tambah Pemain Baru</span>
+</button>
+</div>
+</div>
+<!-- Ringkasan Statistik Cepat (Ledger Badges) -->
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-space-md">
+<div class="bg-surface-container-lowest p-space-md rounded flex items-center justify-between shadow-sm">
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm text-outline uppercase tracking-wider">Total Siswa Aktif</span>
+<div class="flex items-baseline gap-2 mt-1">
+<span class="font-metric-display text-metric-display text-primary">124</span>
+<span class="font-label-sm text-label-sm px-1.5 py-0.5 rounded bg-primary-container text-on-primary">96.8%</span>
+</div>
+<span class="font-body-sm text-body-sm text-on-surface-variant mt-0.5">4 siswa berstatus izin/cuti</span>
+</div>
+<div class="w-12 h-12 rounded bg-surface-container flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-2xl">groups</span>
+</div>
+</div>
+<div class="bg-surface-container-lowest p-space-md rounded flex items-center justify-between shadow-sm">
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm text-outline uppercase tracking-wider">Kelompok Umur Terbanyak</span>
+<div class="flex items-baseline gap-2 mt-1">
+<span class="font-metric-display text-metric-display text-primary">KU-10</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">28 Anak</span>
+</div>
+<span class="font-body-sm text-body-sm text-on-surface-variant mt-0.5">Kelahiran 2016-2017</span>
+</div>
+<div class="w-12 h-12 rounded bg-surface-container flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-2xl">category</span>
+</div>
+</div>
+<div class="bg-surface-container-lowest p-space-md rounded flex items-center justify-between shadow-sm">
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm text-outline uppercase tracking-wider">Kehadiran Sesi Pekan Ini</span>
+<div class="flex items-baseline gap-2 mt-1">
+<span class="font-metric-display text-metric-display text-primary">84%</span>
+<span class="font-label-sm text-label-sm text-primary flex items-center">
+<span class="material-symbols-outlined text-xs">trending_up</span> +3.2%
+            </span>
+</div>
+<span class="font-body-sm text-body-sm text-on-surface-variant mt-0.5">Target kehadiran akademi &gt; 80%</span>
+</div>
+<div class="w-12 h-12 rounded bg-surface-container flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-2xl">event_available</span>
+</div>
+</div>
+<div class="bg-surface-container-lowest p-space-md rounded flex items-center justify-between shadow-sm">
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm text-outline uppercase tracking-wider">Verifikasi Rapor Siswa</span>
+<div class="flex items-baseline gap-2 mt-1">
+<span class="font-metric-display text-metric-display text-tertiary">6</span>
+<span class="font-label-sm text-label-sm px-1.5 py-0.5 rounded bg-tertiary-fixed text-on-tertiary-fixed">Tertunda</span>
+</div>
+<span class="font-body-sm text-body-sm text-on-surface-variant mt-0.5">Siklus Evaluasi Triwulan I</span>
+</div>
+<div class="w-12 h-12 rounded bg-tertiary-fixed-dim/30 flex items-center justify-center text-tertiary">
+<span class="material-symbols-outlined text-2xl">assignment_late</span>
+</div>
+</div>
+</div>
+<!-- Bilah Filter & Pencarian Lengkap (Substitusi Wireframe Input Polos) -->
+<div class="bg-surface-container-lowest p-space-md rounded flex flex-col gap-space-md shadow-sm">
+<div class="grid grid-cols-1 md:grid-cols-12 gap-space-sm items-center">
+<!-- Kolom Pencarian Cerdas -->
+<div class="md:col-span-5 relative">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline text-lg">search</span>
+<input class="w-full pl-10 pr-20 py-2.5 rounded bg-surface-container-low text-on-surface font-body-sm text-body-sm placeholder:text-outline focus:outline-none focus:ring-1 focus:ring-primary-container" id="searchInput" placeholder="Cari nama anak, ID (misal: SSB-0012), nama ortu, atau WhatsApp..." type="text"/>
+<div class="absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none hidden sm:flex items-center gap-1 px-1.5 py-0.5 rounded bg-surface-container text-outline text-[10px] font-mono">
+<span>Ctrl</span><span>K</span>
+</div>
+</div>
+<!-- Filter Kelompok Umur -->
+<div class="md:col-span-2">
+<div class="relative">
+<select class="w-full appearance-none pl-3 pr-8 py-2.5 rounded bg-surface-container-low text-on-surface font-label-md text-label-md focus:outline-none focus:ring-1 focus:ring-primary-container cursor-pointer" id="filterKU">
+<option value="ALL">Semua Kelompok Umur</option>
+<option value="KU-8">KU-8 (Usia 6-8 Thn)</option>
+<option selected="" value="KU-10">KU-10 (Usia 9-10 Thn)</option>
+<option value="KU-12">KU-12 (Usia 11-12 Thn)</option>
+<option value="KU-14">KU-14 (Usia 13-14 Thn)</option>
+<option value="KU-16">KU-16 (Usia 15-16 Thn)</option>
+</select>
+<span class="material-symbols-outlined pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-outline text-base">expand_more</span>
+</div>
+</div>
+<!-- Filter Status Siswa -->
+<div class="md:col-span-2">
+<div class="relative">
+<select class="w-full appearance-none pl-3 pr-8 py-2.5 rounded bg-surface-container-low text-on-surface font-label-md text-label-md focus:outline-none focus:ring-1 focus:ring-primary-container cursor-pointer" id="filterStatus">
+<option value="ALL">Semua Status Siswa</option>
+<option value="AKTIF">Aktif - Lunas</option>
+<option value="CUTI">Cuti Medis / Izin</option>
+<option value="PANTAUAN">Dalam Pantauan Khusus</option>
+<option value="NONAKTIF">Nonaktif / Keluar</option>
+</select>
+<span class="material-symbols-outlined pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-outline text-base">expand_more</span>
+</div>
+</div>
+<!-- Filter Posisi Bermain -->
+<div class="md:col-span-2">
+<div class="relative">
+<select class="w-full appearance-none pl-3 pr-8 py-2.5 rounded bg-surface-container-low text-on-surface font-label-md text-label-md focus:outline-none focus:ring-1 focus:ring-primary-container cursor-pointer" id="filterPosisi">
+<option value="ALL">Semua Posisi Lapangan</option>
+<option value="GK">Penjaga Gawang (GK)</option>
+<option value="DF">Pemain Belakang (DF)</option>
+<option value="MF">Gelandang Tengah (MF)</option>
+<option value="FW">Penyerang Depan (FW)</option>
+</select>
+<span class="material-symbols-outlined pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-outline text-base">expand_more</span>
+</div>
+</div>
+<!-- Tombol Reset / Filter Lanjutan -->
+<div class="md:col-span-1 flex justify-end">
+<button class="p-2.5 rounded bg-surface-container text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors" id="btnResetFilter" title="Reset Filter">
+<span class="material-symbols-outlined text-base">filter_alt_off</span>
+</button>
+</div>
+</div>
+<!-- Bilah Status Filter & Bulk Selection Actions -->
+<div class="flex flex-col sm:flex-row sm:items-center justify-between pt-2 gap-2">
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-surface-tint"></span>
+<span class="font-label-sm text-label-sm text-on-surface">Menampilkan 24 pemain di <span class="text-primary font-bold">KU-10 Garuda Muda</span></span>
+<span class="text-outline text-label-sm font-label-sm">•</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Urutan: No. Punggung / Registrasi</span>
+</div>
+<!-- Menu Aksi Massal (Aktif Saat Ada Centang) -->
+<div class="flex items-center gap-space-xs text-body-sm" id="bulkActionsBar">
+<span class="font-label-sm text-label-sm text-on-surface-variant mr-1"><span class="font-bold text-primary" id="selectedCount">0</span> dipilih:</span>
+<button class="px-2.5 py-1 rounded bg-surface-container text-on-surface hover:bg-surface-container-high font-label-sm text-label-sm transition-colors flex items-center gap-1">
+<span class="material-symbols-outlined text-xs">qr_code_2</span> Cetak QR Card
+          </button>
+<button class="px-2.5 py-1 rounded bg-surface-container text-on-surface hover:bg-surface-container-high font-label-sm text-label-sm transition-colors flex items-center gap-1">
+<span class="material-symbols-outlined text-xs">chat</span> Blast WhatsApp
+          </button>
+</div>
+</div>
+</div>
+<!-- Tabel Data Siswa Gaya Dossier / Buku Induk Pelatih -->
+<div class="bg-surface-container-lowest rounded shadow-sm overflow-hidden flex flex-col">
+<div class="overflow-x-auto w-full">
+<table class="w-full text-left text-body-sm font-body-sm border-collapse">
+<thead>
+<tr class="bg-surface-container-low text-on-surface-variant font-label-sm text-label-sm uppercase tracking-wider">
+<th class="py-3 px-4 w-12 text-center">
+<input class="rounded accent-primary-container w-4 h-4 cursor-pointer" id="checkAll" type="checkbox"/>
+</th>
+<th class="py-3 px-3">No. Induk (NIS)</th>
+<th class="py-3 px-4">Profil Siswa &amp; Kelahiran</th>
+<th class="py-3 px-4">KU &amp; Spesialisasi</th>
+<th class="py-3 px-4">Kontak Wali / Ortu</th>
+<th class="py-3 px-4 text-center">Presensi Sesi</th>
+<th class="py-3 px-4 text-center">Rapor Terakhir</th>
+<th class="py-3 px-4 text-center">Status Administrasi</th>
+<th class="py-3 px-4 text-right">Aksi</th>
+</tr>
+</thead>
+<tbody class="text-on-surface">
+<!-- Baris 1: Cakra Pratama -->
+<tr class="hover:bg-surface-container-low/70 transition-colors">
+<td class="py-3 px-4 text-center">
+<input class="row-checkbox rounded accent-primary-container w-4 h-4 cursor-pointer" type="checkbox"/>
+</td>
+<td class="py-3 px-3">
+<span class="font-mono text-label-sm font-label-sm px-2 py-0.5 rounded bg-surface-container text-on-surface font-semibold">SSB-0012</span>
+</td>
+<td class="py-3 px-4">
+<div class="flex items-center gap-3">
+<img class="w-10 h-10 rounded-full object-cover bg-surface-container flex-shrink-0" data-alt="Close-up documentary portrait of an Indonesian 10-year-old youth football player named Cakra wearing green and yellow training jersey outdoors on a sunny grass field, natural light, focused and proud expression" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBP3Leoh5T7Jk8ypburnZTu-c8kJCdnCe_xBi475nS467HftsXpsvtGfovbMKN_Mp5fH-Bu2TTV4gfw7JNphF5d7ujBRCCjlo5rJ9hKj9ftiL2M-RmrP03GO2V5wvpeZjA7xGRjqpBmCGuOvj3R0kZ2IIUClo98HysC2oh-lG0-YRHSkON9CI1-aQRuPhAHLwPaN1U5EcFYxqZZmdMHCw2OURYI7PYVTwcwDlNgSA5RcDBg6NCsugM--Q"/>
+<div class="min-w-0">
+<p class="font-headline-sm text-headline-sm text-primary leading-tight hover:underline cursor-pointer">Cakra Pratama</p>
+<p class="font-body-sm text-body-sm text-on-surface-variant">10 Thn • Lahir 14 Mei 2016 (Bandung)</p>
+</div>
+</div>
+</td>
+<td class="py-3 px-4">
+<div class="flex flex-col">
+<span class="inline-flex items-center gap-1 font-label-sm text-label-sm text-primary">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span> KU-10
+                  </span>
+<span class="text-on-surface-variant font-body-sm text-body-sm">Sayap Kanan (RW)</span>
+</div>
+</td>
+<td class="py-3 px-4">
+<div class="flex flex-col leading-tight">
+<span class="font-label-md text-label-md text-on-surface">Ibu Ratna Kumala</span>
+<a class="text-surface-tint hover:underline flex items-center gap-1 font-body-sm text-body-sm mt-0.5" href="https://wa.me/6281123456789" target="_blank">
+<span class="material-symbols-outlined text-[13px]">chat</span> 0811-2345-6789
+                  </a>
+</div>
+</td>
+<td class="py-3 px-4 text-center">
+<div class="flex flex-col items-center">
+<span class="inline-flex items-center px-2 py-0.5 rounded bg-primary-fixed text-on-primary-fixed-variant font-label-sm text-label-sm font-bold">82%</span>
+<span class="text-[11px] text-on-surface-variant mt-0.5">18 dari 22 Sesi</span>
+</div>
+</td>
+<td class="py-3 px-4 text-center">
+<div class="inline-flex flex-col items-center">
+<span class="inline-flex items-center gap-1 font-headline-sm text-headline-sm text-primary">
+                    7.7
+                  </span>
+<span class="font-label-sm text-[10px] text-surface-tint uppercase">Sangat Baik</span>
+</div>
+</td>
+<td class="py-3 px-4 text-center">
+<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded bg-surface-container text-on-surface font-label-sm text-label-sm">
+<span class="w-1.5 h-1.5 rounded-full bg-surface-tint"></span>
+                  Aktif (Lunas)
+                </span>
+</td>
+<td class="py-3 px-4 text-right">
+<div class="flex items-center justify-end gap-1">
+<button class="p-1.5 rounded hover:bg-surface-container text-on-surface-variant hover:text-primary transition-colors" title="Lihat Profil Dossier &amp; QR">
+<span class="material-symbols-outlined text-base">badge</span>
+</button>
+<button class="p-1.5 rounded hover:bg-surface-container text-on-surface-variant hover:text-primary transition-colors" title="Cetak Kartu Rapor">
+<span class="material-symbols-outlined text-base">receipt_long</span>
+</button>
+<button class="p-1.5 rounded hover:bg-surface-container text-on-surface-variant hover:text-primary transition-colors" title="Menu Lainnya">
+<span class="material-symbols-outlined text-base">more_vert</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- Baris 2: Dimas Arya -->
+<tr class="hover:bg-surface-container-low/70 transition-colors">
+<td class="py-3 px-4 text-center">
+<input class="row-checkbox rounded accent-primary-container w-4 h-4 cursor-pointer" type="checkbox"/>
+</td>
+<td class="py-3 px-3">
+<span class="font-mono text-label-sm font-label-sm px-2 py-0.5 rounded bg-surface-container text-on-surface font-semibold">SSB-0015</span>
+</td>
+<td class="py-3 px-4">
+<div class="flex items-center gap-3">
+<img class="w-10 h-10 rounded-full object-cover bg-surface-container flex-shrink-0" data-alt="Realistic headshot portrait of an Indonesian schoolboy athlete named Dimas Arya, short black hair, confident cheerful smile, wearing deep green sports jersey, warm daylight setting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAxXCbqj7d3pJ3pd9qI-jRY37gq_8FfYXAVwRAF9tuBKm1_68qqkiKt60vm22PJquS1sldmxzcKSFTf0s1NLTzR8nDgn8wk64j-yltZLossRkrBJzaKywOnt12MZpf94eGKfhqx0TE3qvlL_xwgen1ePOKqaY9-aOz_ennOOBpounoOuyZiLhWKe5ohkwGVvHuUL2V-OGjzpPYRnN901wO2LULWb071BZkHtMLvk3lcxVtSZut6TgFDMA"/>
+<div class="min-w-0">
+<p class="font-headline-sm text-headline-sm text-primary leading-tight hover:underline cursor-pointer">Dimas Arya</p>
+<p class="font-body-sm text-body-sm text-on-surface-variant">10 Thn • Lahir 2 Feb 2016 (Cimahi)</p>
+</div>
+</div>
+</td>
+<td class="py-3 px-4">
+<div class="flex flex-col">
+<span class="inline-flex items-center gap-1 font-label-sm text-label-sm text-primary">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span> KU-10
+                  </span>
+<span class="text-on-surface-variant font-body-sm text-body-sm">Gelandang Tengah (CM)</span>
+</div>
+</td>
+<td class="py-3 px-4">
+<div class="flex flex-col leading-tight">
+<span class="font-label-md text-label-md text-on-surface">Bpk. Hendra S.</span>
+<a class="text-surface-tint hover:underline flex items-center gap-1 font-body-sm text-body-sm mt-0.5" href="https://wa.me/6281244551122" target="_blank">
+<span class="material-symbols-outlined text-[13px]">chat</span> 0812-4455-1122
+                  </a>
+</div>
+</td>
+<td class="py-3 px-4 text-center">
+<div class="flex flex-col items-center">
+<span class="inline-flex items-center px-2 py-0.5 rounded bg-primary-fixed text-on-primary-fixed-variant font-label-sm text-label-sm font-bold">90%</span>
+<span class="text-[11px] text-on-surface-variant mt-0.5">20 dari 22 Sesi</span>
+</div>
+</td>
+<td class="py-3 px-4 text-center">
+<div class="inline-flex flex-col items-center">
+<span class="inline-flex items-center gap-1 font-headline-sm text-headline-sm text-primary">
+                    8.1
+                  </span>
+<span class="font-label-sm text-[10px] text-surface-tint uppercase">Istimewa</span>
+</div>
+</td>
+<td class="py-3 px-4 text-center">
+<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded bg-surface-container text-on-surface font-label-sm text-label-sm">
+<span class="w-1.5 h-1.5 rounded-full bg-surface-tint"></span>
+                  Aktif (Lunas)
+                </span>
+</td>
+<td class="py-3 px-4 text-right">
+<div class="flex items-center justify-end gap-1">
+<button class="p-1.5 rounded hover:bg-surface-container text-on-surface-variant hover:text-primary transition-colors" title="Lihat Profil Dossier &amp; QR">
+<span class="material-symbols-outlined text-base">badge</span>
+</button>
+<button class="p-1.5 rounded hover:bg-surface-container text-on-surface-variant hover:text-primary transition-colors" title="Cetak Kartu Rapor">
+<span class="material-symbols-outlined text-base">receipt_long</span>
+</button>
+<button class="p-1.5 rounded hover:bg-surface-container text-on-surface-variant hover:text-primary transition-colors" title="Menu Lainnya">
+<span class="material-symbols-outlined text-base">more_vert</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- Baris 3: Farhan Maulana (Goalkeeper) -->
+<tr class="hover:bg-surface-container-low/70 transition-colors">
+<td class="py-3 px-4 text-center">
+<input class="row-checkbox rounded accent-primary-container w-4 h-4 cursor-pointer" type="checkbox"/>
+</td>
+<td class="py-3 px-3">
+<span class="font-mono text-label-sm font-label-sm px-2 py-0.5 rounded bg-surface-container text-on-surface font-semibold">SSB-0003</span>
+</td>
+<td class="py-3 px-4">
+<div class="flex items-center gap-3">
+<img class="w-10 h-10 rounded-full object-cover bg-surface-container flex-shrink-0" data-alt="Sports portrait of an Indonesian 9-year-old youth goalkeeper named Farhan wearing padded goalie jersey and goalkeeping gloves holding football under his arm, focused stadium backdrop" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD3ObH2EH6aN2b-J8ehMqiEKO2stAQQn5MubAydfyma2c0Ehz1PO85PfzkKZRNfxT66dWWidS5xOGWaCLsv0jowYHVFEbW72S2d1xVcvE7lBeZ1IjFyYz3rZ7APZDTyfFWkzZSqFH2gIk64ntrbZZBc1lt6kWz6WByK4Kbx0HIA5RAsK-rr8tU1fF2oguwJ4zOxmK9-OvmmKV61JyKGSg4Jue1ArsnAwdmV45FVBnBdE5MgxkhW9WB3xA"/>
+<div class="min-w-0">
+<p class="font-headline-sm text-headline-sm text-primary leading-tight hover:underline cursor-pointer">Farhan Maulana</p>
+<p class="font-body-sm text-body-sm text-on-surface-variant">9 Thn • Lahir 11 Nov 2016 (Sumedang)</p>
+</div>
+</div>
+</td>
+<td class="py-3 px-4">
+<div class="flex flex-col">
+<span class="inline-flex items-center gap-1 font-label-sm text-label-sm text-primary">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span> KU-10
+                  </span>
+<span class="text-on-surface-variant font-body-sm text-body-sm">Penjaga Gawang (GK)</span>
+</div>
+</td>
+<td class="py-3 px-4">
+<div class="flex flex-col leading-tight">
+<span class="font-label-md text-label-md text-on-surface">Ibu Dewi Sartika</span>
+<a class="text-surface-tint hover:underline flex items-center gap-1 font-body-sm text-body-sm mt-0.5" href="https://wa.me/6281399887766" target="_blank">
+<span class="material-symbols-outlined text-[13px]">chat</span> 0813-9988-7766
+                  </a>
+</div>
+</td>
+<td class="py-3 px-4 text-center">
+<div class="flex flex-col items-center">
+<span class="inline-flex items-center px-2 py-0.5 rounded bg-surface-container text-on-surface-variant font-label-sm text-label-sm font-bold">75%</span>
+<span class="text-[11px] text-on-surface-variant mt-0.5">16 dari 22 Sesi</span>
+</div>
+</td>
+<td class="py-3 px-4 text-center">
+<div class="inline-flex flex-col items-center">
+<span class="inline-flex items-center gap-1 font-headline-sm text-headline-sm text-primary">
+                    7.2
+                  </span>
+<span class="font-label-sm text-[10px] text-on-surface-variant uppercase">Baik</span>
+</div>
+</td>
+<td class="py-3 px-4 text-center">
+<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded bg-surface-container text-on-surface font-label-sm text-label-sm">
+<span class="w-1.5 h-1.5 rounded-full bg-surface-tint"></span>
+                  Aktif (Lunas)
+                </span>
+</td>
+<td class="py-3 px-4 text-right">
+<div class="flex items-center justify-end gap-1">
+<button class="p-1.5 rounded hover:bg-surface-container text-on-surface-variant hover:text-primary transition-colors" title="Lihat Profil Dossier &amp; QR">
+<span class="material-symbols-outlined text-base">badge</span>
+</button>
+<button class="p-1.5 rounded hover:bg-surface-container text-on-surface-variant hover:text-primary transition-colors" title="Cetak Kartu Rapor">
+<span class="material-symbols-outlined text-base">receipt_long</span>
+</button>
+<button class="p-1.5 rounded hover:bg-surface-container text-on-surface-variant hover:text-primary transition-colors" title="Menu Lainnya">
+<span class="material-symbols-outlined text-base">more_vert</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- Baris 4: Rizky Ramadhan (Cuti Medis) -->
+<tr class="hover:bg-surface-container-low/70 transition-colors">
+<td class="py-3 px-4 text-center">
+<input class="row-checkbox rounded accent-primary-container w-4 h-4 cursor-pointer" type="checkbox"/>
+</td>
+<td class="py-3 px-3">
+<span class="font-mono text-label-sm font-label-sm px-2 py-0.5 rounded bg-surface-container text-on-surface font-semibold">SSB-0008</span>
+</td>
+<td class="py-3 px-4">
+<div class="flex items-center gap-3">
+<img class="w-10 h-10 rounded-full object-cover bg-surface-container flex-shrink-0" data-alt="Dossier identity photo of Indonesian boy athlete Rizky Ramadhan, athletic build, gentle gaze, neutral studio lighting with sports bib, natural skin tones" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBXG97-FtjSl4-Dhsr67ht3uK5HgOwhnHKQ6UP2NOW9oqFWkZacHks5OG7mcj6NjiHpT6aGY6cfekh7LttPIPyEgrjOVchnVXGLsJJzj8sSfUA3yj6F95EDxK281ioFQhxfsTiXcBjBOtxf6Ki2m1OYUGO8FDpikrcvwklREuDSGkyDqe46fVdrKsh-4mdyNR6Fv-c_4UshLZSxdRQjhlrn0WK4Xf2HfnrPOsc9RJxsSJFiTpHtBNY-yQ"/>
+<div class="min-w-0">
+<p class="font-headline-sm text-headline-sm text-primary leading-tight hover:underline cursor-pointer">Rizky Ramadhan</p>
+<p class="font-body-sm text-body-sm text-on-surface-variant">10 Thn • Lahir 28 Ags 2016 (Garut)</p>
+</div>
+</div>
+</td>
+<td class="py-3 px-4">
+<div class="flex flex-col">
+<span class="inline-flex items-center gap-1 font-label-sm text-label-sm text-primary">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span> KU-10
+                  </span>
+<span class="text-on-surface-variant font-body-sm text-body-sm">Bek Tengah (CB)</span>
+</div>
+</td>
+<td class="py-3 px-4">
+<div class="flex flex-col leading-tight">
+<span class="font-label-md text-label-md text-on-surface">Bpk. Joko Susilo</span>
+<a class="text-surface-tint hover:underline flex items-center gap-1 font-body-sm text-body-sm mt-0.5" href="https://wa.me/6285611223344" target="_blank">
+<span class="material-symbols-outlined text-[13px]">chat</span> 0856-1122-3344
+                  </a>
+</div>
+</td>
+<td class="py-3 px-4 text-center">
+<div class="flex flex-col items-center">
+<span class="inline-flex items-center px-2 py-0.5 rounded bg-secondary-fixed text-on-secondary-fixed-variant font-label-sm text-label-sm font-bold">68%</span>
+<span class="text-[11px] text-on-surface-variant mt-0.5">15 dari 22 Sesi</span>
+</div>
+</td>
+<td class="py-3 px-4 text-center">
+<div class="inline-flex flex-col items-center">
+<span class="inline-flex items-center gap-1 font-headline-sm text-headline-sm text-on-surface-variant">
+                    6.9
+                  </span>
+<span class="font-label-sm text-[10px] text-outline uppercase">Cukup</span>
+</div>
+</td>
+<td class="py-3 px-4 text-center">
+<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded bg-secondary-container/50 text-on-secondary-container font-label-sm text-label-sm">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>
+                  Cuti Medis (Cedera)
+                </span>
+</td>
+<td class="py-3 px-4 text-right">
+<div class="flex items-center justify-end gap-1">
+<button class="p-1.5 rounded hover:bg-surface-container text-on-surface-variant hover:text-primary transition-colors" title="Lihat Profil Dossier &amp; QR">
+<span class="material-symbols-outlined text-base">badge</span>
+</button>
+<button class="p-1.5 rounded hover:bg-surface-container text-on-surface-variant hover:text-primary transition-colors" title="Cetak Kartu Rapor">
+<span class="material-symbols-outlined text-base">receipt_long</span>
+</button>
+<button class="p-1.5 rounded hover:bg-surface-container text-on-surface-variant hover:text-primary transition-colors" title="Menu Lainnya">
+<span class="material-symbols-outlined text-base">more_vert</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- Baris 5: Kevin Pratama (Peringkat Teratas) -->
+<tr class="hover:bg-surface-container-low/70 transition-colors">
+<td class="py-3 px-4 text-center">
+<input class="row-checkbox rounded accent-primary-container w-4 h-4 cursor-pointer" type="checkbox"/>
+</td>
+<td class="py-3 px-3">
+<span class="font-mono text-label-sm font-label-sm px-2 py-0.5 rounded bg-surface-container text-on-surface font-semibold">SSB-0019</span>
+</td>
+<td class="py-3 px-4">
+<div class="flex items-center gap-3">
+<img class="w-10 h-10 rounded-full object-cover bg-surface-container flex-shrink-0" data-alt="Professional sports headshot of an energetic 10-year-old Indonesian soccer talent named Kevin Pratama wearing green uniform jersey, intense athletic focus, high crisp detail" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBBTVoGYyG9cLBX_SJfGrcv7VdcQ67fM-f95GmJcpRaemkS_e2Qzic_mUa0-S40EydY2EwTnN-ecn409U4j6aJUX2gKJ_H-Z-OznonMIi9JW3wRbUYC4CVvg6iEelxc9KHpDlux7bCgjr6XZEtrZlzTLqTgPBdB4IN-aFca7hGe4DflLtxTWM-yOx4r3WMPqNpeBxD553LhlrVJ_Fxx6OrV3_JMuUiDzpw1TkXRVUHTEWpQ4NRHR-C6pQ"/>
+<div class="min-w-0">
+<p class="font-headline-sm text-headline-sm text-primary leading-tight hover:underline cursor-pointer">Kevin Pratama</p>
+<p class="font-body-sm text-body-sm text-on-surface-variant">10 Thn • Lahir 19 Jan 2016 (Bandung)</p>
+</div>
+</div>
+</td>
+<td class="py-3 px-4">
+<div class="flex flex-col">
+<span class="inline-flex items-center gap-1 font-label-sm text-label-sm text-primary">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span> KU-10
+                  </span>
+<span class="text-on-surface-variant font-body-sm text-body-sm">Gelandang Serang (AM)</span>
+</div>
+</td>
+<td class="py-3 px-4">
+<div class="flex flex-col leading-tight">
+<span class="font-label-md text-label-md text-on-surface">Ibu Siti Nurbaya</span>
+<a class="text-surface-tint hover:underline flex items-center gap-1 font-body-sm text-body-sm mt-0.5" href="https://wa.me/6287833445566" target="_blank">
+<span class="material-symbols-outlined text-[13px]">chat</span> 0878-3344-5566
+                  </a>
+</div>
+</td>
+<td class="py-3 px-4 text-center">
+<div class="flex flex-col items-center">
+<span class="inline-flex items-center px-2 py-0.5 rounded bg-primary-fixed text-on-primary-fixed-variant font-label-sm text-label-sm font-bold">95%</span>
+<span class="text-[11px] text-on-surface-variant mt-0.5">21 dari 22 Sesi</span>
+</div>
+</td>
+<td class="py-3 px-4 text-center">
+<div class="inline-flex flex-col items-center">
+<span class="inline-flex items-center gap-1 font-headline-sm text-headline-sm text-secondary-container">
+<span class="material-symbols-outlined text-sm text-secondary fill-1" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="text-primary">8.4</span>
+</span>
+<span class="font-label-sm text-[10px] text-secondary font-bold uppercase">Unggul</span>
+</div>
+</td>
+<td class="py-3 px-4 text-center">
+<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded bg-surface-container text-on-surface font-label-sm text-label-sm">
+<span class="w-1.5 h-1.5 rounded-full bg-surface-tint"></span>
+                  Aktif (Lunas)
+                </span>
+</td>
+<td class="py-3 px-4 text-right">
+<div class="flex items-center justify-end gap-1">
+<button class="p-1.5 rounded hover:bg-surface-container text-on-surface-variant hover:text-primary transition-colors" title="Lihat Profil Dossier &amp; QR">
+<span class="material-symbols-outlined text-base">badge</span>
+</button>
+<button class="p-1.5 rounded hover:bg-surface-container text-on-surface-variant hover:text-primary transition-colors" title="Cetak Kartu Rapor">
+<span class="material-symbols-outlined text-base">receipt_long</span>
+</button>
+<button class="p-1.5 rounded hover:bg-surface-container text-on-surface-variant hover:text-primary transition-colors" title="Menu Lainnya">
+<span class="material-symbols-outlined text-base">more_vert</span>
+</button>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Bilah Navigasi Halaman (Pagination) & Rincian Total -->
+<div class="p-space-md bg-surface-container-low flex flex-col sm:flex-row items-center justify-between gap-space-sm">
+<div class="text-body-sm font-body-sm text-on-surface-variant">
+          Menampilkan <span class="font-bold text-on-surface">1 - 5</span> dari total <span class="font-bold text-on-surface">128</span> siswa terdaftar
+        </div>
+<div class="flex items-center gap-1">
+<button class="px-2.5 py-1.5 rounded bg-surface-container text-on-surface hover:bg-surface-container-high transition-colors font-label-sm text-label-sm disabled:opacity-40" disabled="">
+<span class="material-symbols-outlined text-xs align-middle">chevron_left</span> Sebelumnya
+          </button>
+<button class="w-8 h-8 rounded bg-primary-container text-on-primary font-label-sm text-label-sm font-bold">1</button>
+<button class="w-8 h-8 rounded bg-surface-container text-on-surface hover:bg-surface-container-high font-label-sm text-label-sm">2</button>
+<button class="w-8 h-8 rounded bg-surface-container text-on-surface hover:bg-surface-container-high font-label-sm text-label-sm">3</button>
+<span class="px-1 text-outline">...</span>
+<button class="w-8 h-8 rounded bg-surface-container text-on-surface hover:bg-surface-container-high font-label-sm text-label-sm">13</button>
+<button class="px-2.5 py-1.5 rounded bg-surface-container text-on-surface hover:bg-surface-container-high transition-colors font-label-sm text-label-sm">
+            Berikutnya <span class="material-symbols-outlined text-xs align-middle">chevron_right</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Modul Bantuan / Catatan Teknis Pelatih (Dossier Footer Note) -->
+<div class="bg-surface-container p-space-md rounded flex items-start gap-space-md shadow-sm">
+<span class="material-symbols-outlined text-surface-tint mt-0.5">info</span>
+<div class="flex-1 text-body-sm font-body-sm text-on-surface-variant">
+<p class="font-label-md text-label-md text-on-surface">Pedoman Validasi Dokumen SSB Garuda Muda</p>
+<p class="mt-0.5">
+          Kelompok Umur (KU) dihitung otomatis berdasarkan verifikasi Akta Kelahiran resmi per 1 Januari musim kompetisi PSSI berjalan. Untuk siswa berstatus <span class="text-secondary font-semibold">Cuti Medis</span>, silakan lampirkan surat keterangan dokter tim melalui menu ubah profil siswa sebelum diikutsertakan kembali ke sesi taktis tim.
+        </p>
+</div>
+<a class="font-label-sm text-label-sm text-primary font-bold hover:underline self-center flex items-center gap-1" href="#">
+        Buku Panduan Teknis <span class="material-symbols-outlined text-xs">arrow_forward</span>
+</a>
+</div>
+</div>
+<!-- Modal Dialog Tambah Pemain Cepat (Interaktif Sederhana) -->
+<div class="fixed inset-0 bg-inverse-surface/50 backdrop-blur-sm z-50 hidden items-center justify-center p-4" id="modalTambahPemain">
+<div class="bg-surface-container-lowest rounded max-w-lg w-full p-space-lg shadow-xl flex flex-col gap-space-md">
+<div class="flex items-center justify-between">
+<div>
+<h3 class="font-headline-sm text-headline-sm text-primary">Registrasi Siswa Didik Baru</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Keluarkan nomor induk dan daftarkan ke KU terkait</p>
+</div>
+<button class="p-1 rounded text-outline hover:text-on-surface" id="btnCloseModal">
+<span class="material-symbols-outlined text-xl">close</span>
+</button>
+</div>
+<div class="flex flex-col gap-space-sm pt-2">
+<div>
+<label class="block font-label-sm text-label-sm text-on-surface mb-1">Nama Lengkap Siswa</label>
+<input class="w-full px-3 py-2 rounded bg-surface-container-low text-on-surface font-body-sm text-body-sm focus:outline-none focus:ring-1 focus:ring-primary-container" placeholder="Contoh: Muhammad Rayhan" type="text"/>
+</div>
+<div class="grid grid-cols-2 gap-space-sm">
+<div>
+<label class="block font-label-sm text-label-sm text-on-surface mb-1">Tanggal Lahir</label>
+<input class="w-full px-3 py-2 rounded bg-surface-container-low text-on-surface font-body-sm text-body-sm focus:outline-none focus:ring-1 focus:ring-primary-container" type="date" value="2016-06-15"/>
+</div>
+<div>
+<label class="block font-label-sm text-label-sm text-on-surface mb-1">Kelompok Umur (KU)</label>
+<select class="w-full px-3 py-2 rounded bg-surface-container-low text-on-surface font-label-md text-label-md focus:outline-none focus:ring-1 focus:ring-primary-container">
+<option>KU-8</option>
+<option selected="">KU-10</option>
+<option>KU-12</option>
+<option>KU-14</option>
+<option>KU-16</option>
+</select>
+</div>
+</div>
+<div class="grid grid-cols-2 gap-space-sm">
+<div>
+<label class="block font-label-sm text-label-sm text-on-surface mb-1">Posisi Utama</label>
+<select class="w-full px-3 py-2 rounded bg-surface-container-low text-on-surface font-label-md text-label-md focus:outline-none focus:ring-1 focus:ring-primary-container">
+<option>Penjaga Gawang (GK)</option>
+<option>Bek Tengah (CB)</option>
+<option>Bek Sayap (LB/RB)</option>
+<option selected="">Gelandang (MF)</option>
+<option>Sayap (LW/RW)</option>
+<option>Penyerang (CF)</option>
+</select>
+</div>
+<div>
+<label class="block font-label-sm text-label-sm text-on-surface mb-1">Kaki Dominan</label>
+<select class="w-full px-3 py-2 rounded bg-surface-container-low text-on-surface font-label-md text-label-md focus:outline-none focus:ring-1 focus:ring-primary-container">
+<option selected="">Kanan</option>
+<option>Kiri</option>
+<option>Kedua Kaki (Ambidextrous)</option>
+</select>
+</div>
+</div>
+<div>
+<label class="block font-label-sm text-label-sm text-on-surface mb-1">Nama Orang Tua &amp; No. WhatsApp</label>
+<div class="grid grid-cols-2 gap-space-sm">
+<input class="w-full px-3 py-2 rounded bg-surface-container-low text-on-surface font-body-sm text-body-sm focus:outline-none focus:ring-1 focus:ring-primary-container" placeholder="Nama Ibu/Bapak" type="text"/>
+<input class="w-full px-3 py-2 rounded bg-surface-container-low text-on-surface font-body-sm text-body-sm focus:outline-none focus:ring-1 focus:ring-primary-container" placeholder="08xxxxxxxxxx" type="text"/>
+</div>
+</div>
+</div>
+<div class="flex items-center justify-end gap-space-sm pt-4 border-t border-surface-container-high">
+<button class="px-space-md py-2 rounded bg-surface-container text-on-surface hover:bg-surface-container-high font-label-md text-label-md transition-colors" id="btnCancelModal">
+          Batal
+        </button>
+<button class="px-space-lg py-2 rounded bg-secondary-container text-on-secondary-container hover:bg-secondary-fixed font-label-md text-label-md transition-colors shadow-sm" id="btnSavePemain">
+          Simpan ke Buku Induk
+        </button>
+</div>
+</div>
+</div>
+</div>
+<script>
+  (function() {
+    // Interaktivitas Modal Tambah Pemain
+    const btnTambah = document.getElementById('btnTambahPemain');
+    const modal = document.getElementById('modalTambahPemain');
+    const btnClose = document.getElementById('btnCloseModal');
+    const btnCancel = document.getElementById('btnCancelModal');
+    const btnSave = document.getElementById('btnSavePemain');
+
+    function openModal() {
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    }
+
+    function closeModal() {
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+
+    if (btnTambah) btnTambah.addEventListener('click', openModal);
+    if (btnClose) btnClose.addEventListener('click', closeModal);
+    if (btnCancel) btnCancel.addEventListener('click', closeModal);
+    if (btnSave) {
+      btnSave.addEventListener('click', function() {
+        alert('Data siswa baru berhasil ditambahkan ke Buku Induk KU-10.');
+        closeModal();
+      });
+    }
+
+    // Interaktivitas Checkbox Massal
+    const checkAll = document.getElementById('checkAll');
+    const rowCheckboxes = document.querySelectorAll('.row-checkbox');
+    const selectedCount = document.getElementById('selectedCount');
+
+    function updateCount() {
+      const checked = document.querySelectorAll('.row-checkbox:checked').length;
+      if (selectedCount) selectedCount.textContent = checked;
+    }
+
+    if (checkAll) {
+      checkAll.addEventListener('change', function() {
+        rowCheckboxes.forEach(cb => {
+          cb.checked = checkAll.checked;
+        });
+        updateCount();
+      });
+    }
+
+    rowCheckboxes.forEach(cb => {
+      cb.addEventListener('change', updateCount);
+    });
+
+    // Reset Filter Button
+    const btnReset = document.getElementById('btnResetFilter');
+    const searchInput = document.getElementById('searchInput');
+    const filterKU = document.getElementById('filterKU');
+    const filterStatus = document.getElementById('filterStatus');
+    const filterPosisi = document.getElementById('filterPosisi');
+
+    if (btnReset) {
+      btnReset.addEventListener('click', function() {
+        if (searchInput) searchInput.value = '';
+        if (filterKU) filterKU.value = 'ALL';
+        if (filterStatus) filterStatus.value = 'ALL';
+        if (filterPosisi) filterPosisi.value = 'ALL';
+      });
+    }
+
+    // Keyboard shortcut Ctrl + K untuk fokus cari
+    window.addEventListener('keydown', function(e) {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        if (searchInput) searchInput.focus();
+      }
+    });
+  })();
+</script></main></div></body></html>

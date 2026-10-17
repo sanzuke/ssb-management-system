@@ -1,7 +1,15 @@
 import { Hono } from "hono";
-import { and, asc, desc, eq, ilike, sql, type SQL } from "drizzle-orm";
+import { and, asc, desc, eq, ilike, inArray, isNotNull, sql, type SQL } from "drizzle-orm";
 import { schema, withTenant, type Db, type Tx } from "@ssb/db";
-import { assignmentInputSchema, guardianInputSchema, playerFormSchema, playerStatusSchema, type PlayerDetail, type PlayerSummary } from "@ssb/shared";
+import {
+  assignmentInputSchema,
+  guardianInputSchema,
+  playerFormSchema,
+  playerStatusSchema,
+  type PlayerDetail,
+  type PlayerOverview,
+  type PlayerSummary,
+} from "@ssb/shared";
 import { HttpError } from "./errors";
 import { requirePermission, type AppEnv, type Member } from "./auth/middleware";
 import { isUniqueViolation } from "./auth/service";
@@ -98,6 +106,75 @@ export function playerRoutes(db: Db) {
             .limit(500),
         );
         return c.json(rows.map(toSummary));
+      })
+
+      // Ringkasan untuk tabel pemain dalam satu permintaan: wali utama dan penilaian terakhir tiap pemain
+      // yang boleh dilihat role ini. Data wali (nama, WhatsApp) hanya untuk admin SSB, sama seperti daftar wali di detail pemain.
+      .get("/players-overview", requirePermission("player.read"), async (c) => {
+        const m = ctx(c);
+        const out = await withTenant(db, m.ssbId, async (tx): Promise<PlayerOverview[]> => {
+          const ids = (await tx.select({ id: schema.player.id }).from(schema.player).where(visibleTo(m)).limit(500)).map((r) => r.id);
+          if (ids.length === 0) return [];
+
+          // Penilaian terbaru per pemain: periode terbaru dulu, lalu tanggal penilaian. Orang tua hanya yang terbit.
+          const A = schema.assessment;
+          const rows = await tx
+            .select({ id: A.id, playerId: A.playerId, assessedOn: A.assessedOn, publishedAt: A.publishedAt, periodName: schema.period.name })
+            .from(A)
+            .innerJoin(schema.period, and(eq(schema.period.ssbId, A.ssbId), eq(schema.period.id, A.periodId)))
+            .where(and(inArray(A.playerId, ids), m.role === "orang_tua" ? isNotNull(A.publishedAt) : undefined))
+            .orderBy(desc(schema.period.startDate), desc(A.assessedOn));
+          const terbaru = new Map<string, (typeof rows)[number]>();
+          for (const r of rows) if (!terbaru.has(r.playerId)) terbaru.set(r.playerId, r);
+          const rata = new Map<string, number>();
+          if (terbaru.size > 0) {
+            const S = schema.assessmentScore;
+            const avg = await tx
+              .select({ assessmentId: S.assessmentId, rata: sql<string>`avg(${S.score})` })
+              .from(S)
+              .where(
+                inArray(
+                  S.assessmentId,
+                  [...terbaru.values()].map((r) => r.id),
+                ),
+              )
+              .groupBy(S.assessmentId);
+            for (const r of avg) rata.set(r.assessmentId, Math.round(Number(r.rata) * 10) / 10);
+          }
+
+          // Wali: hanya admin SSB.
+          const wali = new Map<string, { name: string; whatsapp: string | null; relationship: string | null; total: number }>();
+          if (m.role === "admin_ssb") {
+            const g = await tx
+              .select({
+                playerId: schema.playerGuardian.playerId,
+                name: schema.appUser.name,
+                whatsapp: schema.appUser.whatsapp,
+                relationship: schema.playerGuardian.relationship,
+              })
+              .from(schema.playerGuardian)
+              .innerJoin(schema.appUser, and(eq(schema.appUser.ssbId, schema.playerGuardian.ssbId), eq(schema.appUser.id, schema.playerGuardian.userId)))
+              .where(inArray(schema.playerGuardian.playerId, ids))
+              .orderBy(asc(schema.appUser.name));
+            for (const r of g) {
+              const ada = wali.get(r.playerId);
+              if (ada) ada.total++;
+              else wali.set(r.playerId, { name: r.name, whatsapp: r.whatsapp, relationship: r.relationship, total: 1 });
+            }
+          }
+
+          return ids.map((playerId) => {
+            const a = terbaru.get(playerId);
+            return {
+              playerId,
+              guardian: wali.get(playerId) ?? null,
+              latestAssessment: a
+                ? { periodName: a.periodName, overall: rata.get(a.id) ?? null, assessedOn: a.assessedOn, published: a.publishedAt !== null }
+                : null,
+            };
+          });
+        });
+        return c.json(out);
       })
 
       .get("/players/:id", requirePermission("player.read"), async (c) => {

@@ -21,6 +21,7 @@ export default function Undangan() {
   const [name, setName] = createSignal("");
   const [email, setEmail] = createSignal("");
   const [password, setPassword] = createSignal("");
+  const [whatsapp, setWhatsapp] = createSignal("");
 
   onMount(async () => {
     try {
@@ -35,7 +36,7 @@ export default function Undangan() {
 
   const form = createSubmit(async () => {
     const path = `/invitations/${encodeURIComponent(p.token)}/accept`;
-    await api(path, { method: "POST", body: me() ? {} : { name: name(), email: email(), password: password() } });
+    await api(path, { method: "POST", body: me() ? {} : { name: name(), email: email(), password: password(), whatsapp: whatsapp() } });
     nav("/", { replace: true });
   });
 
@@ -112,6 +113,17 @@ export default function Undangan() {
                 value={password()}
                 onInput={setPassword}
                 error={form.fields().password}
+              />
+              <Field
+                id="whatsapp"
+                label="Nomor WhatsApp (boleh dikosongkan)"
+                type="tel"
+                inputmode="tel"
+                autocomplete="tel"
+                hint="Dipakai admin SSB untuk menghubungi Anda. Contoh: 081234567890."
+                value={whatsapp()}
+                onInput={setWhatsapp}
+                error={form.fields().whatsapp}
               />
               <button class="tombol utama" type="submit" disabled={form.busy()}>
                 {form.busy() ? "Membuat akun…" : "Buat akun dan bergabung"}

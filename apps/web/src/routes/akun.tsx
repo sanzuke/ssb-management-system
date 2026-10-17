@@ -12,11 +12,22 @@ export default function Akun() {
   const [current, setCurrent] = createSignal("");
   const [next, setNext] = createSignal("");
   const [done, setDone] = createSignal(false);
+  const [wa, setWa] = createSignal("");
+  const [waDone, setWaDone] = createSignal(false);
 
   onMount(async () => {
     const m = await getMe().catch(() => null);
     if (!m) return nav("/masuk", { replace: true });
     setMe(m);
+    setWa(m.whatsapp ?? "");
+  });
+
+  const kontak = createSubmit(async () => {
+    setWaDone(false);
+    const r = await api<{ ok: boolean; whatsapp: string | null }>("/auth/me", { method: "PATCH", body: { whatsapp: wa() } });
+    setMe({ ...me()!, whatsapp: r.whatsapp });
+    setWa(r.whatsapp ?? "");
+    setWaDone(true);
   });
 
   const form = createSubmit(async () => {
@@ -39,6 +50,39 @@ export default function Akun() {
         <p>
           {me()!.name}, {me()!.email}
         </p>
+
+        <Show when={me()!.active}>
+          <h2>Kontak</h2>
+          <p>
+            Nomor WhatsApp untuk keanggotaan Anda di <strong>{me()!.active!.ssbName}</strong>. Admin SSB bisa melihatnya untuk menghubungi Anda.
+          </p>
+          <Show when={kontak.error()}>
+            <div class="peringatan" role="alert">
+              {kontak.error()}
+            </div>
+          </Show>
+          <Show when={waDone()}>
+            <div class="info" role="status">
+              {me()!.whatsapp ? "Nomor WhatsApp disimpan." : "Nomor WhatsApp dihapus."}
+            </div>
+          </Show>
+          <form class="form" onSubmit={kontak.submit}>
+            <Field
+              id="whatsapp"
+              label="Nomor WhatsApp"
+              type="tel"
+              inputmode="tel"
+              autocomplete="tel"
+              hint="Contoh: 081234567890. Kosongkan untuk menghapus."
+              value={wa()}
+              onInput={setWa}
+              error={kontak.fields().whatsapp}
+            />
+            <button class="tombol utama" type="submit" disabled={kontak.busy()}>
+              {kontak.busy() ? "Menyimpan…" : "Simpan nomor"}
+            </button>
+          </form>
+        </Show>
 
         <h2>{me()!.hasPassword ? "Ganti kata sandi" : "Tambah kata sandi"}</h2>
         <Show when={!me()!.hasPassword}>
