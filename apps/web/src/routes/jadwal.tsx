@@ -1,7 +1,6 @@
 import { A, useNavigate } from "@solidjs/router";
 import { Title } from "@solidjs/meta";
 import { createMemo, createSignal, For, onMount, Show } from "solid-js";
-import AppBar from "~/components/AppBar";
 import SessionForm from "~/components/SessionForm";
 import { api, ApiError, getMe, type Me } from "~/lib/api";
 import type { AgeGroup, Location, TrainingSession } from "@ssb/shared";
@@ -82,7 +81,6 @@ export default function Jadwal() {
   return (
     <Show when={me()} fallback={<p class="halaman">Memuat…</p>}>
       <Title>Jadwal latihan · SSB App</Title>
-      <AppBar me={me()!} />
       <main class="halaman">
         <h1>Jadwal latihan</h1>
         <Show when={error()}>

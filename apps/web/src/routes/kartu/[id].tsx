@@ -1,7 +1,6 @@
 import { A, useNavigate, useParams } from "@solidjs/router";
 import { Title } from "@solidjs/meta";
 import { createSignal, onMount, Show } from "solid-js";
-import AppBar from "~/components/AppBar";
 import QrCode from "~/components/QrCode";
 import { api, ApiError, getMe, type Me } from "~/lib/api";
 import { inisial, posisiLabel, statusLabel, type PlayerDetail } from "~/lib/pemain";
@@ -34,7 +33,6 @@ export default function KartuPemain() {
   return (
     <Show when={me()} fallback={<p class="halaman">Memuat…</p>}>
       <Title>Kartu pemain · SSB App</Title>
-      <AppBar me={me()!} />
       <main class="halaman">
         <Show when={error()}>
           <div class="peringatan" role="alert">

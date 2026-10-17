@@ -1,7 +1,6 @@
 import { A, useNavigate } from "@solidjs/router";
 import { Title } from "@solidjs/meta";
 import { createMemo, createSignal, For, onMount, Show } from "solid-js";
-import AppBar from "~/components/AppBar";
 import Field from "~/components/Field";
 import SelectField from "~/components/SelectField";
 import { api, ApiError, getMe, type Me } from "~/lib/api";
@@ -84,7 +83,6 @@ export default function Indikator() {
   return (
     <Show when={me()} fallback={<p class="halaman">Memuat…</p>}>
       <Title>Indikator penilaian · SSB App</Title>
-      <AppBar me={me()!} />
       <main class="halaman">
         <h1>Indikator penilaian</h1>
         <p>

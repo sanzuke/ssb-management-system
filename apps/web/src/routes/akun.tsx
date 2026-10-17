@@ -1,7 +1,6 @@
 import { A, useNavigate } from "@solidjs/router";
 import { Title } from "@solidjs/meta";
 import { createSignal, onMount, Show } from "solid-js";
-import AppBar from "~/components/AppBar";
 import Field from "~/components/Field";
 import { api, getMe, type Me } from "~/lib/api";
 import { createSubmit } from "~/lib/form";
@@ -44,7 +43,6 @@ export default function Akun() {
   return (
     <Show when={me()} fallback={<p class="halaman">Memuat…</p>}>
       <Title>Akun · SSB App</Title>
-      <AppBar me={me()!} />
       <main class="halaman">
         <h1>Akun</h1>
         <p>

@@ -1,6 +1,6 @@
 import { A, useNavigate } from "@solidjs/router";
 import { Show } from "solid-js";
-import { api, roleLabel, type Me } from "~/lib/api";
+import { api, lupaMe, roleLabel, type Me } from "~/lib/api";
 import Ikon from "./Ikon";
 
 /**
@@ -11,6 +11,7 @@ export default function AppBar(props: { me: Me }) {
   const nav = useNavigate();
   const logout = async () => {
     await api("/auth/logout", { method: "POST" });
+    lupaMe();
     nav("/masuk", { replace: true });
   };
   const staf = () => ["admin_ssb", "pelatih", "korlas"].includes(props.me.active?.role ?? "");

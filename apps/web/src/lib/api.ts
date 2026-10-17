@@ -1,3 +1,5 @@
+import { createSignal } from "solid-js";
+import { isServer } from "solid-js/web";
 import type { Me, Membership } from "@ssb/shared";
 
 export type { Me, Membership };
@@ -30,14 +32,44 @@ export async function api<T>(path: string, init: { method?: string; body?: unkno
   return data as T;
 }
 
-/** Akun yang sedang login, atau null bila belum login. */
-export async function getMe(): Promise<Me | null> {
-  try {
-    return await api<Me>("/auth/me");
-  } catch (e) {
-    if (e instanceof ApiError && e.status === 401) return null;
-    throw e;
-  }
+/**
+ * Akun terakhir yang dimuat, disimpan di sisi klien agar menu tetap tampil saat berpindah halaman.
+ * Hanya diisi di browser (tidak pernah di server) supaya tidak bocor antar pengguna.
+ */
+const [meCache, setMeCache] = createSignal<Me | null>(null);
+/** Sudah pernah memeriksa akun di browser ini (hasilnya bisa null bila belum login). */
+const [meDicek, setMeDicek] = createSignal(false);
+export { meCache, meDicek };
+/** Lupakan akun yang tersimpan, mis. setelah keluar. */
+export const lupaMe = () => setMeCache(null);
+
+let berjalan: Promise<Me | null> | null = null;
+/** Akun yang sedang login, atau null bila belum login. Permintaan yang bersamaan digabung menjadi satu. */
+export function getMe(): Promise<Me | null> {
+  if (berjalan) return berjalan;
+  const p = (async () => {
+    try {
+      const m = await api<Me>("/auth/me");
+      if (!isServer) {
+        setMeCache(m);
+        setMeDicek(true);
+      }
+      return m;
+    } catch (e) {
+      if (e instanceof ApiError && e.status === 401) {
+        if (!isServer) {
+          setMeCache(null);
+          setMeDicek(true);
+        }
+        return null;
+      }
+      throw e;
+    } finally {
+      berjalan = null;
+    }
+  })();
+  berjalan = p;
+  return p;
 }
 
 export const roleLabel: Record<string, string> = {

@@ -1,7 +1,6 @@
 import { A, useNavigate } from "@solidjs/router";
 import { Title } from "@solidjs/meta";
 import { createSignal, onMount, Show } from "solid-js";
-import AppBar from "~/components/AppBar";
 import MasterSection from "~/components/MasterSection";
 import { getMe, type Me } from "~/lib/api";
 
@@ -24,7 +23,6 @@ export default function Master() {
   return (
     <Show when={me()} fallback={<p class="halaman">Memuat…</p>}>
       <Title>Data master · SSB App</Title>
-      <AppBar me={me()!} />
       <main class="halaman">
         <h1>Data master</h1>
         <Show when={canRead()} fallback={<p>Halaman ini hanya untuk admin, pelatih, dan koordinator.</p>}>

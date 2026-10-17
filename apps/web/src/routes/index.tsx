@@ -1,7 +1,6 @@
 import { A, useNavigate } from "@solidjs/router";
 import { Title } from "@solidjs/meta";
 import { createSignal, onMount, Show } from "solid-js";
-import AppBar from "~/components/AppBar";
 import DashboardStaf from "~/components/DashboardStaf";
 import PortalOrangTua from "~/components/PortalOrangTua";
 import { getMe, roleLabel, type Me } from "~/lib/api";
@@ -23,7 +22,6 @@ export default function Beranda() {
   return (
     <Show when={me()} fallback={<p class="halaman">Memuat…</p>}>
       <Title>Beranda · SSB App</Title>
-      <AppBar me={me()!} />
       <main class="halaman" classList={{ lebar: staf() }}>
         <Show
           when={staf()}
