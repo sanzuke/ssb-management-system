@@ -56,9 +56,10 @@ Prasyarat: [Bun](https://bun.sh) >= 1.4, Node.js >= 24 (untuk menjalankan hasil 
 5. Jalankan. API di http://localhost:3000, web di http://localhost:3001.
 
    ```
-   bun run dev:api
-   bun run dev:web
+   bun run dev            # API dan web sekaligus; Ctrl+C menghentikan keduanya
    ```
+
+   Atau satu per satu di dua terminal: `bun run dev:api` dan `bun run dev:web`.
 
 ## Menjalankan
 
@@ -66,8 +67,9 @@ Butuh Bun (>= 1.4). Build web memakai Vite; menjalankan hasil build butuh Node.
 
 ```
 bun install
-bun run dev:api        # http://localhost:3000/health
-bun run dev:web
+bun run dev            # API dan web sekaligus
+bun run dev:api        # hanya API: http://localhost:3000/health
+bun run dev:web        # hanya web
 bun run lint           # Biome: format dan lint (CI menjalankan ini)
 bun run format         # rapikan format otomatis
 bun run typecheck
