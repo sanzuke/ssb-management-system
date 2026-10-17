@@ -649,3 +649,13 @@
     grid-template-columns: repeat(2, 1fr);
   }
 }
+
+/* Placeholder menu selama akun belum selesai dimuat, agar tata letak tidak melompat */
+.bar-memuat {
+  min-height: 64px;
+}
+@media (min-width: 1024px) {
+  .bar-memuat {
+    min-height: 0;
+  }
+}

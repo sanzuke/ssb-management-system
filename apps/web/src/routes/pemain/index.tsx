@@ -1,7 +1,6 @@
 import { A, useNavigate } from "@solidjs/router";
 import { Title } from "@solidjs/meta";
 import { createMemo, createResource, createSignal, For, onMount, Show } from "solid-js";
-import AppBar from "~/components/AppBar";
 import Ikon from "~/components/Ikon";
 import { api, getMe, type Me } from "~/lib/api";
 import { inisial, posisiLabel, statusLabel, usia, tanggal, type AgeGroup, type PlayerSummary } from "~/lib/pemain";
@@ -115,7 +114,6 @@ export default function DaftarPemain() {
   return (
     <Show when={me()} fallback={<p class="halaman">Memuat…</p>}>
       <Title>Pemain · SSB App</Title>
-      <AppBar me={me()!} />
       <main class="halaman lebar">
         <Show when={players.error}>
           <div class="peringatan" role="alert">

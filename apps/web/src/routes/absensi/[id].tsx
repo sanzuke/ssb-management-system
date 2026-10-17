@@ -1,7 +1,6 @@
 import { A, useNavigate, useParams } from "@solidjs/router";
 import { Title } from "@solidjs/meta";
 import { createMemo, createSignal, For, onMount, Show } from "solid-js";
-import AppBar from "~/components/AppBar";
 import Ikon from "~/components/Ikon";
 import { api, ApiError, getMe, type Me } from "~/lib/api";
 import { createSubmit } from "~/lib/form";
@@ -79,7 +78,6 @@ export default function Absensi() {
 
   return (
     <Show when={me()} fallback={<p class="halaman">Memuat…</p>}>
-      <AppBar me={me()!} />
       <main class="halaman absensi">
         <Show
           when={!missing()}

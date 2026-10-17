@@ -1,7 +1,6 @@
 import { A, useNavigate } from "@solidjs/router";
 import { Title } from "@solidjs/meta";
 import { createSignal, onMount, Show } from "solid-js";
-import AppBar from "~/components/AppBar";
 import PlayerForm from "~/components/PlayerForm";
 import { api, getMe, type Me } from "~/lib/api";
 import type { AgeGroup } from "~/lib/pemain";
@@ -22,7 +21,6 @@ export default function PemainBaru() {
   return (
     <Show when={me()} fallback={<p class="halaman">Memuat…</p>}>
       <Title>Tambah pemain · SSB App</Title>
-      <AppBar me={me()!} />
       <main class="halaman">
         <h1>Tambah pemain</h1>
         <Show when={groups().length === 0}>

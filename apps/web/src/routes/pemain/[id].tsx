@@ -1,7 +1,6 @@
 import { A, useNavigate, useParams } from "@solidjs/router";
 import { Title } from "@solidjs/meta";
 import { createSignal, For, onMount, Show } from "solid-js";
-import AppBar from "~/components/AppBar";
 import PlayerForm from "~/components/PlayerForm";
 import SelectField from "~/components/SelectField";
 import { api, ApiError, getMe, type Me } from "~/lib/api";
@@ -64,7 +63,6 @@ export default function DetailPemain() {
 
   return (
     <Show when={me()} fallback={<p class="halaman">Memuat…</p>}>
-      <AppBar me={me()!} />
       <main class="halaman">
         <Show
           when={!missing()}

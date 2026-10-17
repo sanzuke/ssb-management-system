@@ -1,7 +1,6 @@
 import { A, useNavigate, useParams } from "@solidjs/router";
 import { Title } from "@solidjs/meta";
 import { createMemo, createSignal, For, onMount, Show } from "solid-js";
-import AppBar from "~/components/AppBar";
 import GrafikNilai from "~/components/GrafikNilai";
 import HasilNilai from "~/components/HasilNilai";
 import RencanaBaca from "~/components/RencanaBaca";
@@ -137,7 +136,6 @@ export default function NilaiPemain() {
 
   return (
     <Show when={me()} fallback={<p class="halaman">Memuat…</p>}>
-      <AppBar me={me()!} />
       <main class="halaman nilai">
         <Show
           when={!missing()}

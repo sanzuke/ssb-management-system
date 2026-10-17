@@ -1,7 +1,6 @@
 import { A, useNavigate } from "@solidjs/router";
 import { Title } from "@solidjs/meta";
 import { createResource, createSignal, For, onMount, Show } from "solid-js";
-import AppBar from "~/components/AppBar";
 import SelectField from "~/components/SelectField";
 import { api, getMe, type Me } from "~/lib/api";
 import type { AgeGroup, AttendanceSummary, Period } from "@ssb/shared";
@@ -43,7 +42,6 @@ export default function Kehadiran() {
   return (
     <Show when={me()} fallback={<p class="halaman">Memuat…</p>}>
       <Title>Kehadiran · SSB App</Title>
-      <AppBar me={me()!} />
       <main class="halaman">
         <h1>Kehadiran</h1>
         <Show when={!parent()}>
