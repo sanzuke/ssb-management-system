@@ -27,3 +27,4 @@ Satu baris per checkpoint, yang terbaru di atas. Hash commit menjadi acuan utama
 | cp-20-assessment-api | `ace6a5e` | 2026-10-17 | Assessment skala 1-10: indikator per KU (usulan awal 14), penilaian per pemain per periode, jejak skor, penerbitan ke orang tua; migrasi 0012; 73 test api; checklist 37/75 |
 | cp-21-assessment-web | `4f487b9` | 2026-10-17 | Layar penilaian skor 1-10 di HP, layar admin indikator (16 usulan awal), penerbitan, orang tua membaca; e2e 360 px; checklist 39/75 |
 | cp-22-fondasi-tooling | `4031a1a` | 2026-10-17 | Lint/format Biome, logging terstruktur (reqId), workflow CI di tools/ci (belum aktif), Docker Compose lokal (belum dijalankan); 76 test api; checklist 41/75 |
+| cp-23-grafik-nilai | `76b1572` | 2026-10-17 | Radar 6 aspek (periode terpilih vs sebelumnya) dan garis perkembangan antar periode, tabel angka; staf (lipat) dan orang tua; e2e dua periode 360 px; checklist 42/75 |
