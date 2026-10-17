@@ -70,3 +70,7 @@ Rentang usia KU tidak boleh tumpang tindih dalam satu SSB: dicek di API dalam tr
 ### Portal orang tua
 
 `GET /guardian/sessions?from=&to=` (izin `guardian.sessions`, default 30 hari ke belakang dan ke depan, maksimal 300 baris). Satu baris per anak per sesi di KU anak itu: tanggal, jam, KU, lokasi, dan status kehadiran anak (`null` bila belum dicatat). Orang tua tidak pernah menerima daftar pemain lain; `/sessions` dan roster absensi tetap tertutup untuk mereka (404/403). Admin juga memegang izin ini (aturan: admin memegang semua izin) tetapi daftarnya kosong karena admin tidak punya anak.
+
+### Kartu pemain
+
+Halaman `/kartu/<id>` memakai `GET /players/:id`, jadi batas aksesnya sama dengan profil (admin semua; pelatih dan korlas KU yang ditugaskan; orang tua anaknya). Isi QR adalah alamat profil `<asal web>/pemain/<id>` (UUID, bukan nomor anggota yang berurutan). QR tidak membawa data pribadi: profil tetap butuh login dan hak akses. QR digambar di browser dari matriks pustaka `qrcode` sebagai SVG, tanpa layanan luar. Untuk absensi scan QR nanti, pemindai cukup mengambil UUID dari alamat ini.

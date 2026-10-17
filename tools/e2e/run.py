@@ -185,6 +185,16 @@ with sync_playwright() as pw:
     expect(po.get_by_text("Hadir", exact=True)).to_be_visible(); expect(po.get_by_text("Andi Pratama")).to_have_count(0)
     po.screenshot(path=f"{OUT}/21-beranda-orang-tua.png", full_page=True); no_overflow(po, "beranda orang tua")
     po.goto(f"{WEB}/pemain/{[p for p in api_get(page, '/players') if p['fullName'] == 'Cakra Uji'][0]['id']}"); expect(po.get_by_text("tidak ditemukan", exact=False).first).to_be_visible()
+    # Kartu pemain: tampil lengkap, QR terbaca kamera dan menunjuk profil anak; kartu anak lain tertutup
+    po.goto(f"{WEB}/"); po.get_by_role("link", name="Kartu").click()
+    expect(po.get_by_role("heading", name="Kartu pemain")).to_be_visible(); expect(po.get_by_text("Eko Uji", exact=True)).to_be_visible(); expect(po.get_by_text("KU-10", exact=True)).to_be_visible()
+    po.locator("svg.qr").screenshot(path=f"{OUT}/22-qr.png"); po.screenshot(path=f"{OUT}/22-kartu.png", full_page=True); no_overflow(po, "kartu")
+    import cv2
+    img = cv2.imread(f"{OUT}/22-qr.png"); data, _, _ = cv2.QRCodeDetector().detectAndDecode(img)
+    assert data == f"{WEB}/pemain/{eko}", f"isi QR salah: {data!r}"
+    cakra = [p for p in api_get(page, "/players") if p["fullName"] == "Cakra Uji"][0]["id"]
+    po.goto(f"{WEB}/kartu/{cakra}"); expect(po.get_by_role("heading", name="Kartu tidak ditemukan")).to_be_visible()
+    page.goto(f"{WEB}/kartu/{cakra}"); expect(page.get_by_text("Cakra Uji", exact=True)).to_be_visible()
 
     # tautan sama tidak bisa dipakai lagi
     p2.goto(f"{WEB}/undangan/{token}"); expect(p2.get_by_role("heading", name="Undangan tidak berlaku")).to_be_visible()

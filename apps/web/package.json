@@ -18,7 +18,11 @@
     "@solidjs/start": "^2.0.0",
     "@ssb/shared": "workspace:*",
     "nitro": "^3.0.260610-beta",
+    "qrcode": "^1.5.4",
     "solid-js": "^1.9.14",
     "vite": "^8.0.0"
+  },
+  "devDependencies": {
+    "@types/qrcode": "^1.5.6"
   }
 }

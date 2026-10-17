@@ -53,6 +53,7 @@ export default function PortalOrangTua() {
                     </Show>
                   </span>
                 </A>
+                <A class="tombol tipis" href={`/kartu/${k.id}`}>Kartu</A>
                 <Show when={stat(k.id)?.percent != null}>
                   <A class="persen" href="/kehadiran" aria-label={`${stat(k.id)!.percent} persen hadir, lihat rekap`}>{String(stat(k.id)!.percent).replace(".", ",")}%</A>
                 </Show>
