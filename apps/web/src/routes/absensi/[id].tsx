@@ -2,17 +2,20 @@ import { A, useNavigate, useParams } from "@solidjs/router";
 import { Title } from "@solidjs/meta";
 import { createMemo, createSignal, For, onMount, Show } from "solid-js";
 import AppBar from "~/components/AppBar";
+import Ikon from "~/components/Ikon";
 import { api, ApiError, getMe, type Me } from "~/lib/api";
 import { createSubmit } from "~/lib/form";
+import { inisial } from "~/lib/pemain";
 import type { AttendanceRoster, AttendanceStatus } from "@ssb/shared";
 
 const hari = (s: string) => new Date(`${s}T00:00:00`).toLocaleDateString("id-ID", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
-const pilihan: { v: AttendanceStatus; label: string }[] = [
-  { v: "hadir", label: "Hadir" },
-  { v: "izin", label: "Izin" },
-  { v: "sakit", label: "Sakit" },
-  { v: "alpa", label: "Alpa" },
+const pilihan: { v: AttendanceStatus; label: string; huruf: string }[] = [
+  { v: "hadir", label: "Hadir", huruf: "H" },
+  { v: "izin", label: "Izin", huruf: "I" },
+  { v: "sakit", label: "Sakit", huruf: "S" },
+  { v: "alpa", label: "Alpa", huruf: "A" },
 ];
+const labelStatus = (v: AttendanceStatus | undefined) => pilihan.find((o) => o.v === v)?.label ?? "Belum";
 
 export default function Absensi() {
   const nav = useNavigate();
@@ -64,6 +67,7 @@ export default function Absensi() {
     }
     return c;
   });
+  const terdata = () => (roster()?.players.length ?? 0) - count().belum;
 
   const form = createSubmit(async () => {
     const entries = roster()!
@@ -92,12 +96,25 @@ export default function Absensi() {
         >
           <Show when={roster()} fallback={<p>Memuat…</p>}>
             <Title>Absensi {roster()!.session.ageGroup.name} · SSB App</Title>
+            <p class="ortu-chip-baris">
+              <span class="ortu-chip hijau">Sesi lapangan</span>
+            </p>
             <h1>Absensi {roster()!.session.ageGroup.name}</h1>
-            <p>
+            <p class="petunjuk">
               {hari(roster()!.session.sessionDate)}
               {roster()!.session.startTime ? `, jam ${roster()!.session.startTime}` : ""}
               {roster()!.session.location ? `, ${roster()!.session.location!.name}` : ""}
             </p>
+            <dl class="rekap-absen" aria-label="Ringkasan absensi">
+              <For each={pilihan}>
+                {(o) => (
+                  <div data-v={o.v}>
+                    <dt>{o.label}</dt>
+                    <dd>{count()[o.v]}</dd>
+                  </div>
+                )}
+              </For>
+            </dl>
             <Show when={form.error()}>
               <div class="peringatan" role="alert">
                 {form.error()}
@@ -110,7 +127,8 @@ export default function Absensi() {
             </Show>
             <Show when={roster()!.players.length > 0} fallback={<p class="kosong">Belum ada pemain aktif di KU ini. Tambahkan pemain di menu Pemain.</p>}>
               <p>
-                <button class="tombol" type="button" onClick={allPresent}>
+                <button class="tombol utama-rumput" type="button" onClick={allPresent}>
+                  <Ikon nama="centang" ukuran={18} />
                   Tandai semua yang belum diisi hadir
                 </button>
               </p>
@@ -118,13 +136,36 @@ export default function Absensi() {
                 <For each={roster()!.players}>
                   {(pl) => (
                     <li class="baris-absen">
-                      <span class="nama">{pl.fullName}</span>
+                      <div class="absen-kepala">
+                        <span class="ortu-foto kecil" aria-hidden="true">
+                          {inisial(pl.fullName)}
+                        </span>
+                        <div class="ortu-teks">
+                          <span class="nama">{pl.fullName}</span>
+                          <span class="petunjuk">{pl.memberNo ?? "Belum ada nomor"}</span>
+                        </div>
+                        <span class="status-ortu" data-status={marks()[pl.playerId] ?? "belum"}>
+                          {labelStatus(marks()[pl.playerId])}
+                        </span>
+                      </div>
                       {/* biome-ignore lint/a11y/useSemanticElements: fieldset merusak tata letak grid tombol */}
                       <div class="pilih-status" role="group" aria-label={`Kehadiran ${pl.fullName}`}>
                         <For each={pilihan}>
                           {(o) => (
-                            <button type="button" class="status" data-v={o.v} aria-pressed={marks()[pl.playerId] === o.v} onClick={() => set(pl.playerId, o.v)}>
-                              {o.label}
+                            <button
+                              type="button"
+                              class="status"
+                              data-v={o.v}
+                              aria-label={o.label}
+                              aria-pressed={marks()[pl.playerId] === o.v}
+                              onClick={() => set(pl.playerId, o.v)}
+                            >
+                              <span class="huruf" aria-hidden="true">
+                                {o.huruf}
+                              </span>
+                              <span class="kata" aria-hidden="true">
+                                {o.label}
+                              </span>
                             </button>
                           )}
                         </For>
@@ -135,7 +176,11 @@ export default function Absensi() {
               </ul>
               <div class="bar-simpan">
                 <span aria-live="polite">
-                  {count().hadir} hadir, {count().izin} izin, {count().sakit} sakit, {count().alpa} alpa, {count().belum} belum
+                  {terdata()} dari {roster()!.players.length} pemain terdata
+                  <Show when={count().belum > 0}>, {count().belum} belum</Show>
+                </span>
+                <span class="batang" aria-hidden="true">
+                  <span style={{ width: `${(terdata() / roster()!.players.length) * 100}%` }} />
                 </span>
                 <button
                   class="tombol utama"
