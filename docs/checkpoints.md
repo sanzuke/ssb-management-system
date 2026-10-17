@@ -23,3 +23,4 @@ Satu baris per checkpoint, yang terbaru di atas. Hash commit menjadi acuan utama
 | cp-16-rekap-kehadiran-web | `7cff270` | 2026-10-17 | Layar kehadiran (filter periode dan KU, persentase, tampilan pelatih); e2e 360 px; checklist 31/75 |
 | cp-17-portal-ortu-api | `96fb89d` | 2026-10-17 | Endpoint jadwal KU anak dengan status anak; izin `guardian.sessions`; 68 test api |
 | cp-18-portal-ortu-web | `b32f488` | 2026-10-17 | Beranda orang tua (anak, persentase hadir, latihan mendatang dan terakhir); e2e 360 px; checklist 32/75 |
+| cp-19-kartu-pemain-qr | `7062986` | 2026-10-17 | Kartu pemain (nomor anggota, KU, posisi, status, QR ke profil), tautan dari profil dan beranda orang tua; e2e membaca QR; checklist 33/75 |
