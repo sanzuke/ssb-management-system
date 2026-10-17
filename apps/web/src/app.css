@@ -221,3 +221,9 @@ a { color: var(--rumput); text-underline-offset: 3px; }
 .persen { font-family: var(--font-judul, inherit); font-weight: 700; font-size: 1.25rem; min-width: 4.5rem; text-align: right; }
 .batang { flex: 1 1 100%; height: 8px; background: #dfe5d8; border-radius: 4px; overflow: hidden; }
 .batang > span { display: block; height: 100%; background: var(--rumput, #1B4D36); }
+
+.status-ortu { font-weight: 700; padding: 6px 12px; border-radius: 6px; background: #dfe5d8; color: var(--tinta); white-space: nowrap; }
+.status-ortu[data-status="hadir"] { background: var(--rumput, #1B4D36); color: #fff; }
+.status-ortu[data-status="alpa"] { background: var(--merah, #B3372A); color: #fff; }
+.status-ortu[data-status="izin"], .status-ortu[data-status="sakit"] { background: var(--kuning, #F0C23B); }
+.butir > div.isi { display: grid; gap: 2px; flex: 1 1 10rem; }

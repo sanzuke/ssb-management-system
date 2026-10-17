@@ -81,8 +81,8 @@ Butir bertanda **(butuh keputusan)** terhambat oleh pertanyaan terbuka di `docs/
 
 ## G. Portal orang tua dan kartu pemain
 
-- [ ] Orang tua hanya melihat data anak sendiri (test: akses anak orang lain ditolak)
-- [ ] Halaman beranda orang tua: jadwal, absensi, rapor
+- [x] Orang tua hanya melihat data anak sendiri (test: anak, sesi, roster absensi, dan rekap anak orang lain ditolak atau tidak muncul)
+- [ ] Halaman beranda orang tua: jadwal, absensi, rapor (jadwal dan kehadiran sudah jadi dan lolos e2e 360 px; rapor menunggu fitur penilaian)
 - [ ] Unduh rapor PDF dari portal
 - [ ] Kartu pemain digital dengan QR (nomor anggota, KU, posisi, status)
 - [ ] PWA dapat dipasang di layar HP (manifest, ikon, uji pasang di Android)

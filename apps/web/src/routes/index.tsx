@@ -2,6 +2,7 @@ import { A, useNavigate } from "@solidjs/router";
 import { Title } from "@solidjs/meta";
 import { createSignal, onMount, Show } from "solid-js";
 import AppBar from "~/components/AppBar";
+import PortalOrangTua from "~/components/PortalOrangTua";
 import { getMe, roleLabel, type Me } from "~/lib/api";
 
 export default function Beranda() {
@@ -33,7 +34,12 @@ export default function Beranda() {
           <p>
             Anda masuk di <strong>{me()!.active!.ssbName}</strong> sebagai {roleLabel[me()!.active!.role]}.
           </p>
-          <p class="info">Data pemain, absensi, dan penilaian sedang dibangun dan akan muncul di sini.</p>
+          <Show
+            when={me()!.active!.role === "orang_tua"}
+            fallback={<p class="info">Mulai dari menu Pemain, Jadwal, atau Kehadiran di bagian atas.</p>}
+          >
+            <PortalOrangTua />
+          </Show>
         </Show>
       </main>
     </Show>

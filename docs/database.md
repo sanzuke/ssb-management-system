@@ -66,3 +66,7 @@ Rentang usia KU tidak boleh tumpang tindih dalam satu SSB: dicek di API dalam tr
 ### Rekap kehadiran
 
 `GET /attendance/summary?periodId=&ageGroupId=` (izin `attendance.read`). Per pemain: jumlah hadir, izin, sakit, alpa, `recorded` (jumlah keempatnya) dan `percent` = hadir / recorded x 100 satu desimal (`null` bila belum ada catatan). Sesi tanpa satu pun catatan tidak dihitung; pemain tanpa catatan pada sesi tertentu tidak dihitung hadir maupun alpa untuk sesi itu. `sessionsHeld` = sesi pada rentang yang sudah punya catatan. Pemain tidak aktif hanya tampil bila punya catatan pada rentang itu. Pembatasan akses sama dengan daftar pemain (pelatih/korlas: KU ditugaskan, orang tua: anaknya).
+
+### Portal orang tua
+
+`GET /guardian/sessions?from=&to=` (izin `guardian.sessions`, default 30 hari ke belakang dan ke depan, maksimal 300 baris). Satu baris per anak per sesi di KU anak itu: tanggal, jam, KU, lokasi, dan status kehadiran anak (`null` bila belum dicatat). Orang tua tidak pernah menerima daftar pemain lain; `/sessions` dan roster absensi tetap tertutup untuk mereka (404/403). Admin juga memegang izin ini (aturan: admin memegang semua izin) tetapi daftarnya kosong karena admin tidak punya anak.

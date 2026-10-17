@@ -173,6 +173,18 @@ with sync_playwright() as pw:
     page.get_by_label("KU", exact=True).select_option(label="KU-12"); expect(page.get_by_text("Cakra Uji")).to_have_count(0)
     p2.goto(f"{WEB}/kehadiran"); expect(p2.get_by_text("Cakra Uji")).to_be_visible(); expect(p2.get_by_text("Andi Pratama")).to_have_count(0)
     p2.screenshot(path=f"{OUT}/20-kehadiran-pelatih.png", full_page=True); no_overflow(p2, "kehadiran pelatih")
+    # Portal orang tua: undangan untuk Eko Uji, lalu lihat beranda
+    eko = [p for p in api_get(page, "/players") if p["fullName"] == "Eko Uji"][0]["id"]
+    invo = api_post(page, "/invitations", {"role": "orang_tua", "playerId": eko}); assert invo["s"] in (200, 201), invo
+    cto = mkctx(b); po = cto.new_page()
+    po.goto(f"{WEB}/undangan/{invo['j']['token']}"); po.wait_for_selector("h1")
+    po.get_by_label("Nama Anda").fill("Ortu Eko"); po.get_by_label("Email").fill(f"ortu-{uid}@uji.test"); po.get_by_label("Kata sandi").fill(PASS)
+    po.get_by_role("button", name="Buat akun dan bergabung").click()
+    expect(po.get_by_role("heading", name="Anak Anda")).to_be_visible(); expect(po.get_by_role("link", name="Eko Uji")).to_be_visible()
+    expect(po.get_by_text("hadir 1 dari 1 sesi")).to_be_visible(); expect(po.get_by_text("Latihan mendatang")).to_be_visible()
+    expect(po.get_by_text("Hadir", exact=True)).to_be_visible(); expect(po.get_by_text("Andi Pratama")).to_have_count(0)
+    po.screenshot(path=f"{OUT}/21-beranda-orang-tua.png", full_page=True); no_overflow(po, "beranda orang tua")
+    po.goto(f"{WEB}/pemain/{[p for p in api_get(page, '/players') if p['fullName'] == 'Cakra Uji'][0]['id']}"); expect(po.get_by_text("tidak ditemukan", exact=False).first).to_be_visible()
 
     # tautan sama tidak bisa dipakai lagi
     p2.goto(f"{WEB}/undangan/{token}"); expect(p2.get_by_role("heading", name="Undangan tidak berlaku")).to_be_visible()
