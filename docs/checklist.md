@@ -14,11 +14,11 @@ Butir bertanda **(butuh keputusan)** terhambat oleh pertanyaan terbuka di `docs/
 - [x] `bun run typecheck`, `test`, `build` lolos di semua paket
 - [x] Skema inti: ssb, app_user, age_group, period, player, player_guardian, coach_assignment, training_session, attendance
 - [x] RLS aktif dan dipaksa di semua tabel; 6 test isolasi tenant lolos
-- [ ] CI (GitHub Actions): typecheck + test + build tiap push, dengan service PostgreSQL untuk test RLS
-- [ ] Lint dan format (satu perintah `bun run lint`, lolos di CI)
+- [ ] CI (GitHub Actions): typecheck + test + build tiap push, dengan service PostgreSQL untuk test RLS (workflow sudah ditulis di `tools/ci/ci.yml` dan alurnya disimulasikan lokal; belum aktif karena token sesi tidak boleh mendorong ke `.github/workflows`, dan belum pernah berjalan di GitHub)
+- [x] Lint dan format (satu perintah `bun run lint`, Biome; lolos lokal, masuk workflow CI)
 - [x] Konfigurasi lingkungan: validasi env saat start (gagal bila `DATABASE_URL` kosong)
-- [ ] Logging terstruktur dan penanganan error seragam di API (format error baku di `packages/shared`)
-- [ ] Docker Compose untuk pengembangan lokal (PostgreSQL + API + web), `docker compose up` cukup untuk mulai
+- [x] Logging terstruktur dan penanganan error seragam di API (format error baku di `packages/shared`)
+- [ ] Docker Compose untuk pengembangan lokal (PostgreSQL + API + web), `docker compose up` cukup untuk mulai (berkas sudah ditulis dan sintaksnya valid; belum dijalankan karena lingkungan sesi tidak punya Docker daemon)
 
 ## B. Akun dan tenant
 
