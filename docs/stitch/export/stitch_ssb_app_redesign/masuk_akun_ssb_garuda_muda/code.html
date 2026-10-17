@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+
+<html lang="id"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport"/><meta content="mobile_blank" name="shell-type"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Next:wght@100..900&family=Bricolage+Grotesque:wght@100..900&display=swap" rel="stylesheet"/><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = { darkMode: "class", theme: { extend: { "colors": { "primary-container": "#1b4d36", "inverse-primary": "#9ed2b4", "on-tertiary-fixed": "#410000", "on-primary-fixed": "#002113", "surface-container-lowest": "#ffffff", "error-container": "#ffdad6", "secondary-container": "#fecf47", "on-tertiary": "#ffffff", "on-primary-container": "#8abd9f", "on-error": "#ffffff", "on-background": "#121e18", "tertiary-container": "#87170f", "surface-container": "#e3f1e7", "on-secondary-fixed-variant": "#594400", "tertiary": "#640001", "tertiary-fixed": "#ffdad5", "on-tertiary-container": "#ff9485", "on-secondary-fixed": "#241a00", "background": "#effdf3", "surface": "#effdf3", "outline": "#717973", "surface-container-highest": "#d8e6dc", "on-primary": "#ffffff", "surface-variant": "#d8e6dc", "on-secondary": "#ffffff", "primary": "#003621", "inverse-on-surface": "#e6f4ea", "error": "#ba1a1a", "surface-bright": "#effdf3", "tertiary-fixed-dim": "#ffb4a9", "outline-variant": "#c0c9c1", "primary-fixed": "#b9efcf", "on-error-container": "#93000a", "surface-container-low": "#e9f7ed", "on-tertiary-fixed-variant": "#8b1911", "surface-container-high": "#ddece2", "on-secondary-container": "#725800", "on-surface-variant": "#414943", "on-surface": "#121e18", "surface-dim": "#cfddd4", "on-primary-fixed-variant": "#1e5038", "secondary-fixed-dim": "#efc13a", "inverse-surface": "#27332d", "secondary-fixed": "#ffdf91", "surface-tint": "#37684f", "secondary": "#755b00", "primary-fixed-dim": "#9ed2b4" }, "borderRadius": { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" }, "spacing": { "space-xl": "1.5rem", "space-lg": "1rem", "space-xs": "0.25rem", "gutter": "1rem", "space-sm": "0.5rem", "gutter-mobile": "0.75rem", "space-md": "0.75rem", "margin-mobile": "1rem", "margin": "1.5rem" }, "fontFamily": { "body-sm": ["Atkinson Hyperlegible Next"], "headline-lg": ["Bricolage Grotesque"], "headline-md": ["Bricolage Grotesque"], "display-lg-mobile": ["Bricolage Grotesque"], "metric-display": ["Atkinson Hyperlegible Next"], "label-lg": ["Atkinson Hyperlegible Next"], "display-lg": ["Bricolage Grotesque"], "label-sm": ["Atkinson Hyperlegible Next"], "headline-sm": ["Bricolage Grotesque"], "body-md": ["Atkinson Hyperlegible Next"], "label-md": ["Atkinson Hyperlegible Next"], "body-lg": ["Atkinson Hyperlegible Next"] }, "fontSize": { "body-sm": ["12px", { "lineHeight": "16px", "fontWeight": "400" }], "headline-lg": ["28px", { "lineHeight": "34px", "fontWeight": "700" }], "headline-md": ["22px", { "lineHeight": "28px", "fontWeight": "700" }], "display-lg-mobile": ["30px", { "lineHeight": "36px", "fontWeight": "800" }], "metric-display": ["32px", { "lineHeight": "36px", "fontWeight": "700" }], "label-lg": ["14px", { "lineHeight": "18px", "fontWeight": "700" }], "display-lg": ["40px", { "lineHeight": "48px", "fontWeight": "800" }], "label-sm": ["11px", { "lineHeight": "14px", "fontWeight": "700" }], "headline-sm": ["18px", { "lineHeight": "24px", "fontWeight": "700" }], "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }], "label-md": ["12px", { "lineHeight": "16px", "fontWeight": "700" }], "body-lg": ["16px", { "lineHeight": "24px", "fontWeight": "400" }] } } } };</script><style>@layer base { html, body { width: 100%; margin: 0; padding: 0; min-height: 100vh; } body { overscroll-behavior: none; } .pb-safe { padding-bottom: env(safe-area-inset-bottom, 0px); } .pt-safe { padding-top: env(safe-area-inset-top, 0px); } main > :first-child { margin-top: 0 !important; } main > :last-child { margin-bottom: 0 !important; } } ::-webkit-scrollbar { display: none; }</style><style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head><body class="bg-surface font-body-md text-on-surface antialiased flex flex-col min-h-screen"><main class="flex flex-col flex-1 relative w-full bg-surface pt-safe pb-safe"><div class="flex flex-col w-full relative pb-8 overflow-hidden">
+<!-- Watermark Garis Lapangan Sepak Bola (Center Circle & Mid-line Motif) -->
+<div class="pointer-events-none absolute inset-x-0 top-0 h-96 flex items-center justify-center opacity-[0.06] select-none z-0">
+<svg class="text-primary-container" fill="none" height="340" viewbox="0 0 340 340" width="340" xmlns="http://www.w3.org/2000/svg">
+<circle cx="170" cy="170" r="130" stroke="currentColor" stroke-dasharray="8 6" stroke-width="4"></circle>
+<circle cx="170" cy="170" fill="currentColor" r="8"></circle>
+<line stroke="currentColor" stroke-width="3" x1="0" x2="340" y1="170" y2="170"></line>
+</svg>
+</div>
+<!-- Content Layer -->
+<div class="relative z-10 flex flex-col w-full px-gutter-mobile space-y-5">
+<!-- 1. Header Identitas Lembaga & Lencana -->
+<header class="flex flex-col items-center text-center pt-3">
+<!-- Lambang Lencana Fisik SSB Garuda Muda -->
+<div class="w-16 h-16 rounded-xl bg-primary-container flex items-center justify-center shadow-sm mb-3 relative">
+<div class="w-14 h-14 rounded-lg bg-surface-container flex flex-col items-center justify-center text-primary-container">
+<span class="material-symbols-outlined text-secondary text-2xl" style="font-variation-settings: 'FILL' 1;">sports_soccer</span>
+<div class="flex space-x-0.5 mt-0.5">
+<span class="material-symbols-outlined text-secondary text-[11px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-secondary text-[11px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-secondary text-[11px]" style="font-variation-settings: 'FILL' 1;">star</span>
+</div>
+</div>
+</div>
+<!-- Badge Status Akreditasi -->
+<div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-surface-container-high text-primary-container mb-2">
+<span class="w-2 h-2 rounded-full bg-secondary-container"></span>
+<span class="font-label-sm text-label-sm tracking-tight">Tahun Ajaran 2026/2027 • Terakreditasi PSSI</span>
+</div>
+<h1 class="font-headline-lg text-headline-lg text-on-surface tracking-tight">SSB Garuda Muda</h1>
+<p class="font-body-md text-body-md text-on-surface-variant max-w-[280px] mt-0.5">
+        Buku registrasi & pembinaan siswa sepak bola usia dini
+      </p>
+</header>
+<!-- 2. Pemilih Peran / Segmented Control -->
+<div class="w-full bg-surface-container-high p-1 rounded-xl flex flex-col gap-1.5">
+<div aria-label="Pilih Peran Masuk" class="grid grid-cols-2 gap-1 w-full" role="tablist">
+<button aria-selected="true" class="h-12 rounded-lg font-label-md text-label-md transition-all flex items-center justify-center gap-1.5 bg-primary-container text-on-primary shadow-sm" id="tab-wali" onclick="selectRole('wali')" role="tab" type="button">
+<span class="material-symbols-outlined text-base">supervisor_account</span>
+<span>Orang Tua / Wali</span>
+</button>
+<button aria-selected="false" class="h-12 rounded-lg font-label-md text-label-md transition-all flex items-center justify-center gap-1.5 text-on-surface-variant bg-transparent" id="tab-pelatih" onclick="selectRole('pelatih')" role="tab" type="button">
+<span class="material-symbols-outlined text-base">sports</span>
+<span>Pelatih & Staf</span>
+</button>
+</div>
+<!-- Keterangan Kontekstual Peran -->
+<div class="px-2 py-1 flex items-start gap-1.5 text-on-surface-variant">
+<span class="material-symbols-outlined text-sm mt-0.5 text-secondary">info</span>
+<p class="font-body-sm text-body-sm leading-tight" id="role-hint">
+          Pantau jadwal latihan, absensi lapangan, dan buku rapor perkembangan ananda.
+        </p>
+</div>
+</div>
+<!-- 5a. Dismissable Registrasi Banner -->
+<aside class="w-full bg-surface-container-low rounded-xl p-3 flex items-start gap-2.5" id="info-banner">
+<span class="material-symbols-outlined text-primary-container text-lg mt-0.5" style="font-variation-settings: 'FILL' 1;">assignment_turned_in</span>
+<div class="flex-1">
+<p class="font-label-sm text-label-sm text-primary-container">Panduan Akun Baru</p>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-0.5">
+          Gunakan nomor WhatsApp yang didaftarkan saat pengisian formulir fisik di sekretariat.
+        </p>
+</div>
+<button aria-label="Tutup pemberitahuan" class="w-7 h-7 -mr-1 -mt-1 flex items-center justify-center text-on-surface-variant rounded-md active:bg-surface-container" onclick="document.getElementById('info-banner').classList.add('hidden')" type="button">
+<span class="material-symbols-outlined text-base">close</span>
+</button>
+</aside>
+<!-- 3. Formulir Masuk -->
+<form class="w-full space-y-3.5" onsubmit="event.preventDefault();">
+<!-- Input 1: WhatsApp / Email -->
+<div class="flex flex-col space-y-1.5">
+<label class="font-label-md text-label-md text-on-surface flex items-center justify-between" for="credential-input">
+<span>Nomor WhatsApp atau Email</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Wajib</span>
+</label>
+<div class="relative w-full">
+<input autocomplete="username" class="w-full h-12 px-3.5 pl-11 rounded-lg bg-surface-container-lowest text-on-surface placeholder:text-outline font-body-md text-body-md focus:bg-surface-container-lowest focus:outline-none focus:ring-2 focus:ring-primary-container" id="credential-input" name="credential" placeholder="08123456789 atau nama@email.com" type="text"/>
+<div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-on-surface-variant">
+<span class="material-symbols-outlined text-lg">contact_phone</span>
+</div>
+</div>
+</div>
+<!-- Input 2: Kata Sandi -->
+<div class="flex flex-col space-y-1.5">
+<label class="font-label-md text-label-md text-on-surface flex items-center justify-between" for="password-input">
+<span>Kata Sandi</span>
+<a class="font-label-sm text-label-sm text-primary-container underline underline-offset-2" href="#">Lupa sandi?</a>
+</label>
+<div class="relative w-full">
+<input autocomplete="current-password" class="w-full h-12 px-3.5 pl-11 pr-12 rounded-lg bg-surface-container-lowest text-on-surface placeholder:text-outline font-body-md text-body-md focus:bg-surface-container-lowest focus:outline-none focus:ring-2 focus:ring-primary-container" id="password-input" name="password" placeholder="Masukkan kata sandi akun" type="password"/>
+<div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-on-surface-variant">
+<span class="material-symbols-outlined text-lg">lock</span>
+</div>
+<button aria-label="Lihat atau sembunyikan kata sandi" class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-on-surface-variant" id="toggle-password" onclick="togglePasswordVisibility()" type="button">
+<span class="material-symbols-outlined text-lg" id="eye-icon">visibility</span>
+</button>
+</div>
+</div>
+<!-- Opsi Centang Ingat Saya -->
+<div class="flex items-center justify-between pt-0.5">
+<label class="flex items-center gap-2.5 cursor-pointer select-none">
+<input checked="" class="w-5 h-5 rounded bg-surface-container-lowest text-primary-container focus:ring-primary-container" id="remember-me" type="checkbox"/>
+<span class="font-body-sm text-body-sm text-on-surface">Ingat sesi saya di gawai ini</span>
+</label>
+</div>
+<!-- 4. Tombol Aksi Utama -->
+<div class="pt-2 flex flex-col space-y-2.5">
+<!-- Tombol Masuk Primer (Sistem Desain Garuda Muda: Kuning Tegas Lapangan #F0C23B) -->
+<button class="w-full h-12 rounded-lg bg-secondary-container text-on-secondary-fixed font-label-lg text-label-lg flex items-center justify-center gap-2 active:translate-y-0.5 transition-transform shadow-sm" type="submit">
+<span>Masuk ke Buku Akun</span>
+<span class="material-symbols-outlined text-lg">arrow_forward</span>
+</button>
+<!-- Pemisah Garis Halus Buku Rapor -->
+<div class="relative py-2 flex items-center justify-center">
+<div class="w-full h-px bg-surface-variant"></div>
+<span class="absolute px-3 bg-surface text-on-surface-variant font-label-sm text-label-sm">
+            atau masuk lebih cepat
+          </span>
+</div>
+<!-- Tombol Masuk via OTP WhatsApp -->
+<button class="w-full h-12 rounded-lg bg-primary-container text-on-primary font-label-md text-label-md flex items-center justify-center gap-2 active:translate-y-0.5 transition-transform" type="button">
+<span class="material-symbols-outlined text-lg">chat</span>
+<span>Kirim Kode Masuk via WhatsApp</span>
+</button>
+<!-- Tombol Masuk dengan Akun Google -->
+<button class="w-full h-12 rounded-lg bg-surface-container-lowest text-on-surface font-label-md text-label-md flex items-center justify-center gap-2.5 active:bg-surface-container-low transition-colors shadow-sm" type="button">
+<svg class="w-4 h-4" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"></path>
+<path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"></path>
+<path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z" fill="#FBBC05"></path>
+<path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z" fill="#EA4335"></path>
+</svg>
+<span>Masuk dengan Google</span>
+</button>
+</div>
+</form>
+<!-- Kartu Bantuan & Kontak Lapangan -->
+<div class="w-full bg-surface-container rounded-xl p-3 flex flex-col gap-2">
+<div class="flex items-center justify-between">
+<span class="font-label-sm text-label-sm text-on-surface">Pendaftaran Siswa Baru?</span>
+<span class="px-2 py-0.5 rounded-full bg-surface-container-high font-label-sm text-label-sm text-primary-container">Gelombang II</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant">
+        Belum menerima nomor registrasi buku rapor? Hubungi meja piket lapangan atau daftar daring.
+      </p>
+<div class="grid grid-cols-2 gap-2 pt-1">
+<a class="h-10 rounded-lg bg-surface-container-lowest text-primary-container font-label-sm text-label-sm flex items-center justify-center gap-1 active:bg-surface-container-high" href="#">
+<span class="material-symbols-outlined text-sm">how_to_reg</span>
+<span>Daftar Siswa</span>
+</a>
+<a class="h-10 rounded-lg bg-surface-container-lowest text-on-surface font-label-sm text-label-sm flex items-center justify-center gap-1 active:bg-surface-container-high" href="#">
+<span class="material-symbols-outlined text-sm">support_agent</span>
+<span>Piket Lapangan</span>
+</a>
+</div>
+</div>
+<!-- 5b. Footer Legalitas & Pedoman Grassroots -->
+<footer class="pt-2 flex flex-col items-center text-center space-y-2">
+<div class="flex items-center justify-center gap-2 text-on-surface-variant font-label-sm text-label-sm">
+<span>Buku Pedoman Siswa</span>
+<span>•</span>
+<span>Kebijakan Privasi</span>
+<span>•</span>
+<span>Bantuan</span>
+</div>
+<p class="font-body-sm text-body-sm text-outline max-w-[300px]">
+        Sistem kurikulum pembinaan teknik merujuk pada Pedoman Filosofi Sepak Bola Indonesia (Filanesia) PSSI Grassroots.
+      </p>
+</footer>
+</div>
+</div>
+<script>
+  function selectRole(role) {
+    const tabWali = document.getElementById('tab-wali');
+    const tabPelatih = document.getElementById('tab-pelatih');
+    const roleHint = document.getElementById('role-hint');
+
+    if (role === 'wali') {
+      tabWali.className = 'h-12 rounded-lg font-label-md text-label-md transition-all flex items-center justify-center gap-1.5 bg-primary-container text-on-primary shadow-sm';
+      tabWali.setAttribute('aria-selected', 'true');
+      tabPelatih.className = 'h-12 rounded-lg font-label-md text-label-md transition-all flex items-center justify-center gap-1.5 text-on-surface-variant bg-transparent';
+      tabPelatih.setAttribute('aria-selected', 'false');
+      roleHint.textContent = 'Pantau jadwal latihan, absensi lapangan, dan buku rapor perkembangan ananda.';
+    } else {
+      tabPelatih.className = 'h-12 rounded-lg font-label-md text-label-md transition-all flex items-center justify-center gap-1.5 bg-primary-container text-on-primary shadow-sm';
+      tabPelatih.setAttribute('aria-selected', 'true');
+      tabWali.className = 'h-12 rounded-lg font-label-md text-label-md transition-all flex items-center justify-center gap-1.5 text-on-surface-variant bg-transparent';
+      tabWali.setAttribute('aria-selected', 'false');
+      roleHint.textContent = 'Akses pencatatan evaluasi teknik kuadran, absensi harian siswa, dan log latihan tim.';
+    }
+  }
+
+  function togglePasswordVisibility() {
+    const passwordInput = document.getElementById('password-input');
+    const eyeIcon = document.getElementById('eye-icon');
+    
+    if (passwordInput.type === 'password') {
+      passwordInput.type = 'text';
+      eyeIcon.textContent = 'visibility_off';
+    } else {
+      passwordInput.type = 'password';
+      eyeIcon.textContent = 'visibility';
+    }
+  }
+</script></main></body></html>

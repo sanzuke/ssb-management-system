@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+
+<html lang="id"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport"/><meta content="mobile_tab" name="shell-type"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{width:100%;margin:0;padding:0;}body{overscroll-behavior:none;-webkit-tap-highlight-color:transparent;}.pb-safe{padding-bottom:env(safe-area-inset-bottom,0px);}.pt-safe{padding-top:env(safe-area-inset-top,0px);}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = { darkMode: 'class', theme: { extend: { colors: { 'surface-variant': '#d8e6dc', 'tertiary-fixed-dim': '#ffb4a9', 'secondary-fixed-dim': '#efc13a', 'on-secondary-fixed': '#241a00', 'secondary': '#755b00', 'on-secondary-fixed-variant': '#594400', 'tertiary-container': '#87170f', 'secondary-fixed': '#ffdf91', 'primary-fixed-dim': '#9ed2b4', 'on-tertiary-container': '#ff9485', 'inverse-primary': '#9ed2b4', 'on-primary-fixed-variant': '#1e5038', 'on-secondary': '#ffffff', 'surface-container': '#e3f1e7', 'outline-variant': '#c0c9c1', 'on-primary-fixed': '#002113', 'primary-fixed': '#b9efcf', 'background': '#effdf3', 'error': '#ba1a1a', 'on-primary': '#ffffff', 'tertiary-fixed': '#ffdad5', 'surface': '#effdf3', 'tertiary': '#640001', 'on-surface-variant': '#414943', 'surface-container-high': '#ddece2', 'on-tertiary': '#ffffff', 'surface-container-low': '#e9f7ed', 'on-error': '#ffffff', 'surface-container-lowest': '#ffffff', 'surface-dim': '#cfddd4', 'surface-tint': '#37684f', 'on-primary-container': '#8abd9f', 'inverse-on-surface': '#e6f4ea', 'primary-container': '#1b4d36', 'surface-bright': '#effdf3', 'on-tertiary-fixed-variant': '#8b1911', 'on-background': '#121e18', 'secondary-container': '#fecf47', 'on-error-container': '#93000a', 'on-surface': '#121e18', 'error-container': '#ffdad6', 'surface-container-highest': '#d8e6dc', 'on-secondary-container': '#725800', 'primary': '#003621', 'on-tertiary-fixed': '#410000', 'outline': '#717973', 'inverse-surface': '#27332d' }, borderRadius: { 'DEFAULT': '0.25rem', 'lg': '0.5rem', 'xl': '0.75rem', 'full': '9999px' }, spacing: { 'space-md': '0.75rem', 'gutter': '1rem', 'gutter-mobile': '0.75rem', 'space-xl': '1.5rem', 'margin-mobile': '1rem', 'space-xs': '0.25rem', 'margin': '1.5rem', 'space-lg': '1rem', 'space-sm': '0.5rem' }, fontFamily: { 'display-lg': ['Bricolage Grotesque'], 'metric-display': ['Atkinson Hyperlegible Next'], 'label-lg': ['Atkinson Hyperlegible Next'], 'body-lg': ['Atkinson Hyperlegible Next'], 'headline-md': ['Bricolage Grotesque'], 'display-lg-mobile': ['Bricolage Grotesque'], 'headline-lg': ['Bricolage Grotesque'], 'body-md': ['Atkinson Hyperlegible Next'], 'label-sm': ['Atkinson Hyperlegible Next'], 'body-sm': ['Atkinson Hyperlegible Next'], 'label-md': ['Atkinson Hyperlegible Next'], 'headline-sm': ['Bricolage Grotesque'] }, fontSize: { 'display-lg': ['40px', { lineHeight: '48px', fontWeight: '800' }], 'metric-display': ['32px', { lineHeight: '36px', fontWeight: '700' }], 'label-lg': ['14px', { lineHeight: '18px', fontWeight: '700' }], 'body-lg': ['16px', { lineHeight: '24px', fontWeight: '400' }], 'headline-md': ['22px', { lineHeight: '28px', fontWeight: '700' }], 'display-lg-mobile': ['30px', { lineHeight: '36px', fontWeight: '800' }], 'headline-lg': ['28px', { lineHeight: '34px', fontWeight: '700' }], 'body-md': ['14px', { lineHeight: '20px', fontWeight: '400' }], 'label-sm': ['11px', { lineHeight: '14px', fontWeight: '700' }], 'body-sm': ['12px', { lineHeight: '16px', fontWeight: '400' }], 'label-md': ['12px', { lineHeight: '16px', fontWeight: '700' }], 'headline-sm': ['18px', { lineHeight: '24px', fontWeight: '700' }] } } } };</script><style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head><body class="bg-surface font-body-md text-on-surface antialiased flex flex-col min-h-screen selection:bg-secondary-container"><header class="fixed top-0 w-full z-50 pt-safe bg-surface/85 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)]"><div class="h-16 px-gutter-mobile flex items-center justify-between gap-space-sm"><div class="flex items-center gap-space-sm min-w-0 shrink-0"><img alt="SSB Garuda Muda Logo" class="h-8 w-auto object-contain" src="https://lh3.googleusercontent.com/aida/AEtjO1VADFFrjwz-HIvXYsILNcRVAP5OeGgXiVntznkV3Mgvd-jvCsaiRtcw0khou41wHdC9Bv4GOPCoKDQ8aR0dHoGmISrSpir191TXIZLJsWrjLg524BATjY733JDgCfLysYV0BuaOTgyGebdlHdshZWFXr-QOa3YCOuSNuPG_2nmMjhRzARFkTV4T5csnJ2qR-arMVBXH0lvWqa1e2HpAKBNLAnazNKV8e8v9rUxAKRmfFEI5E5ldN0oue6M"/><span class="font-headline-sm text-headline-sm text-primary tracking-tight truncate hidden xs:inline">Garuda Muda</span></div><div class="flex-1 flex flex-col items-center justify-center px-space-xs text-center min-w-0"><span class="font-label-sm text-label-sm uppercase tracking-wider text-secondary px-space-xs py-0.5 rounded bg-surface-container font-bold truncate max-w-[150px]">Rapor Nilai</span></div><div class="flex items-center justify-end shrink-0"><button aria-label="Profil Pelatih" class="w-11 h-11 flex items-center justify-center rounded-full active:scale-95 transition-transform p-0.5" type="button"><img alt="Profile" class="w-8 h-8 rounded-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAJiYHhTNRxwhftnlHLCU5dyLIEkMoU8UyrPMAUN9mvomc9_d0iHZJoo71HBRSX1b8AADBocgkXqvsQdKAhAo6h5XLBjVrtzJ640zSQjbrZpBHSWGbFnoSI1MO6aU_TeihE-vcaqtJ5bFS0MI774YK5kxpP3aVv99UM9s9H5Mzvci24fH-D-khww-Y4-rtPCz3MluroUP1fX06-VGkqPocAQdl_vAgwwtKkdP4ZgL0yFuH1YE0W2mc4Fg"/></button></div></div></header><main class="flex-1 flex flex-col relative w-full pt-16 pb-20 bg-surface"><div class="flex flex-col w-full pb-8">
+<!-- Sub-Header Dossier Bar -->
+<div class="px-gutter-mobile pt-space-sm pb-space-sm bg-surface-container-low flex items-center justify-between shadow-sm">
+<div class="flex items-center gap-space-xs min-w-0">
+<span class="material-symbols-outlined text-primary text-[18px]">verified</span>
+<span class="font-label-sm text-label-sm text-primary uppercase tracking-wider truncate">Buku Rapor Siswa Terakreditasi</span>
+</div>
+<span class="font-label-sm text-label-sm px-space-xs py-0.5 rounded bg-surface-container-highest text-on-surface-variant font-bold">
+      SSB-0012
+    </span>
+</div>
+<div class="px-gutter-mobile flex flex-col gap-space-md mt-space-sm">
+<!-- 1. Header Ringkasan Pemain (Dossier Physical Card) -->
+<section class="bg-surface-container-lowest rounded-xl p-space-md shadow-sm flex flex-col gap-space-sm relative overflow-hidden">
+<!-- Watermark Stamp Texture Effect -->
+<div class="absolute -right-6 -bottom-6 w-28 h-28 rounded-full bg-surface-container/60 pointer-events-none flex items-center justify-center">
+<span class="font-display-lg-mobile text-[48px] text-surface-container-highest select-none font-black opacity-40">U10</span>
+</div>
+<div class="flex items-start gap-space-md">
+<!-- Photo Dossier Frame -->
+<div class="relative shrink-0">
+<img class="w-16 h-20 rounded-lg object-cover shadow-sm bg-surface-container" data-alt="A portrait of a 10-year-old Indonesian boy football player wearing an emerald green soccer training jersey, holding a classic leather football, warm morning golden-hour sunlight on the grass field, documentary photojournalism style, authentic athletic youth sports." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBI2tECiawLgEzv_fPZ5qH0Sh-C5Ep8FJd031-eF5hh7u29BVpSibpY_1QXMUT8wl2ehDbX36XHi2ycJhQWonNra5z1fJg1ow8Nj6T4YU6I0B9nVEUVB9pZPGQjMjeu0qlIIB5bkoRVw_UIrsPM1PtsZpXlDLYRnkXwuHvYnlGe7OH26vKBBaN6brZoQ4QoesFU3rGXeERd_nfObjanhGvmhqnPlZI2L2aZQeDQkXD3D_40X1Wpm_b2qw"/>
+<div class="absolute -bottom-1 -right-1 bg-secondary-container text-on-secondary-container font-label-sm text-[10px] px-1.5 py-0.2 rounded font-bold">
+            RW
+          </div>
+</div>
+<!-- Player Meta Info -->
+<div class="flex-1 min-w-0 flex flex-col">
+<div class="flex items-center justify-between gap-1">
+<span class="font-label-sm text-label-sm text-secondary font-bold uppercase tracking-wider">KU-10 (2016)</span>
+<span class="font-label-sm text-[10px] text-on-surface-variant bg-surface-container px-1.5 py-0.5 rounded">Tengah Musim</span>
+</div>
+<h1 class="font-headline-sm text-headline-sm text-primary tracking-tight truncate mt-0.5">Cakra Pratama</h1>
+<p class="font-body-sm text-body-sm text-on-surface-variant truncate">Posisi: Penyerang Sayap Kanan</p>
+<div class="mt-space-xs pt-space-xs flex items-center justify-between text-on-surface-variant">
+<div class="flex items-center gap-1 min-w-0">
+<span class="material-symbols-outlined text-[14px] text-primary shrink-0">sports</span>
+<span class="font-label-sm text-label-sm truncate">Coach Pak Budi</span>
+</div>
+<span class="font-label-sm text-label-sm text-primary font-bold">T.A 2026/27</span>
+</div>
+</div>
+</div>
+</section>
+<!-- 2. Hero Metric: Nilai Rata-rata & Sparkline Tren -->
+<section class="bg-surface-container-lowest rounded-xl p-space-md shadow-sm flex flex-col gap-space-sm">
+<div class="flex items-center justify-between">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant font-bold">Indeks Prestasi Kumulatif</span>
+<span class="font-label-sm text-[10px] bg-primary-fixed text-on-primary-fixed px-2 py-0.5 rounded-full font-bold">Skala 1 - 10</span>
+</div>
+<div class="flex items-end justify-between gap-space-sm">
+<div class="flex items-baseline gap-space-xs">
+<span class="font-display-lg-mobile text-display-lg-mobile text-primary leading-none tracking-tight">7,7</span>
+<span class="font-label-md text-label-md text-on-surface-variant">/ 10</span>
+</div>
+<!-- Growth Badge -->
+<div class="flex items-center gap-1 bg-surface-container px-2 py-1 rounded-lg">
+<span class="material-symbols-outlined text-[16px] text-primary">trending_up</span>
+<span class="font-label-sm text-label-sm text-primary font-bold">+0,4 Periode Lalu</span>
+</div>
+</div>
+<!-- Trend Sparkline Ledger -->
+<div class="bg-surface-container-low rounded-lg p-space-sm mt-space-xs flex items-center justify-between gap-space-sm">
+<div class="flex flex-col min-w-0">
+<span class="font-label-sm text-label-sm text-primary font-bold">Kategori: Sangat Baik</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant truncate">Progres konsisten dalam 3 siklus penilaian</span>
+</div>
+<!-- Inline SVG Sparkline -->
+<div class="shrink-0 w-28 h-10 flex flex-col justify-end">
+<svg aria-hidden="true" class="w-full h-full overflow-visible" viewbox="0 0 110 36">
+<polyline fill="none" points="10,28 55,20 100,6" stroke="#c0c9c1" stroke-dasharray="2 2" stroke-width="1.5"></polyline>
+<polyline fill="none" points="10,28 55,20 100,6" stroke="#003621" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"></polyline>
+<!-- Dot 1 -->
+<circle cx="10" cy="28" fill="#ffffff" r="3.5" stroke="#003621" stroke-width="2"></circle>
+<text fill="#414943" font-size="8" font-weight="700" text-anchor="middle" x="10" y="34">7.1</text>
+<!-- Dot 2 -->
+<circle cx="55" cy="20" fill="#ffffff" r="3.5" stroke="#003621" stroke-width="2"></circle>
+<text fill="#414943" font-size="8" font-weight="700" text-anchor="middle" x="55" y="14">7.3</text>
+<!-- Dot 3 (Current) -->
+<circle cx="100" cy="6" fill="#fecf47" r="4" stroke="#003621" stroke-width="2"></circle>
+<text fill="#003621" font-size="8" font-weight="800" text-anchor="middle" x="100" y="2">7.7</text>
+</svg>
+</div>
+</div>
+</section>
+<!-- 3. Radar Chart 6 Poros Pembinaan -->
+<section class="bg-surface-container-lowest rounded-xl p-space-md shadow-sm flex flex-col gap-space-sm">
+<div class="flex items-center justify-between">
+<div>
+<h2 class="font-headline-sm text-headline-sm text-primary tracking-tight">Grafik 6 Aspek Pembinaan</h2>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Analisis komprehensif profil pemain U-10</p>
+</div>
+<button aria-label="Informasi Standar" class="p-1 rounded-full text-on-surface-variant active:bg-surface-container" type="button">
+<span class="material-symbols-outlined text-[20px]">info</span>
+</button>
+</div>
+<!-- Clean High-Contrast SVG Radar -->
+<div class="relative w-full aspect-square max-w-[280px] mx-auto py-2">
+<svg class="w-full h-full" viewbox="0 0 300 300">
+<defs>
+<radialgradient cx="50%" cy="50%" id="radarGlow" r="50%">
+<stop offset="0%" stop-color="#37684f" stop-opacity="0.2"></stop>
+<stop offset="100%" stop-color="#37684f" stop-opacity="0.04"></stop>
+</radialgradient>
+</defs>
+<!-- Outer Hexagon Concentric Grid (Scale: 10, 8, 6, 4, 2) -->
+<!-- 100% (10) radius 100 -->
+<polygon fill="none" points="150,50 236.6,100 236.6,200 150,250 63.4,200 63.4,100" stroke="#d8e6dc" stroke-width="1.2"></polygon>
+<!-- 75% (7.5) radius 75 -->
+<polygon fill="none" points="150,75 214.95,112.5 214.95,187.5 150,225 85.05,187.5 85.05,112.5" stroke="#d8e6dc" stroke-dasharray="3 2" stroke-width="1"></polygon>
+<!-- 50% (5.0) radius 50 -->
+<polygon fill="none" points="150,100 193.3,125 193.3,175 150,200 106.7,175 106.7,125" stroke="#ddece2" stroke-width="1"></polygon>
+<!-- Axis lines -->
+<line stroke="#d8e6dc" stroke-width="1" x1="150" x2="150" y1="150" y2="50"></line>
+<line stroke="#d8e6dc" stroke-width="1" x1="150" x2="236.6" y1="150" y2="100"></line>
+<line stroke="#d8e6dc" stroke-width="1" x1="150" x2="236.6" y1="150" y2="200"></line>
+<line stroke="#d8e6dc" stroke-width="1" x1="150" x2="150" y1="150" y2="250"></line>
+<line stroke="#d8e6dc" stroke-width="1" x1="150" x2="63.4" y1="150" y2="200"></line>
+<line stroke="#d8e6dc" stroke-width="1" x1="150" x2="63.4" y1="150" y2="100"></line>
+<!-- PREVIOUS PERIOD (Amber dashed: Fisik 7.2, Taktik 6.0, Mental 7.5, Gerak 7.0, Cerdas 7.0, Teknik 7.2) -->
+<!-- Scaled (Val/10 * 100):
+               Poros 0 (Teknik: 7.2) -> 150, 150 - 72 = 78
+               Poros 1 (Fisik: 7.2) -> 150 + 72*cos(30) = 212.35, 150 - 72*sin(30) = 114
+               Poros 2 (Taktik: 6.0) -> 150 + 60*cos(30) = 201.96, 150 + 60*sin(30) = 180
+               Poros 3 (Mental: 7.5) -> 150, 150 + 75 = 225
+               Poros 4 (Gerak: 7.0) -> 150 - 70*cos(30) = 89.38, 150 + 70*sin(30) = 185
+               Poros 5 (Cerdas: 7.0) -> 150 - 70*cos(30) = 89.38, 150 - 70*sin(30) = 115
+          -->
+<polygon fill="none" points="150,78 212.35,114 201.96,180 150,225 89.38,185 89.38,115" stroke="#C0841A" stroke-dasharray="4 3" stroke-width="1.8"></polygon>
+<!-- CURRENT PERIOD (Turf Green Solid: Teknik 8.0, Fisik 8.0, Taktik 6.8, Mental 8.0, Gerak 7.5, Cerdas 7.8) -->
+<!-- Scaled (Val/10 * 100):
+               Poros 0 (Teknik 8.0) -> (150, 70)
+               Poros 1 (Fisik 8.0)  -> 150 + 80*0.866 = 219.28, 150 - 80*0.5 = 110
+               Poros 2 (Taktik 6.8) -> 150 + 68*0.866 = 208.88, 150 + 68*0.5 = 184
+               Poros 3 (Mental 8.0) -> (150, 230)
+               Poros 4 (Gerak 7.5)  -> 150 - 75*0.866 = 85.05, 150 + 75*0.5 = 187.5
+               Poros 5 (Cerdas 7.8) -> 150 - 78*0.866 = 82.45, 150 - 78*0.5 = 111
+          -->
+<polygon fill="url(#radarGlow)" points="150,70 219.28,110 208.88,184 150,230 85.05,187.5 82.45,111" stroke="#1B4D36" stroke-width="2.2"></polygon>
+<!-- Dots for Current Period -->
+<circle cx="150" cy="70" fill="#1B4D36" r="3.5"></circle>
+<circle cx="219.28" cy="110" fill="#1B4D36" r="3.5"></circle>
+<circle cx="208.88" cy="184" fill="#1B4D36" r="3.5"></circle>
+<circle cx="150" cy="230" fill="#1B4D36" r="3.5"></circle>
+<circle cx="85.05" cy="187.5" fill="#1B4D36" r="3.5"></circle>
+<circle cx="82.45" cy="111" fill="#1B4D36" r="3.5"></circle>
+<!-- Labels around Axes -->
+<text fill="#003621" font-size="10" font-weight="700" text-anchor="middle" x="150" y="38">Teknik (8.0)</text>
+<text fill="#003621" font-size="10" font-weight="700" text-anchor="start" x="245" y="98">Fisik (8.0)</text>
+<text fill="#003621" font-size="10" font-weight="700" text-anchor="start" x="245" y="206">Taktik (6.8)</text>
+<text fill="#003621" font-size="10" font-weight="700" text-anchor="middle" x="150" y="268">Mental (8.0)</text>
+<text fill="#003621" font-size="10" font-weight="700" text-anchor="end" x="52" y="206">Gerak (7.5)</text>
+<text fill="#003621" font-size="10" font-weight="700" text-anchor="end" x="52" y="98">Kecerdasan (7.8)</text>
+</svg>
+</div>
+<!-- Radar Legend Strip -->
+<div class="flex items-center justify-center gap-space-lg pt-space-xs border-t-0 bg-surface-container-low p-2 rounded-lg">
+<div class="flex items-center gap-2">
+<span class="w-4 h-1.5 rounded-full bg-primary-container"></span>
+<span class="font-label-sm text-label-sm text-on-surface">Musim 2026/27 (Kini)</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="w-4 h-0 border-b-2 border-dashed border-[#C0841A]"></span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Musim 2025/26 (Lalu)</span>
+</div>
+</div>
+</section>
+<!-- 4. Rincian Skor per Aspek & Indikator (Structured Ledger) -->
+<section class="bg-surface-container-lowest rounded-xl p-space-md shadow-sm flex flex-col gap-space-md">
+<div class="flex items-center justify-between">
+<div>
+<h2 class="font-headline-sm text-headline-sm text-primary tracking-tight">Rincian Buku Nilai Indikator</h2>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Transparansi capaian per parameter teknis</p>
+</div>
+<span class="material-symbols-outlined text-primary text-[24px]">assignment_turned_in</span>
+</div>
+<!-- Aspek: TEKNIK -->
+<div class="flex flex-col gap-space-xs bg-surface-container-low p-space-sm rounded-lg">
+<div class="flex items-center justify-between pb-1">
+<div class="flex items-center gap-1.5">
+<span class="w-2 h-2 rounded-full bg-primary-container"></span>
+<span class="font-label-md text-label-md text-primary uppercase tracking-wide">1. Teknik Dasar Sepak Bola</span>
+</div>
+<span class="font-label-sm text-label-sm font-bold text-primary bg-surface-container px-1.5 py-0.5 rounded">Rata-rata: 7.25</span>
+</div>
+<div class="flex flex-col gap-2 mt-1">
+<!-- Row 1 -->
+<div class="flex items-center justify-between text-body-sm">
+<span class="text-on-surface">Kontrol Bola (First Touch)</span>
+<div class="flex items-center gap-2">
+<div class="w-24 bg-surface-container-highest rounded-full h-2 overflow-hidden">
+<div class="bg-primary-container h-full rounded-full" style="width: 80%"></div>
+</div>
+<span class="font-label-md text-label-md w-4 text-right text-primary">8</span>
+</div>
+</div>
+<!-- Row 2 -->
+<div class="flex items-center justify-between text-body-sm">
+<span class="text-on-surface">Akurasi Passing Pendek</span>
+<div class="flex items-center gap-2">
+<div class="w-24 bg-surface-container-highest rounded-full h-2 overflow-hidden">
+<div class="bg-primary-container h-full rounded-full" style="width: 80%"></div>
+</div>
+<span class="font-label-md text-label-md w-4 text-right text-primary">8</span>
+</div>
+</div>
+<!-- Row 3 -->
+<div class="flex items-center justify-between text-body-sm">
+<span class="text-on-surface">Dribbling 1 lawan 1</span>
+<div class="flex items-center gap-2">
+<div class="w-24 bg-surface-container-highest rounded-full h-2 overflow-hidden">
+<div class="bg-primary-container h-full rounded-full" style="width: 70%"></div>
+</div>
+<span class="font-label-md text-label-md w-4 text-right text-primary">7</span>
+</div>
+</div>
+<!-- Row 4 -->
+<div class="flex items-center justify-between text-body-sm">
+<span class="text-on-surface">Finishing &amp; Sepakan</span>
+<div class="flex items-center gap-2">
+<div class="w-24 bg-surface-container-highest rounded-full h-2 overflow-hidden">
+<div class="bg-[#C0841A] h-full rounded-full" style="width: 60%"></div>
+</div>
+<span class="font-label-md text-label-md w-4 text-right text-secondary">6</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Aspek: FISIK -->
+<div class="flex flex-col gap-space-xs bg-surface-container-low p-space-sm rounded-lg">
+<div class="flex items-center justify-between pb-1">
+<div class="flex items-center gap-1.5">
+<span class="w-2 h-2 rounded-full bg-primary-container"></span>
+<span class="font-label-md text-label-md text-primary uppercase tracking-wide">2. Kemampuan Fisik &amp; Atletik</span>
+</div>
+<span class="font-label-sm text-label-sm font-bold text-primary bg-surface-container px-1.5 py-0.5 rounded">Rata-rata: 8.00</span>
+</div>
+<div class="flex flex-col gap-2 mt-1">
+<!-- Row 1 -->
+<div class="flex items-center justify-between text-body-sm">
+<span class="text-on-surface">Kelincahan (Agility)</span>
+<div class="flex items-center gap-2">
+<div class="w-24 bg-surface-container-highest rounded-full h-2 overflow-hidden">
+<div class="bg-primary-container h-full rounded-full" style="width: 80%"></div>
+</div>
+<span class="font-label-md text-label-md w-4 text-right text-primary">8</span>
+</div>
+</div>
+<!-- Row 2: Peak High score 9 -->
+<div class="flex items-center justify-between text-body-sm bg-secondary-fixed/40 -mx-1 px-1 py-0.5 rounded">
+<div class="flex items-center gap-1">
+<span class="text-on-surface font-bold">Kecepatan Sprint</span>
+<span class="material-symbols-outlined text-secondary text-[14px]">star</span>
+</div>
+<div class="flex items-center gap-2">
+<div class="w-24 bg-surface-container-highest rounded-full h-2 overflow-hidden">
+<div class="bg-secondary h-full rounded-full" style="width: 90%"></div>
+</div>
+<span class="font-label-md text-label-md w-4 text-right text-secondary font-black">9</span>
+</div>
+</div>
+<!-- Row 3 -->
+<div class="flex items-center justify-between text-body-sm">
+<span class="text-on-surface">Keseimbangan Dinamis</span>
+<div class="flex items-center gap-2">
+<div class="w-24 bg-surface-container-highest rounded-full h-2 overflow-hidden">
+<div class="bg-primary-container h-full rounded-full" style="width: 70%"></div>
+</div>
+<span class="font-label-md text-label-md w-4 text-right text-primary">7</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Aspek: TAKTIK -->
+<div class="flex flex-col gap-space-xs bg-surface-container-low p-space-sm rounded-lg">
+<div class="flex items-center justify-between pb-1">
+<div class="flex items-center gap-1.5">
+<span class="w-2 h-2 rounded-full bg-primary-container"></span>
+<span class="font-label-md text-label-md text-primary uppercase tracking-wide">3. Pemahaman Taktik Sederhana</span>
+</div>
+<span class="font-label-sm text-label-sm font-bold text-primary bg-surface-container px-1.5 py-0.5 rounded">Rata-rata: 6.50</span>
+</div>
+<div class="flex flex-col gap-2 mt-1">
+<div class="flex items-center justify-between text-body-sm">
+<span class="text-on-surface">Penempatan Posisi (Width)</span>
+<div class="flex items-center gap-2">
+<div class="w-24 bg-surface-container-highest rounded-full h-2 overflow-hidden">
+<div class="bg-[#C0841A] h-full rounded-full" style="width: 60%"></div>
+</div>
+<span class="font-label-md text-label-md w-4 text-right text-secondary">6</span>
+</div>
+</div>
+<div class="flex items-center justify-between text-body-sm">
+<span class="text-on-surface">Pengambilan Keputusan Oper</span>
+<div class="flex items-center gap-2">
+<div class="w-24 bg-surface-container-highest rounded-full h-2 overflow-hidden">
+<div class="bg-primary-container h-full rounded-full" style="width: 70%"></div>
+</div>
+<span class="font-label-md text-label-md w-4 text-right text-primary">7</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Aspek: MENTAL & KARAKTER -->
+<div class="flex flex-col gap-space-xs bg-surface-container-low p-space-sm rounded-lg">
+<div class="flex items-center justify-between pb-1">
+<div class="flex items-center gap-1.5">
+<span class="w-2 h-2 rounded-full bg-primary-container"></span>
+<span class="font-label-md text-label-md text-primary uppercase tracking-wide">4. Mental &amp; Karakter Lapangan</span>
+</div>
+<span class="font-label-sm text-label-sm font-bold text-primary bg-surface-container px-1.5 py-0.5 rounded">Rata-rata: 8.00</span>
+</div>
+<div class="flex flex-col gap-2 mt-1">
+<div class="flex items-center justify-between text-body-sm">
+<span class="text-on-surface">Fokus &amp; Konsentrasi Latihan</span>
+<div class="flex items-center gap-2">
+<div class="w-24 bg-surface-container-highest rounded-full h-2 overflow-hidden">
+<div class="bg-primary-container h-full rounded-full" style="width: 80%"></div>
+</div>
+<span class="font-label-md text-label-md w-4 text-right text-primary">8</span>
+</div>
+</div>
+<div class="flex items-center justify-between text-body-sm">
+<span class="text-on-surface">Sportivitas &amp; Fair Play</span>
+<div class="flex items-center gap-2">
+<div class="w-24 bg-surface-container-highest rounded-full h-2 overflow-hidden">
+<div class="bg-primary-container h-full rounded-full" style="width: 80%"></div>
+</div>
+<span class="font-label-md text-label-md w-4 text-right text-primary">8</span>
+</div>
+</div>
+<div class="flex items-center justify-between text-body-sm">
+<span class="text-on-surface">Respek Teman &amp; Pelatih</span>
+<div class="flex items-center gap-2">
+<div class="w-24 bg-surface-container-highest rounded-full h-2 overflow-hidden">
+<div class="bg-primary-container h-full rounded-full" style="width: 80%"></div>
+</div>
+<span class="font-label-md text-label-md w-4 text-right text-primary">8</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- 5. Catatan Evaluasi Pelatih -->
+<section class="bg-surface-container-lowest rounded-xl p-space-md shadow-sm flex flex-col gap-space-sm">
+<div class="flex items-center gap-space-sm">
+<div class="w-9 h-9 rounded-full bg-primary flex items-center justify-center text-on-primary shrink-0">
+<span class="material-symbols-outlined text-[20px]">rate_review</span>
+</div>
+<div class="min-w-0">
+<h2 class="font-headline-sm text-headline-sm text-primary tracking-tight">Catatan Pelatih Kepala</h2>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Budi Santoso, Lisensi C PSSI Grassroots</span>
+</div>
+</div>
+<!-- Physical Quote Box with subtle inset ledger feel -->
+<div class="bg-surface-container-low rounded-lg p-space-md relative overflow-hidden">
+<span class="material-symbols-outlined absolute top-2 right-2 text-surface-variant text-[44px] pointer-events-none opacity-40">format_quote</span>
+<p class="font-body-md text-body-md text-on-surface italic relative z-10 leading-relaxed">
+          “Cakra menunjukkan determinasi tinggi saat sesi latihan. Cepat belajar, memiliki akselerasi sayap yang sangat berbahaya. Perlu lebih tenang di depan gawang ketika berhadapan dengan kiper.”
+        </p>
+<div class="mt-space-sm pt-space-xs flex items-center justify-between text-on-surface-variant">
+<span class="font-label-sm text-label-sm">Evaluasi Terverifikasi</span>
+<div class="flex items-center gap-1 text-primary">
+<span class="material-symbols-outlined text-[14px]">draw</span>
+<span class="font-label-sm text-[10px] uppercase font-bold tracking-widest">Ttd. Pelatih</span>
+</div>
+</div>
+</div>
+</section>
+<!-- 6. Rencana Pengembangan (Target Latihan Berikutnya) -->
+<section class="bg-surface-container-lowest rounded-xl p-space-md shadow-sm flex flex-col gap-space-sm">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-secondary text-[22px]">flag</span>
+<h2 class="font-headline-sm text-headline-sm text-primary tracking-tight">Rencana Pengembangan</h2>
+</div>
+<span class="font-label-sm text-[10px] bg-secondary-fixed text-on-secondary-fixed px-2 py-0.5 rounded font-bold">2 Target Utama</span>
+</div>
+<div class="flex flex-col gap-space-xs mt-1">
+<!-- Target 1 Card -->
+<div class="bg-surface-container-low p-space-sm rounded-lg flex items-start gap-space-sm">
+<div class="w-6 h-6 rounded-full bg-secondary-container text-on-secondary-container font-label-md flex items-center justify-center shrink-0 mt-0.5 font-bold">
+            1
+          </div>
+<div class="flex-1 min-w-0">
+<h3 class="font-label-lg text-label-lg text-primary">Penyelesaian Akhir Kaki Kiri</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-0.5">
+              Latihan drill tembakan terarah menggunakan kaki lemah 2x seminggu setelah sesi reguler.
+            </p>
+</div>
+</div>
+<!-- Target 2 Card -->
+<div class="bg-surface-container-low p-space-sm rounded-lg flex items-start gap-space-sm">
+<div class="w-6 h-6 rounded-full bg-secondary-container text-on-secondary-container font-label-md flex items-center justify-center shrink-0 mt-0.5 font-bold">
+            2
+          </div>
+<div class="flex-1 min-w-0">
+<h3 class="font-label-lg text-label-lg text-primary">Visi Umpan Silang Rendah</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-0.5">
+              Mengasah momen timing <em>low cut-back pass</em> saat mendekati garis akhir lapangan lawan.
+            </p>
+</div>
+</div>
+</div>
+</section>
+<!-- 7. Tombol Aksi Dokumen & Berbagi -->
+<section class="flex flex-col gap-space-sm pt-space-xs pb-space-lg">
+<!-- High visibility primary download button (F0C23B / 48px height) -->
+<button class="w-full h-12 bg-secondary-container text-on-secondary-fixed font-label-lg rounded-xl flex items-center justify-center gap-2 shadow-sm active:translate-y-0.5 transition-transform" id="btnDownloadReport" type="button">
+<span class="material-symbols-outlined text-[20px]">download</span>
+<span>Unduh Rapor PDF A4 Resmi</span>
+</button>
+<!-- WhatsApp Parent Share Action -->
+<button class="w-full h-12 bg-surface-container-lowest text-primary font-label-lg rounded-xl flex items-center justify-center gap-2 shadow-sm active:bg-surface-container transition-colors" id="btnShareWA" type="button">
+<span class="material-symbols-outlined text-[20px] text-[#2A8A57]">share</span>
+<span>Bagikan Ringkasan ke Orang Tua via WhatsApp</span>
+</button>
+<!-- Verification Footer Seal -->
+<div class="text-center mt-space-xs">
+<p class="font-label-sm text-[10px] text-on-surface-variant tracking-wider uppercase">
+          Dokumen Rapor Pembinaan Usia Dini • SSB Garuda Muda Jakarta
+        </p>
+</div>
+</section>
+</div>
+<!-- Toast Micro-interaction -->
+<div class="fixed bottom-20 left-1/2 -translate-x-1/2 bg-primary text-on-primary px-4 py-2.5 rounded-full shadow-lg font-label-sm text-label-sm flex items-center gap-2 opacity-0 pointer-events-none transition-opacity duration-300 z-50" id="toastNotification">
+<span class="material-symbols-outlined text-[18px] text-secondary-container">check_circle</span>
+<span id="toastMessage">Tautan rapor disiapkan untuk WhatsApp</span>
+</div>
+</div>
+<script>
+  (function() {
+    const downloadBtn = document.getElementById('btnDownloadReport');
+    const shareBtn = document.getElementById('btnShareWA');
+    const toast = document.getElementById('toastNotification');
+    const toastMsg = document.getElementById('toastMessage');
+
+    function showToast(text) {
+      if (!toast || !toastMsg) return;
+      toastMsg.textContent = text;
+      toast.classList.remove('opacity-0', 'pointer-events-none');
+      toast.classList.add('opacity-100');
+      setTimeout(() => {
+        toast.classList.remove('opacity-100');
+        toast.classList.add('opacity-0', 'pointer-events-none');
+      }, 2400);
+    }
+
+    if (downloadBtn) {
+      downloadBtn.addEventListener('click', () => {
+        showToast('Membuat dokumen PDF A4 Cakra Pratama...');
+      });
+    }
+
+    if (shareBtn) {
+      shareBtn.addEventListener('click', () => {
+        showToast('Membuka WhatsApp untuk berkabar dengan wali murid...');
+      });
+    }
+  })();
+</script></main><nav class="fixed bottom-0 w-full z-50 pb-safe bg-surface/90 backdrop-blur-xl shadow-[0_-2px_10px_rgba(0,0,0,0.03)]" data-active-classes="text-primary-container font-bold fill-current [&amp;_.tab-indicator]:opacity-100"><div class="h-[60px] px-gutter-mobile grid grid-cols-4 items-center"><a class="flex flex-col items-center justify-center h-full min-h-[48px] text-on-surface-variant hover:text-primary transition-colors group relative" data-path="beranda" href="#"><span class="material-symbols-outlined text-[24px] mb-0.5">home</span><span class="font-label-sm text-[10px] tracking-tight">Beranda</span><span class="tab-indicator absolute bottom-1 w-1.5 h-1.5 rounded-full bg-secondary-container opacity-0 transition-opacity"></span></a><a class="flex flex-col items-center justify-center h-full min-h-[48px] text-on-surface-variant hover:text-primary transition-colors group relative" data-path="presensi" href="#"><span class="material-symbols-outlined text-[24px] mb-0.5">fact_check</span><span class="font-label-sm text-[10px] tracking-tight">Presensi</span><span class="tab-indicator absolute bottom-1 w-1.5 h-1.5 rounded-full bg-secondary-container opacity-0 transition-opacity"></span></a><a aria-current="page" class="flex flex-col items-center justify-center h-full min-h-[48px] transition-colors group relative text-primary-container font-bold fill-current [&amp;_.tab-indicator]:opacity-100" data-path="rapor-nilai" href="#"><span class="material-symbols-outlined text-[24px] mb-0.5">query_stats</span><span class="font-label-sm text-[10px] tracking-tight">Rapor</span><span class="tab-indicator absolute bottom-1 w-1.5 h-1.5 rounded-full bg-secondary-container opacity-0 transition-opacity"></span></a><a class="flex flex-col items-center justify-center h-full min-h-[48px] text-on-surface-variant hover:text-primary transition-colors group relative" data-path="pemain" href="#"><span class="material-symbols-outlined text-[24px] mb-0.5">badge</span><span class="font-label-sm text-[10px] tracking-tight">Pemain</span><span class="tab-indicator absolute bottom-1 w-1.5 h-1.5 rounded-full bg-secondary-container opacity-0 transition-opacity"></span></a></div></nav></body></html>

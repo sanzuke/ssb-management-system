@@ -4,7 +4,7 @@ import { createSignal, onMount, Show } from "solid-js";
 import AppBar from "~/components/AppBar";
 import QrCode from "~/components/QrCode";
 import { api, ApiError, getMe, type Me } from "~/lib/api";
-import { posisiLabel, statusLabel, type PlayerDetail } from "~/lib/pemain";
+import { inisial, posisiLabel, statusLabel, type PlayerDetail } from "~/lib/pemain";
 
 export default function KartuPemain() {
   const nav = useNavigate();
@@ -54,31 +54,47 @@ export default function KartuPemain() {
               <h1>Kartu pemain</h1>
               <article class="kartu" aria-label={`Kartu pemain ${d().fullName}`}>
                 <header>
-                  <span class="kartu-ssb">{me()!.active!.ssbName}</span>
-                  <span class="kartu-status" data-status={d().status}>
-                    {statusLabel[d().status]}
-                  </span>
+                  <div>
+                    <span class="kartu-ssb">{me()!.active!.ssbName}</span>
+                    <span class="kartu-sub">Kartu anggota</span>
+                  </div>
+                  <div class="kartu-no">
+                    <strong>{d().memberNo ?? "Belum ada nomor"}</strong>
+                    <span class="kartu-status" data-status={d().status}>
+                      {statusLabel[d().status]}
+                    </span>
+                  </div>
                 </header>
-                <div class="kartu-nama">{d().fullName}</div>
-                <dl class="kartu-data">
-                  <dt>Nomor anggota</dt>
-                  <dd>{d().memberNo ?? "-"}</dd>
-                  <dt>KU</dt>
-                  <dd>{d().ageGroup?.name ?? "Belum ditentukan"}</dd>
-                  <dt>Posisi</dt>
-                  <dd>{d().position ? posisiLabel[d().position!] : "Belum ditentukan"}</dd>
-                </dl>
-                <QrCode value={url()} label={`Kode QR ${d().fullName}, nomor anggota ${d().memberNo ?? "belum ada"}`} />
+                <div class="kartu-badan">
+                  <div class="kartu-profil">
+                    <span class="ortu-foto" aria-hidden="true">
+                      {inisial(d().fullName)}
+                    </span>
+                    <div class="ortu-teks">
+                      <span class="ortu-chip hijau">{d().ageGroup?.name ?? "KU belum ditentukan"}</span>
+                      <div class="kartu-nama">{d().fullName}</div>
+                      <span class="petunjuk">{d().position ? posisiLabel[d().position!] : "Posisi belum ditentukan"}</span>
+                    </div>
+                  </div>
+                  <div class="kartu-qr">
+                    <QrCode value={url()} label={`Kode QR ${d().fullName}, nomor anggota ${d().memberNo ?? "belum ada"}`} />
+                    <p>Tunjukkan kode ini ke pelatih. Kode membuka profil pemain, dan hanya akun yang berhak yang bisa melihat isinya.</p>
+                    <Show when={d().memberNo}>
+                      <p class="kartu-kode">
+                        Kode unik: <strong>{d().memberNo}</strong>
+                      </p>
+                    </Show>
+                  </div>
+                </div>
               </article>
-              <p class="petunjuk">Kode QR membuka profil pemain. Hanya akun yang berhak yang bisa melihat isinya.</p>
-              <p class="tautan-bawah">
-                <A class="tombol tipis" href={`/pemain/${d().id}`}>
-                  Lihat profil
-                </A>
-                <button class="tombol tipis" type="button" onClick={() => window.print()}>
+              <div class="kartu-aksi">
+                <button class="tombol utama" type="button" onClick={() => window.print()}>
                   Cetak kartu
                 </button>
-              </p>
+                <A class="tombol utama-rumput" href={`/pemain/${d().id}`}>
+                  Lihat profil
+                </A>
+              </div>
             </>
           )}
         </Show>
