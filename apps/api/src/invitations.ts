@@ -31,7 +31,12 @@ export function invitationRoutes(db: Db, opts: { secureCookie: boolean; webUrl: 
           return c.json({ ok: true, ssbId: joined.ssbId, role: joined.role });
         }
         const parsed = acceptInvitationSchema.safeParse(await c.req.json().catch(() => ({})));
-        if (!parsed.success) throw new HttpError(400, "bad_request", "Nama, email, dan kata sandi (minimal 10 karakter) wajib diisi");
+        if (!parsed.success)
+          throw new HttpError(
+            400,
+            "bad_request",
+            "Nama, email, dan kata sandi (minimal 10 karakter) wajib diisi; nomor WhatsApp, bila diisi, harus 8 sampai 15 angka",
+          );
         const body = parsed.data;
         let accountId: string;
         try {
@@ -44,7 +49,7 @@ export function invitationRoutes(db: Db, opts: { secureCookie: boolean; webUrl: 
           if (isUniqueViolation(e)) throw new HttpError(409, "email_taken", "Email sudah terdaftar. Masuk dulu, lalu buka tautan undangan lagi");
           throw e;
         }
-        const joined = await acceptInvitation(db, token, { id: accountId, name: body.name });
+        const joined = await acceptInvitation(db, token, { id: accountId, name: body.name }, undefined, body.whatsapp);
         await startSession(db, c, accountId, joined, opts.secureCookie);
         return c.json({ ok: true, ssbId: joined.ssbId, role: joined.role }, 201);
       })

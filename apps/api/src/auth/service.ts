@@ -128,7 +128,7 @@ export async function previewInvitation(db: Db, token: string) {
 }
 
 /** Menerima undangan atas nama akun. Sekali pakai; gagal bila akun sudah menjadi anggota. */
-export async function acceptInvitation(db: Db, token: string, account: { id: string; name: string }, memberName?: string) {
+export async function acceptInvitation(db: Db, token: string, account: { id: string; name: string }, memberName?: string, whatsapp?: string) {
   const { ssbId, secret } = parseToken(token);
   try {
     return await withTenant(db, ssbId, async (tx) => {
@@ -141,7 +141,7 @@ export async function acceptInvitation(db: Db, token: string, account: { id: str
       if (!inv) throw invalidInvitation();
       const [u] = await tx
         .insert(schema.appUser)
-        .values({ ssbId, accountId: account.id, name: memberName ?? account.name, role: inv.role })
+        .values({ ssbId, accountId: account.id, name: memberName ?? account.name, role: inv.role, whatsapp: whatsapp ?? null })
         .returning();
       if (inv.playerId && inv.role === "orang_tua") {
         await tx.insert(schema.playerGuardian).values({ ssbId, playerId: inv.playerId, userId: u!.id });

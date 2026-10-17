@@ -2,8 +2,8 @@ import { and, eq, ne } from "drizzle-orm";
 import { Hono } from "hono";
 import { deleteCookie, getCookie } from "hono/cookie";
 import { zv } from "../validator";
-import { schema, type Db } from "@ssb/db";
-import { changePasswordSchema, loginSchema, registerSsbSchema, selectSsbSchema, ssbInputSchema, type Me } from "@ssb/shared";
+import { schema, withTenant, type Db } from "@ssb/db";
+import { changePasswordSchema, loginSchema, registerSsbSchema, selectSsbSchema, ssbInputSchema, updateProfileSchema, type Me } from "@ssb/shared";
 import { HttpError } from "../errors";
 import { requireAccount, type AppEnv } from "./middleware";
 import { dummyHash, hashPassword, verifyPassword } from "./password";
@@ -57,8 +57,23 @@ export function authRoutes(db: Db, opts: { secureCookie: boolean }) {
         const memberships = await listMemberships(db, a.accountId);
         const active = a.member ? (memberships.find((m) => m.userId === a.member!.userId) ?? null) : null;
         const [acc] = await db.select({ hasPassword: schema.account.passwordHash }).from(schema.account).where(eq(schema.account.id, a.accountId)).limit(1);
-        const me: Me = { accountId: a.accountId, name: a.accountName, email: a.email, hasPassword: acc?.hasPassword != null, active, memberships };
+        const whatsapp = a.member
+          ? await withTenant(db, a.member.ssbId, async (tx) => {
+              const [u] = await tx.select({ whatsapp: schema.appUser.whatsapp }).from(schema.appUser).where(eq(schema.appUser.id, a.member!.userId)).limit(1);
+              return u?.whatsapp ?? null;
+            })
+          : null;
+        const me: Me = { accountId: a.accountId, name: a.accountName, email: a.email, hasPassword: acc?.hasPassword != null, whatsapp, active, memberships };
         return c.json(me);
+      })
+
+      // Ubah kontak sendiri pada keanggotaan di SSB aktif (nomor WhatsApp; kosong menghapus).
+      .patch("/me", requireAccount, zv("json", updateProfileSchema), async (c) => {
+        const a = c.get("auth")!;
+        if (!a.member) throw new HttpError(400, "no_active_ssb", "Pilih SSB terlebih dulu");
+        const { whatsapp } = c.req.valid("json");
+        await withTenant(db, a.member.ssbId, (tx) => tx.update(schema.appUser).set({ whatsapp }).where(eq(schema.appUser.id, a.member!.userId)));
+        return c.json({ ok: true, whatsapp });
       })
 
       // Pilih SSB aktif untuk sesi ini; hanya SSB tempat akun menjadi anggota.

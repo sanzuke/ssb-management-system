@@ -495,3 +495,8 @@
     grid-template-columns: repeat(4, 1fr);
   }
 }
+
+/* Jarak antar bagian di halaman Akun */
+.halaman form.form + h2 {
+  margin-top: 32px;
+}

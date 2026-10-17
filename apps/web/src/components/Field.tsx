@@ -18,7 +18,7 @@ type Props = {
   minlength?: number;
   maxlength?: number;
   pattern?: string;
-  inputmode?: "text" | "email" | "numeric";
+  inputmode?: "text" | "email" | "numeric" | "tel";
 };
 
 export default function Field(p: Props) {
