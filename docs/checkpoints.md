@@ -25,3 +25,4 @@ Satu baris per checkpoint, yang terbaru di atas. Hash commit menjadi acuan utama
 | cp-18-portal-ortu-web | `b32f488` | 2026-10-17 | Beranda orang tua (anak, persentase hadir, latihan mendatang dan terakhir); e2e 360 px; checklist 32/75 |
 | cp-19-kartu-pemain-qr | `7062986` | 2026-10-17 | Kartu pemain (nomor anggota, KU, posisi, status, QR ke profil), tautan dari profil dan beranda orang tua; e2e membaca QR; checklist 33/75 |
 | cp-20-assessment-api | `ace6a5e` | 2026-10-17 | Assessment skala 1-10: indikator per KU (usulan awal 14), penilaian per pemain per periode, jejak skor, penerbitan ke orang tua; migrasi 0012; 73 test api; checklist 37/75 |
+| cp-21-assessment-web | `4f487b9` | 2026-10-17 | Layar penilaian skor 1-10 di HP, layar admin indikator (16 usulan awal), penerbitan, orang tua membaca; e2e 360 px; checklist 39/75 |
