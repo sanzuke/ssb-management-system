@@ -488,11 +488,36 @@
   .bar .menu svg {
     display: block;
   }
+  /* Semua halaman memakai lebar penuh di samping sidebar */
+  .halaman,
   .halaman.lebar {
+    max-width: none;
     padding: 28px 32px 56px;
+  }
+  /* Formulir satu kolom tetap dibatasi agar kolom isian tidak terlalu panjang */
+  .halaman > .form,
+  .halaman > form {
+    max-width: 44rem;
+  }
+  /* Bilah simpan melayang di dasar layar: geser agar tidak tertutup sidebar */
+  .bar-simpan {
+    left: 248px;
+  }
+  .progres-nilai {
+    margin-inline: -32px;
+    padding-inline: 32px;
   }
   .statistik {
     grid-template-columns: repeat(4, 1fr);
+  }
+  /* Tombol skor 1-10 sebaris dengan ukuran wajar, bukan melebar mengikuti halaman */
+  .pilih-nilai {
+    grid-template-columns: repeat(10, minmax(0, 3.4rem));
+    justify-content: start;
+  }
+  /* Kartu absensi tersusun beberapa kolom; tiap pemilih status tidak terlalu panjang */
+  .daftar-absen {
+    grid-template-columns: repeat(auto-fill, minmax(24rem, 1fr));
   }
 }
 
