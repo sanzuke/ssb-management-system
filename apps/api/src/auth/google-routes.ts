@@ -26,10 +26,7 @@ const b64 = (b: Buffer) => b.toString("base64url");
  * Login/daftar dengan Google (OIDC, authorization code + PKCE).
  * Status alur disimpan di cookie bertanda tangan yang berlaku 10 menit.
  */
-export function googleRoutes(
-  db: Db,
-  cfg: { provider: GoogleProvider | null; secret: string | undefined; webUrl: string; secureCookie: boolean },
-) {
+export function googleRoutes(db: Db, cfg: { provider: GoogleProvider | null; secret: string | undefined; webUrl: string; secureCookie: boolean }) {
   // Berhasil: ke beranda. Gagal: kembali ke halaman asal alur (masuk, daftar, atau undangan), tempat pesan ditampilkan.
   const back = (error?: string, page = "/masuk") => (error ? `${cfg.webUrl}${page}?error=${error}` : `${cfg.webUrl}/?login=ok`);
   const pageOf = (start: Tx["start"]) =>
@@ -63,7 +60,7 @@ export function googleRoutes(
       const code = c.req.query("code");
       if (!code || c.req.query("state") !== tx.state) return c.redirect(back("state_tidak_cocok", page), 302);
 
-      let claims;
+      let claims: Awaited<ReturnType<typeof cfg.provider.exchange>>;
       try {
         claims = await cfg.provider.exchange(code, tx.verifier);
       } catch {

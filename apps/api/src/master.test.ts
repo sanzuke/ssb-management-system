@@ -24,11 +24,21 @@ run("data master: KU, periode, lokasi", () => {
       headers: { "content-type": "application/json", ...(cookie ? { cookie } : {}) },
       ...(method !== "GET" && method !== "DELETE" ? { body: JSON.stringify(body ?? {}) } : {}),
     });
-  const sessionOf = (res: Response) => res.headers.getSetCookie().find((c) => c.startsWith("ssb_session="))!.split(";")[0]!;
+  const sessionOf = (res: Response) =>
+    res.headers
+      .getSetCookie()
+      .find((c) => c.startsWith("ssb_session="))!
+      .split(";")[0]!;
   const json = async (res: Response) => (await res.json()) as any;
 
   async function newSsb(tag: string) {
-    const res = await call("POST", "/auth/register-ssb", undefined, { ssbName: `M ${tag}`, slug: `m-${tag}-${uid}`, adminName: "Admin", email: `admin-${tag}-${uid}@uji.test`, password: PASS });
+    const res = await call("POST", "/auth/register-ssb", undefined, {
+      ssbName: `M ${tag}`,
+      slug: `m-${tag}-${uid}`,
+      adminName: "Admin",
+      email: `admin-${tag}-${uid}@uji.test`,
+      password: PASS,
+    });
     expect(res.status).toBe(201);
     const { ssbId } = await json(res);
     ssbIds.push(ssbId);
@@ -36,7 +46,11 @@ run("data master: KU, periode, lokasi", () => {
   }
   async function member(admin: string, role: string) {
     const inv = await json(await call("POST", "/invitations", admin, { role }));
-    const acc = await call("POST", `/invitations/${inv.token}/accept`, undefined, { name: role, email: `${role}-${uid}-${randomUUID().slice(0, 4)}@uji.test`, password: PASS });
+    const acc = await call("POST", `/invitations/${inv.token}/accept`, undefined, {
+      name: role,
+      email: `${role}-${uid}-${randomUUID().slice(0, 4)}@uji.test`,
+      password: PASS,
+    });
     expect(acc.status).toBe(201);
     return sessionOf(acc);
   }
@@ -96,7 +110,9 @@ run("data master: KU, periode, lokasi", () => {
     expect(rev.status).toBe(400);
     expect((await json(rev)).error.fields.endDate).toBeTruthy();
     expect((await call("POST", "/periods", admin, { name: "Salah", startDate: "2026-02-30", endDate: "2026-03-01" })).status).toBe(400);
-    expect((await json(await call("POST", "/periods", admin, { name: "Musim 2026/27", startDate: "2027-06-01", endDate: "2027-12-01" }))).error.code).toBe("duplicate");
+    expect((await json(await call("POST", "/periods", admin, { name: "Musim 2026/27", startDate: "2027-06-01", endDate: "2027-12-01" }))).error.code).toBe(
+      "duplicate",
+    );
     const upd = await call("PATCH", `/periods/${id}`, admin, { name: "Musim 2026/27", startDate: "2026-08-01", endDate: "2027-06-30" });
     expect((await json(upd)).endDate).toBe("2027-06-30");
     expect((await call("DELETE", `/periods/${id}`, admin)).status).toBe(204);
@@ -125,7 +141,11 @@ run("data master: KU, periode, lokasi", () => {
       expect((await call("GET", path, ortu)).status).toBe(403);
       expect((await call("GET", path)).status).toBe(401);
     }
-    const body = { "/age-groups": { name: "KU-9", minAge: 8, maxAge: 9 }, "/periods": { name: "Periode", startDate: "2026-01-01", endDate: "2026-12-31" }, "/locations": { name: "Lokasi" } } as const;
+    const body = {
+      "/age-groups": { name: "KU-9", minAge: 8, maxAge: 9 },
+      "/periods": { name: "Periode", startDate: "2026-01-01", endDate: "2026-12-31" },
+      "/locations": { name: "Lokasi" },
+    } as const;
     for (const [path, b] of Object.entries(body)) for (const who of [pelatih, korlas, ortu]) expect((await call("POST", path, who, b)).status).toBe(403);
     const ku = await json(await call("POST", "/age-groups", admin, body["/age-groups"]));
     expect((await call("DELETE", `/age-groups/${ku.id}`, pelatih)).status).toBe(403);

@@ -66,7 +66,9 @@ export default function Absensi() {
   });
 
   const form = createSubmit(async () => {
-    const entries = roster()!.players.filter((x) => marks()[x.playerId]).map((x) => ({ playerId: x.playerId, status: marks()[x.playerId]!, note: x.note }));
+    const entries = roster()!
+      .players.filter((x) => marks()[x.playerId])
+      .map((x) => ({ playerId: x.playerId, status: marks()[x.playerId]!, note: x.note }));
     apply(await api<AttendanceRoster>(`/sessions/${p.id}/attendance`, { method: "PUT", body: { entries } }));
     setSaved(true);
   });
@@ -82,7 +84,9 @@ export default function Absensi() {
               <Title>Sesi tidak ditemukan · SSB App</Title>
               <h1>Sesi tidak ditemukan</h1>
               <p>Sesi ini tidak ada, atau KU-nya tidak ditugaskan kepada Anda.</p>
-              <A class="tombol" href="/jadwal">Ke jadwal latihan</A>
+              <A class="tombol" href="/jadwal">
+                Ke jadwal latihan
+              </A>
             </>
           }
         >
@@ -95,18 +99,27 @@ export default function Absensi() {
               {roster()!.session.location ? `, ${roster()!.session.location!.name}` : ""}
             </p>
             <Show when={form.error()}>
-              <div class="peringatan" role="alert">{form.error()}</div>
+              <div class="peringatan" role="alert">
+                {form.error()}
+              </div>
             </Show>
             <Show when={saved()}>
-              <div class="info" role="status">Absensi disimpan. Anda masih bisa mengoreksinya.</div>
+              <div class="info" role="status">
+                Absensi disimpan. Anda masih bisa mengoreksinya.
+              </div>
             </Show>
             <Show when={roster()!.players.length > 0} fallback={<p class="kosong">Belum ada pemain aktif di KU ini. Tambahkan pemain di menu Pemain.</p>}>
-              <p><button class="tombol" type="button" onClick={allPresent}>Tandai semua yang belum diisi hadir</button></p>
+              <p>
+                <button class="tombol" type="button" onClick={allPresent}>
+                  Tandai semua yang belum diisi hadir
+                </button>
+              </p>
               <ul class="daftar-absen">
                 <For each={roster()!.players}>
                   {(pl) => (
                     <li class="baris-absen">
                       <span class="nama">{pl.fullName}</span>
+                      {/* biome-ignore lint/a11y/useSemanticElements: fieldset merusak tata letak grid tombol */}
                       <div class="pilih-status" role="group" aria-label={`Kehadiran ${pl.fullName}`}>
                         <For each={pilihan}>
                           {(o) => (
@@ -121,13 +134,22 @@ export default function Absensi() {
                 </For>
               </ul>
               <div class="bar-simpan">
-                <span aria-live="polite">{count().hadir} hadir, {count().izin} izin, {count().sakit} sakit, {count().alpa} alpa, {count().belum} belum</span>
-                <button class="tombol utama" type="button" disabled={form.busy() || (!dirty() && count().belum === roster()!.players.length)} onClick={form.submit}>
+                <span aria-live="polite">
+                  {count().hadir} hadir, {count().izin} izin, {count().sakit} sakit, {count().alpa} alpa, {count().belum} belum
+                </span>
+                <button
+                  class="tombol utama"
+                  type="button"
+                  disabled={form.busy() || (!dirty() && count().belum === roster()!.players.length)}
+                  onClick={form.submit}
+                >
                   {form.busy() ? "Menyimpan…" : "Simpan absensi"}
                 </button>
               </div>
             </Show>
-            <p class="tautan-bawah"><A href="/jadwal">Kembali ke jadwal</A></p>
+            <p class="tautan-bawah">
+              <A href="/jadwal">Kembali ke jadwal</A>
+            </p>
           </Show>
         </Show>
       </main>

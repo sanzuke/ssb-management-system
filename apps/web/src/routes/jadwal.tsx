@@ -69,7 +69,13 @@ export default function Jadwal() {
     }
   };
   const ringkas = (a: TrainingSession["attendance"]) => {
-    const parts = [a.hadir ? `${a.hadir} hadir` : "", a.izin ? `${a.izin} izin` : "", a.sakit ? `${a.sakit} sakit` : "", a.alpa ? `${a.alpa} alpa` : "", a.belum ? `${a.belum} belum diisi` : ""].filter(Boolean);
+    const parts = [
+      a.hadir ? `${a.hadir} hadir` : "",
+      a.izin ? `${a.izin} izin` : "",
+      a.sakit ? `${a.sakit} sakit` : "",
+      a.alpa ? `${a.alpa} alpa` : "",
+      a.belum ? `${a.belum} belum diisi` : "",
+    ].filter(Boolean);
     return parts.length ? parts.join(", ") : "Tidak ada pemain aktif";
   };
 
@@ -80,23 +86,51 @@ export default function Jadwal() {
       <main class="halaman">
         <h1>Jadwal latihan</h1>
         <Show when={error()}>
-          <div class="peringatan" role="alert">{error()}</div>
+          <div class="peringatan" role="alert">
+            {error()}
+          </div>
         </Show>
         <Show when={notice()}>
-          <div class="info" role="status">{notice()}</div>
+          <div class="info" role="status">
+            {notice()}
+          </div>
         </Show>
 
         <Show when={admin()}>
           <Show
             when={editing() === "baru"}
-            fallback={<p><button class="tombol utama" type="button" onClick={() => { setNotice(""); setEditing("baru"); }}>Tambah sesi</button></p>}
+            fallback={
+              <p>
+                <button
+                  class="tombol utama"
+                  type="button"
+                  onClick={() => {
+                    setNotice("");
+                    setEditing("baru");
+                  }}
+                >
+                  Tambah sesi
+                </button>
+              </p>
+            }
           >
             <section class="master">
               <h2>Sesi baru</h2>
               <Show when={groups().length === 0}>
-                <p class="info">Belum ada KU. Buat KU di <A href="/master">Data master</A> dulu.</p>
+                <p class="info">
+                  Belum ada KU. Buat KU di <A href="/master">Data master</A> dulu.
+                </p>
               </Show>
-              <SessionForm ageGroups={groups()} locations={locs()} onCancel={() => setEditing(null)} onSaved={async (n) => { setEditing(null); setNotice(n > 1 ? `${n} sesi dijadwalkan.` : "Sesi dijadwalkan."); await load(); }} />
+              <SessionForm
+                ageGroups={groups()}
+                locations={locs()}
+                onCancel={() => setEditing(null)}
+                onSaved={async (n) => {
+                  setEditing(null);
+                  setNotice(n > 1 ? `${n} sesi dijadwalkan.` : "Sesi dijadwalkan.");
+                  await load();
+                }}
+              />
             </section>
           </Show>
         </Show>
@@ -122,7 +156,10 @@ export default function Jadwal() {
                         fallback={
                           <>
                             <A class="pemain-tautan isi" href={`/absensi/${s.id}`}>
-                              <strong>{s.ageGroup.name}{s.startTime ? `, jam ${s.startTime}` : ""}</strong>
+                              <strong>
+                                {s.ageGroup.name}
+                                {s.startTime ? `, jam ${s.startTime}` : ""}
+                              </strong>
                               <span class="petunjuk">{[s.location?.name, ringkas(s.attendance)].filter(Boolean).join(", ")}</span>
                             </A>
                             <Show when={admin()}>
@@ -131,20 +168,45 @@ export default function Jadwal() {
                                   when={confirmId() === s.id}
                                   fallback={
                                     <>
-                                      <button class="tombol tipis" type="button" onClick={() => { setNotice(""); setEditing(s.id); }}>Ubah</button>
-                                      <button class="tombol tipis" type="button" onClick={() => setConfirmId(s.id)}>Hapus</button>
+                                      <button
+                                        class="tombol tipis"
+                                        type="button"
+                                        onClick={() => {
+                                          setNotice("");
+                                          setEditing(s.id);
+                                        }}
+                                      >
+                                        Ubah
+                                      </button>
+                                      <button class="tombol tipis" type="button" onClick={() => setConfirmId(s.id)}>
+                                        Hapus
+                                      </button>
                                     </>
                                   }
                                 >
-                                  <button class="tombol bahaya" type="button" onClick={() => remove(s.id)}>Ya, hapus</button>
-                                  <button class="tombol tipis" type="button" onClick={() => setConfirmId(null)}>Batal</button>
+                                  <button class="tombol bahaya" type="button" onClick={() => remove(s.id)}>
+                                    Ya, hapus
+                                  </button>
+                                  <button class="tombol tipis" type="button" onClick={() => setConfirmId(null)}>
+                                    Batal
+                                  </button>
                                 </Show>
                               </span>
                             </Show>
                           </>
                         }
                       >
-                        <SessionForm initial={s} ageGroups={groups()} locations={locs()} onCancel={() => setEditing(null)} onSaved={async () => { setEditing(null); setNotice("Sesi diperbarui."); await load(); }} />
+                        <SessionForm
+                          initial={s}
+                          ageGroups={groups()}
+                          locations={locs()}
+                          onCancel={() => setEditing(null)}
+                          onSaved={async () => {
+                            setEditing(null);
+                            setNotice("Sesi diperbarui.");
+                            await load();
+                          }}
+                        />
                       </Show>
                     </li>
                   )}
@@ -155,7 +217,14 @@ export default function Jadwal() {
         </For>
 
         <p class="tautan-bawah">
-          <button class="tombol tipis" type="button" onClick={async () => { setPast(!past()); await load(); }}>
+          <button
+            class="tombol tipis"
+            type="button"
+            onClick={async () => {
+              setPast(!past());
+              await load();
+            }}
+          >
             {past() ? "Sembunyikan sesi yang sudah lewat" : "Tampilkan sesi 60 hari terakhir"}
           </button>
         </p>

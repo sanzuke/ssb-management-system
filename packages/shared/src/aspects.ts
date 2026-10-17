@@ -21,4 +21,3 @@ export const defaultIndicators: Record<AssessmentAspect, string[]> = {
   movement: ["Koordinasi", "Keseimbangan"],
   game_intelligence: ["Pengambilan keputusan", "Membaca permainan"],
 };
-

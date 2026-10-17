@@ -104,7 +104,9 @@ export const appUser = pgTable(
   {
     id: uuid("id").primaryKey().defaultRandom(),
     ssbId: ssbId().references(() => ssb.id, { onDelete: "cascade" }),
-    accountId: uuid("account_id").notNull().references(() => account.id, { onDelete: "cascade" }),
+    accountId: uuid("account_id")
+      .notNull()
+      .references(() => account.id, { onDelete: "cascade" }),
     name: text("name").notNull(),
     whatsapp: text("whatsapp"),
     role: userRole("role").notNull(),
@@ -287,7 +289,9 @@ export const attendance = pgTable(
   },
   (t) => [
     primaryKey({ columns: [t.sessionId, t.playerId] }),
-    foreignKey({ columns: [t.ssbId, t.sessionId], foreignColumns: [trainingSession.ssbId, trainingSession.id], name: "attendance_session_fk" }).onDelete("cascade"),
+    foreignKey({ columns: [t.ssbId, t.sessionId], foreignColumns: [trainingSession.ssbId, trainingSession.id], name: "attendance_session_fk" }).onDelete(
+      "cascade",
+    ),
     foreignKey({ columns: [t.ssbId, t.playerId], foreignColumns: [player.ssbId, player.id], name: "attendance_player_fk" }).onDelete("cascade"),
     foreignKey({ columns: [t.ssbId, t.recordedBy], foreignColumns: [appUser.ssbId, appUser.id], name: "attendance_recorded_by_fk" }),
     index("attendance_player_idx").on(t.ssbId, t.playerId),
@@ -353,8 +357,14 @@ export const assessmentScore = pgTable(
   (t) => [
     primaryKey({ columns: [t.assessmentId, t.indicatorId] }),
     check("assessment_score_range", sql`${t.score} between 1 and 10`),
-    foreignKey({ columns: [t.ssbId, t.assessmentId], foreignColumns: [assessment.ssbId, assessment.id], name: "assessment_score_assessment_fk" }).onDelete("cascade"),
-    foreignKey({ columns: [t.ssbId, t.indicatorId], foreignColumns: [assessmentIndicator.ssbId, assessmentIndicator.id], name: "assessment_score_indicator_fk" }),
+    foreignKey({ columns: [t.ssbId, t.assessmentId], foreignColumns: [assessment.ssbId, assessment.id], name: "assessment_score_assessment_fk" }).onDelete(
+      "cascade",
+    ),
+    foreignKey({
+      columns: [t.ssbId, t.indicatorId],
+      foreignColumns: [assessmentIndicator.ssbId, assessmentIndicator.id],
+      name: "assessment_score_indicator_fk",
+    }),
     tenantPolicy("assessment_score"),
   ],
 ).enableRLS();
@@ -373,8 +383,14 @@ export const assessmentScoreLog = pgTable(
     changedAt: timestamp("changed_at", { withTimezone: true }).notNull().defaultNow(),
   },
   (t) => [
-    foreignKey({ columns: [t.ssbId, t.assessmentId], foreignColumns: [assessment.ssbId, assessment.id], name: "assessment_score_log_assessment_fk" }).onDelete("cascade"),
-    foreignKey({ columns: [t.ssbId, t.indicatorId], foreignColumns: [assessmentIndicator.ssbId, assessmentIndicator.id], name: "assessment_score_log_indicator_fk" }),
+    foreignKey({ columns: [t.ssbId, t.assessmentId], foreignColumns: [assessment.ssbId, assessment.id], name: "assessment_score_log_assessment_fk" }).onDelete(
+      "cascade",
+    ),
+    foreignKey({
+      columns: [t.ssbId, t.indicatorId],
+      foreignColumns: [assessmentIndicator.ssbId, assessmentIndicator.id],
+      name: "assessment_score_log_indicator_fk",
+    }),
     foreignKey({ columns: [t.ssbId, t.changedBy], foreignColumns: [appUser.ssbId, appUser.id], name: "assessment_score_log_changed_by_fk" }),
     index("assessment_score_log_assessment_idx").on(t.ssbId, t.assessmentId, t.changedAt),
     tenantPolicy("assessment_score_log"),
@@ -387,7 +403,10 @@ export const assessmentScoreLog = pgTable(
  */
 export const ssbDirectory = pgTable("ssb_directory", {
   slug: text("slug").primaryKey(),
-  ssbId: uuid("ssb_id").notNull().unique().references(() => ssb.id, { onDelete: "cascade" }),
+  ssbId: uuid("ssb_id")
+    .notNull()
+    .unique()
+    .references(() => ssb.id, { onDelete: "cascade" }),
 });
 
 /**
@@ -399,7 +418,9 @@ export const userSession = pgTable(
   {
     id: uuid("id").primaryKey().defaultRandom(),
     tokenHash: text("token_hash").notNull().unique(),
-    accountId: uuid("account_id").notNull().references(() => account.id, { onDelete: "cascade" }),
+    accountId: uuid("account_id")
+      .notNull()
+      .references(() => account.id, { onDelete: "cascade" }),
     // SSB aktif; kosong sampai akun yang punya beberapa SSB memilih salah satu.
     ssbId: uuid("ssb_id"),
     userId: uuid("user_id"),

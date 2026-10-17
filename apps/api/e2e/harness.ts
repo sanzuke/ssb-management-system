@@ -17,11 +17,7 @@ const google: GoogleProvider = {
 };
 
 const { db } = createDb(process.env.DATABASE_URL!);
-const api = createApp(
-  db,
-  { NODE_ENV: "test", ALLOWED_ORIGINS: WEB, WEB_URL: WEB, SESSION_SECRET: "x".repeat(40) } as never,
-  { google },
-);
+const api = createApp(db, { NODE_ENV: "test", ALLOWED_ORIGINS: WEB, WEB_URL: WEB, SESSION_SECRET: "x".repeat(40) } as never, { google });
 
 Bun.serve({
   port: 3000,

@@ -44,17 +44,30 @@ export default function DaftarPemain() {
       <main class="halaman">
         <h1>{role() === "orang_tua" ? "Anak Anda" : "Pemain"}</h1>
         <Show when={role() === "admin_ssb"}>
-          <p><A class="tombol utama" href="/pemain/baru">Tambah pemain</A></p>
+          <p>
+            <A class="tombol utama" href="/pemain/baru">
+              Tambah pemain
+            </A>
+          </p>
         </Show>
         <Show when={role() !== "orang_tua"}>
           <div class="form saring">
             <Field id="cari" label="Cari nama" value={q()} onInput={setQ} />
             <SelectField id="fku" label="KU" blank="Semua KU" value={ku()} onInput={setKu} options={groups().map((g) => ({ value: g.id, label: g.name }))} />
-            <SelectField id="fstatus" label="Status" blank="Semua status" value={status()} onInput={setStatus} options={Object.entries(statusLabel).map(([value, label]) => ({ value, label }))} />
+            <SelectField
+              id="fstatus"
+              label="Status"
+              blank="Semua status"
+              value={status()}
+              onInput={setStatus}
+              options={Object.entries(statusLabel).map(([value, label]) => ({ value, label }))}
+            />
           </div>
         </Show>
         <Show when={players.error}>
-          <div class="peringatan" role="alert">Daftar pemain tidak bisa dimuat. Muat ulang halaman.</div>
+          <div class="peringatan" role="alert">
+            Daftar pemain tidak bisa dimuat. Muat ulang halaman.
+          </div>
         </Show>
         <Show when={players()}>
           <Show
@@ -71,7 +84,9 @@ export default function DaftarPemain() {
               </p>
             }
           >
-            <p class="petunjuk" aria-live="polite">{players()!.length} pemain</p>
+            <p class="petunjuk" aria-live="polite">
+              {players()!.length} pemain
+            </p>
             <ul class="daftar-butir">
               <For each={players()}>
                 {(pl) => (
@@ -79,7 +94,15 @@ export default function DaftarPemain() {
                     <A class="pemain-tautan" href={`/pemain/${pl.id}`}>
                       <strong>{pl.fullName}</strong>
                       <span class="petunjuk">
-                        {[pl.memberNo, pl.ageGroup?.name ?? "Tanpa KU", `${usia(pl.birthDate)} th`, pl.position ? posisiLabel[pl.position] : null, pl.status !== "aktif" ? statusLabel[pl.status] : null].filter(Boolean).join(", ")}
+                        {[
+                          pl.memberNo,
+                          pl.ageGroup?.name ?? "Tanpa KU",
+                          `${usia(pl.birthDate)} th`,
+                          pl.position ? posisiLabel[pl.position] : null,
+                          pl.status !== "aktif" ? statusLabel[pl.status] : null,
+                        ]
+                          .filter(Boolean)
+                          .join(", ")}
                       </span>
                     </A>
                   </li>

@@ -30,7 +30,9 @@ export default function PilihSsb() {
         <h1>Pilih SSB</h1>
         <p>Akun {me()!.email} tergabung di lebih dari satu SSB. Anda bisa menggantinya kapan saja.</p>
         <Show when={form.error()}>
-          <div class="peringatan" role="alert">{form.error()}</div>
+          <div class="peringatan" role="alert">
+            {form.error()}
+          </div>
         </Show>
         <ul class="daftar-pilihan">
           <For each={me()!.memberships}>

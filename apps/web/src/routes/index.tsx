@@ -27,17 +27,16 @@ export default function Beranda() {
           fallback={
             <>
               <p>Akun ini belum tergabung di SSB mana pun. Buka tautan undangan dari admin SSB, atau buat SSB baru.</p>
-              <A class="tombol utama" href="/daftar">Daftarkan SSB baru</A>
+              <A class="tombol utama" href="/daftar">
+                Daftarkan SSB baru
+              </A>
             </>
           }
         >
           <p>
             Anda masuk di <strong>{me()!.active!.ssbName}</strong> sebagai {roleLabel[me()!.active!.role]}.
           </p>
-          <Show
-            when={me()!.active!.role === "orang_tua"}
-            fallback={<p class="info">Mulai dari menu Pemain, Jadwal, atau Kehadiran di bagian atas.</p>}
-          >
+          <Show when={me()!.active!.role === "orang_tua"} fallback={<p class="info">Mulai dari menu Pemain, Jadwal, atau Kehadiran di bagian atas.</p>}>
             <PortalOrangTua />
           </Show>
         </Show>

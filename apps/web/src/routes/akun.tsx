@@ -45,19 +45,47 @@ export default function Akun() {
           <p>Akun ini masuk dengan Google. Dengan kata sandi, Anda juga bisa masuk memakai email.</p>
         </Show>
         <Show when={form.error()}>
-          <div class="peringatan" role="alert">{form.error()}</div>
+          <div class="peringatan" role="alert">
+            {form.error()}
+          </div>
         </Show>
         <Show when={done()}>
-          <div class="info" role="status">Kata sandi disimpan. Perangkat lain perlu masuk ulang.</div>
+          <div class="info" role="status">
+            Kata sandi disimpan. Perangkat lain perlu masuk ulang.
+          </div>
         </Show>
         <form class="form" onSubmit={form.submit}>
           <Show when={me()!.hasPassword}>
-            <Field id="currentPassword" label="Kata sandi saat ini" type="password" autocomplete="current-password" required value={current()} onInput={setCurrent} error={form.fields().currentPassword} />
+            <Field
+              id="currentPassword"
+              label="Kata sandi saat ini"
+              type="password"
+              autocomplete="current-password"
+              required
+              value={current()}
+              onInput={setCurrent}
+              error={form.fields().currentPassword}
+            />
           </Show>
-          <Field id="newPassword" label="Kata sandi baru" type="password" autocomplete="new-password" required minlength={10} hint="Minimal 10 karakter." value={next()} onInput={setNext} error={form.fields().newPassword} />
-          <button class="tombol utama" type="submit" disabled={form.busy()}>{form.busy() ? "Menyimpan…" : "Simpan kata sandi"}</button>
+          <Field
+            id="newPassword"
+            label="Kata sandi baru"
+            type="password"
+            autocomplete="new-password"
+            required
+            minlength={10}
+            hint="Minimal 10 karakter."
+            value={next()}
+            onInput={setNext}
+            error={form.fields().newPassword}
+          />
+          <button class="tombol utama" type="submit" disabled={form.busy()}>
+            {form.busy() ? "Menyimpan…" : "Simpan kata sandi"}
+          </button>
         </form>
-        <p class="tautan-bawah"><A href="/">Kembali ke beranda</A></p>
+        <p class="tautan-bawah">
+          <A href="/">Kembali ke beranda</A>
+        </p>
       </main>
     </Show>
   );

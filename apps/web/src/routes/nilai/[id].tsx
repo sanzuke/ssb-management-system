@@ -63,7 +63,8 @@ export default function NilaiPemain() {
         setPeriods(per);
         const now = per.find((x) => x.startDate <= today() && today() <= x.endDate);
         setPeriodId(now?.id ?? per[per.length - 1]?.id ?? "");
-        if (player.ageGroup) setIndicators((await api<AssessmentIndicator[]>(`/assessment-indicators?ageGroupId=${player.ageGroup.id}`).catch(() => [])).filter((i) => i.active));
+        if (player.ageGroup)
+          setIndicators((await api<AssessmentIndicator[]>(`/assessment-indicators?ageGroupId=${player.ageGroup.id}`).catch(() => [])).filter((i) => i.active));
         fill(l.find((a) => a.period.id === periodId()) ?? null);
       }
     } catch (e) {
@@ -84,10 +85,17 @@ export default function NilaiPemain() {
     setScores({ ...scores(), [indicatorId]: v });
   };
   const filled = createMemo(() => indicators().filter((i) => scores()[i.id] !== undefined).length);
-  const groups = createMemo(() => assessmentAspects.map((a) => ({ aspect: a, items: indicators().filter((i) => i.aspect === a) })).filter((g) => g.items.length > 0));
+  const groups = createMemo(() =>
+    assessmentAspects.map((a) => ({ aspect: a, items: indicators().filter((i) => i.aspect === a) })).filter((g) => g.items.length > 0),
+  );
 
   const form = createSubmit(async () => {
-    const body = { note: note().trim() || null, scores: indicators().filter((i) => scores()[i.id] !== undefined).map((i) => ({ indicatorId: i.id, score: scores()[i.id]! })) };
+    const body = {
+      note: note().trim() || null,
+      scores: indicators()
+        .filter((i) => scores()[i.id] !== undefined)
+        .map((i) => ({ indicatorId: i.id, score: scores()[i.id]! })),
+    };
     await api<AssessmentView>(`/players/${p.id}/assessments/${periodId()}`, { method: "PUT", body });
     const l = await reload();
     fill(l.find((a) => a.period.id === periodId()) ?? null);
@@ -121,7 +129,9 @@ export default function NilaiPemain() {
               <Title>Pemain tidak ditemukan · SSB App</Title>
               <h1>Pemain tidak ditemukan</h1>
               <p>Pemain ini tidak ada, atau bukan bagian dari KU atau anak yang bisa Anda akses.</p>
-              <A class="tombol" href="/pemain">Ke daftar pemain</A>
+              <A class="tombol" href="/pemain">
+                Ke daftar pemain
+              </A>
             </>
           }
         >
@@ -129,8 +139,16 @@ export default function NilaiPemain() {
             <Title>Penilaian {pl()!.fullName} · SSB App</Title>
             <h1>Penilaian {pl()!.fullName}</h1>
             <p class="petunjuk">{pl()!.ageGroup?.name ?? "Belum ada KU"}, skala 1 sampai 10</p>
-            <Show when={error()}><div class="peringatan" role="alert">{error()}</div></Show>
-            <Show when={notice()}><div class="info" role="status">{notice()}</div></Show>
+            <Show when={error()}>
+              <div class="peringatan" role="alert">
+                {error()}
+              </div>
+            </Show>
+            <Show when={notice()}>
+              <div class="info" role="status">
+                {notice()}
+              </div>
+            </Show>
 
             {/* Orang tua: semua penilaian yang sudah diterbitkan */}
             <Show when={parent()}>
@@ -151,7 +169,13 @@ export default function NilaiPemain() {
             <Show when={!parent()}>
               <Show when={periods().length > 0} fallback={<p class="kosong">Belum ada periode. Admin perlu menambahkannya di Data master.</p>}>
                 <div class="form saring">
-                  <SelectField id="periode" label="Periode" value={periodId()} onInput={pickPeriod} options={periods().map((x) => ({ value: x.id, label: x.name }))} />
+                  <SelectField
+                    id="periode"
+                    label="Periode"
+                    value={periodId()}
+                    onInput={pickPeriod}
+                    options={periods().map((x) => ({ value: x.id, label: x.name }))}
+                  />
                 </div>
 
                 <Show when={current()}>
@@ -162,9 +186,15 @@ export default function NilaiPemain() {
                     <p>
                       <Show
                         when={current()!.publishedAt}
-                        fallback={<button class="tombol utama" type="button" onClick={() => publish(true)}>Terbitkan ke orang tua</button>}
+                        fallback={
+                          <button class="tombol utama" type="button" onClick={() => publish(true)}>
+                            Terbitkan ke orang tua
+                          </button>
+                        }
                       >
-                        <button class="tombol" type="button" onClick={() => publish(false)}>Tarik dari orang tua</button>
+                        <button class="tombol" type="button" onClick={() => publish(false)}>
+                          Tarik dari orang tua
+                        </button>
                       </Show>
                     </p>
                   </Show>
@@ -178,15 +208,25 @@ export default function NilaiPemain() {
                     </Show>
                   }
                 >
-                  <Show when={form.error()}><div class="peringatan" role="alert">{form.error()}</div></Show>
-                  <Show when={saved()}><div class="info" role="status">Penilaian disimpan. Anda masih bisa mengubahnya.</div></Show>
+                  <Show when={form.error()}>
+                    <div class="peringatan" role="alert">
+                      {form.error()}
+                    </div>
+                  </Show>
+                  <Show when={saved()}>
+                    <div class="info" role="status">
+                      Penilaian disimpan. Anda masih bisa mengubahnya.
+                    </div>
+                  </Show>
                   <Show
                     when={indicators().length > 0}
                     fallback={
                       <p class="kosong">
                         {pl()!.ageGroup ? `KU ${pl()!.ageGroup!.name} belum punya indikator penilaian.` : "Pemain ini belum punya KU, jadi belum bisa dinilai."}
                         {role() === "admin_ssb" ? " " : " Minta admin SSB menyiapkannya."}
-                        <Show when={role() === "admin_ssb"}><A href="/indikator">Siapkan indikator</A></Show>
+                        <Show when={role() === "admin_ssb"}>
+                          <A href="/indikator">Siapkan indikator</A>
+                        </Show>
                       </p>
                     }
                   >
@@ -198,10 +238,17 @@ export default function NilaiPemain() {
                             {(i) => (
                               <div class="indikator">
                                 <span class="nama">{i.name}</span>
+                                {/* biome-ignore lint/a11y/useSemanticElements: fieldset merusak tata letak grid tombol */}
                                 <div class="pilih-nilai" role="group" aria-label={`Skor ${i.name}`}>
                                   <For each={NILAI}>
                                     {(n) => (
-                                      <button type="button" class="nilai-btn" aria-pressed={scores()[i.id] === n} aria-label={`${i.name} ${n}`} onClick={() => setScore(i.id, n)}>
+                                      <button
+                                        type="button"
+                                        class="nilai-btn"
+                                        aria-pressed={scores()[i.id] === n}
+                                        aria-label={`${i.name} ${n}`}
+                                        onClick={() => setScore(i.id, n)}
+                                      >
                                         {n}
                                       </button>
                                     )}
@@ -215,10 +262,22 @@ export default function NilaiPemain() {
                     </For>
                     <div class="field">
                       <label for="catatan">Catatan pelatih (boleh dikosongkan)</label>
-                      <textarea id="catatan" rows="3" maxlength="1000" value={note()} onInput={(e) => { setNote(e.currentTarget.value); setDirty(true); setSaved(false); }} />
+                      <textarea
+                        id="catatan"
+                        rows="3"
+                        maxlength="1000"
+                        value={note()}
+                        onInput={(e) => {
+                          setNote(e.currentTarget.value);
+                          setDirty(true);
+                          setSaved(false);
+                        }}
+                      />
                     </div>
                     <div class="bar-simpan">
-                      <span aria-live="polite">{filled()} dari {indicators().length} indikator terisi</span>
+                      <span aria-live="polite">
+                        {filled()} dari {indicators().length} indikator terisi
+                      </span>
                       <button class="tombol utama" type="button" disabled={form.busy() || filled() === 0 || !dirty()} onClick={form.submit}>
                         {form.busy() ? "Menyimpan…" : "Simpan penilaian"}
                       </button>
@@ -237,7 +296,11 @@ export default function NilaiPemain() {
                               <li class="butir">
                                 <span class="isi">
                                   <strong>{h.indicator}</strong>: {h.from === null ? "diisi" : `${h.from} menjadi`} {h.to}
-                                  <span class="petunjuk"> {tgl(h.at)}{h.by ? `, ${h.by}` : ""}</span>
+                                  <span class="petunjuk">
+                                    {" "}
+                                    {tgl(h.at)}
+                                    {h.by ? `, ${h.by}` : ""}
+                                  </span>
                                 </span>
                               </li>
                             )}
@@ -249,7 +312,9 @@ export default function NilaiPemain() {
                 </Show>
               </Show>
             </Show>
-            <p class="tautan-bawah"><A href={`/pemain/${pl()!.id}`}>Kembali ke profil</A></p>
+            <p class="tautan-bawah">
+              <A href={`/pemain/${pl()!.id}`}>Kembali ke profil</A>
+            </p>
           </Show>
         </Show>
       </main>

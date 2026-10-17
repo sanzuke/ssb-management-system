@@ -14,12 +14,14 @@ import { playerRoutes } from "./players";
 import { sessionRoutes } from "./sessions";
 import { assessmentRoutes } from "./assessments";
 import type { Env } from "./env";
+import { createLogger, requestLogger, type Logger } from "./logger";
 
-export type AppDeps = { google?: GoogleProvider | null };
+export type AppDeps = { google?: GoogleProvider | null; logger?: Logger };
 
 export function createApp(
   db: Db,
-  env: Pick<Env, "NODE_ENV" | "ALLOWED_ORIGINS"> & Partial<Pick<Env, "WEB_URL" | "PUBLIC_API_URL" | "SESSION_SECRET" | "GOOGLE_CLIENT_ID" | "GOOGLE_CLIENT_SECRET">>,
+  env: Pick<Env, "NODE_ENV" | "ALLOWED_ORIGINS"> &
+    Partial<Pick<Env, "WEB_URL" | "PUBLIC_API_URL" | "SESSION_SECRET" | "GOOGLE_CLIENT_ID" | "GOOGLE_CLIENT_SECRET">>,
   deps: AppDeps = {},
 ) {
   const secureCookie = env.NODE_ENV === "production";
@@ -36,6 +38,8 @@ export function createApp(
         : null;
 
   const app = new Hono<AppEnv>();
+  const logger = deps.logger ?? createLogger({ silent: env.NODE_ENV === "test" });
+  app.use(requestLogger(logger));
   app.onError(onError);
   app.notFound((c) => c.json(errorBody("not_found", "Tidak ditemukan"), 404));
 
@@ -43,29 +47,31 @@ export function createApp(
   app.use(csrf({ origin: env.ALLOWED_ORIGINS.split(",").map((s) => s.trim()) }));
   app.use(loadAuth(db));
 
-  return app
-    .get("/health", (c) => {
-      const body: Health = { status: "ok", service: "ssb-api", time: new Date().toISOString() };
-      return c.json(body);
-    })
-    .route("/auth/google", googleRoutes(db, { provider: google, secret: env.SESSION_SECRET, webUrl, secureCookie }))
-    .route("/auth", authRoutes(db, { secureCookie }))
-    .route("/invitations", invitationRoutes(db, { secureCookie, webUrl }))
-    .route("/", masterRoutes(db))
-    .route("/", playerRoutes(db))
-    .route("/", sessionRoutes(db))
-    .route("/", assessmentRoutes(db))
-    // Daftar anggota SSB sendiri; hanya admin SSB.
-    .get("/users", requirePermission("user.list"), async (c) => {
-      const m = c.get("auth")!.member!;
-      const rows = await withTenant(db, m.ssbId, (tx) =>
-        tx
-          .select({ id: schema.appUser.id, name: schema.appUser.name, email: schema.account.email, role: schema.appUser.role })
-          .from(schema.appUser)
-          .innerJoin(schema.account, eq(schema.account.id, schema.appUser.accountId)),
-      );
-      return c.json(rows);
-    });
+  return (
+    app
+      .get("/health", (c) => {
+        const body: Health = { status: "ok", service: "ssb-api", time: new Date().toISOString() };
+        return c.json(body);
+      })
+      .route("/auth/google", googleRoutes(db, { provider: google, secret: env.SESSION_SECRET, webUrl, secureCookie }))
+      .route("/auth", authRoutes(db, { secureCookie }))
+      .route("/invitations", invitationRoutes(db, { secureCookie, webUrl }))
+      .route("/", masterRoutes(db))
+      .route("/", playerRoutes(db))
+      .route("/", sessionRoutes(db))
+      .route("/", assessmentRoutes(db))
+      // Daftar anggota SSB sendiri; hanya admin SSB.
+      .get("/users", requirePermission("user.list"), async (c) => {
+        const m = c.get("auth")!.member!;
+        const rows = await withTenant(db, m.ssbId, (tx) =>
+          tx
+            .select({ id: schema.appUser.id, name: schema.appUser.name, email: schema.account.email, role: schema.appUser.role })
+            .from(schema.appUser)
+            .innerJoin(schema.account, eq(schema.account.id, schema.appUser.accountId)),
+        );
+        return c.json(rows);
+      })
+  );
 }
 
 export type AppType = ReturnType<typeof createApp>;

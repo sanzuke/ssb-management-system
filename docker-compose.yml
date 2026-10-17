@@ -1,0 +1,77 @@
+# Pengembangan lokal: `docker compose up` (atau `docker compose up --watch` agar perubahan kode tersinkron).
+# Web di http://localhost:3001, API di http://localhost:3000. Kata sandi di sini hanya untuk lokal.
+x-app: &app
+  build:
+    context: .
+    dockerfile: Dockerfile.dev
+  environment: &env
+    DATABASE_URL: postgres://ssb_app:app@db:5432/ssb
+    DATABASE_URL_OWNER: postgres://ssb_owner:owner@db:5432/ssb
+    ALLOWED_ORIGINS: http://localhost:3001
+    WEB_URL: http://localhost:3001
+    PUBLIC_API_URL: http://localhost:3000
+    SESSION_SECRET: ${SESSION_SECRET:-dev-saja-ganti-di-produksi-0123456789abcdef}
+    # Login Google opsional; isi keduanya lewat file .env atau variabel shell. Lihat docs/auth.md.
+    GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
+    GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
+
+services:
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: ssb
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      # Dijalankan hanya saat volume masih kosong: membuat role ssb_owner dan ssb_app.
+      - ./tools/db/init.sql:/docker-entrypoint-initdb.d/10-init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d ssb"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+
+  migrate:
+    <<: *app
+    command: ["bun", "run", "db:migrate"]
+    restart: "no"
+    depends_on:
+      db:
+        condition: service_healthy
+
+  api:
+    <<: *app
+    command: ["bun", "run", "dev:api"]
+    ports:
+      - "3000:3000"
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    develop:
+      watch:
+        - { action: sync, path: ./apps/api/src, target: /app/apps/api/src }
+        - { action: sync, path: ./packages, target: /app/packages, ignore: [node_modules] }
+        - { action: rebuild, path: ./bun.lock }
+
+  web:
+    <<: *app
+    working_dir: /app/apps/web
+    command: ["bun", "run", "dev", "--host", "0.0.0.0"]
+    environment:
+      <<: *env
+      API_URL: http://api:3000
+    ports:
+      - "3001:3001"
+    depends_on:
+      - api
+    develop:
+      watch:
+        - { action: sync, path: ./apps/web/src, target: /app/apps/web/src }
+        - { action: sync, path: ./apps/web/public, target: /app/apps/web/public }
+        - { action: sync, path: ./packages, target: /app/packages, ignore: [node_modules] }
+        - { action: rebuild, path: ./bun.lock }
+
+volumes:
+  pgdata:

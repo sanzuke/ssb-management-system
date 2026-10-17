@@ -36,7 +36,9 @@ export default function Masuk() {
       <p>Pelatih, orang tua, dan admin masuk dari sini.</p>
 
       <Show when={urlError() || form.error()}>
-        <div class="peringatan" role="alert">{urlError() || form.error()}</div>
+        <div class="peringatan" role="alert">
+          {urlError() || form.error()}
+        </div>
       </Show>
 
       <GoogleButton href="/api/auth/google/start?intent=login">Masuk dengan Google</GoogleButton>
@@ -44,9 +46,30 @@ export default function Masuk() {
       <div class="pemisah">atau pakai email</div>
 
       <form class="form" onSubmit={form.submit} novalidate>
-        <Field id="email" label="Email" type="email" inputmode="email" autocomplete="username" required value={email()} onInput={setEmail} error={form.fields().email} />
-        <Field id="password" label="Kata sandi" type="password" autocomplete="current-password" required value={password()} onInput={setPassword} error={form.fields().password} />
-        <button class="tombol utama" type="submit" disabled={form.busy()}>{form.busy() ? "Memeriksa…" : "Masuk"}</button>
+        <Field
+          id="email"
+          label="Email"
+          type="email"
+          inputmode="email"
+          autocomplete="username"
+          required
+          value={email()}
+          onInput={setEmail}
+          error={form.fields().email}
+        />
+        <Field
+          id="password"
+          label="Kata sandi"
+          type="password"
+          autocomplete="current-password"
+          required
+          value={password()}
+          onInput={setPassword}
+          error={form.fields().password}
+        />
+        <button class="tombol utama" type="submit" disabled={form.busy()}>
+          {form.busy() ? "Memeriksa…" : "Masuk"}
+        </button>
       </form>
 
       <p class="tautan-bawah">

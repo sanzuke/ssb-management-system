@@ -77,10 +77,14 @@ export default function MasterSection(p: {
     <section class="master" aria-labelledby={`h-${slug}`}>
       <h2 id={`h-${slug}`}>{p.title}</h2>
       <Show when={loadError()}>
-        <div class="peringatan" role="alert">{loadError()}</div>
+        <div class="peringatan" role="alert">
+          {loadError()}
+        </div>
       </Show>
       <Show when={rowError()}>
-        <div class="peringatan" role="alert">{rowError()}</div>
+        <div class="peringatan" role="alert">
+          {rowError()}
+        </div>
       </Show>
       <Show when={loaded() && !loadError() && items().length === 0 && editing() !== "baru"}>
         <p class="kosong">{p.empty}</p>
@@ -100,13 +104,28 @@ export default function MasterSection(p: {
                           when={confirmId() === item.id}
                           fallback={
                             <>
-                              <button class="tombol tipis" type="button" onClick={() => open(item)}>Ubah</button>
-                              <button class="tombol tipis" type="button" onClick={() => { setRowError(""); setConfirmId(item.id); }}>Hapus</button>
+                              <button class="tombol tipis" type="button" onClick={() => open(item)}>
+                                Ubah
+                              </button>
+                              <button
+                                class="tombol tipis"
+                                type="button"
+                                onClick={() => {
+                                  setRowError("");
+                                  setConfirmId(item.id);
+                                }}
+                              >
+                                Hapus
+                              </button>
                             </>
                           }
                         >
-                          <button class="tombol bahaya" type="button" onClick={() => remove(item.id)}>Ya, hapus</button>
-                          <button class="tombol tipis" type="button" onClick={() => setConfirmId(null)}>Batal</button>
+                          <button class="tombol bahaya" type="button" onClick={() => remove(item.id)}>
+                            Ya, hapus
+                          </button>
+                          <button class="tombol tipis" type="button" onClick={() => setConfirmId(null)}>
+                            Batal
+                          </button>
                         </Show>
                       </span>
                     </Show>
@@ -119,11 +138,15 @@ export default function MasterSection(p: {
           )}
         </For>
         <Show when={editing() === "baru"}>
-          <li class="butir"><FormBody /></li>
+          <li class="butir">
+            <FormBody />
+          </li>
         </Show>
       </ul>
       <Show when={p.canWrite && editing() === null}>
-        <button class="tombol" type="button" onClick={() => open()}>{p.addLabel}</button>
+        <button class="tombol" type="button" onClick={() => open()}>
+          {p.addLabel}
+        </button>
       </Show>
     </section>
   );
@@ -132,7 +155,9 @@ export default function MasterSection(p: {
     return (
       <form class="form" onSubmit={form.submit}>
         <Show when={form.error()}>
-          <div class="peringatan" role="alert">{form.error()}</div>
+          <div class="peringatan" role="alert">
+            {form.error()}
+          </div>
         </Show>
         <For each={p.fields}>
           {(f) => (
@@ -151,8 +176,12 @@ export default function MasterSection(p: {
           )}
         </For>
         <div class="butir-aksi">
-          <button class="tombol utama" type="submit" disabled={form.busy()}>{form.busy() ? "Menyimpan…" : "Simpan"}</button>
-          <button class="tombol" type="button" onClick={() => setEditing(null)}>Batal</button>
+          <button class="tombol utama" type="submit" disabled={form.busy()}>
+            {form.busy() ? "Menyimpan…" : "Simpan"}
+          </button>
+          <button class="tombol" type="button" onClick={() => setEditing(null)}>
+            Batal
+          </button>
         </div>
       </form>
     );

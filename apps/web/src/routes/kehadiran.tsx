@@ -48,21 +48,30 @@ export default function Kehadiran() {
         <h1>Kehadiran</h1>
         <Show when={!parent()}>
           <div class="form saring">
-            <SelectField id="periode" label="Periode" value={period() ?? ""} onInput={setPeriod} blank="Semua periode" options={periods().map((p) => ({ value: p.id, label: p.name }))} />
+            <SelectField
+              id="periode"
+              label="Periode"
+              value={period() ?? ""}
+              onInput={setPeriod}
+              blank="Semua periode"
+              options={periods().map((p) => ({ value: p.id, label: p.name }))}
+            />
             <SelectField id="ku" label="KU" value={ku()} onInput={setKu} blank="Semua KU" options={groups().map((g) => ({ value: g.id, label: g.name }))} />
           </div>
         </Show>
 
         <Show when={data.error}>
-          <div class="peringatan" role="alert">Rekap tidak bisa dimuat. Muat ulang halaman.</div>
+          <div class="peringatan" role="alert">
+            Rekap tidak bisa dimuat. Muat ulang halaman.
+          </div>
         </Show>
 
         <Show when={data()}>
           {(d) => (
             <>
               <p class="petunjuk" role="status">
-                {d().sessionsHeld} sesi latihan tercatat{d().period ? ` pada ${d().period!.name}` : ""}{d().ageGroup ? ` untuk ${d().ageGroup!.name}` : ""}.
-                {" "}Persentase = hadir dibagi sesi yang tercatat untuk pemain itu.
+                {d().sessionsHeld} sesi latihan tercatat{d().period ? ` pada ${d().period!.name}` : ""}
+                {d().ageGroup ? ` untuk ${d().ageGroup!.name}` : ""}. Persentase = hadir dibagi sesi yang tercatat untuk pemain itu.
               </p>
               <Show when={d().players.length === 0}>
                 <p class="kosong">{parent() ? "Belum ada data kehadiran untuk anak Anda." : "Tidak ada pemain pada pilihan ini."}</p>
@@ -78,11 +87,13 @@ export default function Kehadiran() {
                           {p.recorded ? `, ${p.hadir} hadir, ${p.izin} izin, ${p.sakit} sakit, ${p.alpa} alpa dari ${p.recorded} sesi` : ", belum ada catatan"}
                         </span>
                       </A>
-                      <span class="persen" aria-label={p.percent === null ? "Belum ada catatan" : `${p.percent} persen hadir`}>
+                      <span class="persen" role="img" aria-label={p.percent === null ? "Belum ada catatan" : `${p.percent} persen hadir`}>
                         {p.percent === null ? "–" : `${String(p.percent).replace(".", ",")}%`}
                       </span>
                       <Show when={p.percent !== null}>
-                        <span class="batang" aria-hidden="true"><span style={{ width: `${p.percent}%` }} /></span>
+                        <span class="batang" aria-hidden="true">
+                          <span style={{ width: `${p.percent}%` }} />
+                        </span>
                       </Show>
                     </li>
                   )}

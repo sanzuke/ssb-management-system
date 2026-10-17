@@ -28,7 +28,12 @@ export default function Penugasan() {
     if (!m) return nav("/masuk", { replace: true });
     if (m.active?.role !== "admin_ssb") return nav("/", { replace: true });
     setMe(m);
-    const [u, g, p] = await Promise.all([api<Member[]>("/users").catch(() => []), api<AgeGroup[]>("/age-groups").catch(() => []), api<Period[]>("/periods").catch(() => []), load()]);
+    const [u, g, p] = await Promise.all([
+      api<Member[]>("/users").catch(() => []),
+      api<AgeGroup[]>("/age-groups").catch(() => []),
+      api<Period[]>("/periods").catch(() => []),
+      load(),
+    ]);
     setCoaches(u.filter((x) => x.role === "pelatih" || x.role === "korlas"));
     setGroups(g);
     setPeriods(p);
@@ -58,15 +63,21 @@ export default function Penugasan() {
         <p>Pelatih dan koordinator hanya melihat pemain di KU yang ditugaskan kepada mereka pada periode yang sedang berjalan.</p>
 
         <Show when={rowError()}>
-          <div class="peringatan" role="alert">{rowError()}</div>
+          <div class="peringatan" role="alert">
+            {rowError()}
+          </div>
         </Show>
         <Show when={items().length > 0} fallback={<p class="kosong">Belum ada penugasan.</p>}>
           <ul class="daftar-butir">
             <For each={items()}>
               {(a) => (
                 <li class="butir">
-                  <span class="isi">{a.userName} ({roleLabel[a.role]}), {a.ageGroupName}, {a.periodName}</span>
-                  <button class="tombol tipis" type="button" onClick={() => remove(a)}>Hapus</button>
+                  <span class="isi">
+                    {a.userName} ({roleLabel[a.role]}), {a.ageGroupName}, {a.periodName}
+                  </span>
+                  <button class="tombol tipis" type="button" onClick={() => remove(a)}>
+                    Hapus
+                  </button>
                 </li>
               )}
             </For>
@@ -79,18 +90,47 @@ export default function Penugasan() {
             when={ready()}
             fallback={
               <p class="info">
-                Penugasan butuh minimal satu pelatih atau korlas yang sudah bergabung (lewat undangan), satu KU, dan satu periode. KU dan periode dibuat di <A href="/master">Data master</A>.
+                Penugasan butuh minimal satu pelatih atau korlas yang sudah bergabung (lewat undangan), satu KU, dan satu periode. KU dan periode dibuat di{" "}
+                <A href="/master">Data master</A>.
               </p>
             }
           >
             <form class="form" onSubmit={form.submit}>
               <Show when={form.error()}>
-                <div class="peringatan" role="alert">{form.error()}</div>
+                <div class="peringatan" role="alert">
+                  {form.error()}
+                </div>
               </Show>
-              <SelectField id="anggota" label="Pelatih atau korlas" blank="Pilih anggota" required value={userId()} onInput={setUserId} options={coaches().map((u) => ({ value: u.id, label: `${u.name} (${roleLabel[u.role]})` }))} />
-              <SelectField id="ku" label="KU" blank="Pilih KU" required value={ageGroupId()} onInput={setAgeGroupId} options={groups().map((g) => ({ value: g.id, label: g.name }))} />
-              <SelectField id="periode" label="Periode" blank="Pilih periode" required value={periodId()} onInput={setPeriodId} options={periods().map((p) => ({ value: p.id, label: p.name }))} />
-              <button class="tombol utama" type="submit" disabled={form.busy()}>{form.busy() ? "Menyimpan…" : "Tambah penugasan"}</button>
+              <SelectField
+                id="anggota"
+                label="Pelatih atau korlas"
+                blank="Pilih anggota"
+                required
+                value={userId()}
+                onInput={setUserId}
+                options={coaches().map((u) => ({ value: u.id, label: `${u.name} (${roleLabel[u.role]})` }))}
+              />
+              <SelectField
+                id="ku"
+                label="KU"
+                blank="Pilih KU"
+                required
+                value={ageGroupId()}
+                onInput={setAgeGroupId}
+                options={groups().map((g) => ({ value: g.id, label: g.name }))}
+              />
+              <SelectField
+                id="periode"
+                label="Periode"
+                blank="Pilih periode"
+                required
+                value={periodId()}
+                onInput={setPeriodId}
+                options={periods().map((p) => ({ value: p.id, label: p.name }))}
+              />
+              <button class="tombol utama" type="submit" disabled={form.busy()}>
+                {form.busy() ? "Menyimpan…" : "Tambah penugasan"}
+              </button>
             </form>
           </Show>
         </section>

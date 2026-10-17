@@ -77,7 +77,9 @@ export default function Indikator() {
       setNotice(`${i.name} dihapus.`);
     });
 
-  const byAspect = createMemo(() => assessmentAspects.map((a) => ({ aspect: a, list: items().filter((i) => i.aspect === a) })).filter((g) => g.list.length > 0));
+  const byAspect = createMemo(() =>
+    assessmentAspects.map((a) => ({ aspect: a, list: items().filter((i) => i.aspect === a) })).filter((g) => g.list.length > 0),
+  );
 
   return (
     <Show when={me()} fallback={<p class="halaman">Memuat…</p>}>
@@ -85,22 +87,39 @@ export default function Indikator() {
       <AppBar me={me()!} />
       <main class="halaman">
         <h1>Indikator penilaian</h1>
-        <p>Indikator yang dinilai pelatih untuk tiap KU, dikelompokkan dalam enam aspek. Skalanya 1 sampai 10.{admin() ? "" : " Hanya admin SSB yang bisa mengubahnya."}</p>
+        <p>
+          Indikator yang dinilai pelatih untuk tiap KU, dikelompokkan dalam enam aspek. Skalanya 1 sampai 10.
+          {admin() ? "" : " Hanya admin SSB yang bisa mengubahnya."}
+        </p>
         <Show when={groups().length === 0}>
-          <p class="kosong">Belum ada KU. Buat KU di <A href="/master">Data master</A> dulu.</p>
+          <p class="kosong">
+            Belum ada KU. Buat KU di <A href="/master">Data master</A> dulu.
+          </p>
         </Show>
         <Show when={groups().length > 0}>
           <div class="form saring">
             <SelectField id="ku" label="KU" value={ku()} onInput={pickKu} options={groups().map((g) => ({ value: g.id, label: g.name }))} />
           </div>
-          <Show when={error()}><div class="peringatan" role="alert">{error()}</div></Show>
-          <Show when={notice()}><div class="info" role="status">{notice()}</div></Show>
+          <Show when={error()}>
+            <div class="peringatan" role="alert">
+              {error()}
+            </div>
+          </Show>
+          <Show when={notice()}>
+            <div class="info" role="status">
+              {notice()}
+            </div>
+          </Show>
 
           <Show when={items().length === 0}>
             <p class="kosong">KU ini belum punya indikator.{admin() ? " Pasang usulan awal (16 indikator) lalu sesuaikan, atau tambahkan sendiri." : ""}</p>
           </Show>
           <Show when={admin() && items().length === 0}>
-            <p><button class="tombol utama" type="button" onClick={defaults}>Pasang usulan awal</button></p>
+            <p>
+              <button class="tombol utama" type="button" onClick={defaults}>
+                Pasang usulan awal
+              </button>
+            </p>
           </Show>
 
           <For each={byAspect()}>
@@ -111,20 +130,31 @@ export default function Indikator() {
                   <For each={g.list}>
                     {(i) => (
                       <li class="butir">
-                        <span class="isi" classList={{ nonaktif: !i.active }}>{i.name}{i.active ? "" : " (nonaktif)"}</span>
+                        <span class="isi" classList={{ nonaktif: !i.active }}>
+                          {i.name}
+                          {i.active ? "" : " (nonaktif)"}
+                        </span>
                         <Show when={admin()}>
                           <span class="butir-aksi">
                             <Show
                               when={confirmId() === i.id}
                               fallback={
                                 <>
-                                  <button class="tombol tipis" type="button" onClick={() => toggle(i)}>{i.active ? "Nonaktifkan" : "Aktifkan"}</button>
-                                  <button class="tombol tipis" type="button" aria-label={`Hapus ${i.name}`} onClick={() => setConfirmId(i.id)}>Hapus</button>
+                                  <button class="tombol tipis" type="button" onClick={() => toggle(i)}>
+                                    {i.active ? "Nonaktifkan" : "Aktifkan"}
+                                  </button>
+                                  <button class="tombol tipis" type="button" aria-label={`Hapus ${i.name}`} onClick={() => setConfirmId(i.id)}>
+                                    Hapus
+                                  </button>
                                 </>
                               }
                             >
-                              <button class="tombol bahaya" type="button" onClick={() => remove(i)}>Ya, hapus</button>
-                              <button class="tombol tipis" type="button" onClick={() => setConfirmId(null)}>Batal</button>
+                              <button class="tombol bahaya" type="button" onClick={() => remove(i)}>
+                                Ya, hapus
+                              </button>
+                              <button class="tombol tipis" type="button" onClick={() => setConfirmId(null)}>
+                                Batal
+                              </button>
                             </Show>
                           </span>
                         </Show>
@@ -140,10 +170,31 @@ export default function Indikator() {
             <section class="master">
               <h2>Tambah indikator</h2>
               <form class="form" onSubmit={add.submit} novalidate={false}>
-                <Show when={add.error()}><div class="peringatan" role="alert">{add.error()}</div></Show>
-                <SelectField id="aspek" label="Aspek" value={aspect()} onInput={(v) => setAspect(v as AssessmentAspect)} options={assessmentAspects.map((a) => ({ value: a, label: aspectLabel[a] }))} />
-                <Field id="nama-indikator" label="Nama indikator" required minlength={2} maxlength={80} value={name()} onInput={setName} error={add.fields().name} />
-                <button class="tombol utama" type="submit" disabled={add.busy()}>{add.busy() ? "Menambah…" : "Tambah indikator"}</button>
+                <Show when={add.error()}>
+                  <div class="peringatan" role="alert">
+                    {add.error()}
+                  </div>
+                </Show>
+                <SelectField
+                  id="aspek"
+                  label="Aspek"
+                  value={aspect()}
+                  onInput={(v) => setAspect(v as AssessmentAspect)}
+                  options={assessmentAspects.map((a) => ({ value: a, label: aspectLabel[a] }))}
+                />
+                <Field
+                  id="nama-indikator"
+                  label="Nama indikator"
+                  required
+                  minlength={2}
+                  maxlength={80}
+                  value={name()}
+                  onInput={setName}
+                  error={add.fields().name}
+                />
+                <button class="tombol utama" type="submit" disabled={add.busy()}>
+                  {add.busy() ? "Menambah…" : "Tambah indikator"}
+                </button>
               </form>
               <Show when={items().length > 0}>
                 <p class="petunjuk">Indikator yang sudah dipakai penilaian tidak bisa dihapus, hanya dinonaktifkan agar riwayat tetap utuh.</p>

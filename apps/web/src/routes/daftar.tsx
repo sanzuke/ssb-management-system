@@ -59,11 +59,23 @@ export default function Daftar() {
       <p>Anda menjadi admin SSB. Pelatih dan orang tua bergabung lewat tautan undangan.</p>
 
       <Show when={urlError() || form.error()}>
-        <div class="peringatan" role="alert">{urlError() || form.error()}</div>
+        <div class="peringatan" role="alert">
+          {urlError() || form.error()}
+        </div>
       </Show>
 
       <form class="form" ref={formEl} onSubmit={form.submit} novalidate={false}>
-        <Field id="ssbName" label="Nama SSB" required minlength={2} maxlength={120} autocomplete="organization" value={ssbName()} onInput={onName} error={form.fields().ssbName} />
+        <Field
+          id="ssbName"
+          label="Nama SSB"
+          required
+          minlength={2}
+          maxlength={120}
+          autocomplete="organization"
+          value={ssbName()}
+          onInput={onName}
+          error={form.fields().ssbName}
+        />
         <Field
           id="slug"
           label="Kode SSB"
@@ -86,16 +98,41 @@ export default function Daftar() {
           fallback={
             <>
               <p class="info">Dibuat atas nama {me()!.name}. SSB ini akan ditambahkan ke akun Anda.</p>
-              <button class="tombol utama" type="submit" disabled={form.busy()}>{form.busy() ? "Membuat SSB…" : "Buat SSB"}</button>
+              <button class="tombol utama" type="submit" disabled={form.busy()}>
+                {form.busy() ? "Membuat SSB…" : "Buat SSB"}
+              </button>
             </>
           }
         >
           <GoogleButton onClick={withGoogle}>Daftar dengan Google</GoogleButton>
           <div class="pemisah">atau buat akun dengan email</div>
           <Field id="adminName" label="Nama Anda" required autocomplete="name" value={adminName()} onInput={setAdminName} error={form.fields().adminName} />
-          <Field id="email" label="Email" type="email" inputmode="email" autocomplete="username" required value={email()} onInput={setEmail} error={form.fields().email} />
-          <Field id="password" label="Kata sandi" type="password" autocomplete="new-password" required minlength={10} hint="Minimal 10 karakter." value={password()} onInput={setPassword} error={form.fields().password} />
-          <button class="tombol utama" type="submit" disabled={form.busy()}>{form.busy() ? "Membuat akun…" : "Daftar dengan email"}</button>
+          <Field
+            id="email"
+            label="Email"
+            type="email"
+            inputmode="email"
+            autocomplete="username"
+            required
+            value={email()}
+            onInput={setEmail}
+            error={form.fields().email}
+          />
+          <Field
+            id="password"
+            label="Kata sandi"
+            type="password"
+            autocomplete="new-password"
+            required
+            minlength={10}
+            hint="Minimal 10 karakter."
+            value={password()}
+            onInput={setPassword}
+            error={form.fields().password}
+          />
+          <button class="tombol utama" type="submit" disabled={form.busy()}>
+            {form.busy() ? "Membuat akun…" : "Daftar dengan email"}
+          </button>
         </Show>
       </form>
 

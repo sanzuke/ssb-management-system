@@ -23,10 +23,29 @@ Butuh Bun (>= 1.4). Build web memakai Vite; menjalankan hasil build butuh Node.
 bun install
 bun run dev:api        # http://localhost:3000/health
 bun run dev:web
+bun run lint           # Biome: format dan lint (CI menjalankan ini)
+bun run format         # rapikan format otomatis
 bun run typecheck
 bun run test
 bun run build
 ```
+
+### Dengan Docker Compose
+
+```
+docker compose up --build          # PostgreSQL, migrasi, API (3000), web (3001)
+docker compose up --watch          # sama, dan menyinkronkan perubahan kode
+```
+
+Database dibuat otomatis (role dan kata sandi lokal ada di `tools/db/init.sql`). Untuk login Google, isi `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, dan `SESSION_SECRET` di file `.env` (lihat `docs/auth.md`).
+
+### CI
+
+Workflow GitHub Actions ada di `tools/ci/ci.yml` (lint, typecheck, test dengan PostgreSQL, build). Salin ke `.github/workflows/ci.yml` agar aktif.
+
+### Log API
+
+Satu baris JSON per permintaan (`reqId`, `method`, `path`, `status`, `ms`) ke stdout; error tak terduga dicatat sebagai `unhandled_error` dengan `reqId` yang sama dengan header `X-Request-Id` di respons. Query string, isi permintaan, dan cookie tidak dicatat.
 
 Catatan: SolidStart 2 meminta Node >= 24 untuk menjalankan hasil build. Di Node 22 build dan jalan normal pada uji awal, tetapi gunakan Node 24 untuk produksi.
 

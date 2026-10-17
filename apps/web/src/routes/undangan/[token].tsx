@@ -50,8 +50,14 @@ export default function Undangan() {
           fallback={
             <>
               <h1>Undangan tidak berlaku</h1>
-              <p>{invalid() ? "Tautan ini sudah dipakai, kedaluwarsa, atau salah. Minta admin SSB membuat tautan undangan baru." : "Undangan tidak bisa dimuat. Periksa sambungan internet Anda, lalu muat ulang halaman."}</p>
-              <A class="tombol" href="/masuk">Ke halaman masuk</A>
+              <p>
+                {invalid()
+                  ? "Tautan ini sudah dipakai, kedaluwarsa, atau salah. Minta admin SSB membuat tautan undangan baru."
+                  : "Undangan tidak bisa dimuat. Periksa sambungan internet Anda, lalu muat ulang halaman."}
+              </p>
+              <A class="tombol" href="/masuk">
+                Ke halaman masuk
+              </A>
             </>
           }
         >
@@ -62,15 +68,21 @@ export default function Undangan() {
           </p>
 
           <Show when={urlError() || form.error()}>
-            <div class="peringatan" role="alert">{urlError() || form.error()}</div>
+            <div class="peringatan" role="alert">
+              {urlError() || form.error()}
+            </div>
           </Show>
 
           <Show
             when={!me()}
             fallback={
               <form class="form" onSubmit={form.submit}>
-                <p class="info">Anda masuk sebagai {me()!.name} ({me()!.email}).</p>
-                <button class="tombol utama" type="submit" disabled={form.busy()}>{form.busy() ? "Bergabung…" : `Gabung sebagai ${roleLabel[inv()!.role]}`}</button>
+                <p class="info">
+                  Anda masuk sebagai {me()!.name} ({me()!.email}).
+                </p>
+                <button class="tombol utama" type="submit" disabled={form.busy()}>
+                  {form.busy() ? "Bergabung…" : `Gabung sebagai ${roleLabel[inv()!.role]}`}
+                </button>
               </form>
             }
           >
@@ -78,9 +90,32 @@ export default function Undangan() {
             <div class="pemisah">atau buat akun dengan email</div>
             <form class="form" onSubmit={form.submit}>
               <Field id="name" label="Nama Anda" required autocomplete="name" value={name()} onInput={setName} error={form.fields().name} />
-              <Field id="email" label="Email" type="email" inputmode="email" autocomplete="username" required value={email()} onInput={setEmail} error={form.fields().email} />
-              <Field id="password" label="Kata sandi" type="password" autocomplete="new-password" required minlength={10} hint="Minimal 10 karakter." value={password()} onInput={setPassword} error={form.fields().password} />
-              <button class="tombol utama" type="submit" disabled={form.busy()}>{form.busy() ? "Membuat akun…" : "Buat akun dan bergabung"}</button>
+              <Field
+                id="email"
+                label="Email"
+                type="email"
+                inputmode="email"
+                autocomplete="username"
+                required
+                value={email()}
+                onInput={setEmail}
+                error={form.fields().email}
+              />
+              <Field
+                id="password"
+                label="Kata sandi"
+                type="password"
+                autocomplete="new-password"
+                required
+                minlength={10}
+                hint="Minimal 10 karakter."
+                value={password()}
+                onInput={setPassword}
+                error={form.fields().password}
+              />
+              <button class="tombol utama" type="submit" disabled={form.busy()}>
+                {form.busy() ? "Membuat akun…" : "Buat akun dan bergabung"}
+              </button>
             </form>
             <p class="tautan-bawah">
               Sudah punya akun? <A href={`/masuk?lanjut=${encodeURIComponent(`/undangan/${p.token}`)}`}>Masuk dulu</A>, lalu tautan ini akan terbuka lagi.

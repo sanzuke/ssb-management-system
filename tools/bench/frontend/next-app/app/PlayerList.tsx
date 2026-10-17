@@ -15,7 +15,9 @@ export default function PlayerList({ players }: { players: Player[] }) {
   return (
     <section>
       <input placeholder="Cari pemain" value={q} onChange={(e) => setQ(e.target.value)} />
-      <p>Hadir: {present.size} / {players.length}</p>
+      <p>
+        Hadir: {present.size} / {players.length}
+      </p>
       <ul>
         {shown.map((p) => (
           <li key={p.id}>

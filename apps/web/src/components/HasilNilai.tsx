@@ -10,20 +10,32 @@ export default function HasilNilai(props: { a: AssessmentView }) {
   return (
     <div class="hasil">
       <p class="hasil-total">
-        <span class="persen" aria-label={props.a.overall === null ? "Belum ada skor" : `Rata-rata ${koma(props.a.overall)} dari 10`}>{props.a.overall === null ? "–" : koma(props.a.overall)}</span>
-        <span class="petunjuk">rata-rata dari 10, dinilai {new Date(`${props.a.assessedOn}T00:00:00`).toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" })}{props.a.assessor ? ` oleh ${props.a.assessor}` : ""}</span>
+        <span class="persen" role="img" aria-label={props.a.overall === null ? "Belum ada skor" : `Rata-rata ${koma(props.a.overall)} dari 10`}>
+          {props.a.overall === null ? "–" : koma(props.a.overall)}
+        </span>
+        <span class="petunjuk">
+          rata-rata dari 10, dinilai{" "}
+          {new Date(`${props.a.assessedOn}T00:00:00`).toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" })}
+          {props.a.assessor ? ` oleh ${props.a.assessor}` : ""}
+        </span>
       </p>
       <For each={props.a.aspects}>
         {(x) => (
           <section class="aspek" aria-label={aspectLabel[x.aspect]}>
-            <h3>{aspectLabel[x.aspect]} <span class="rata">rata-rata {koma(x.average)}</span></h3>
+            <h3>
+              {aspectLabel[x.aspect]} <span class="rata">rata-rata {koma(x.average)}</span>
+            </h3>
             <ul class="daftar-butir">
               <For each={rows(x.aspect)}>
                 {(s) => (
                   <li class="butir">
                     <span class="isi">{s.name}</span>
-                    <span class="skor" aria-label={`${s.name}: ${s.score} dari 10`}>{s.score}</span>
-                    <span class="batang" aria-hidden="true"><span style={{ width: `${s.score * 10}%` }} /></span>
+                    <span class="skor" role="img" aria-label={`${s.name}: ${s.score} dari 10`}>
+                      {s.score}
+                    </span>
+                    <span class="batang" aria-hidden="true">
+                      <span style={{ width: `${s.score * 10}%` }} />
+                    </span>
                   </li>
                 )}
               </For>
@@ -31,7 +43,11 @@ export default function HasilNilai(props: { a: AssessmentView }) {
           </section>
         )}
       </For>
-      <Show when={props.a.note}><p class="catatan"><strong>Catatan pelatih:</strong> {props.a.note}</p></Show>
+      <Show when={props.a.note}>
+        <p class="catatan">
+          <strong>Catatan pelatih:</strong> {props.a.note}
+        </p>
+      </Show>
     </div>
   );
 }

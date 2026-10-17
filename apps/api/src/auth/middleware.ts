@@ -35,9 +35,7 @@ export const loadAuth = (db: Db) =>
           let member: Member | null = null;
           if (s.ssbId && s.userId) {
             // ssb_id berasal dari sesi di server, tidak pernah dari input klien.
-            const [u] = await withTenant(db, s.ssbId, (tx) =>
-              tx.select().from(schema.appUser).where(eq(schema.appUser.id, s.userId!)).limit(1),
-            );
+            const [u] = await withTenant(db, s.ssbId, (tx) => tx.select().from(schema.appUser).where(eq(schema.appUser.id, s.userId!)).limit(1));
             if (u && u.accountId === acc.id) member = { ssbId: u.ssbId, userId: u.id, role: u.role, name: u.name };
           }
           c.set("auth", { accountId: acc.id, email: acc.email, accountName: acc.name, sessionHash, member });

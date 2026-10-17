@@ -37,10 +37,14 @@ export default function Field(p: Props) {
         aria-describedby={describedBy()}
       />
       <Show when={p.hint}>
-        <span class="petunjuk" id={`${p.id}-hint`}>{p.hint}</span>
+        <span class="petunjuk" id={`${p.id}-hint`}>
+          {p.hint}
+        </span>
       </Show>
       <Show when={p.error}>
-        <span class="pesan-salah" id={`${p.id}-err`}>{p.error}</span>
+        <span class="pesan-salah" id={`${p.id}-err`}>
+          {p.error}
+        </span>
       </Show>
     </div>
   );

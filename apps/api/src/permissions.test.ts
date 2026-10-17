@@ -68,7 +68,11 @@ run("matriks izin per endpoint (database)", () => {
       headers: { "content-type": "application/json", cookie },
       ...(method !== "GET" ? { body: JSON.stringify(body ?? {}) } : {}),
     });
-  const sessionOf = (res: Response) => res.headers.getSetCookie().find((c) => c.startsWith("ssb_session="))!.split(";")[0]!;
+  const sessionOf = (res: Response) =>
+    res.headers
+      .getSetCookie()
+      .find((c) => c.startsWith("ssb_session="))!
+      .split(";")[0]!;
 
   test("siapkan satu anggota untuk tiap role", async () => {
     const reg = await app.request("/auth/register-ssb", {
@@ -112,7 +116,10 @@ run("matriks izin per endpoint (database)", () => {
         if (can(role, e.perm)) expect([role, res.status < 400]).toEqual([role, true]);
         else expect([role, res.status]).toEqual([role, 403]);
       }
-      expect((await app.request(e.path, { method: e.method, headers: { "content-type": "application/json" }, ...(e.method !== "GET" ? { body: "{}" } : {}) })).status).toBe(401);
+      expect(
+        (await app.request(e.path, { method: e.method, headers: { "content-type": "application/json" }, ...(e.method !== "GET" ? { body: "{}" } : {}) }))
+          .status,
+      ).toBe(401);
     });
   }
 

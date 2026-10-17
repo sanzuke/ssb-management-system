@@ -36,11 +36,17 @@ export default function KartuPemain() {
       <Title>Kartu pemain · SSB App</Title>
       <AppBar me={me()!} />
       <main class="halaman">
-        <Show when={error()}><div class="peringatan" role="alert">{error()}</div></Show>
+        <Show when={error()}>
+          <div class="peringatan" role="alert">
+            {error()}
+          </div>
+        </Show>
         <Show when={missing()}>
           <h1>Kartu tidak ditemukan</h1>
           <p>Pemain ini tidak ada, atau bukan bagian dari KU atau anak yang bisa Anda akses.</p>
-          <A class="tombol" href="/pemain">Ke daftar pemain</A>
+          <A class="tombol" href="/pemain">
+            Ke daftar pemain
+          </A>
         </Show>
         <Show when={pl()}>
           {(d) => (
@@ -49,20 +55,29 @@ export default function KartuPemain() {
               <article class="kartu" aria-label={`Kartu pemain ${d().fullName}`}>
                 <header>
                   <span class="kartu-ssb">{me()!.active!.ssbName}</span>
-                  <span class="kartu-status" data-status={d().status}>{statusLabel[d().status]}</span>
+                  <span class="kartu-status" data-status={d().status}>
+                    {statusLabel[d().status]}
+                  </span>
                 </header>
                 <div class="kartu-nama">{d().fullName}</div>
                 <dl class="kartu-data">
-                  <dt>Nomor anggota</dt><dd>{d().memberNo ?? "-"}</dd>
-                  <dt>KU</dt><dd>{d().ageGroup?.name ?? "Belum ditentukan"}</dd>
-                  <dt>Posisi</dt><dd>{d().position ? posisiLabel[d().position!] : "Belum ditentukan"}</dd>
+                  <dt>Nomor anggota</dt>
+                  <dd>{d().memberNo ?? "-"}</dd>
+                  <dt>KU</dt>
+                  <dd>{d().ageGroup?.name ?? "Belum ditentukan"}</dd>
+                  <dt>Posisi</dt>
+                  <dd>{d().position ? posisiLabel[d().position!] : "Belum ditentukan"}</dd>
                 </dl>
                 <QrCode value={url()} label={`Kode QR ${d().fullName}, nomor anggota ${d().memberNo ?? "belum ada"}`} />
               </article>
               <p class="petunjuk">Kode QR membuka profil pemain. Hanya akun yang berhak yang bisa melihat isinya.</p>
               <p class="tautan-bawah">
-                <A class="tombol tipis" href={`/pemain/${d().id}`}>Lihat profil</A>
-                <button class="tombol tipis" type="button" onClick={() => window.print()}>Cetak kartu</button>
+                <A class="tombol tipis" href={`/pemain/${d().id}`}>
+                  Lihat profil
+                </A>
+                <button class="tombol tipis" type="button" onClick={() => window.print()}>
+                  Cetak kartu
+                </button>
               </p>
             </>
           )}

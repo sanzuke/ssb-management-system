@@ -34,14 +34,20 @@ export const permissions = {
   "invitation.create": { roles: ["admin_ssb"], desc: "Membuat tautan undangan" },
   "master.read": { roles: ["admin_ssb", "pelatih", "korlas"], desc: "Melihat KU, periode, dan lokasi" },
   "master.write": { roles: ["admin_ssb"], desc: "Mengubah KU, periode, dan lokasi" },
-  "player.read": { roles: ["admin_ssb", "pelatih", "korlas", "orang_tua"], desc: "Melihat pemain (pelatih dan korlas: KU yang ditugaskan; orang tua: anaknya)" },
+  "player.read": {
+    roles: ["admin_ssb", "pelatih", "korlas", "orang_tua"],
+    desc: "Melihat pemain (pelatih dan korlas: KU yang ditugaskan; orang tua: anaknya)",
+  },
   "player.write": { roles: ["admin_ssb"], desc: "Menambah dan mengubah pemain" },
   "attendance.record": { roles: ["admin_ssb", "pelatih", "korlas"], desc: "Mencatat absensi latihan" },
   "attendance.read": { roles: ["admin_ssb", "pelatih", "korlas", "orang_tua"], desc: "Melihat absensi (orang tua: anaknya)" },
   "assessment.write": { roles: ["admin_ssb", "pelatih"], desc: "Mengisi penilaian pemain" },
   "assessment.read": { roles: ["admin_ssb", "pelatih", "korlas", "orang_tua"], desc: "Melihat penilaian (orang tua: anaknya, setelah terbit)" },
   "session.manage": { roles: ["admin_ssb"], desc: "Menjadwalkan, mengubah, dan menghapus sesi latihan" },
-  "guardian.sessions": { roles: ["admin_ssb", "orang_tua"], desc: "Portal orang tua: jadwal KU anak sendiri beserta status kehadiran anak, tanpa daftar pemain lain (admin tidak punya anak, jadi daftarnya kosong)" },
+  "guardian.sessions": {
+    roles: ["admin_ssb", "orang_tua"],
+    desc: "Portal orang tua: jadwal KU anak sendiri beserta status kehadiran anak, tanpa daftar pemain lain (admin tidak punya anak, jadi daftarnya kosong)",
+  },
   "session.read": { roles: ["admin_ssb", "pelatih", "korlas"], desc: "Melihat jadwal sesi latihan (pelatih dan korlas: KU yang ditugaskan)" },
   "assignment.manage": { roles: ["admin_ssb"], desc: "Menugaskan pelatih dan korlas ke KU per periode" },
   "report.publish": { roles: ["admin_ssb", "korlas"], desc: "Menerbitkan rapor ke orang tua (wewenang korlas: menunggu keputusan)" },
@@ -56,7 +62,7 @@ export function renderPermissionTable(): string {
   const rows = (Object.keys(permissions) as Permission[]).map(
     (p) => `| \`${p}\` | ${permissions[p].desc} | ${roleOrder.map((r) => (can(r, p) ? "ya" : "-")).join(" | ")} |`,
   );
-  return [head, ...rows].join("\n") + "\n";
+  return `${[head, ...rows].join("\n")}\n`;
 }
 
 /** Kode SSB dipakai saat login, jadi dibatasi huruf kecil, angka, dan tanda hubung. */
@@ -148,7 +154,10 @@ export type Me = z.infer<typeof meSchema>;
 // ---- Data master ----
 
 const nameField = z.string().trim().min(2, "minimal 2 karakter").max(80, "maksimal 80 karakter");
-const isoDate = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "format tanggal YYYY-MM-DD").refine((s) => !Number.isNaN(Date.parse(s)) && new Date(s).toISOString().startsWith(s), "tanggal tidak valid");
+const isoDate = z
+  .string()
+  .regex(/^\d{4}-\d{2}-\d{2}$/, "format tanggal YYYY-MM-DD")
+  .refine((s) => !Number.isNaN(Date.parse(s)) && new Date(s).toISOString().startsWith(s), "tanggal tidak valid");
 
 export const ageGroupInputSchema = z
   .object({
@@ -306,7 +315,11 @@ export const assessmentInputSchema = z.object({
     .array(
       z.object({
         indicatorId: uuidStr,
-        score: z.number({ message: "harus berupa angka" }).int("harus bilangan bulat").min(SCORE_MIN, `minimal ${SCORE_MIN}`).max(SCORE_MAX, `maksimal ${SCORE_MAX}`),
+        score: z
+          .number({ message: "harus berupa angka" })
+          .int("harus bilangan bulat")
+          .min(SCORE_MIN, `minimal ${SCORE_MIN}`)
+          .max(SCORE_MAX, `maksimal ${SCORE_MAX}`),
       }),
     )
     .min(1, "minimal satu skor")

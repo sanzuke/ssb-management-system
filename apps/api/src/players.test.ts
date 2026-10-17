@@ -11,7 +11,11 @@ const iso = (offsetDays: number) => new Date(Date.now() + offsetDays * 86400000)
 
 run("pemain, penugasan, dan batas data per role", () => {
   const { db, client } = createDb(url!);
-  const app = createApp(db, { NODE_ENV: "test", ALLOWED_ORIGINS: "http://localhost:3001", WEB_URL: "http://web.test", SESSION_SECRET: "x".repeat(40) }, { google: null });
+  const app = createApp(
+    db,
+    { NODE_ENV: "test", ALLOWED_ORIGINS: "http://localhost:3001", WEB_URL: "http://web.test", SESSION_SECRET: "x".repeat(40) },
+    { google: null },
+  );
   const uid = randomUUID().slice(0, 8);
   const PASS = "kata-sandi-panjang-1";
   const ssbIds: string[] = [];
@@ -22,11 +26,21 @@ run("pemain, penugasan, dan batas data per role", () => {
       headers: { "content-type": "application/json", ...(cookie ? { cookie } : {}) },
       ...(method !== "GET" && method !== "DELETE" ? { body: JSON.stringify(body ?? {}) } : {}),
     });
-  const sessionOf = (res: Response) => res.headers.getSetCookie().find((c) => c.startsWith("ssb_session="))!.split(";")[0]!;
+  const sessionOf = (res: Response) =>
+    res.headers
+      .getSetCookie()
+      .find((c) => c.startsWith("ssb_session="))!
+      .split(";")[0]!;
   const json = async (res: Response) => (await res.json()) as any;
 
   async function newSsb(tag: string) {
-    const res = await call("POST", "/auth/register-ssb", undefined, { ssbName: `P ${tag}`, slug: `p-${tag}-${uid}`, adminName: "Admin", email: `admin-${tag}-${uid}@uji.test`, password: PASS });
+    const res = await call("POST", "/auth/register-ssb", undefined, {
+      ssbName: `P ${tag}`,
+      slug: `p-${tag}-${uid}`,
+      adminName: "Admin",
+      email: `admin-${tag}-${uid}@uji.test`,
+      password: PASS,
+    });
     expect(res.status).toBe(201);
     const { ssbId } = await json(res);
     ssbIds.push(ssbId);
@@ -41,7 +55,8 @@ run("pemain, penugasan, dan batas data per role", () => {
     const me = await json(await call("GET", "/auth/me", cookie));
     return { cookie, userId: me.active.userId as string };
   }
-  const mkKu = async (admin: string, name: string, min: number, max: number) => (await json(await call("POST", "/age-groups", admin, { name, minAge: min, maxAge: max }))).id as string;
+  const mkKu = async (admin: string, name: string, min: number, max: number) =>
+    (await json(await call("POST", "/age-groups", admin, { name, minAge: min, maxAge: max }))).id as string;
   const mkPlayer = async (admin: string, name: string, ageGroupId?: string | null, extra: object = {}) => {
     const r = await call("POST", "/players", admin, { fullName: name, birthDate: "2016-04-05", ageGroupId, ...extra });
     expect(r.status).toBe(201);

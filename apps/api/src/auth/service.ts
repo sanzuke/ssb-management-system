@@ -7,8 +7,7 @@ import type { Membership, SsbInput, UserRole } from "@ssb/shared";
 import { HttpError } from "../errors";
 import { SESSION_COOKIE, SESSION_TTL_MS, hashToken, newToken } from "./session";
 
-export const isUniqueViolation = (e: unknown) =>
-  (e as { code?: string })?.code === "23505" || (e as { cause?: { code?: string } })?.cause?.code === "23505";
+export const isUniqueViolation = (e: unknown) => (e as { code?: string })?.code === "23505" || (e as { cause?: { code?: string } })?.cause?.code === "23505";
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -47,13 +46,7 @@ export async function ssbIdBySlug(db: Db, slug: string) {
 }
 
 /** Membuat sesi untuk akun; ssbId/userId kosong bila belum ada SSB yang dipilih. */
-export async function startSession(
-  db: Db,
-  c: Context,
-  accountId: string,
-  active: { ssbId: string; userId: string } | null,
-  secureCookie: boolean,
-) {
+export async function startSession(db: Db, c: Context, accountId: string, active: { ssbId: string; userId: string } | null, secureCookie: boolean) {
   const token = newToken();
   await db.insert(schema.userSession).values({
     tokenHash: hashToken(token),
@@ -73,10 +66,7 @@ export async function startSession(
 
 /** Pilih SSB aktif untuk sesi yang sedang berjalan. */
 export async function setActive(db: Db, sessionHash: string, active: { ssbId: string; userId: string }) {
-  await db
-    .update(schema.userSession)
-    .set({ ssbId: active.ssbId, userId: active.userId })
-    .where(eq(schema.userSession.tokenHash, sessionHash));
+  await db.update(schema.userSession).set({ ssbId: active.ssbId, userId: active.userId }).where(eq(schema.userSession.tokenHash, sessionHash));
 }
 
 /** SSB yang dipilih otomatis setelah login: yang cocok dengan kode SSB, atau satu-satunya. */

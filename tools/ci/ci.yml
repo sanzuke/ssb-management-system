@@ -1,0 +1,63 @@
+# Salin ke .github/workflows/ci.yml agar aktif (token sesi Claude tidak punya izin `workflow` untuk mendorongnya).
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: ssb
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      PGPASSWORD: postgres
+      DATABASE_URL: postgres://ssb_app:app@localhost:5432/ssb
+      DATABASE_URL_OWNER: postgres://ssb_owner:owner@localhost:5432/ssb
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.2
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - run: bun install --frozen-lockfile
+      - name: Siapkan role dan database
+        run: |
+          sudo apt-get update -qq && sudo apt-get install -y -qq postgresql-client
+          psql -h localhost -U postgres -d ssb -v ON_ERROR_STOP=1 -f tools/db/init.sql
+      - name: Migrasi
+        run: bun run db:migrate
+      - name: Lint dan format
+        run: bun run lint
+      - name: Typecheck
+        run: bun run typecheck
+      - name: Test
+        run: |
+          bun run test 2>&1 | tee test.log
+          # Test yang bergantung pada database tidak boleh dilewati diam-diam.
+          if grep -Eq '[1-9][0-9]* skip' test.log; then echo "ada test yang dilewati"; exit 1; fi
+      - name: Izin terdokumentasi mutakhir
+        run: |
+          bun run docs:izin
+          git diff --exit-code docs/izin.md
+      - name: Build
+        run: bun run build

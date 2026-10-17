@@ -99,7 +99,13 @@ run("autentikasi, akun global, dan undangan", () => {
     const sameEmail = await post("/auth/register-ssb", { ssbName: "Lain", slug: `lain-${uid}`, adminName: "X", email: a.email, password: PASS });
     expect(sameEmail.status).toBe(409);
     expect((await json(sameEmail)).error.code).toBe("email_taken");
-    const short = await post("/auth/register-ssb", { ssbName: "Pendek", slug: `pendek-${uid}`, adminName: "X", email: `p-${uid}@uji.test`, password: "pendek" });
+    const short = await post("/auth/register-ssb", {
+      ssbName: "Pendek",
+      slug: `pendek-${uid}`,
+      adminName: "X",
+      email: `p-${uid}@uji.test`,
+      password: "pendek",
+    });
     expect(short.status).toBe(400);
     const err = await json(short);
     expect(err.error.code).toBe("validation");
@@ -131,7 +137,10 @@ run("autentikasi, akun global, dan undangan", () => {
     expect((await get("/auth/me", a.cookie)).status).toBe(401);
 
     const b = await register("exp");
-    await db.update(schema.userSession).set({ expiresAt: new Date(Date.now() - 1000) }).where(eq(schema.userSession.accountId, b.accountId));
+    await db
+      .update(schema.userSession)
+      .set({ expiresAt: new Date(Date.now() - 1000) })
+      .where(eq(schema.userSession.accountId, b.accountId));
     expect((await get("/auth/me", b.cookie)).status).toBe(401);
   });
 
@@ -182,7 +191,9 @@ run("autentikasi, akun global, dan undangan", () => {
 
   test("undangan orang tua menghubungkan akun ke pemain", async () => {
     const a = await register("ortu");
-    const [p] = await withTenant(db, a.ssbId, (tx) => tx.insert(schema.player).values({ ssbId: a.ssbId, fullName: "Anak", birthDate: "2016-01-01" }).returning());
+    const [p] = await withTenant(db, a.ssbId, (tx) =>
+      tx.insert(schema.player).values({ ssbId: a.ssbId, fullName: "Anak", birthDate: "2016-01-01" }).returning(),
+    );
     const token = await invite(a, "orang_tua", { playerId: p!.id });
     await joinAsNew(token, "ortu");
     const links = await withTenant(db, a.ssbId, (tx) => tx.select().from(schema.playerGuardian));

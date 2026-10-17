@@ -8,7 +8,9 @@ export default function NotFound() {
       <Title>Halaman tidak ditemukan · SSB App</Title>
       <h1>Halaman tidak ditemukan</h1>
       <p>Alamat yang Anda buka tidak ada atau sudah dipindah.</p>
-      <A class="tombol utama" href="/">Ke beranda</A>
+      <A class="tombol utama" href="/">
+        Ke beranda
+      </A>
     </AuthShell>
   );
 }

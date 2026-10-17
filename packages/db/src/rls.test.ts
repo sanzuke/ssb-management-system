@@ -15,7 +15,10 @@ run("isolasi tenant (RLS)", () => {
   const app = createDb(url!);
 
   beforeAll(async () => {
-    for (const [id, name] of [[a, "SSB A"], [b, "SSB B"]] as const) {
+    for (const [id, name] of [
+      [a, "SSB A"],
+      [b, "SSB B"],
+    ] as const) {
       await withTenant(app.db, id, async (tx) => {
         await tx.insert(schema.ssb).values({ id, name });
         const [g] = await tx.insert(schema.ageGroup).values({ ssbId: id, name: "KU-10", minAge: 9, maxAge: 10 }).returning();
@@ -40,9 +43,7 @@ run("isolasi tenant (RLS)", () => {
   });
 
   test("tenant A tidak bisa menulis atas nama B", async () => {
-    await expect(
-      withTenant(app.db, a, (tx) => tx.insert(schema.player).values({ ssbId: b, fullName: "Penyusup", birthDate: "2016-01-01" })),
-    ).rejects.toThrow();
+    await expect(withTenant(app.db, a, (tx) => tx.insert(schema.player).values({ ssbId: b, fullName: "Penyusup", birthDate: "2016-01-01" }))).rejects.toThrow();
   });
 
   test("tenant A tidak bisa mengubah atau menghapus data B", async () => {

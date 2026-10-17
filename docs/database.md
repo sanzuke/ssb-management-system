@@ -12,7 +12,7 @@ PostgreSQL 16, Drizzle ORM (`packages/db`). Isolasi antar SSB dijaga di level da
 
 ## Menyiapkan database lokal
 
-Jalankan sekali sebagai superuser:
+Jalankan sekali sebagai superuser (isinya sama dengan `tools/db/init.sql`, yang dipakai Docker Compose dan CI; kata sandinya hanya untuk lokal):
 
 ```sql
 CREATE ROLE ssb_owner LOGIN CREATEROLE PASSWORD '...';

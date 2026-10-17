@@ -10,7 +10,11 @@ const iso = (n: number) => new Date(Date.now() + n * 86400000).toISOString().sli
 
 run("jadwal latihan dan absensi", () => {
   const { db, client } = createDb(url!);
-  const app = createApp(db, { NODE_ENV: "test", ALLOWED_ORIGINS: "http://localhost:3001", WEB_URL: "http://web.test", SESSION_SECRET: "x".repeat(40) }, { google: null });
+  const app = createApp(
+    db,
+    { NODE_ENV: "test", ALLOWED_ORIGINS: "http://localhost:3001", WEB_URL: "http://web.test", SESSION_SECRET: "x".repeat(40) },
+    { google: null },
+  );
   const uid = randomUUID().slice(0, 8);
   const PASS = "kata-sandi-panjang-1";
   const ssbIds: string[] = [];
@@ -21,12 +25,22 @@ run("jadwal latihan dan absensi", () => {
       headers: { "content-type": "application/json", ...(cookie ? { cookie } : {}) },
       ...(method !== "GET" && method !== "DELETE" ? { body: JSON.stringify(body ?? {}) } : {}),
     });
-  const sessionOf = (res: Response) => res.headers.getSetCookie().find((c) => c.startsWith("ssb_session="))!.split(";")[0]!;
+  const sessionOf = (res: Response) =>
+    res.headers
+      .getSetCookie()
+      .find((c) => c.startsWith("ssb_session="))!
+      .split(";")[0]!;
   const json = async (res: Response) => (await res.json()) as any;
 
   /** SSB dengan KU-10 dan KU-12, periode berjalan, pelatih (ditugaskan ke KU-10), dan pemain di tiap KU. */
   async function world(tag: string) {
-    const reg = await call("POST", "/auth/register-ssb", undefined, { ssbName: `S ${tag}`, slug: `s-${tag}-${uid}`, adminName: "Admin", email: `admin-${tag}-${uid}@uji.test`, password: PASS });
+    const reg = await call("POST", "/auth/register-ssb", undefined, {
+      ssbName: `S ${tag}`,
+      slug: `s-${tag}-${uid}`,
+      adminName: "Admin",
+      email: `admin-${tag}-${uid}@uji.test`,
+      password: PASS,
+    });
     expect(reg.status).toBe(201);
     const { ssbId } = await json(reg);
     ssbIds.push(ssbId);
@@ -37,13 +51,18 @@ run("jadwal latihan dan absensi", () => {
     const loc = (await json(await call("POST", "/locations", admin, { name: "Lapangan Utama" }))).id as string;
     const join = async (role: string) => {
       const inv = await json(await call("POST", "/invitations", admin, { role }));
-      const acc = await call("POST", `/invitations/${inv.token}/accept`, undefined, { name: role, email: `${role}-${randomUUID().slice(0, 6)}-${uid}@uji.test`, password: PASS });
+      const acc = await call("POST", `/invitations/${inv.token}/accept`, undefined, {
+        name: role,
+        email: `${role}-${randomUUID().slice(0, 6)}-${uid}@uji.test`,
+        password: PASS,
+      });
       const cookie = sessionOf(acc);
       return { cookie, userId: (await json(await call("GET", "/auth/me", cookie))).active.userId as string };
     };
     const pelatih = await join("pelatih");
     expect((await call("POST", "/assignments", admin, { userId: pelatih.userId, ageGroupId: ku10, periodId: period })).status).toBe(201);
-    const mk = async (name: string, ageGroupId: string, status = "aktif") => (await json(await call("POST", "/players", admin, { fullName: name, birthDate: "2015-05-05", ageGroupId, status }))).id as string;
+    const mk = async (name: string, ageGroupId: string, status = "aktif") =>
+      (await json(await call("POST", "/players", admin, { fullName: name, birthDate: "2015-05-05", ageGroupId, status }))).id as string;
     const a1 = await mk("Ali", ku10);
     const a2 = await mk("Bima", ku10);
     const a3 = await mk("Cakra", ku10);
@@ -63,7 +82,14 @@ run("jadwal latihan dan absensi", () => {
     const r = await call("POST", "/sessions", w.admin, { ageGroupId: w.ku10, sessionDate: iso(3), startTime: "16:00", locationId: w.loc });
     expect(r.status).toBe(201);
     const [s] = await json(r);
-    expect(s).toMatchObject({ sessionDate: iso(3), startTime: "16:00", ageGroup: { name: "KU-10" }, location: { name: "Lapangan Utama" }, period: { name: "Musim" }, attendance: { hadir: 0, belum: 3 } });
+    expect(s).toMatchObject({
+      sessionDate: iso(3),
+      startTime: "16:00",
+      ageGroup: { name: "KU-10" },
+      location: { name: "Lapangan Utama" },
+      period: { name: "Musim" },
+      attendance: { hadir: 0, belum: 3 },
+    });
     const noPeriod = await json(await call("POST", "/sessions", w.admin, { ageGroupId: w.ku10, sessionDate: iso(300) }));
     expect(noPeriod[0].period).toBeNull();
     expect(noPeriod[0].startTime).toBeNull();
@@ -95,7 +121,9 @@ run("jadwal latihan dan absensi", () => {
     expect(f.sessionDate).toBeTruthy();
     expect(f.startTime).toBe("format jam HH:MM");
     expect((await json(await call("POST", "/sessions", w.admin, { ageGroupId: other.ku10, sessionDate: iso(2) }))).error.code).toBe("reference_invalid");
-    expect((await json(await call("POST", "/sessions", w.admin, { ageGroupId: w.ku10, sessionDate: iso(2), locationId: other.loc }))).error.code).toBe("reference_invalid");
+    expect((await json(await call("POST", "/sessions", w.admin, { ageGroupId: w.ku10, sessionDate: iso(2), locationId: other.loc }))).error.code).toBe(
+      "reference_invalid",
+    );
   });
 
   test("ubah dan hapus sesi; KU terkunci dan hapus ditolak bila sudah ada absensi", async () => {
@@ -126,14 +154,30 @@ run("jadwal latihan dan absensi", () => {
   test("absensi massal: simpan, koreksi, ringkasan, dan roster tanpa pemain keluar", async () => {
     const w = await world("abs");
     const [s] = await json(await call("POST", "/sessions", w.admin, { ageGroupId: w.ku10, sessionDate: iso(0), startTime: "16:00" }));
-    const first = await call("PUT", `/sessions/${s.id}/attendance`, w.pelatih.cookie, { entries: [{ playerId: w.a1, status: "hadir" }, { playerId: w.a2, status: "sakit", note: "demam" }] });
+    const first = await call("PUT", `/sessions/${s.id}/attendance`, w.pelatih.cookie, {
+      entries: [
+        { playerId: w.a1, status: "hadir" },
+        { playerId: w.a2, status: "sakit", note: "demam" },
+      ],
+    });
     expect(first.status).toBe(200);
     const roster = await json(first);
-    expect(roster.players.map((p: any) => [p.fullName, p.status])).toEqual([["Ali", "hadir"], ["Bima", "sakit"], ["Cakra", null]]); // "Dodo Keluar" tidak muncul
+    expect(roster.players.map((p: any) => [p.fullName, p.status])).toEqual([
+      ["Ali", "hadir"],
+      ["Bima", "sakit"],
+      ["Cakra", null],
+    ]); // "Dodo Keluar" tidak muncul
     expect(roster.players[1].note).toBe("demam");
     expect(roster.session.attendance).toEqual({ hadir: 1, izin: 0, sakit: 1, alpa: 0, belum: 1 });
     // koreksi: Bima jadi izin, Cakra alpa; satu permintaan lagi
-    const fix = await json(await call("PUT", `/sessions/${s.id}/attendance`, w.pelatih.cookie, { entries: [{ playerId: w.a2, status: "izin", note: null }, { playerId: w.a3, status: "alpa" }] }));
+    const fix = await json(
+      await call("PUT", `/sessions/${s.id}/attendance`, w.pelatih.cookie, {
+        entries: [
+          { playerId: w.a2, status: "izin", note: null },
+          { playerId: w.a3, status: "alpa" },
+        ],
+      }),
+    );
     expect(fix.session.attendance).toEqual({ hadir: 1, izin: 1, sakit: 0, alpa: 1, belum: 0 });
     expect(fix.players[1].note).toBeNull();
     // admin melihat ringkasan yang sama di daftar sesi
@@ -145,7 +189,16 @@ run("jadwal latihan dan absensi", () => {
     const [s] = await json(await call("POST", "/sessions", w.admin, { ageGroupId: w.ku10, sessionDate: iso(0) }));
     const put = (entries: unknown) => call("PUT", `/sessions/${s.id}/attendance`, w.pelatih.cookie, { entries });
     expect((await json(await put([{ playerId: w.b1, status: "hadir" }]))).error.code).toBe("player_not_in_group");
-    expect((await json(await put([{ playerId: w.a1, status: "hadir" }, { playerId: w.a1, status: "izin" }]))).error.code).toBe("duplicate_player");
+    expect(
+      (
+        await json(
+          await put([
+            { playerId: w.a1, status: "hadir" },
+            { playerId: w.a1, status: "izin" },
+          ]),
+        )
+      ).error.code,
+    ).toBe("duplicate_player");
     expect((await put([{ playerId: w.a1, status: "bolos" }])).status).toBe(400);
     expect((await put([])).status).toBe(400);
     expect((await json(await put([{ playerId: randomUUID(), status: "hadir" }]))).error.code).toBe("player_not_in_group");
@@ -211,15 +264,27 @@ run("jadwal latihan dan absensi", () => {
   test("rekap kehadiran: persentase per pemain dan per periode, KU, dan batas role", async () => {
     const w = await world("rekap");
     const period2 = (await json(await call("POST", "/periods", w.admin, { name: "Musim lalu", startDate: iso(-200), endDate: iso(-100) }))).id as string;
-    const mkSession = async (ageGroupId: string, offset: number) => (await json(await call("POST", "/sessions", w.admin, { ageGroupId, sessionDate: iso(offset) })))[0].id as string;
-    const rec = async (sid: string, entries: { playerId: string; status: string }[]) => expect((await call("PUT", `/sessions/${sid}/attendance`, w.admin, { entries })).status).toBe(200);
+    const mkSession = async (ageGroupId: string, offset: number) =>
+      (await json(await call("POST", "/sessions", w.admin, { ageGroupId, sessionDate: iso(offset) })))[0].id as string;
+    const rec = async (sid: string, entries: { playerId: string; status: string }[]) =>
+      expect((await call("PUT", `/sessions/${sid}/attendance`, w.admin, { entries })).status).toBe(200);
     const [s1, s2, s3, s4] = [await mkSession(w.ku10, -3), await mkSession(w.ku10, -2), await mkSession(w.ku10, -1), await mkSession(w.ku10, 0)];
     const old = await mkSession(w.ku10, -150);
     const s12 = await mkSession(w.ku12, -1);
     await mkSession(w.ku10, 1); // sesi tanpa catatan tidak dihitung
-    await rec(s1, [{ playerId: w.a1, status: "hadir" }, { playerId: w.a2, status: "hadir" }]);
-    await rec(s2, [{ playerId: w.a1, status: "hadir" }, { playerId: w.a2, status: "hadir" }]);
-    await rec(s3, [{ playerId: w.a1, status: "izin" }, { playerId: w.a2, status: "hadir" }, { playerId: w.off, status: "sakit" }]);
+    await rec(s1, [
+      { playerId: w.a1, status: "hadir" },
+      { playerId: w.a2, status: "hadir" },
+    ]);
+    await rec(s2, [
+      { playerId: w.a1, status: "hadir" },
+      { playerId: w.a2, status: "hadir" },
+    ]);
+    await rec(s3, [
+      { playerId: w.a1, status: "izin" },
+      { playerId: w.a2, status: "hadir" },
+      { playerId: w.off, status: "sakit" },
+    ]);
     await rec(s4, [{ playerId: w.a1, status: "alpa" }]); // Bima tidak tercatat
     await rec(old, [{ playerId: w.a1, status: "hadir" }]);
     await rec(s12, [{ playerId: w.b1, status: "hadir" }]);
@@ -274,14 +339,28 @@ run("jadwal latihan dan absensi", () => {
 
   test("portal orang tua: jadwal KU anak sendiri dengan status anak; anak orang lain tertutup", async () => {
     const w = await world("portal");
-    const mk = async (ageGroupId: string, offset: number) => (await json(await call("POST", "/sessions", w.admin, { ageGroupId, sessionDate: iso(offset), startTime: "16:00", locationId: w.loc })))[0].id as string;
+    const mk = async (ageGroupId: string, offset: number) =>
+      (await json(await call("POST", "/sessions", w.admin, { ageGroupId, sessionDate: iso(offset), startTime: "16:00", locationId: w.loc })))[0].id as string;
     const s10 = await mk(w.ku10, -1);
     const s10b = await mk(w.ku10, 3);
     const s12 = await mk(w.ku12, 2);
-    expect((await call("PUT", `/sessions/${s10}/attendance`, w.admin, { entries: [{ playerId: w.a1, status: "sakit" }, { playerId: w.a2, status: "hadir" }] })).status).toBe(200);
+    expect(
+      (
+        await call("PUT", `/sessions/${s10}/attendance`, w.admin, {
+          entries: [
+            { playerId: w.a1, status: "sakit" },
+            { playerId: w.a2, status: "hadir" },
+          ],
+        })
+      ).status,
+    ).toBe(200);
     const parent = async (playerId: string, tag: string) => {
       const inv = await json(await call("POST", "/invitations", w.admin, { role: "orang_tua", playerId }));
-      const acc = await call("POST", `/invitations/${inv.token}/accept`, undefined, { name: `Ortu ${tag}`, email: `ortu-${tag}-${uid}@uji.test`, password: PASS });
+      const acc = await call("POST", `/invitations/${inv.token}/accept`, undefined, {
+        name: `Ortu ${tag}`,
+        email: `ortu-${tag}-${uid}@uji.test`,
+        password: PASS,
+      });
       expect(acc.status).toBe(201);
       return sessionOf(acc);
     };
@@ -289,7 +368,10 @@ run("jadwal latihan dan absensi", () => {
     const ortuEko = await parent(w.b1, "eko");
 
     const ali = await json(await call("GET", "/guardian/sessions", ortuAli));
-    expect(ali.map((r: any) => [r.sessionId, r.playerId, r.status])).toEqual([[s10, w.a1, "sakit"], [s10b, w.a1, null]]);
+    expect(ali.map((r: any) => [r.sessionId, r.playerId, r.status])).toEqual([
+      [s10, w.a1, "sakit"],
+      [s10b, w.a1, null],
+    ]);
     expect(ali[0]).toMatchObject({ playerName: "Ali", startTime: "16:00", ageGroup: { name: "KU-10" }, location: { name: "Lapangan Utama" } });
     const eko = await json(await call("GET", "/guardian/sessions", ortuEko));
     expect(eko.map((r: any) => [r.sessionId, r.playerId])).toEqual([[s12, w.b1]]);
@@ -308,5 +390,4 @@ run("jadwal latihan dan absensi", () => {
     const other = await world("portalB");
     expect(await json(await call("GET", "/guardian/sessions", other.admin))).toEqual([]);
   });
-
 });

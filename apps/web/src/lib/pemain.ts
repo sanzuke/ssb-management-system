@@ -11,4 +11,5 @@ export const usia = (birthDate: string) => {
   if (n.getMonth() < b.getMonth() || (n.getMonth() === b.getMonth() && n.getDate() < b.getDate())) y--;
   return y;
 };
-export const tanggal = (s: string) => new Date(s.length === 10 ? `${s}T00:00:00` : s).toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" });
+export const tanggal = (s: string) =>
+  new Date(s.length === 10 ? `${s}T00:00:00` : s).toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" });

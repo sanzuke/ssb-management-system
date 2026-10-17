@@ -26,10 +26,14 @@ export default function PemainBaru() {
       <main class="halaman">
         <h1>Tambah pemain</h1>
         <Show when={groups().length === 0}>
-          <p class="info">Belum ada KU. Pemain tetap bisa ditambahkan sekarang, KU diisi nanti setelah dibuat di <A href="/master">Data master</A>.</p>
+          <p class="info">
+            Belum ada KU. Pemain tetap bisa ditambahkan sekarang, KU diisi nanti setelah dibuat di <A href="/master">Data master</A>.
+          </p>
         </Show>
         <PlayerForm ageGroups={groups()} onSaved={(p) => nav(`/pemain/${p.id}`)} />
-        <p class="tautan-bawah"><A href="/pemain">Kembali ke daftar pemain</A></p>
+        <p class="tautan-bawah">
+          <A href="/pemain">Kembali ke daftar pemain</A>
+        </p>
       </main>
     </Show>
   );

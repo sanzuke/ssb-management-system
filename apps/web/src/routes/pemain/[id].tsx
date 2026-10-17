@@ -73,36 +73,76 @@ export default function DetailPemain() {
               <Title>Pemain tidak ditemukan · SSB App</Title>
               <h1>Pemain tidak ditemukan</h1>
               <p>Pemain ini tidak ada, atau bukan bagian dari KU atau anak yang bisa Anda akses.</p>
-              <A class="tombol" href="/pemain">Ke daftar pemain</A>
+              <A class="tombol" href="/pemain">
+                Ke daftar pemain
+              </A>
             </>
           }
         >
           <Show when={pl()} fallback={<p>Memuat…</p>}>
             <Title>{pl()!.fullName} · SSB App</Title>
             <h1>{pl()!.fullName}</h1>
-            <p class="aksi-baris"><A class="tombol tipis" href={`/nilai/${pl()!.id}`}>Penilaian</A> <A class="tombol tipis" href={`/kartu/${pl()!.id}`}>Kartu pemain</A></p>
+            <p class="aksi-baris">
+              <A class="tombol tipis" href={`/nilai/${pl()!.id}`}>
+                Penilaian
+              </A>{" "}
+              <A class="tombol tipis" href={`/kartu/${pl()!.id}`}>
+                Kartu pemain
+              </A>
+            </p>
             <Show
               when={!editing()}
               fallback={
                 <>
-                  <PlayerForm initial={pl()!} ageGroups={groups()} onSaved={async () => { setEditing(false); setSaved(true); await load(); }} />
-                  <p class="tautan-bawah"><button class="tombol tipis" type="button" onClick={() => setEditing(false)}>Batal</button></p>
+                  <PlayerForm
+                    initial={pl()!}
+                    ageGroups={groups()}
+                    onSaved={async () => {
+                      setEditing(false);
+                      setSaved(true);
+                      await load();
+                    }}
+                  />
+                  <p class="tautan-bawah">
+                    <button class="tombol tipis" type="button" onClick={() => setEditing(false)}>
+                      Batal
+                    </button>
+                  </p>
                 </>
               }
             >
               <Show when={saved()}>
-                <div class="info" role="status">Perubahan disimpan.</div>
+                <div class="info" role="status">
+                  Perubahan disimpan.
+                </div>
               </Show>
               <dl class="rincian">
-                <dt>Nomor anggota</dt><dd>{pl()!.memberNo ?? "-"}</dd>
-                <dt>Tanggal lahir</dt><dd>{tanggal(pl()!.birthDate)}, {usia(pl()!.birthDate)} tahun</dd>
-                <dt>KU</dt><dd>{pl()!.ageGroup?.name ?? "Belum ditentukan"}</dd>
-                <dt>Posisi</dt><dd>{pl()!.position ? posisiLabel[pl()!.position!] : "Belum ditentukan"}</dd>
-                <dt>Sekolah</dt><dd>{pl()!.school ?? "-"}</dd>
-                <dt>Status</dt><dd>{statusLabel[pl()!.status]}</dd>
+                <dt>Nomor anggota</dt>
+                <dd>{pl()!.memberNo ?? "-"}</dd>
+                <dt>Tanggal lahir</dt>
+                <dd>
+                  {tanggal(pl()!.birthDate)}, {usia(pl()!.birthDate)} tahun
+                </dd>
+                <dt>KU</dt>
+                <dd>{pl()!.ageGroup?.name ?? "Belum ditentukan"}</dd>
+                <dt>Posisi</dt>
+                <dd>{pl()!.position ? posisiLabel[pl()!.position!] : "Belum ditentukan"}</dd>
+                <dt>Sekolah</dt>
+                <dd>{pl()!.school ?? "-"}</dd>
+                <dt>Status</dt>
+                <dd>{statusLabel[pl()!.status]}</dd>
               </dl>
               <Show when={admin()}>
-                <button class="tombol" type="button" onClick={() => { setSaved(false); setEditing(true); }}>Ubah data pemain</button>
+                <button
+                  class="tombol"
+                  type="button"
+                  onClick={() => {
+                    setSaved(false);
+                    setEditing(true);
+                  }}
+                >
+                  Ubah data pemain
+                </button>
               </Show>
             </Show>
 
@@ -110,15 +150,27 @@ export default function DetailPemain() {
               <section class="master">
                 <h2>Orang tua</h2>
                 <Show when={guardianError()}>
-                  <div class="peringatan" role="alert">{guardianError()}</div>
+                  <div class="peringatan" role="alert">
+                    {guardianError()}
+                  </div>
                 </Show>
-                <Show when={(pl()!.guardians ?? []).length > 0} fallback={<p class="kosong">Belum ada orang tua yang terhubung. Buat undangan orang tua untuk pemain ini, atau hubungkan akun yang sudah ada.</p>}>
+                <Show
+                  when={(pl()!.guardians ?? []).length > 0}
+                  fallback={
+                    <p class="kosong">Belum ada orang tua yang terhubung. Buat undangan orang tua untuk pemain ini, atau hubungkan akun yang sudah ada.</p>
+                  }
+                >
                   <ul class="daftar-butir">
                     <For each={pl()!.guardians}>
                       {(g) => (
                         <li class="butir">
-                          <span class="isi">{g.name}{g.relationship ? `, ${g.relationship}` : ""}</span>
-                          <button class="tombol tipis" type="button" onClick={() => removeGuardian(g.userId)}>Lepas</button>
+                          <span class="isi">
+                            {g.name}
+                            {g.relationship ? `, ${g.relationship}` : ""}
+                          </span>
+                          <button class="tombol tipis" type="button" onClick={() => removeGuardian(g.userId)}>
+                            Lepas
+                          </button>
                         </li>
                       )}
                     </For>
@@ -127,10 +179,22 @@ export default function DetailPemain() {
                 <Show when={available().length > 0}>
                   <form class="form" onSubmit={addGuardian.submit}>
                     <Show when={addGuardian.error()}>
-                      <div class="peringatan" role="alert">{addGuardian.error()}</div>
+                      <div class="peringatan" role="alert">
+                        {addGuardian.error()}
+                      </div>
                     </Show>
-                    <SelectField id="ortu" label="Hubungkan orang tua yang sudah bergabung" blank="Pilih orang tua" required value={pick()} onInput={setPick} options={available().map((u) => ({ value: u.id, label: `${u.name} (${u.email})` }))} />
-                    <button class="tombol" type="submit" disabled={addGuardian.busy()}>Hubungkan</button>
+                    <SelectField
+                      id="ortu"
+                      label="Hubungkan orang tua yang sudah bergabung"
+                      blank="Pilih orang tua"
+                      required
+                      value={pick()}
+                      onInput={setPick}
+                      options={available().map((u) => ({ value: u.id, label: `${u.name} (${u.email})` }))}
+                    />
+                    <button class="tombol" type="submit" disabled={addGuardian.busy()}>
+                      Hubungkan
+                    </button>
                   </form>
                 </Show>
               </section>
@@ -145,7 +209,8 @@ export default function DetailPemain() {
                       {(h) => (
                         <li class="butir">
                           <span class="isi">
-                            {h.field === "age_group" ? "KU" : "Status"}: {h.field === "status" ? (statusLabel[h.from ?? ""] ?? "-") : (h.from ?? "belum ada")} menjadi {h.field === "status" ? (statusLabel[h.to ?? ""] ?? "-") : (h.to ?? "belum ada")}
+                            {h.field === "age_group" ? "KU" : "Status"}: {h.field === "status" ? (statusLabel[h.from ?? ""] ?? "-") : (h.from ?? "belum ada")}{" "}
+                            menjadi {h.field === "status" ? (statusLabel[h.to ?? ""] ?? "-") : (h.to ?? "belum ada")}
                           </span>
                           <span class="petunjuk">{tanggal(h.at)}</span>
                         </li>
@@ -155,7 +220,9 @@ export default function DetailPemain() {
                 </Show>
               </section>
             </Show>
-            <p class="tautan-bawah"><A href="/pemain">Kembali ke daftar pemain</A></p>
+            <p class="tautan-bawah">
+              <A href="/pemain">Kembali ke daftar pemain</A>
+            </p>
           </Show>
         </Show>
       </main>

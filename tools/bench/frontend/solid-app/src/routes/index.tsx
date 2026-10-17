@@ -19,7 +19,9 @@ export default function Home() {
       <h1>Absensi Latihan</h1>
       <section>
         <input placeholder="Cari pemain" value={q()} onInput={(e) => setQ(e.currentTarget.value)} />
-        <p>Hadir: {present().size} / {players.length}</p>
+        <p>
+          Hadir: {present().size} / {players.length}
+        </p>
         <ul>
           <For each={shown()}>
             {(p) => (

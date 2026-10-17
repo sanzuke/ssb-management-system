@@ -28,7 +28,10 @@ export default function Master() {
       <main class="halaman">
         <h1>Data master</h1>
         <Show when={canRead()} fallback={<p>Halaman ini hanya untuk admin, pelatih, dan koordinator.</p>}>
-          <p>Kelompok usia, periode, dan lokasi latihan dipakai di data pemain dan jadwal.{role() === "admin_ssb" ? "" : " Hanya admin SSB yang bisa mengubahnya."}</p>
+          <p>
+            Kelompok usia, periode, dan lokasi latihan dipakai di data pemain dan jadwal.
+            {role() === "admin_ssb" ? "" : " Hanya admin SSB yang bisa mengubahnya."}
+          </p>
           <MasterSection
             title="Kelompok usia (KU)"
             path="/age-groups"
@@ -56,7 +59,9 @@ export default function Master() {
             summary={(i) => `${i.name}, ${tgl(i.startDate)} sampai ${tgl(i.endDate)}`}
           />
           <Show when={role() === "admin_ssb"}>
-            <p><A href="/penugasan">Atur penugasan pelatih ke KU</A></p>
+            <p>
+              <A href="/penugasan">Atur penugasan pelatih ke KU</A>
+            </p>
           </Show>
           <MasterSection
             title="Lokasi latihan"

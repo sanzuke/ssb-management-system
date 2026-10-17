@@ -1,11 +1,11 @@
 // Runner benchmark. Jalankan: taskset -c 1 node bench.mjs
 // Server dipin ke core 0, runner/autocannon dipin ke core 1.
-import { spawn } from 'node:child_process';
-import { readFileSync, writeFileSync } from 'node:fs';
-import { performance } from 'node:perf_hooks';
-import autocannon from 'autocannon';
+import { spawn } from "node:child_process";
+import { readFileSync, writeFileSync } from "node:fs";
+import { performance } from "node:perf_hooks";
+import autocannon from "autocannon";
 
-const BUN = '/root/.bun/bin/bun';
+const BUN = "/root/.bun/bin/bun";
 const PORT = 3200;
 const URL = `http://127.0.0.1:${PORT}`;
 const ROUNDS = Number(process.env.ROUNDS ?? 3);
@@ -15,22 +15,22 @@ const CONNS = Number(process.env.CONNS ?? 64);
 const STARTUPS = Number(process.env.STARTUPS ?? 3);
 
 const configs = [
-  { name: 'Hono', rt: 'Node', cmd: 'node', file: 'dist/hono-node.js' },
-  { name: 'Hono', rt: 'Bun', cmd: BUN, file: 'dist/hono-bun.js' },
-  { name: 'Nest + Fastify', rt: 'Node', cmd: 'node', file: 'dist/nest-fastify.js' },
-  { name: 'Nest + Fastify', rt: 'Bun', cmd: BUN, file: 'dist/nest-fastify.js' },
-  { name: 'Nest + Express', rt: 'Node', cmd: 'node', file: 'dist/nest-express.js' },
-  { name: 'Nest + Express', rt: 'Bun', cmd: BUN, file: 'dist/nest-express.js' },
-  { name: 'Mentah (tanpa framework)', rt: 'Node', cmd: 'node', file: 'dist/raw-node.js' },
-  { name: 'Mentah (tanpa framework)', rt: 'Bun', cmd: BUN, file: 'dist/raw-bun.js' },
-  { name: 'Hono (kontrol ulang)', rt: 'Node', cmd: 'node', file: 'dist/hono-node.js', control: true },
+  { name: "Hono", rt: "Node", cmd: "node", file: "dist/hono-node.js" },
+  { name: "Hono", rt: "Bun", cmd: BUN, file: "dist/hono-bun.js" },
+  { name: "Nest + Fastify", rt: "Node", cmd: "node", file: "dist/nest-fastify.js" },
+  { name: "Nest + Fastify", rt: "Bun", cmd: BUN, file: "dist/nest-fastify.js" },
+  { name: "Nest + Express", rt: "Node", cmd: "node", file: "dist/nest-express.js" },
+  { name: "Nest + Express", rt: "Bun", cmd: BUN, file: "dist/nest-express.js" },
+  { name: "Mentah (tanpa framework)", rt: "Node", cmd: "node", file: "dist/raw-node.js" },
+  { name: "Mentah (tanpa framework)", rt: "Bun", cmd: BUN, file: "dist/raw-bun.js" },
+  { name: "Hono (kontrol ulang)", rt: "Node", cmd: "node", file: "dist/hono-node.js", control: true },
 ];
-const only = process.env.ONLY ? process.env.ONLY.split(',').map(Number) : null;
+const only = process.env.ONLY ? process.env.ONLY.split(",").map(Number) : null;
 
-const body = JSON.stringify({ name: 'Budi', age: 10 });
+const body = JSON.stringify({ name: "Budi", age: 10 });
 const endpoints = [
-  { key: 'ping', opts: { url: `${URL}/ping`, method: 'GET' } },
-  { key: 'echo', opts: { url: `${URL}/echo`, method: 'POST', headers: { 'content-type': 'application/json' }, body } },
+  { key: "ping", opts: { url: `${URL}/ping`, method: "GET" } },
+  { key: "echo", opts: { url: `${URL}/echo`, method: "POST", headers: { "content-type": "application/json" }, body } },
 ];
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -41,7 +41,7 @@ const median = (a) => {
 };
 const rssMb = (pid) => {
   try {
-    return Number(/VmRSS:\s+(\d+)/.exec(readFileSync(`/proc/${pid}/status`, 'utf8'))[1]) / 1024;
+    return Number(/VmRSS:\s+(\d+)/.exec(readFileSync(`/proc/${pid}/status`, "utf8"))[1]) / 1024;
   } catch {
     return NaN;
   }
@@ -49,14 +49,14 @@ const rssMb = (pid) => {
 
 function start(cfg) {
   const t0 = performance.now();
-  const child = spawn('taskset', ['-c', '0', cfg.cmd, cfg.file], {
+  const child = spawn("taskset", ["-c", "0", cfg.cmd, cfg.file], {
     env: { ...process.env, PORT: String(PORT) },
-    stdio: ['ignore', 'ignore', 'pipe'],
+    stdio: ["ignore", "ignore", "pipe"],
   });
-  let err = '';
-  child.stderr.on('data', (d) => (err += d));
+  let err = "";
+  child.stderr.on("data", (d) => (err += d));
   let exited = false;
-  child.on('exit', () => (exited = true));
+  child.on("exit", () => (exited = true));
   const ready = (async () => {
     for (;;) {
       if (exited) throw new Error(`server berhenti: ${err.slice(0, 300)}`);
@@ -69,9 +69,9 @@ function start(cfg) {
   })();
   const stop = async () => {
     if (exited) return;
-    child.kill('SIGTERM');
+    child.kill("SIGTERM");
     for (let i = 0; i < 100 && !exited; i++) await sleep(50);
-    if (!exited) child.kill('SIGKILL');
+    if (!exited) child.kill("SIGKILL");
     await sleep(200);
   };
   return { child, ready, stop };
@@ -79,11 +79,11 @@ function start(cfg) {
 
 async function verify() {
   const a = await fetch(`${URL}/ping`);
-  const b = await fetch(`${URL}/echo`, { method: 'POST', headers: { 'content-type': 'application/json' }, body });
+  const b = await fetch(`${URL}/echo`, { method: "POST", headers: { "content-type": "application/json" }, body });
   const bad = await fetch(`${URL}/echo`, {
-    method: 'POST',
-    headers: { 'content-type': 'application/json' },
-    body: JSON.stringify({ name: '', age: -1 }),
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ name: "", age: -1 }),
   });
   const ok = a.status === 200 && (await a.text()) === '{"ok":true}' && b.status === 200 && JSON.stringify(await b.json()) === body;
   return { ok, invalidStatus: bad.status };
@@ -123,7 +123,7 @@ for (const { c: cfg } of list) {
     const v = await verify();
     row.verifyOk = v.ok;
     row.invalidStatus = v.invalidStatus;
-    if (!v.ok) throw new Error('respons tidak sesuai');
+    if (!v.ok) throw new Error("respons tidak sesuai");
 
     for (const ep of endpoints) {
       await load(ep.opts, WARMUP);
@@ -140,7 +140,9 @@ for (const { c: cfg } of list) {
         errors: runs.reduce((n, r) => n + r.errors, 0),
         non2xx: runs.reduce((n, r) => n + r.non2xx, 0),
       };
-      console.error(`   ${ep.key}: ${Math.round(row[ep.key].rps)} req/s (min ${Math.round(row[ep.key].min)}, max ${Math.round(row[ep.key].max)}), p99 ${row[ep.key].p99} ms`);
+      console.error(
+        `   ${ep.key}: ${Math.round(row[ep.key].rps)} req/s (min ${Math.round(row[ep.key].min)}, max ${Math.round(row[ep.key].max)}), p99 ${row[ep.key].p99} ms`,
+      );
     }
     row.loadRss = rssMb(s.child.pid);
     await s.stop();
@@ -149,12 +151,12 @@ for (const { c: cfg } of list) {
     console.error(`   GAGAL: ${row.error}`);
   }
   results.push(row);
-  writeFileSync('results.json', JSON.stringify({ conns: CONNS, duration: DURATION, rounds: ROUNDS, results }, null, 2));
+  writeFileSync("results.json", JSON.stringify({ conns: CONNS, duration: DURATION, rounds: ROUNDS, results }, null, 2));
 }
 
-const f0 = (n) => (Number.isFinite(n) ? Math.round(n).toLocaleString('en-US') : '-');
-console.log('\n| Konfigurasi | Runtime | Start (ms) | RSS idle (MB) | RSS setelah beban (MB) | /ping req/s | p99 ms | /echo req/s | p99 ms |');
-console.log('| --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |');
+const f0 = (n) => (Number.isFinite(n) ? Math.round(n).toLocaleString("en-US") : "-");
+console.log("\n| Konfigurasi | Runtime | Start (ms) | RSS idle (MB) | RSS setelah beban (MB) | /ping req/s | p99 ms | /echo req/s | p99 ms |");
+console.log("| --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |");
 for (const r of results) {
   if (r.error) {
     console.log(`| ${r.name} | ${r.rt} | GAGAL: ${r.error} | | | | | | |`);

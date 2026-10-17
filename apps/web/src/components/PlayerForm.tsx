@@ -31,15 +31,51 @@ export default function PlayerForm(p: { initial?: PlayerSummary; ageGroups: AgeG
   return (
     <form class="form" onSubmit={form.submit}>
       <Show when={form.error()}>
-        <div class="peringatan" role="alert">{form.error()}</div>
+        <div class="peringatan" role="alert">
+          {form.error()}
+        </div>
       </Show>
-      <Field id="fullName" label="Nama lengkap" required maxlength={120} autocomplete="off" value={fullName()} onInput={setFullName} error={form.fields().fullName} />
+      <Field
+        id="fullName"
+        label="Nama lengkap"
+        required
+        maxlength={120}
+        autocomplete="off"
+        value={fullName()}
+        onInput={setFullName}
+        error={form.fields().fullName}
+      />
       <Field id="birthDate" label="Tanggal lahir" type="date" required value={birthDate()} onInput={setBirthDate} error={form.fields().birthDate} />
-      <SelectField id="ageGroupId" label="Kelompok usia (KU)" blank="Belum ditentukan" value={ageGroupId()} onInput={setAgeGroupId} options={p.ageGroups.map((g) => ({ value: g.id, label: `${g.name} (usia ${g.minAge} sampai ${g.maxAge})` }))} error={form.fields().ageGroupId} />
-      <SelectField id="position" label="Posisi" blank="Belum ditentukan" value={position()} onInput={setPosition} options={Object.entries(posisiLabel).map(([value, label]) => ({ value, label }))} error={form.fields().position} />
+      <SelectField
+        id="ageGroupId"
+        label="Kelompok usia (KU)"
+        blank="Belum ditentukan"
+        value={ageGroupId()}
+        onInput={setAgeGroupId}
+        options={p.ageGroups.map((g) => ({ value: g.id, label: `${g.name} (usia ${g.minAge} sampai ${g.maxAge})` }))}
+        error={form.fields().ageGroupId}
+      />
+      <SelectField
+        id="position"
+        label="Posisi"
+        blank="Belum ditentukan"
+        value={position()}
+        onInput={setPosition}
+        options={Object.entries(posisiLabel).map(([value, label]) => ({ value, label }))}
+        error={form.fields().position}
+      />
       <Field id="school" label="Sekolah (boleh dikosongkan)" maxlength={120} value={school()} onInput={setSchool} error={form.fields().school} />
-      <SelectField id="status" label="Status" value={status()} onInput={(v) => setStatus(v as "aktif")} options={Object.entries(statusLabel).map(([value, label]) => ({ value, label }))} error={form.fields().status} />
-      <button class="tombol utama" type="submit" disabled={form.busy()}>{form.busy() ? "Menyimpan…" : i ? "Simpan perubahan" : "Tambah pemain"}</button>
+      <SelectField
+        id="status"
+        label="Status"
+        value={status()}
+        onInput={(v) => setStatus(v as "aktif")}
+        options={Object.entries(statusLabel).map(([value, label]) => ({ value, label }))}
+        error={form.fields().status}
+      />
+      <button class="tombol utama" type="submit" disabled={form.busy()}>
+        {form.busy() ? "Menyimpan…" : i ? "Simpan perubahan" : "Tambah pemain"}
+      </button>
     </form>
   );
 }

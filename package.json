@@ -15,10 +15,13 @@
     "db:generate": "bun --filter @ssb/db generate",
     "db:migrate": "bun --filter @ssb/db migrate",
     "docs:izin": "bun tools/permissions-doc.ts",
-    "progress": "bun tools/progress.ts"
+    "progress": "bun tools/progress.ts",
+    "lint": "biome check --diagnostic-level=error .",
+    "format": "biome format --write ."
   },
   "devDependencies": {
-    "typescript": "^5.9.0",
-    "@types/bun": "latest"
+    "@biomejs/biome": "2.5.15",
+    "@types/bun": "latest",
+    "typescript": "^5.9.0"
   }
 }

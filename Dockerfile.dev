@@ -1,0 +1,10 @@
+# Image pengembangan: dependensi terpasang, kode disalin (disinkronkan lewat `docker compose watch`).
+FROM oven/bun:1.4.2
+WORKDIR /app
+COPY package.json bun.lock ./
+COPY apps/api/package.json apps/api/
+COPY apps/web/package.json apps/web/
+COPY packages/shared/package.json packages/shared/
+COPY packages/db/package.json packages/db/
+RUN bun install --frozen-lockfile
+COPY . .
