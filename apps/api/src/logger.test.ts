@@ -23,7 +23,7 @@ test("setiap permintaan dicatat satu baris JSON dengan id, status, durasi; query
   const id = res.headers.get("x-request-id");
   expect(id).toBeTruthy();
   expect(lines).toHaveLength(1);
-  const { line, level } = lines[0];
+  const { line, level } = lines[0] as (typeof lines)[number];
   expect(level).toBe("info");
   expect(line).toMatchObject({ msg: "request", reqId: id, method: "GET", path: "/ok", status: 200 });
   expect(typeof line.ms).toBe("number");

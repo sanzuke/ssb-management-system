@@ -74,7 +74,7 @@ Butir bertanda **(butuh keputusan)** terhambat oleh pertanyaan terbuka di `docs/
 - [x] Input penilaian per pemain per periode; skor di luar skala ditolak (test: 0, 11, -1, 5,5, teks, null ditolak; 1 dan 10 sah; juga dijaga CHECK di database)
 - [x] Jejak perubahan skor (siapa, kapan, nilai lama dan baru; test)
 - [x] Layar input penilaian ramah sentuh di HP (tombol skor 1-10 setinggi 48 px, simpan di bar bawah; pelatih menilai, admin dan korlas menerbitkan, orang tua membaca; lolos e2e 360 px; uji waktu isi di HP oleh manusia belum)
-- [ ] Grafik perkembangan dan radar chart per pemain
+- [x] Grafik perkembangan dan radar chart per pemain (SVG sendiri, tanpa pustaka; radar butuh minimal 3 aspek terisi; lolos e2e 360 px, tabel angka tersedia)
 - [ ] Development plan per pemain per periode
 - [ ] Rapor PDF dari HTML dengan Playwright di Node; satu rapor selesai dalam kurang dari 10 detik
 - [ ] Wewenang Korlas atas rapor diputuskan dan diterapkan **(butuh keputusan)**

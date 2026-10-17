@@ -668,3 +668,118 @@ a {
   min-width: 0;
   font-size: 2rem;
 }
+
+/* Grafik penilaian (warna sudah lolos validator: hijau = kini, kuning tua putus-putus = periode lalu) */
+.grafik {
+  --seri-kini: #2a8a57;
+  --seri-lalu: #c0841a;
+  margin: 20px 0;
+}
+.grafik figcaption {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-bottom: 8px;
+}
+.grafik svg {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+.grafik .cincin {
+  fill: none;
+  stroke: var(--garis);
+  stroke-width: 1;
+}
+.grafik .poros,
+.grafik .kisi {
+  stroke: var(--garis);
+  stroke-width: 1;
+}
+.grafik .label-poros {
+  font-size: 12px;
+  fill: var(--tinta);
+}
+.grafik .label-skala {
+  font-size: 11px;
+  fill: var(--redup);
+}
+.grafik .label-nilai {
+  font-size: 12px;
+  font-weight: 700;
+  fill: var(--tinta);
+}
+.grafik .radar-kini {
+  fill: var(--seri-kini);
+  fill-opacity: 0.18;
+  stroke: var(--seri-kini);
+  stroke-width: 2.5;
+  stroke-linejoin: round;
+}
+.grafik .radar-lalu {
+  fill: none;
+  stroke: var(--seri-lalu);
+  stroke-width: 2.5;
+  stroke-dasharray: 6 4;
+  stroke-linejoin: round;
+}
+.grafik .titik-kini {
+  fill: var(--seri-kini);
+  stroke: var(--kapur);
+  stroke-width: 2;
+}
+.grafik .titik-biasa {
+  fill: var(--kapur);
+  stroke: var(--seri-kini);
+  stroke-width: 2.5;
+}
+.grafik .garis-kini {
+  stroke: var(--seri-kini);
+  stroke-width: 2.5;
+}
+.grafik .garis-lalu {
+  stroke: var(--seri-lalu);
+  stroke-width: 2.5;
+  stroke-dasharray: 6 4;
+}
+.grafik .garis-data {
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+.legenda {
+  list-style: none;
+  padding: 0;
+  margin: 4px 0 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 16px;
+}
+.legenda svg {
+  width: 28px;
+  flex: none;
+}
+.legenda li {
+  display: flex;
+  white-space: nowrap;
+  min-height: 0;
+  align-items: center;
+  gap: 8px;
+}
+.tabel-gulir {
+  overflow-x: auto;
+}
+.tabel-nilai {
+  border-collapse: collapse;
+  min-width: 100%;
+}
+.tabel-nilai th,
+.tabel-nilai td {
+  padding: 8px 10px;
+  text-align: right;
+  border-bottom: 1px solid var(--garis);
+  white-space: nowrap;
+}
+.tabel-nilai th[scope="row"],
+.tabel-nilai thead th:first-child {
+  text-align: left;
+}

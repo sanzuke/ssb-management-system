@@ -2,6 +2,7 @@ import { A, useNavigate, useParams } from "@solidjs/router";
 import { Title } from "@solidjs/meta";
 import { createMemo, createSignal, For, onMount, Show } from "solid-js";
 import AppBar from "~/components/AppBar";
+import GrafikNilai from "~/components/GrafikNilai";
 import HasilNilai from "~/components/HasilNilai";
 import SelectField from "~/components/SelectField";
 import { api, ApiError, getMe, type Me } from "~/lib/api";
@@ -155,6 +156,9 @@ export default function NilaiPemain() {
               <Show when={list().length === 0}>
                 <p class="kosong">Belum ada penilaian yang diterbitkan untuk {pl()!.fullName}. Penilaian muncul di sini setelah SSB menerbitkannya.</p>
               </Show>
+              <Show when={list().length > 0}>
+                <GrafikNilai list={list()} />
+              </Show>
               <For each={list()}>
                 {(a) => (
                   <section class="master" aria-label={a.period.name}>
@@ -204,10 +208,17 @@ export default function NilaiPemain() {
                   when={canWrite()}
                   fallback={
                     <Show when={current()} fallback={<p class="kosong">Belum ada penilaian pada periode ini.</p>}>
+                      <GrafikNilai list={list()} selectedId={periodId()} />
                       <HasilNilai a={current()!} />
                     </Show>
                   }
                 >
+                  <Show when={list().length > 0}>
+                    <details class="riwayat-nilai">
+                      <summary>Grafik perkembangan</summary>
+                      <GrafikNilai list={list()} selectedId={periodId()} />
+                    </details>
+                  </Show>
                   <Show when={form.error()}>
                     <div class="peringatan" role="alert">
                       {form.error()}
