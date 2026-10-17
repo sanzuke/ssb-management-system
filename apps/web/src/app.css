@@ -821,3 +821,604 @@ a {
   font-size: 0.85rem;
   color: var(--redup);
 }
+
+/* ---- Gaya buku rapor (desain Stitch "Garuda Muda Dossier"): masuk ---- */
+.buku {
+  position: relative;
+  min-height: 100dvh;
+  overflow: hidden;
+  background: var(--kapur);
+  padding: 28px 16px 40px;
+}
+.tanda-air {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 340px;
+  height: 340px;
+  transform: translateX(-50%);
+  fill: none;
+  stroke: var(--rumput);
+  stroke-width: 3;
+  opacity: 0.07;
+  pointer-events: none;
+}
+.tanda-air .titik {
+  fill: var(--rumput);
+  stroke: none;
+}
+.buku-isi {
+  position: relative;
+  z-index: 1;
+  width: min(100%, 26rem);
+  margin: 0 auto;
+}
+.buku-isi > :last-child {
+  margin-bottom: 0;
+}
+.kepala-buku {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  margin-bottom: 24px;
+}
+.kepala-buku p {
+  color: var(--redup);
+  margin: 0 auto;
+}
+.lencana {
+  display: grid;
+  place-items: center;
+  width: 64px;
+  height: 64px;
+  margin-bottom: 14px;
+  border-radius: 14px;
+  background: var(--rumput);
+  color: var(--kuning);
+  box-shadow: inset 0 0 0 4px #e3ece4;
+}
+.buku .form {
+  gap: 14px;
+}
+.buku .field label {
+  font-size: 0.9rem;
+}
+.kolom-input {
+  position: relative;
+}
+.dengan-ikon input {
+  padding-left: 44px;
+}
+.ikon-kolom {
+  position: absolute;
+  inset: 0 auto 0 14px;
+  display: flex;
+  align-items: center;
+  color: var(--redup);
+  pointer-events: none;
+}
+.field:has(.lihat-sandi) input {
+  padding-right: 52px;
+}
+.lihat-sandi {
+  position: absolute;
+  inset: 0 0 0 auto;
+  width: 48px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--redup);
+  cursor: pointer;
+}
+.buku .field input {
+  border-color: var(--garis);
+  border-width: 1px;
+}
+.buku .field input:focus-visible {
+  border-color: var(--rumput);
+}
+.buku .field[data-salah] input {
+  border-color: var(--merah);
+}
+.buku .tombol {
+  border-radius: 8px;
+  border-width: 1px;
+  border-color: var(--garis);
+}
+.buku .tombol.utama {
+  border-color: #d8a826;
+}
+.buku .tombol:active {
+  transform: translateY(1px);
+}
+.buku .pemisah {
+  margin: 20px 0 16px;
+}
+.kartu-bantuan {
+  display: grid;
+  gap: 4px;
+  margin-top: 24px;
+  padding: 14px;
+  border-radius: 12px;
+  background: #e9efe3;
+}
+.kartu-bantuan p {
+  margin: 0 0 8px;
+  color: var(--redup);
+  font-size: 0.9rem;
+}
+.tombol.putih {
+  background: #fff;
+  color: var(--rumput);
+}
+
+/* ---- Beranda orang tua (desain Stitch "Garuda Muda Dossier") ---- */
+.ortu-chip-baris {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 0 0 12px;
+}
+.ortu-chip {
+  padding: 2px 10px;
+  border-radius: 999px;
+  background: #e3ece4;
+  color: var(--rumput);
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+.ortu-chip.kuning {
+  background: #fbeeb8;
+  color: #6b5200;
+}
+.ortu-bagian {
+  margin: 24px 0;
+}
+.ortu-anak {
+  display: grid;
+  gap: 14px;
+  margin-bottom: 14px;
+  padding: 16px;
+  border: 1px solid var(--garis);
+  border-radius: 16px;
+  background: #fff;
+}
+.ortu-profil {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-height: 48px;
+  color: var(--tinta);
+  text-decoration: none;
+}
+.ortu-profil:hover strong {
+  text-decoration: underline;
+}
+.ortu-foto {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 64px;
+  height: 64px;
+  border-radius: 12px;
+  background: var(--rumput);
+  color: var(--kuning);
+  font-family: var(--judul);
+  font-weight: 800;
+  font-size: 1.4rem;
+}
+.ortu-teks {
+  display: grid;
+  gap: 1px;
+  min-width: 0;
+}
+.ortu-teks strong {
+  font-family: var(--judul);
+  font-size: 1.15rem;
+  line-height: 1.2;
+}
+.ortu-metrik {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px;
+  border-radius: 12px;
+  background: #edf1e7;
+}
+.ortu-angka {
+  display: grid;
+  gap: 2px;
+}
+.ortu-besar {
+  font-family: var(--judul);
+  font-weight: 800;
+  font-size: 2rem;
+  line-height: 1.1;
+  color: var(--rumput);
+  font-variant-numeric: tabular-nums;
+}
+.ortu-besar small {
+  font-size: 1rem;
+  color: var(--redup);
+}
+.ortu-rekap {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 44px;
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+.ortu-aksi {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.ortu-aksi .tombol {
+  padding-inline: 8px;
+  font-size: 0.95rem;
+}
+.tombol.utama-rumput {
+  background: var(--rumput);
+  border-color: var(--rumput);
+  color: var(--kapur);
+}
+.tombol.utama-rumput:hover {
+  background: var(--rumput-tua);
+}
+.tombol.sekunder {
+  background: #e3ece4;
+  border-color: #e3ece4;
+  color: var(--rumput);
+}
+.ortu-terdekat {
+  display: grid;
+  gap: 12px;
+  margin: 24px 0;
+  padding: 16px;
+  border-radius: 16px;
+  background: var(--kuning);
+}
+.ortu-kepala {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.ortu-judul-kecil {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 800;
+  font-size: 0.85rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.ortu-lencana {
+  padding: 2px 10px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.8);
+  font-size: 0.8rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.ortu-isi-putih {
+  display: grid;
+  gap: 10px;
+  padding: 14px;
+  border-radius: 12px;
+  background: #fff;
+}
+.ortu-baris {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+.ortu-baris svg {
+  flex: none;
+  margin-top: 2px;
+  color: var(--rumput);
+}
+.ortu-kosong {
+  margin: 0;
+  padding: 12px;
+  border-radius: 12px;
+  background: #fff;
+}
+.ortu-lanjut {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 6px;
+}
+.ortu-lanjut li {
+  display: grid;
+  padding: 8px 12px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.55);
+  font-size: 0.92rem;
+}
+.ortu-daftar {
+  list-style: none;
+  margin: 0 0 8px;
+  padding: 10px;
+  display: grid;
+  gap: 8px;
+  border: 1px solid var(--garis);
+  border-radius: 16px;
+  background: #fff;
+}
+.ortu-riwayat {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px;
+  border-radius: 10px;
+  background: #f1f4ec;
+}
+.ortu-riwayat .ortu-teks {
+  flex: 1;
+}
+.ortu-riwayat .ortu-teks strong {
+  font-family: var(--isi);
+  font-size: 0.95rem;
+}
+.ortu-bulat {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #dfe5d8;
+  color: var(--tinta);
+  font-weight: 800;
+}
+.ortu-riwayat[data-status="hadir"] .ortu-bulat {
+  background: var(--rumput);
+  color: #fff;
+}
+.ortu-riwayat[data-status="izin"] .ortu-bulat,
+.ortu-riwayat[data-status="sakit"] .ortu-bulat {
+  background: #8a6a1d;
+  color: #fff;
+}
+.ortu-riwayat[data-status="alpa"] .ortu-bulat {
+  background: var(--merah);
+  color: #fff;
+}
+
+/* ---- Penilaian dan rapor (desain Stitch "Garuda Muda Dossier") ---- */
+.progres-nilai {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  display: grid;
+  gap: 6px;
+  margin: 8px -16px 16px;
+  padding: 12px 16px;
+  background: var(--kapur);
+  border-bottom: 1px solid var(--garis);
+}
+.progres-teks {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 0.95rem;
+}
+.kartu-aspek {
+  margin: 16px 0;
+  padding: 14px 14px 6px;
+  border: 1px solid var(--garis);
+  border-radius: 16px;
+  background: #fff;
+}
+.kartu-aspek h2,
+.kartu-aspek h3 {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  font-size: 1.1rem;
+}
+.kartu-aspek .rata {
+  margin-left: auto;
+  padding: 1px 8px;
+  border-radius: 6px;
+  background: #e3ece4;
+  color: var(--rumput);
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+.nomor-aspek {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 26px;
+  height: 26px;
+  border-radius: 6px;
+  background: var(--rumput);
+  color: var(--kapur);
+  font-size: 0.85rem;
+}
+.kartu-aspek .indikator {
+  border-bottom: 0;
+  padding: 10px 0 14px;
+}
+.indikator .nama {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.nilai-terpilih {
+  min-width: 28px;
+  padding: 0 8px;
+  border-radius: 6px;
+  background: #fbeeb8;
+  color: #6b5200;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+.nilai-terpilih[data-tinggi] {
+  background: var(--kuning);
+  color: var(--tinta);
+}
+.pilih-nilai {
+  gap: 8px;
+}
+.nilai-btn {
+  border: 1px solid var(--garis);
+  border-radius: 999px;
+  background: #f1f4ec;
+  font-variant-numeric: tabular-nums;
+}
+.nilai-btn[aria-pressed="true"] {
+  border-color: var(--rumput);
+}
+.nilai-btn[aria-pressed="true"][data-tinggi] {
+  background: var(--kuning);
+  border-color: #d8a826;
+  color: var(--tinta);
+}
+.bar-simpan {
+  border-top: 1px solid var(--garis);
+  background: #fff;
+}
+.bar-simpan .tombol.utama {
+  border-color: #d8a826;
+  border-width: 1px;
+  border-radius: 8px;
+}
+.hasil-total {
+  padding: 14px;
+  border-radius: 16px;
+  background: #fff;
+  border: 1px solid var(--garis);
+  margin-bottom: 12px;
+}
+.hasil-total .persen {
+  font-family: var(--judul);
+  font-weight: 800;
+  color: var(--rumput);
+  font-size: 2.6rem;
+  line-height: 1;
+}
+.hasil .batang {
+  flex: 1 1 100%;
+  height: 8px;
+}
+.catatan {
+  margin: 14px 0;
+  padding: 14px 14px 14px 18px;
+  border-left: 4px solid var(--kuning);
+  border-radius: 0 12px 12px 0;
+  background: #e9efe3;
+  font-style: italic;
+}
+.catatan strong {
+  font-style: normal;
+}
+
+/* ---- Kartu pemain (desain Stitch "Garuda Muda Dossier") ---- */
+.ortu-chip.hijau {
+  justify-self: start;
+  background: #c9ecd6;
+}
+.kartu {
+  max-width: 26rem;
+  margin: 12px auto;
+  padding: 0;
+  overflow: hidden;
+  border: 1px solid var(--garis);
+  border-radius: 16px;
+  gap: 0;
+}
+.kartu header {
+  align-items: center;
+  padding: 14px 16px;
+  background: var(--rumput);
+  color: var(--kapur);
+}
+.kartu header > div {
+  display: grid;
+  gap: 2px;
+}
+.kartu-ssb {
+  color: var(--kuning);
+  font-family: var(--judul);
+  font-size: 1.15rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+.kartu-sub {
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.kartu-no {
+  justify-items: end;
+  text-align: right;
+}
+.kartu-no strong {
+  color: var(--kuning);
+  font-variant-numeric: tabular-nums;
+}
+.kartu-no .kartu-status {
+  padding: 0;
+  background: transparent;
+  color: var(--kapur);
+  font-size: 0.85rem;
+}
+.kartu-badan {
+  display: grid;
+  gap: 16px;
+  padding: 16px;
+}
+.kartu-profil {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.kartu-qr {
+  display: grid;
+  justify-items: center;
+  gap: 8px;
+  padding: 16px;
+  border-radius: 16px;
+  background: #edf1e7;
+  text-align: center;
+}
+.kartu-qr p {
+  margin: 0;
+  color: var(--redup);
+  font-size: 0.9rem;
+}
+.kartu-qr .kartu-kode {
+  color: var(--tinta);
+}
+.kartu .qr {
+  border: 0;
+  border-radius: 8px;
+}
+.kartu-aksi {
+  display: grid;
+  gap: 10px;
+  max-width: 26rem;
+  margin: 16px auto;
+}
+.kartu-aksi .tombol {
+  border-radius: 8px;
+}
+@media print {
+  .kartu-aksi {
+    display: none !important;
+  }
+}

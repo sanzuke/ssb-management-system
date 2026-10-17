@@ -33,8 +33,9 @@ export default function Beranda() {
             </>
           }
         >
-          <p>
-            Anda masuk di <strong>{me()!.active!.ssbName}</strong> sebagai {roleLabel[me()!.active!.role]}.
+          <p class="ortu-chip-baris">
+            <span class="ortu-chip">{me()!.active!.ssbName}</span>
+            <span class="ortu-chip kuning">{roleLabel[me()!.active!.role]}</span>
           </p>
           <Show when={me()!.active!.role === "orang_tua"} fallback={<p class="info">Mulai dari menu Pemain, Jadwal, atau Kehadiran di bagian atas.</p>}>
             <PortalOrangTua />

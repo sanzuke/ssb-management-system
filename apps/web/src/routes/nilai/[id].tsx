@@ -96,6 +96,12 @@ export default function NilaiPemain() {
     setScores({ ...scores(), [indicatorId]: v });
   };
   const filled = createMemo(() => indicators().filter((i) => scores()[i.id] !== undefined).length);
+  const rataSementara = createMemo(() => {
+    const v = indicators()
+      .map((i) => scores()[i.id])
+      .filter((x): x is number => x !== undefined);
+    return v.length ? String(Math.round((v.reduce((a, b) => a + b, 0) / v.length) * 10) / 10).replace(".", ",") : "–";
+  });
   const groups = createMemo(() =>
     assessmentAspects.map((a) => ({ aspect: a, items: indicators().filter((i) => i.aspect === a) })).filter((g) => g.items.length > 0),
   );
@@ -149,7 +155,13 @@ export default function NilaiPemain() {
           <Show when={pl()} fallback={<p>Memuat…</p>}>
             <Title>Penilaian {pl()!.fullName} · SSB App</Title>
             <h1>Penilaian {pl()!.fullName}</h1>
-            <p class="petunjuk">{pl()!.ageGroup?.name ?? "Belum ada KU"}, skala 1 sampai 10</p>
+            <p class="ortu-chip-baris">
+              <Show when={pl()!.memberNo}>
+                <span class="ortu-chip">{pl()!.memberNo}</span>
+              </Show>
+              <span class="ortu-chip">{pl()!.ageGroup?.name ?? "Belum ada KU"}</span>
+              <span class="ortu-chip kuning">Skala 1 sampai 10</span>
+            </p>
             <Show when={error()}>
               <div class="peringatan" role="alert">
                 {error()}
@@ -174,7 +186,7 @@ export default function NilaiPemain() {
                   <section class="master" aria-label={a.period.name}>
                     <h2>{a.period.name}</h2>
                     <p>
-                      <a class="tombol" href={`/api/players/${encodeURIComponent(p.id)}/assessments/${a.period.id}/report`} download="">
+                      <a class="tombol utama" href={`/api/players/${encodeURIComponent(p.id)}/assessments/${a.period.id}/report`} download="">
                         Unduh rapor (PDF)
                       </a>
                     </p>
@@ -200,7 +212,7 @@ export default function NilaiPemain() {
 
                 <Show when={current()}>
                   <p>
-                    <a class="tombol" href={`/api/players/${encodeURIComponent(p.id)}/assessments/${current()!.period.id}/report`} download="">
+                    <a class="tombol utama" href={`/api/players/${encodeURIComponent(p.id)}/assessments/${current()!.period.id}/report`} download="">
                       Unduh rapor (PDF)
                     </a>
                   </p>
@@ -267,14 +279,41 @@ export default function NilaiPemain() {
                       </p>
                     }
                   >
+                    <div class="progres-nilai" role="status" aria-live="polite">
+                      <div class="progres-teks">
+                        <strong>Progres penilaian</strong>
+                        <span>
+                          {filled()}/{indicators().length} terisi
+                        </span>
+                      </div>
+                      <span class="batang" aria-hidden="true">
+                        <span style={{ width: `${(filled() / indicators().length) * 100}%` }} />
+                      </span>
+                      <span class="petunjuk">Rata-rata sementara: {rataSementara()}</span>
+                    </div>
                     <For each={groups()}>
-                      {(g) => (
-                        <section class="aspek" aria-label={aspectLabel[g.aspect]}>
-                          <h2>{aspectLabel[g.aspect]}</h2>
+                      {(g, gi) => (
+                        <section class="aspek kartu-aspek" aria-label={aspectLabel[g.aspect]}>
+                          <h2>
+                            <span class="nomor-aspek" aria-hidden="true">
+                              {gi() + 1}
+                            </span>
+                            {aspectLabel[g.aspect]}
+                            <span class="rata">
+                              {g.items.filter((i) => scores()[i.id] !== undefined).length}/{g.items.length} terisi
+                            </span>
+                          </h2>
                           <For each={g.items}>
                             {(i) => (
                               <div class="indikator">
-                                <span class="nama">{i.name}</span>
+                                <span class="nama">
+                                  {i.name}
+                                  <Show when={scores()[i.id] !== undefined}>
+                                    <span class="nilai-terpilih" data-tinggi={scores()[i.id]! >= 9 ? "" : undefined}>
+                                      {scores()[i.id]}
+                                    </span>
+                                  </Show>
+                                </span>
                                 {/* biome-ignore lint/a11y/useSemanticElements: fieldset merusak tata letak grid tombol */}
                                 <div class="pilih-nilai" role="group" aria-label={`Skor ${i.name}`}>
                                   <For each={NILAI}>
@@ -282,6 +321,7 @@ export default function NilaiPemain() {
                                       <button
                                         type="button"
                                         class="nilai-btn"
+                                        attr:data-tinggi={n >= 9 ? "" : undefined}
                                         aria-pressed={scores()[i.id] === n}
                                         aria-label={`${i.name} ${n}`}
                                         onClick={() => setScore(i.id, n)}

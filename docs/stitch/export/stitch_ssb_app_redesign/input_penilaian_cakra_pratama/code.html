@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+
+<html lang="id"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport"/><meta content="mobile_stack" name="shell-type"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{width:100%;margin:0;padding:0;}body{overscroll-behavior:none;-webkit-tap-highlight-color:transparent;}.pb-safe{padding-bottom:env(safe-area-inset-bottom,0px);}.pt-safe{padding-top:env(safe-area-inset-top,0px);}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = { darkMode: 'class', theme: { extend: { colors: { 'surface-variant': '#d8e6dc', 'tertiary-fixed-dim': '#ffb4a9', 'secondary-fixed-dim': '#efc13a', 'on-secondary-fixed': '#241a00', 'secondary': '#755b00', 'on-secondary-fixed-variant': '#594400', 'tertiary-container': '#87170f', 'secondary-fixed': '#ffdf91', 'primary-fixed-dim': '#9ed2b4', 'on-tertiary-container': '#ff9485', 'inverse-primary': '#9ed2b4', 'on-primary-fixed-variant': '#1e5038', 'on-secondary': '#ffffff', 'surface-container': '#e3f1e7', 'outline-variant': '#c0c9c1', 'on-primary-fixed': '#002113', 'primary-fixed': '#b9efcf', 'background': '#effdf3', 'error': '#ba1a1a', 'on-primary': '#ffffff', 'tertiary-fixed': '#ffdad5', 'surface': '#effdf3', 'tertiary': '#640001', 'on-surface-variant': '#414943', 'surface-container-high': '#ddece2', 'on-tertiary': '#ffffff', 'surface-container-low': '#e9f7ed', 'on-error': '#ffffff', 'surface-container-lowest': '#ffffff', 'surface-dim': '#cfddd4', 'surface-tint': '#37684f', 'on-primary-container': '#8abd9f', 'inverse-on-surface': '#e6f4ea', 'primary-container': '#1b4d36', 'surface-bright': '#effdf3', 'on-tertiary-fixed-variant': '#8b1911', 'on-background': '#121e18', 'secondary-container': '#fecf47', 'on-error-container': '#93000a', 'on-surface': '#121e18', 'error-container': '#ffdad6', 'surface-container-highest': '#d8e6dc', 'on-secondary-container': '#725800', 'primary': '#003621', 'on-tertiary-fixed': '#410000', 'outline': '#717973', 'inverse-surface': '#27332d' }, borderRadius: { 'DEFAULT': '0.25rem', 'lg': '0.5rem', 'xl': '0.75rem', 'full': '9999px' }, spacing: { 'space-md': '0.75rem', 'gutter': '1rem', 'gutter-mobile': '0.75rem', 'space-xl': '1.5rem', 'margin-mobile': '1rem', 'space-xs': '0.25rem', 'margin': '1.5rem', 'space-lg': '1rem', 'space-sm': '0.5rem' }, fontFamily: { 'display-lg': ['Bricolage Grotesque'], 'metric-display': ['Atkinson Hyperlegible Next'], 'label-lg': ['Atkinson Hyperlegible Next'], 'body-lg': ['Atkinson Hyperlegible Next'], 'headline-md': ['Bricolage Grotesque'], 'display-lg-mobile': ['Bricolage Grotesque'], 'headline-lg': ['Bricolage Grotesque'], 'body-md': ['Atkinson Hyperlegible Next'], 'label-sm': ['Atkinson Hyperlegible Next'], 'body-sm': ['Atkinson Hyperlegible Next'], 'label-md': ['Atkinson Hyperlegible Next'], 'headline-sm': ['Bricolage Grotesque'] }, fontSize: { 'display-lg': ['40px', { lineHeight: '48px', fontWeight: '800' }], 'metric-display': ['32px', { lineHeight: '36px', fontWeight: '700' }], 'label-lg': ['14px', { lineHeight: '18px', fontWeight: '700' }], 'body-lg': ['16px', { lineHeight: '24px', fontWeight: '400' }], 'headline-md': ['22px', { lineHeight: '28px', fontWeight: '700' }], 'display-lg-mobile': ['30px', { lineHeight: '36px', fontWeight: '800' }], 'headline-lg': ['28px', { lineHeight: '34px', fontWeight: '700' }], 'body-md': ['14px', { lineHeight: '20px', fontWeight: '400' }], 'label-sm': ['11px', { lineHeight: '14px', fontWeight: '700' }], 'body-sm': ['12px', { lineHeight: '16px', fontWeight: '400' }], 'label-md': ['12px', { lineHeight: '16px', fontWeight: '700' }], 'headline-sm': ['18px', { lineHeight: '24px', fontWeight: '700' }] } } } };</script><style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head><body class="bg-surface font-body-md text-on-surface antialiased flex flex-col min-h-screen selection:bg-secondary-container"><header class="fixed top-0 w-full z-50 pt-safe bg-surface/85 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)]"><div class="h-16 px-gutter-mobile flex items-center justify-between gap-space-sm"><div class="flex items-center gap-space-xs"><button aria-label="Kembali" class="w-11 h-11 flex items-center justify-center text-primary-container active:bg-surface-variant/40 rounded-full transition-colors" onclick="history.back()" type="button"><span class="material-symbols-outlined text-[24px]">arrow_back</span></button><img alt="SSB Garuda Muda Logo" class="h-7 w-auto object-contain" src="https://lh3.googleusercontent.com/aida/AEtjO1VADFFrjwz-HIvXYsILNcRVAP5OeGgXiVntznkV3Mgvd-jvCsaiRtcw0khou41wHdC9Bv4GOPCoKDQ8aR0dHoGmISrSpir191TXIZLJsWrjLg524BATjY733JDgCfLysYV0BuaOTgyGebdlHdshZWFXr-QOa3YCOuSNuPG_2nmMjhRzARFkTV4T5csnJ2qR-arMVBXH0lvWqa1e2HpAKBNLAnazNKV8e8v9rUxAKRmfFEI5E5ldN0oue6M"/></div><div class="flex-1 flex flex-col items-center justify-center px-space-xs text-center min-w-0"><h1 class="font-headline-sm text-headline-sm text-on-surface truncate">Input Penilaian</h1></div><div class="flex items-center justify-end shrink-0"><button aria-label="Profil" class="w-11 h-11 flex items-center justify-center rounded-full active:scale-95 transition-transform p-0.5" type="button"><img alt="Profile" class="w-8 h-8 rounded-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAJiYHhTNRxwhftnlHLCU5dyLIEkMoU8UyrPMAUN9mvomc9_d0iHZJoo71HBRSX1b8AADBocgkXqvsQdKAhAo6h5XLBjVrtzJ640zSQjbrZpBHSWGbFnoSI1MO6aU_TeihE-vcaqtJ5bFS0MI774YK5kxpP3aVv99UM9s9H5Mzvci24fH-D-khww-Y4-rtPCz3MluroUP1fX06-VGkqPocAQdl_vAgwwtKkdP4ZgL0yFuH1YE0W2mc4Fg"/></button></div></div></header><main class="flex-1 flex flex-col relative w-full pt-16 bg-surface"><div class="flex flex-col w-full pb-32">
+<!-- Top Context Ledger Bar -->
+<section class="px-gutter-mobile pt-space-sm pb-space-xs">
+<div class="bg-surface-container-lowest rounded-xl p-space-md shadow-sm">
+<div class="flex items-start justify-between gap-space-sm">
+<div class="flex items-center gap-space-sm min-w-0">
+<div class="w-14 h-14 rounded-lg overflow-hidden shrink-0 bg-surface-container">
+<img class="w-full h-full object-cover" data-alt="A young 9-year-old Indonesian football player smiling proudly wearing an emerald green and gold grassroots soccer jersey, golden hour pitch lighting, hyper-realistic, documentary photography" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCuQxxCKm2w9bAqx_LgD9EN379Ur7L4BNYWnSBhStgeomrK9AmcXzRi5hkSMa3NlHg-PUW8Nbi8INkr25IfyGuk4Yi1XEjLnnaPirPDDm1V529-UQUS66S3dfr4nEs3BihnbTv42BGqeE7hKjiIxwEL3gmtt3EsB03Eai6cqCZN0buMCrdV-lxNfNZLewwUY_CgGHO-2jMO-NGp7cKSf-TbPYDYc5eRkLa6t_dBXTbZkgTDLCsuF10wHQ"/>
+</div>
+<div class="min-w-0">
+<div class="flex items-center gap-space-xs mb-0.5">
+<span class="bg-primary-container text-on-primary font-label-sm text-label-sm px-1.5 py-0.5 rounded">SSB-0012</span>
+<span class="bg-secondary-container text-on-secondary-container font-label-sm text-label-sm px-1.5 py-0.5 rounded font-bold">KU-10</span>
+</div>
+<h2 class="font-headline-sm text-headline-sm text-on-surface truncate">Cakra Pratama</h2>
+<p class="font-body-sm text-body-sm text-on-surface-variant flex items-center gap-1">
+<span class="material-symbols-outlined text-[15px] text-secondary">sports_soccer</span>
+              Sayap Kanan • Musim 2026/27
+            </p>
+</div>
+</div>
+<div class="text-right shrink-0">
+<span class="text-primary font-label-sm text-label-sm uppercase tracking-wide block">Penilai</span>
+<span class="font-label-md text-label-md text-on-surface">Pak Budi</span>
+</div>
+</div>
+<!-- Completion Indicator Ledger -->
+<div class="mt-space-md bg-surface-container-low rounded-lg p-space-sm">
+<div class="flex items-center justify-between gap-2 mb-1.5">
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-secondary text-[18px]">edit_document</span>
+<span class="font-label-md text-label-md text-on-surface">Progres Penilaian</span>
+</div>
+<span class="bg-secondary-container text-on-secondary-container font-label-sm text-label-sm px-2 py-0.5 rounded-full font-bold">
+<span id="completed-count">8</span>/17 Selesai
+          </span>
+</div>
+<div class="w-full h-2.5 bg-surface-variant rounded-full overflow-hidden flex">
+<div class="h-full bg-primary-container transition-all duration-300" id="progress-bar-fill" style="width: 47.05%;"></div>
+</div>
+<div class="flex justify-between items-center mt-1 text-on-surface-variant font-label-sm text-label-sm">
+<span>9 indikator belum diisi</span>
+<span class="font-bold text-primary">Rata-rata: 7.5</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Navigation Chips: Jump to Aspect -->
+<div class="px-gutter-mobile py-space-xs overflow-x-auto no-scrollbar flex items-center gap-1.5">
+<a class="whitespace-nowrap px-3 py-1.5 rounded-full bg-primary-container text-on-primary font-label-sm text-label-sm flex items-center gap-1" href="#aspek-1">
+<span class="w-2 h-2 rounded-full bg-secondary-container inline-block"></span>
+      1. Ball Mastery (4)
+    </a>
+<a class="whitespace-nowrap px-3 py-1.5 rounded-full bg-surface-container-highest text-on-surface font-label-sm text-label-sm flex items-center gap-1" href="#aspek-2">
+<span class="w-2 h-2 rounded-full bg-secondary-container inline-block"></span>
+      2. Fisik (3)
+    </a>
+<a class="whitespace-nowrap px-3 py-1.5 rounded-full bg-surface-container-highest text-on-surface font-label-sm text-label-sm flex items-center gap-1" href="#aspek-3">
+<span class="w-2 h-2 rounded-full bg-outline-variant inline-block"></span>
+      3. Taktik (2)
+    </a>
+<a class="whitespace-nowrap px-3 py-1.5 rounded-full bg-surface-container-highest text-on-surface font-label-sm text-label-sm flex items-center gap-1" href="#aspek-4">
+<span class="w-2 h-2 rounded-full bg-outline-variant inline-block"></span>
+      4. Mental (3)
+    </a>
+<a class="whitespace-nowrap px-3 py-1.5 rounded-full bg-surface-container-highest text-on-surface font-label-sm text-label-sm" href="#aspek-5">5. Gerak Dasar</a>
+<a class="whitespace-nowrap px-3 py-1.5 rounded-full bg-surface-container-highest text-on-surface font-label-sm text-label-sm" href="#aspek-6">6. Intelijen</a>
+</div>
+<!-- Form Content: 6 Assessment Pillars -->
+<div class="px-gutter-mobile flex flex-col gap-space-md mt-space-xs">
+<!-- ASPEK 1: TEKNIK / BALL MASTERY -->
+<section class="bg-surface-container-lowest rounded-xl p-space-md shadow-sm" id="aspek-1">
+<div class="flex items-center justify-between pb-space-xs mb-space-sm border-b border-surface-variant">
+<div class="flex items-center gap-space-xs">
+<span class="w-6 h-6 rounded bg-primary-container text-on-primary font-label-md text-label-md flex items-center justify-center">1</span>
+<div>
+<h3 class="font-headline-sm text-headline-sm text-on-surface">Teknik (Ball Mastery)</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Sentuhan pertama, eksekusi kaki dominan &amp; lemah</p>
+</div>
+</div>
+<span class="bg-primary-fixed text-on-primary-fixed font-label-sm text-label-sm px-2 py-0.5 rounded font-bold">4/4 Terisi</span>
+</div>
+<div class="flex flex-col gap-space-lg">
+<!-- Indikator 1 -->
+<div class="flex flex-col gap-1.5">
+<div class="flex justify-between items-center">
+<span class="font-label-lg text-label-lg text-on-surface">Kontrol Bola (First Touch)</span>
+<span class="text-secondary font-headline-sm text-headline-sm font-bold bg-secondary-fixed/50 px-2 py-0.5 rounded">8</span>
+</div>
+<div class="flex items-center gap-1 overflow-x-auto pb-1 pt-0.5 no-scrollbar touch-pan-x">
+<button class="score-btn min-w-[36px] h-12 rounded-lg bg-surface-container-low text-on-surface font-label-md text-label-md flex items-center justify-center shrink-0 active:scale-95 transition-transform" type="button">1</button>
+<button class="score-btn min-w-[36px] h-12 rounded-lg bg-surface-container-low text-on-surface font-label-md text-label-md flex items-center justify-center shrink-0 active:scale-95 transition-transform" type="button">2</button>
+<button class="score-btn min-w-[36px] h-12 rounded-lg bg-surface-container-low text-on-surface font-label-md text-label-md flex items-center justify-center shrink-0 active:scale-95 transition-transform" type="button">3</button>
+<button class="score-btn min-w-[36px] h-12 rounded-lg bg-surface-container-low text-on-surface font-label-md text-label-md flex items-center justify-center shrink-0 active:scale-95 transition-transform" type="button">4</button>
+<button class="score-btn min-w-[36px] h-12 rounded-lg bg-surface-container-low text-on-surface font-label-md text-label-md flex items-center justify-center shrink-0 active:scale-95 transition-transform" type="button">5</button>
+<button class="score-btn min-w-[36px] h-12 rounded-lg bg-surface-container-low text-on-surface font-label-md text-label-md flex items-center justify-center shrink-0 active:scale-95 transition-transform" type="button">6</button>
+<button class="score-btn min-w-[36px] h-12 rounded-lg bg-surface-container-low text-on-surface font-label-md text-label-md flex items-center justify-center shrink-0 active:scale-95 transition-transform" type="button">7</button>
+<button class="score-btn min-w-[36px] h-12 rounded-lg bg-primary-container text-on-primary font-headline-sm text-headline-sm flex items-center justify-center shrink-0 shadow-sm" type="button">8</button>
+<button class="score-btn min-w-[36px] h-12 rounded-lg bg-surface-container-low text-on-surface font-label-md text-label-md flex items-center justify-center shrink-0 active:scale-95 transition-transform" type="button">9</button>
+<button class="score-btn min-w-[36px] h-12 rounded-lg bg-surface-container-low text-on-surface font-label-md text-label-md flex items-center justify-center shrink-0 active:scale-95 transition-transform" type="button">10</button>
+</div>
+</div>
+<!-- Indikator 2 -->
+<div class="flex flex-col gap-1.5">
+<div class="flex justify-between items-center">
+<span class="font-label-lg text-label-lg text-on-surface">Passing &amp; Receiving</span>
+<span class="text-secondary font-headline-sm text-headline-sm font-bold bg-secondary-fixed/50 px-2 py-0.5 rounded">8</span>
+</div>
+<div class="flex items-center gap-1 overflow-x-auto pb-1 pt-0.5 no-scrollbar touch-pan-x">
+<button class="score-btn min-w-[36px] h-12 rounded-lg bg-surface-container-low text-on-surface font-label-md text-label-md flex items-center justify-center shrink-0" type="button">1</button>
+<button class="score-btn min-w-[36px] h-12 rounded-lg bg-surface-container-low text-on-surface font-label-md text-label-md flex items-center justify-center shrink-0" type="button">2</button>
+<button class="score-btn min-w-[36px] h-12 rounded-lg bg-surface-container-low text-on-surface font-label-md text-label-md flex items-center justify-center shrink-0" type="button">3</button>
+<button class="score-btn min-w-[36px] h-12 rounded-lg bg-surface-container-low text-on-surface font-label-md text-label-md flex items-center justify-center shrink-0" type="button">4</button>
+<button class="score-btn min-w-[36px] h-12 rounded-lg bg-surface-container-low text-on-surface font-label-md text-label-md flex items-center justify-center shrink-0" type="button">5</button>
+<button class="score-btn min-w-[36px] h-12 rounded-lg bg-surface-container-low text-on-surface font-label-md text-label-md flex items-center justify-center shrink-0" type="button">6</button>
+<button class="score-btn min-w-[36px] h-12 rounded-lg bg-surface-container-low text-on-surface font-label-md text-label-md flex items-center justify-center shrink-0" type="button">7</button>
+<button class="score-btn min-w-[36px] h-12 rounded-lg bg-primary-container text-on-primary font-headline-sm text-headline-sm flex items-center justify-center shrink-0 shadow-sm" type="button">8</button>
+<button class="score-btn min-w-[36px] h-12 rounded-lg bg-surface-container-low text-on-surface font-label-md text-label-md flex items-center justify-center shrink-0" type="button">9</button>
+<button class="score-btn min-w-[36px] h-12 rounded-lg bg-surface-container-low text-on-surface font-label-md text-label-md flex items-center justify-center shrink-0" type="button">10</button>
+</div>
+</div>
+<!-- Indikator 3 -->
+<div class="flex flex-col gap-1.5">
+<div class="flex justify-between items-center">
+<span class="font-label-lg text-label-lg text-on-surface">Dribbling &amp; Giringan</span>
+<span class="text-secondary font-headline-sm text-headline-sm font-bold bg-secondary-fixed/50 px-2 py-0.5 rounded">7</span>
+</div>
+<div class="flex items-center gap-1 overflow-x-auto pb-1 pt-0.5 no-scrollbar touch-pan-x">
+<button class="score-btn min-w-[36px] h-12 rounded-lg bg-surface-container-low text-on-surface font-label-md text-label-md flex items-center justify-center shrink-0" type="button">1</button>
+<button class="score-btn min-w-[36px] h-12 rounded-lg bg-surface-container-low text-on-surface font-label-md text-label-md flex items-center justify-center shrink-0" type="button">2</button>
+<button class="score-btn min-w-[36px] h-12 rounded-lg bg-surface-container-low text-on-surface font-label-md text-label-md flex items-center justify-center shrink-0" type="button">3</button>
+<button class="score-btn min-w-[36px] h-12 rounded-lg bg-surface-container-low text-on-surface font-label-md text-label-md flex items-center justify-center shrink-0" type="button">4</button>
+<button class="score-btn min-w-[36px] h-12 rounded-lg bg-surface-container-low text-on-surface font-label-md text-label-md flex items-center justify-center shrink-0" type="button">5</button>
+<button class="score-btn min-w-[36px] h-12 rounded-lg bg-surface-container-low text-on-surface font-label-md text-label-md flex items-center justify-center shrink-0" type="button">6</button>
+<button class="score-btn min-w-[36px] h-12 rounded-lg bg-primary-container text-on-primary font-headline-sm text-headline-sm flex items-center justify-center shrink-0 shadow-sm" type="button">7</button>
+<button class="score-btn min-w-[36px] h-12 rounded-lg bg-surface-container-low text-on-surface font-label-md text-label-md flex items-center justify-center shrink-0" type="button">8</button>
+<button class="score-btn min-w-[36px] h-12 rounded-lg bg-surface-container-low text-on-surface font-label-md text-label-md flex items-center justify-center shrink-0" type="button">9</button>
+<button class="score-btn min-w-[36px] h-12 rounded-lg bg-surface-container-low text-on-surface font-label-md text-label-md flex items-center justify-center shrink-0" type="button">10</button>
+</div>
+</div>
+<!-- Indikator 4 -->
+<div class="flex flex-col gap-1.5">
+<div class="flex justify-between items-center">
+<span class="font-label-lg text-label-lg text-on-surface">Shooting / Finishing</span>
+<span class="text-secondary font-headline-sm text-headline-sm font-bold bg-secondary-fixed/50 px-2 py-0.5 rounded">6</span>
+</div>
+<div class="flex items-center gap-1 overflow-x-auto pb-1 pt-0.5 no-scrollbar touch-pan-x">
+<button class="score-btn min-w-[36px] h-12 rounded-lg bg-surface-container-low text-on-surface font-label-md text-label-md flex items-center justify-center shrink-0" type="button">1</button>
+<button class="score-btn min-w-[36px] h-12 rounded-lg bg-surface-container-low text-on-surface font-label-md text-label-md flex items-center justify-center shrink-0" type="button">2</button>
+<button class="score-btn min-w-[36px] h-12 rounded-lg bg-surface-container-low text-on-surface font-label-md text-label-md flex items-center justify-center shrink-0" type="button">3</button>
+<button class="score-btn min-w-[36px] h-12 rounded-lg bg-surface-container-low text-on-surface font-label-md text-label-md flex items-center justify-center shrink-0" type="button">4</button>
+<button class="score-btn min-w-[36px] h-12 rounded-lg bg-surface-container-low text-on-surface font-label-md text-label-md flex items-center justify-center shrink-0" type="button">5</button>
+<button class="score-btn min-w-[36px] h-12 rounded-lg bg-primary-container text-on-primary font-headline-sm text-headline-sm flex items-center justify-center shrink-0 shadow-sm" type="button">6</button>
+<button class="score-btn min-w-[36px] h-12 rounded-lg bg-surface-container-low text-on-surface font-label-md text-label-md flex items-center justify-center shrink-0" type="button">7</button>
+<button class="score-btn min-w-[36px] h-12 rounded-lg bg-surface-container-low text-on-surface font-label-md text-label-md flex items-center justify-center shrink-0" type="button">8</button>
+<button class="score-btn min-w-[36px] h-12 rounded-lg bg-surface-container-low text-on-surface font-label-md text-label-md flex items-center justify-center shrink-0" type="button">9</button>
+<button class="score-btn min-w-[36px] h-12 rounded-lg bg-surface-container-low text-on-surface font-label-md text-label-md flex items-center justify-center shrink-0" type="button">10</button>
+</div>
+</div>
+</div>
+</section>
+<!-- ASPEK 2: FISIK & ATLETISME -->
+<section class="bg-surface-container-lowest rounded-xl p-space-md shadow-sm" id="aspek-2">
+<div class="flex items-center justify-between pb-space-xs mb-space-sm border-b border-surface-variant">
+<div class="flex items-center gap-space-xs">
+<span class="w-6 h-6 rounded bg-primary-container text-on-primary font-label-md text-label-md flex items-center justify-center">2</span>
+<div>
+<h3 class="font-headline-sm text-headline-sm text-on-surface">Fisik &amp; Atletisisme</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Kelincahan, akselerasi, koordinasi tubuh</p>
+</div>
+</div>
+<span class="bg-primary-fixed text-on-primary-fixed font-label-sm text-label-sm px-2 py-0.5 rounded font-bold">3/3 Terisi</span>
+</div>
+<div class="flex flex-col gap-space-lg">
+<!-- Indikator 5 -->
+<div class="flex flex-col gap-1.5">
+<div class="flex justify-between items-center">
+<span class="font-label-lg text-label-lg text-on-surface">Kelincahan / Agility</span>
+<span class="text-secondary font-headline-sm text-headline-sm font-bold bg-secondary-fixed/50 px-2 py-0.5 rounded">8</span>
+</div>
+<div class="flex items-center gap-1 overflow-x-auto pb-1 pt-0.5 no-scrollbar touch-pan-x">
+<button class="score-btn min-w-[36px] h-12 rounded-lg bg-surface-container-low text-on-surface font-label-md text-label-md flex items-center justify-center shrink-0" type="button">1</button>
+<button class="score-btn min-w-[36px] h-12 rounded-lg bg-surface-container-low text-on-surface font-label-md text-label-md flex items-center justify-center shrink-0" type="button">2</button>
+<button class="score-btn min-w-[36px] h-12 rounded-lg bg-surface-container-low text-on-surface font-label-md text-label-md flex items-center justify-center shrink-0" type="button">3</button>
+<button class="score-btn min-w-[36px] h-12 rounded-lg bg-surface-container-low text-on-surface font-label-md text-label-md flex items-center justify-center shrink-0" type="button">4</button>
+<button class="score-btn min-w-[36px] h-12 rounded-lg bg-surface-container-low text-on-surface font-label-md text-label-md flex items-center justify-center shrink-0" type="button">5</button>
+<button class="score-btn min-w-[36px] h-12 rounded-lg bg-surface-container-low text-on-surface font-label-md text-label-md flex items-center justify-center shrink-0" type="button">6</button>
+<button class="score-btn min-w-[36px] h-12 rounded-lg bg-surface-container-low text-on-surface font-label-md text-label-md flex items-center justify-center shrink-0" type="button">7</button>
+<button class="score-btn min-w-[36px] h-12 rounded-lg bg-primary-container text-on-primary font-headline-sm text-headline-sm flex items-center justify-center shrink-0 shadow-sm" type="button">8</button>
+<button class="score-btn min-w-[36px] h-12 rounded-lg bg-surface-container-low text-on-surface font-label-md text-label-md flex items-center justify-center shrink-0" type="button">9</button>
+<button class="score-btn min-w-[36px] h-12 rounded-lg bg-surface-container-low text-on-surface font-label-md text-label-md flex items-center justify-center shrink-0" type="button">10</button>
+</div>
+</div>
+<!-- Indikator 6 -->
+<div class="flex flex-col gap-1.5">
+<div class="flex justify-between items-center">
+<span class="font-label-lg text-label-lg text-on-surface">Kecepatan / Speed</span>
+<span class="text-on-secondary-container font-headline-sm text-headline-sm font-bold bg-secondary-container px-2 py-0.5 rounded">9 ★</span>
+</div>
+<div class="flex items-center gap-1 overflow-x-auto pb-1 pt-0.5 no-scrollbar touch-pan-x">
+<button class="score-btn min-w-[36px] h-12 rounded-lg bg-surface-container-low text-on-surface font-label-md text-label-md flex items-center justify-center shrink-0" type="button">1</button>
+<button class="score-btn min-w-[36px] h-12 rounded-lg bg-surface-container-low text-on-surface font-label-md text-label-md flex items-center justify-center shrink-0" type="button">2</button>
+<button class="score-btn min-w-[36px] h-12 rounded-lg bg-surface-container-low text-on-surface font-label-md text-label-md flex items-center justify-center shrink-0" type="button">3</button>
+<button class="score-btn min-w-[36px] h-12 rounded-lg bg-surface-container-low text-on-surface font-label-md text-label-md flex items-center justify-center shrink-0" type="button">4</button>
+<button class="score-btn min-w-[36px] h-12 rounded-lg bg-surface-container-low text-on-surface font-label-md text-label-md flex items-center justify-center shrink-0" type="button">5</button>
+<button class="score-btn min-w-[36px] h-12 rounded-lg bg-surface-container-low text-on-surface font-label-md text-label-md flex items-center justify-center shrink-0" type="button">6</button>
+<button class="score-btn min-w-[36px] h-12 rounded-lg bg-surface-container-low text-on-surface font-label-md text-label-md flex items-center justify-center shrink-0" type="button">7</button>
+<button class="score-btn min-w-[36px] h-12 rounded-lg bg-surface-container-low text-on-surface font-label-md text-label-md flex items-center justify-center shrink-0" type="button">8</button>
+<button class="score-btn min-w-[36px] h-12 rounded-lg bg-secondary-container text-on-secondary-container font-headline-sm text-headline-sm flex items-center justify-center shrink-0 shadow-sm font-bold" type="button">9</button>
+<button class="score-btn min-w-[36px] h-12 rounded-lg bg-surface-container-low text-on-surface font-label-md text-label-md flex items-center justify-center shrink-0" type="button">10</button>
+</div>
+</div>
+<!-- Indikator 7 -->
+<div class="flex flex-col gap-1.5">
+<div class="flex justify-between items-center">
+<span class="font-label-lg text-label-lg text-on-surface">Keseimbangan Tubuh (Balance)</span>
+<span class="text-secondary font-headline-sm text-headline-sm font-bold bg-secondary-fixed/50 px-2 py-0.5 rounded">7</span>
+</div>
+<div class="flex items-center gap-1 overflow-x-auto pb-1 pt-0.5 no-scrollbar touch-pan-x">
+<button class="score-btn min-w-[36px] h-12 rounded-lg bg-surface-container-low text-on-surface font-label-md text-label-md flex items-center justify-center shrink-0" type="button">1</button>
+<button class="score-btn min-w-[36px] h-12 rounded-lg bg-surface-container-low text-on-surface font-label-md text-label-md flex items-center justify-center shrink-0" type="button">2</button>
+<button class="score-btn min-w-[36px] h-12 rounded-lg bg-surface-container-low text-on-surface font-label-md text-label-md flex items-center justify-center shrink-0" type="button">3</button>
+<button class="score-btn min-w-[36px] h-12 rounded-lg bg-surface-container-low text-on-surface font-label-md text-label-md flex items-center justify-center shrink-0" type="button">4</button>
+<button class="score-btn min-w-[36px] h-12 rounded-lg bg-surface-container-low text-on-surface font-label-md text-label-md flex items-center justify-center shrink-0" type="button">5</button>
+<button class="score-btn min-w-[36px] h-12 rounded-lg bg-surface-container-low text-on-surface font-label-md text-label-md flex items-center justify-center shrink-0" type="button">6</button>
+<button class="score-btn min-w-[36px] h-12 rounded-lg bg-primary-container text-on-primary font-headline-sm text-headline-sm flex items-center justify-center shrink-0 shadow-sm" type="button">7</button>
+<button class="score-btn min-w-[36px] h-12 rounded-lg bg-surface-container-low text-on-surface font-label-md text-label-md flex items-center justify-center shrink-0" type="button">8</button>
+<button class="score-btn min-w-[36px] h-12 rounded-lg bg-surface-container-low text-on-surface font-label-md text-label-md flex items-center justify-center shrink-0" type="button">9</button>
+<button class="score-btn min-w-[36px] h-12 rounded-lg bg-surface-container-low text-on-surface font-label-md text-label-md flex items-center justify-center shrink-0" type="button">10</button>
+</div>
+</div>
+</div>
+</section>
+<!-- ASPEK 3: TAKTIK & PEMAHAMAN POSISI -->
+<section class="bg-surface-container-lowest rounded-xl p-space-md shadow-sm" id="aspek-3">
+<div class="flex items-center justify-between pb-space-xs mb-space-sm border-b border-surface-variant">
+<div class="flex items-center gap-space-xs">
+<span class="w-6 h-6 rounded bg-primary-container text-on-primary font-label-md text-label-md flex items-center justify-center">3</span>
+<div>
+<h3 class="font-headline-sm text-headline-sm text-on-surface">Taktik &amp; Pemahaman Posisi</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Pemahaman ruang lapangan &amp; peran sayap</p>
+</div>
+</div>
+<span class="bg-surface-variant text-on-surface-variant font-label-sm text-label-sm px-2 py-0.5 rounded font-bold">1/2 Terisi</span>
+</div>
+<div class="flex flex-col gap-space-lg">
+<!-- Indikator 8 (Belum dinilai - Perlu Input Cepat) -->
+<div class="flex flex-col gap-1.5 p-2 bg-secondary-fixed/20 rounded-lg">
+<div class="flex justify-between items-center">
+<span class="font-label-lg text-label-lg text-on-surface font-bold flex items-center gap-1">
+<span class="w-2 h-2 rounded-full bg-error inline-block"></span>
+              Penempatan Posisi Lapangan
+            </span>
+<span class="text-on-surface-variant font-label-sm text-label-sm italic bg-surface-container px-2 py-0.5 rounded">Ketuk skor</span>
+</div>
+<!-- 2 Rows of 5 for ultimate quick pitch-side thumbs -->
+<div class="grid grid-cols-5 gap-1.5 pt-1">
+<button class="score-btn h-12 rounded-lg bg-surface-container-lowest text-on-surface font-headline-sm text-headline-sm flex items-center justify-center shadow-xs active:scale-95 transition-transform" onclick="selectScore(this, '8')" type="button">1</button>
+<button class="score-btn h-12 rounded-lg bg-surface-container-lowest text-on-surface font-headline-sm text-headline-sm flex items-center justify-center shadow-xs active:scale-95 transition-transform" onclick="selectScore(this, '8')" type="button">2</button>
+<button class="score-btn h-12 rounded-lg bg-surface-container-lowest text-on-surface font-headline-sm text-headline-sm flex items-center justify-center shadow-xs active:scale-95 transition-transform" onclick="selectScore(this, '8')" type="button">3</button>
+<button class="score-btn h-12 rounded-lg bg-surface-container-lowest text-on-surface font-headline-sm text-headline-sm flex items-center justify-center shadow-xs active:scale-95 transition-transform" onclick="selectScore(this, '8')" type="button">4</button>
+<button class="score-btn h-12 rounded-lg bg-surface-container-lowest text-on-surface font-headline-sm text-headline-sm flex items-center justify-center shadow-xs active:scale-95 transition-transform" onclick="selectScore(this, '8')" type="button">5</button>
+<button class="score-btn h-12 rounded-lg bg-surface-container-lowest text-on-surface font-headline-sm text-headline-sm flex items-center justify-center shadow-xs active:scale-95 transition-transform" onclick="selectScore(this, '8')" type="button">6</button>
+<button class="score-btn h-12 rounded-lg bg-surface-container-lowest text-on-surface font-headline-sm text-headline-sm flex items-center justify-center shadow-xs active:scale-95 transition-transform" onclick="selectScore(this, '8')" type="button">7</button>
+<button class="score-btn h-12 rounded-lg bg-surface-container-lowest text-on-surface font-headline-sm text-headline-sm flex items-center justify-center shadow-xs active:scale-95 transition-transform" onclick="selectScore(this, '8')" type="button">8</button>
+<button class="score-btn h-12 rounded-lg bg-surface-container-lowest text-on-surface font-headline-sm text-headline-sm flex items-center justify-center shadow-xs active:scale-95 transition-transform" onclick="selectScore(this, '8')" type="button">9</button>
+<button class="score-btn h-12 rounded-lg bg-surface-container-lowest text-on-surface font-headline-sm text-headline-sm flex items-center justify-center shadow-xs active:scale-95 transition-transform" onclick="selectScore(this, '8')" type="button">10</button>
+</div>
+</div>
+<!-- Indikator 9 -->
+<div class="flex flex-col gap-1.5">
+<div class="flex justify-between items-center">
+<span class="font-label-lg text-label-lg text-on-surface">Pengambilan Keputusan Sederhana</span>
+<span class="text-secondary font-headline-sm text-headline-sm font-bold bg-secondary-fixed/50 px-2 py-0.5 rounded">7</span>
+</div>
+<div class="flex items-center gap-1 overflow-x-auto pb-1 pt-0.5 no-scrollbar touch-pan-x">
+<button class="score-btn min-w-[36px] h-12 rounded-lg bg-surface-container-low text-on-surface font-label-md text-label-md flex items-center justify-center shrink-0" type="button">1</button>
+<button class="score-btn min-w-[36px] h-12 rounded-lg bg-surface-container-low text-on-surface font-label-md text-label-md flex items-center justify-center shrink-0" type="button">2</button>
+<button class="score-btn min-w-[36px] h-12 rounded-lg bg-surface-container-low text-on-surface font-label-md text-label-md flex items-center justify-center shrink-0" type="button">3</button>
+<button class="score-btn min-w-[36px] h-12 rounded-lg bg-surface-container-low text-on-surface font-label-md text-label-md flex items-center justify-center shrink-0" type="button">4</button>
+<button class="score-btn min-w-[36px] h-12 rounded-lg bg-surface-container-low text-on-surface font-label-md text-label-md flex items-center justify-center shrink-0" type="button">5</button>
+<button class="score-btn min-w-[36px] h-12 rounded-lg bg-surface-container-low text-on-surface font-label-md text-label-md flex items-center justify-center shrink-0" type="button">6</button>
+<button class="score-btn min-w-[36px] h-12 rounded-lg bg-primary-container text-on-primary font-headline-sm text-headline-sm flex items-center justify-center shrink-0 shadow-sm" type="button">7</button>
+<button class="score-btn min-w-[36px] h-12 rounded-lg bg-surface-container-low text-on-surface font-label-md text-label-md flex items-center justify-center shrink-0" type="button">8</button>
+<button class="score-btn min-w-[36px] h-12 rounded-lg bg-surface-container-low text-on-surface font-label-md text-label-md flex items-center justify-center shrink-0" type="button">9</button>
+<button class="score-btn min-w-[36px] h-12 rounded-lg bg-surface-container-low text-on-surface font-label-md text-label-md flex items-center justify-center shrink-0" type="button">10</button>
+</div>
+</div>
+</div>
+</section>
+<!-- ASPEK 4: MENTAL & SIKAP -->
+<section class="bg-surface-container-lowest rounded-xl p-space-md shadow-sm" id="aspek-4">
+<div class="flex items-center justify-between pb-space-xs mb-space-sm border-b border-surface-variant">
+<div class="flex items-center gap-space-xs">
+<span class="w-6 h-6 rounded bg-primary-container text-on-primary font-label-md text-label-md flex items-center justify-center">4</span>
+<div>
+<h3 class="font-headline-sm text-headline-sm text-on-surface">Mental &amp; Karakter</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Konsentrasi, sportivitas, etika siswa</p>
+</div>
+</div>
+<span class="bg-surface-variant text-on-surface-variant font-label-sm text-label-sm px-2 py-0.5 rounded font-bold">1/3 Terisi</span>
+</div>
+<div class="flex flex-col gap-space-lg">
+<!-- Indikator 10 -->
+<div class="flex flex-col gap-1.5">
+<div class="flex justify-between items-center">
+<span class="font-label-lg text-label-lg text-on-surface">Fokus &amp; Konsentrasi Sesi</span>
+<span class="text-secondary font-headline-sm text-headline-sm font-bold bg-secondary-fixed/50 px-2 py-0.5 rounded">8</span>
+</div>
+<div class="flex items-center gap-1 overflow-x-auto pb-1 pt-0.5 no-scrollbar touch-pan-x">
+<button class="score-btn min-w-[36px] h-12 rounded-lg bg-surface-container-low text-on-surface font-label-md text-label-md flex items-center justify-center shrink-0" type="button">1</button>
+<button class="score-btn min-w-[36px] h-12 rounded-lg bg-surface-container-low text-on-surface font-label-md text-label-md flex items-center justify-center shrink-0" type="button">2</button>
+<button class="score-btn min-w-[36px] h-12 rounded-lg bg-surface-container-low text-on-surface font-label-md text-label-md flex items-center justify-center shrink-0" type="button">3</button>
+<button class="score-btn min-w-[36px] h-12 rounded-lg bg-surface-container-low text-on-surface font-label-md text-label-md flex items-center justify-center shrink-0" type="button">4</button>
+<button class="score-btn min-w-[36px] h-12 rounded-lg bg-surface-container-low text-on-surface font-label-md text-label-md flex items-center justify-center shrink-0" type="button">5</button>
+<button class="score-btn min-w-[36px] h-12 rounded-lg bg-surface-container-low text-on-surface font-label-md text-label-md flex items-center justify-center shrink-0" type="button">6</button>
+<button class="score-btn min-w-[36px] h-12 rounded-lg bg-surface-container-low text-on-surface font-label-md text-label-md flex items-center justify-center shrink-0" type="button">7</button>
+<button class="score-btn min-w-[36px] h-12 rounded-lg bg-primary-container text-on-primary font-headline-sm text-headline-sm flex items-center justify-center shrink-0 shadow-sm" type="button">8</button>
+<button class="score-btn min-w-[36px] h-12 rounded-lg bg-surface-container-low text-on-surface font-label-md text-label-md flex items-center justify-center shrink-0" type="button">9</button>
+<button class="score-btn min-w-[36px] h-12 rounded-lg bg-surface-container-low text-on-surface font-label-md text-label-md flex items-center justify-center shrink-0" type="button">10</button>
+</div>
+</div>
+<!-- Indikator 11 (Belum dinilai) -->
+<div class="flex flex-col gap-1.5">
+<div class="flex justify-between items-center">
+<span class="font-label-lg text-label-lg text-on-surface">Sportivitas &amp; Kerjasama Tim</span>
+<span class="text-on-surface-variant font-label-sm text-label-sm bg-surface-container px-2 py-0.5 rounded">-</span>
+</div>
+<div class="flex items-center gap-1 overflow-x-auto pb-1 pt-0.5 no-scrollbar touch-pan-x">
+<button class="min-w-[36px] h-12 rounded-lg bg-surface-container-low text-on-surface font-label-md text-label-md flex items-center justify-center shrink-0" onclick="selectScoreInline(this)" type="button">1</button>
+<button class="min-w-[36px] h-12 rounded-lg bg-surface-container-low text-on-surface font-label-md text-label-md flex items-center justify-center shrink-0" onclick="selectScoreInline(this)" type="button">2</button>
+<button class="min-w-[36px] h-12 rounded-lg bg-surface-container-low text-on-surface font-label-md text-label-md flex items-center justify-center shrink-0" onclick="selectScoreInline(this)" type="button">3</button>
+<button class="min-w-[36px] h-12 rounded-lg bg-surface-container-low text-on-surface font-label-md text-label-md flex items-center justify-center shrink-0" onclick="selectScoreInline(this)" type="button">4</button>
+<button class="min-w-[36px] h-12 rounded-lg bg-surface-container-low text-on-surface font-label-md text-label-md flex items-center justify-center shrink-0" onclick="selectScoreInline(this)" type="button">5</button>
+<button class="min-w-[36px] h-12 rounded-lg bg-surface-container-low text-on-surface font-label-md text-label-md flex items-center justify-center shrink-0" onclick="selectScoreInline(this)" type="button">6</button>
+<button class="min-w-[36px] h-12 rounded-lg bg-surface-container-low text-on-surface font-label-md text-label-md flex items-center justify-center shrink-0" onclick="selectScoreInline(this)" type="button">7</button>
+<button class="min-w-[36px] h-12 rounded-lg bg-surface-container-low text-on-surface font-label-md text-label-md flex items-center justify-center shrink-0" onclick="selectScoreInline(this)" type="button">8</button>
+<button class="min-w-[36px] h-12 rounded-lg bg-surface-container-low text-on-surface font-label-md text-label-md flex items-center justify-center shrink-0" onclick="selectScoreInline(this)" type="button">9</button>
+<button class="min-w-[36px] h-12 rounded-lg bg-surface-container-low text-on-surface font-label-md text-label-md flex items-center justify-center shrink-0" onclick="selectScoreInline(this)" type="button">10</button>
+</div>
+</div>
+<!-- Indikator 12 (Belum dinilai) -->
+<div class="flex flex-col gap-1.5">
+<div class="flex justify-between items-center">
+<span class="font-label-lg text-label-lg text-on-surface">Respek Pelatih &amp; Lawan</span>
+<span class="text-on-surface-variant font-label-sm text-label-sm bg-surface-container px-2 py-0.5 rounded">-</span>
+</div>
+<div class="flex items-center gap-1 overflow-x-auto pb-1 pt-0.5 no-scrollbar touch-pan-x">
+<button class="min-w-[36px] h-12 rounded-lg bg-surface-container-low text-on-surface font-label-md text-label-md flex items-center justify-center shrink-0" onclick="selectScoreInline(this)" type="button">1</button>
+<button class="min-w-[36px] h-12 rounded-lg bg-surface-container-low text-on-surface font-label-md text-label-md flex items-center justify-center shrink-0" onclick="selectScoreInline(this)" type="button">2</button>
+<button class="min-w-[36px] h-12 rounded-lg bg-surface-container-low text-on-surface font-label-md text-label-md flex items-center justify-center shrink-0" onclick="selectScoreInline(this)" type="button">3</button>
+<button class="min-w-[36px] h-12 rounded-lg bg-surface-container-low text-on-surface font-label-md text-label-md flex items-center justify-center shrink-0" onclick="selectScoreInline(this)" type="button">4</button>
+<button class="min-w-[36px] h-12 rounded-lg bg-surface-container-low text-on-surface font-label-md text-label-md flex items-center justify-center shrink-0" onclick="selectScoreInline(this)" type="button">5</button>
+<button class="min-w-[36px] h-12 rounded-lg bg-surface-container-low text-on-surface font-label-md text-label-md flex items-center justify-center shrink-0" onclick="selectScoreInline(this)" type="button">6</button>
+<button class="min-w-[36px] h-12 rounded-lg bg-surface-container-low text-on-surface font-label-md text-label-md flex items-center justify-center shrink-0" onclick="selectScoreInline(this)" type="button">7</button>
+<button class="min-w-[36px] h-12 rounded-lg bg-surface-container-low text-on-surface font-label-md text-label-md flex items-center justify-center shrink-0" onclick="selectScoreInline(this)" type="button">8</button>
+<button class="min-w-[36px] h-12 rounded-lg bg-surface-container-low text-on-surface font-label-md text-label-md flex items-center justify-center shrink-0" onclick="selectScoreInline(this)" type="button">9</button>
+<button class="min-w-[36px] h-12 rounded-lg bg-surface-container-low text-on-surface font-label-md text-label-md flex items-center justify-center shrink-0" onclick="selectScoreInline(this)" type="button">10</button>
+</div>
+</div>
+</div>
+</section>
+<!-- ASPEK 5: GERAK DASAR (FUNDAMENTAL MOVEMENT) -->
+<section class="bg-surface-container-lowest rounded-xl p-space-md shadow-sm" id="aspek-5">
+<div class="flex items-center justify-between pb-space-xs mb-space-sm border-b border-surface-variant">
+<div class="flex items-center gap-space-xs">
+<span class="w-6 h-6 rounded bg-primary-container text-on-primary font-label-md text-label-md flex items-center justify-center">5</span>
+<div>
+<h3 class="font-headline-sm text-headline-sm text-on-surface">Gerak Dasar (Movement)</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Lokomotor &amp; pola gerak tanpa bola</p>
+</div>
+</div>
+<span class="bg-surface-variant text-on-surface-variant font-label-sm text-label-sm px-2 py-0.5 rounded font-bold">0/1 Terisi</span>
+</div>
+<div class="flex flex-col gap-1.5">
+<div class="flex justify-between items-center">
+<span class="font-label-lg text-label-lg text-on-surface">Koordinasi Gerak Tanpa Bola</span>
+<span class="text-on-surface-variant font-label-sm text-label-sm bg-surface-container px-2 py-0.5 rounded">-</span>
+</div>
+<div class="grid grid-cols-5 gap-1.5 pt-1">
+<button class="h-12 rounded-lg bg-surface-container-low text-on-surface font-label-md text-label-md flex items-center justify-center" onclick="selectScoreInline(this)" type="button">1</button>
+<button class="h-12 rounded-lg bg-surface-container-low text-on-surface font-label-md text-label-md flex items-center justify-center" onclick="selectScoreInline(this)" type="button">2</button>
+<button class="h-12 rounded-lg bg-surface-container-low text-on-surface font-label-md text-label-md flex items-center justify-center" onclick="selectScoreInline(this)" type="button">3</button>
+<button class="h-12 rounded-lg bg-surface-container-low text-on-surface font-label-md text-label-md flex items-center justify-center" onclick="selectScoreInline(this)" type="button">4</button>
+<button class="h-12 rounded-lg bg-surface-container-low text-on-surface font-label-md text-label-md flex items-center justify-center" onclick="selectScoreInline(this)" type="button">5</button>
+<button class="h-12 rounded-lg bg-surface-container-low text-on-surface font-label-md text-label-md flex items-center justify-center" onclick="selectScoreInline(this)" type="button">6</button>
+<button class="h-12 rounded-lg bg-surface-container-low text-on-surface font-label-md text-label-md flex items-center justify-center" onclick="selectScoreInline(this)" type="button">7</button>
+<button class="h-12 rounded-lg bg-surface-container-low text-on-surface font-label-md text-label-md flex items-center justify-center" onclick="selectScoreInline(this)" type="button">8</button>
+<button class="h-12 rounded-lg bg-surface-container-low text-on-surface font-label-md text-label-md flex items-center justify-center" onclick="selectScoreInline(this)" type="button">9</button>
+<button class="h-12 rounded-lg bg-surface-container-low text-on-surface font-label-md text-label-md flex items-center justify-center" onclick="selectScoreInline(this)" type="button">10</button>
+</div>
+</div>
+</section>
+<!-- ASPEK 6: KECERDASAN BERMAIN (GAME INTELLIGENCE) -->
+<section class="bg-surface-container-lowest rounded-xl p-space-md shadow-sm" id="aspek-6">
+<div class="flex items-center justify-between pb-space-xs mb-space-sm border-b border-surface-variant">
+<div class="flex items-center gap-space-xs">
+<span class="w-6 h-6 rounded bg-primary-container text-on-primary font-label-md text-label-md flex items-center justify-center">6</span>
+<div>
+<h3 class="font-headline-sm text-headline-sm text-on-surface">Kecerdasan Bermain</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Kesadaran spasial &amp; antisipasi aksi kawan</p>
+</div>
+</div>
+<span class="bg-surface-variant text-on-surface-variant font-label-sm text-label-sm px-2 py-0.5 rounded font-bold">0/1 Terisi</span>
+</div>
+<div class="flex flex-col gap-1.5">
+<div class="flex justify-between items-center">
+<span class="font-label-lg text-label-lg text-on-surface">Visi Ruang Terbuka</span>
+<span class="text-on-surface-variant font-label-sm text-label-sm bg-surface-container px-2 py-0.5 rounded">-</span>
+</div>
+<div class="flex items-center gap-1 overflow-x-auto pb-1 pt-0.5 no-scrollbar touch-pan-x">
+<button class="min-w-[36px] h-12 rounded-lg bg-surface-container-low text-on-surface font-label-md text-label-md flex items-center justify-center shrink-0" onclick="selectScoreInline(this)" type="button">1</button>
+<button class="min-w-[36px] h-12 rounded-lg bg-surface-container-low text-on-surface font-label-md text-label-md flex items-center justify-center shrink-0" onclick="selectScoreInline(this)" type="button">2</button>
+<button class="min-w-[36px] h-12 rounded-lg bg-surface-container-low text-on-surface font-label-md text-label-md flex items-center justify-center shrink-0" onclick="selectScoreInline(this)" type="button">3</button>
+<button class="min-w-[36px] h-12 rounded-lg bg-surface-container-low text-on-surface font-label-md text-label-md flex items-center justify-center shrink-0" onclick="selectScoreInline(this)" type="button">4</button>
+<button class="min-w-[36px] h-12 rounded-lg bg-surface-container-low text-on-surface font-label-md text-label-md flex items-center justify-center shrink-0" onclick="selectScoreInline(this)" type="button">5</button>
+<button class="min-w-[36px] h-12 rounded-lg bg-surface-container-low text-on-surface font-label-md text-label-md flex items-center justify-center shrink-0" onclick="selectScoreInline(this)" type="button">6</button>
+<button class="min-w-[36px] h-12 rounded-lg bg-surface-container-low text-on-surface font-label-md text-label-md flex items-center justify-center shrink-0" onclick="selectScoreInline(this)" type="button">7</button>
+<button class="min-w-[36px] h-12 rounded-lg bg-surface-container-low text-on-surface font-label-md text-label-md flex items-center justify-center shrink-0" onclick="selectScoreInline(this)" type="button">8</button>
+<button class="min-w-[36px] h-12 rounded-lg bg-surface-container-low text-on-surface font-label-md text-label-md flex items-center justify-center shrink-0" onclick="selectScoreInline(this)" type="button">9</button>
+<button class="min-w-[36px] h-12 rounded-lg bg-surface-container-low text-on-surface font-label-md text-label-md flex items-center justify-center shrink-0" onclick="selectScoreInline(this)" type="button">10</button>
+</div>
+</div>
+</section>
+<!-- SECTION: CATATAN EVALUASI PELATIH (MINIMAL TYPING) -->
+<section class="bg-surface-container-lowest rounded-xl p-space-md shadow-sm">
+<div class="flex items-center gap-space-xs mb-space-xs">
+<span class="material-symbols-outlined text-primary-container text-[20px]">rate_review</span>
+<h3 class="font-headline-sm text-headline-sm text-on-surface">Catatan Pelatih</h3>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mb-space-sm">
+        Gunakan quick-chip sentuh untuk menghindari mengetik panjang di lapangan:
+      </p>
+<!-- Quick Feedback Chips -->
+<div class="flex flex-wrap gap-1.5 mb-space-sm">
+<button class="h-10 px-3 bg-surface-container rounded-full font-label-sm text-label-sm text-on-surface active:bg-secondary-container transition-colors flex items-center gap-1" onclick="appendNote(this, 'Cepat belajar')" type="button">
+<span class="text-primary-container font-bold">+</span> Cepat belajar
+        </button>
+<button class="h-10 px-3 bg-surface-container rounded-full font-label-sm text-label-sm text-on-surface active:bg-secondary-container transition-colors flex items-center gap-1" onclick="appendNote(this, 'Disiplin posisi')" type="button">
+<span class="text-primary-container font-bold">+</span> Disiplin posisi
+        </button>
+<button class="h-10 px-3 bg-surface-container rounded-full font-label-sm text-label-sm text-on-surface active:bg-secondary-container transition-colors flex items-center gap-1" onclick="appendNote(this, 'Perlu tenang depan gawang')" type="button">
+<span class="text-primary-container font-bold">+</span> Perlu tenang depan gawang
+        </button>
+<button class="h-10 px-3 bg-surface-container rounded-full font-label-sm text-label-sm text-on-surface active:bg-secondary-container transition-colors flex items-center gap-1" onclick="appendNote(this, 'Tingkatkan akurasi kaki kiri')" type="button">
+<span class="text-primary-container font-bold">+</span> Tingkatkan kaki kiri
+        </button>
+</div>
+<div class="relative">
+<textarea class="w-full bg-surface-container-low rounded-lg p-space-sm font-body-md text-body-md text-on-surface focus:outline-none focus:ring-1 focus:ring-primary-container resize-none" id="coach-notes" placeholder="Tuliskan evaluasi khusus anak ini..." rows="3">Cepat belajar, perlu lebih tenang di depan gawang saat situasi 1 lawan 1 dengan kiper.</textarea>
+<button class="absolute right-2 bottom-2 text-on-surface-variant text-[12px] bg-surface-container px-2 py-0.5 rounded font-label-sm" onclick="document.getElementById('coach-notes').value=''" type="button">Hapus</button>
+</div>
+</section>
+</div>
+<!-- Sticky Bottom Summary & Dual Action Bar (Pitch-Side Optimized) -->
+<aside class="fixed bottom-0 left-0 right-0 z-40 bg-surface-container-lowest/95 backdrop-blur-md border-t border-surface-variant px-gutter-mobile pt-2 pb-safe shadow-lg">
+<div class="max-w-md mx-auto flex flex-col gap-2">
+<!-- Fast Ledger Stats -->
+<div class="flex items-center justify-between px-1">
+<div class="flex items-center gap-1 text-on-surface">
+<span class="material-symbols-outlined text-primary-container text-[18px]">verified</span>
+<span class="font-label-sm text-label-sm"><strong id="bottom-filled-count">8</strong>/17 Indikator Terisi</span>
+</div>
+<div class="font-label-sm text-label-sm text-on-surface-variant">
+          Rata-rata Sementara: <strong class="text-primary font-bold">7.5</strong>
+</div>
+</div>
+<!-- Action Buttons Pair -->
+<div class="grid grid-cols-2 gap-2 pb-2">
+<button class="h-[50px] rounded-lg bg-surface-container text-on-surface font-label-md text-label-md flex items-center justify-center gap-1 active:bg-surface-variant transition-colors" onclick="triggerToast('Draf penilaian tersimpan di perangkat')" type="button">
+<span class="material-symbols-outlined text-[18px]">save</span>
+          Simpan Draf
+        </button>
+<button class="h-[50px] rounded-lg bg-secondary-container text-on-secondary-fixed font-label-md text-label-md font-bold flex items-center justify-center gap-1 shadow-sm active:translate-y-0.5 transition-transform" onclick="triggerToast('Rapor Berhasil Difinalisasi!')" type="button">
+<span class="material-symbols-outlined text-[18px]">send_and_archive</span>
+          Finalisasi Rapor
+        </button>
+</div>
+</div>
+</aside>
+<!-- Interactive Pitchside Toast Notification -->
+<div class="fixed top-20 left-1/2 -translate-x-1/2 z-50 bg-primary-container text-on-primary px-4 py-2.5 rounded-full shadow-lg font-label-md text-label-md flex items-center gap-2 opacity-0 pointer-events-none transition-opacity duration-200" id="toast">
+<span class="material-symbols-outlined text-[18px] text-secondary-container">check_circle</span>
+<span id="toast-text">Tersimpan</span>
+</div>
+</div>
+<script>
+  let filledIndicators = 8;
+  const totalIndicators = 17;
+
+  function selectScore(el, val) {
+    const parent = el.parentElement;
+    parent.querySelectorAll('button').forEach(btn => {
+      btn.classList.remove('bg-primary-container', 'text-on-primary', 'font-bold');
+      btn.classList.add('bg-surface-container-lowest', 'text-on-surface');
+    });
+    el.classList.remove('bg-surface-container-lowest', 'text-on-surface');
+    el.classList.add('bg-primary-container', 'text-on-primary', 'font-bold');
+    
+    updateCounter();
+    triggerToast('Skor Posisi diset ke: ' + el.innerText.trim());
+  }
+
+  function selectScoreInline(el) {
+    const parent = el.parentElement;
+    parent.querySelectorAll('button').forEach(btn => {
+      btn.classList.remove('bg-primary-container', 'text-on-primary', 'font-bold');
+      btn.classList.add('bg-surface-container-low', 'text-on-surface');
+    });
+    el.classList.remove('bg-surface-container-low', 'text-on-surface');
+    el.classList.add('bg-primary-container', 'text-on-primary', 'font-bold');
+
+    updateCounter();
+  }
+
+  function updateCounter() {
+    if (filledIndicators < totalIndicators) {
+      filledIndicators += 1;
+      const countEl = document.getElementById('completed-count');
+      const bottomCountEl = document.getElementById('bottom-filled-count');
+      const progressFill = document.getElementById('progress-bar-fill');
+      
+      if (countEl) countEl.innerText = filledIndicators;
+      if (bottomCountEl) bottomCountEl.innerText = filledIndicators;
+      if (progressFill) {
+        const pct = (filledIndicators / totalIndicators) * 100;
+        progressFill.style.width = pct + '%';
+      }
+    }
+  }
+
+  function appendNote(btn, text) {
+    const textarea = document.getElementById('coach-notes');
+    if (!textarea) return;
+    if (textarea.value.trim().length > 0) {
+      textarea.value += ', ' + text.toLowerCase();
+    } else {
+      textarea.value = text;
+    }
+    btn.classList.add('bg-secondary-fixed');
+    setTimeout(() => {
+      btn.classList.remove('bg-secondary-fixed');
+    }, 300);
+  }
+
+  function triggerToast(msg) {
+    const toast = document.getElementById('toast');
+    const toastText = document.getElementById('toast-text');
+    if (!toast || !toastText) return;
+    toastText.innerText = msg;
+    toast.classList.remove('opacity-0', 'pointer-events-none');
+    toast.classList.add('opacity-100');
+    setTimeout(() => {
+      toast.classList.remove('opacity-100');
+      toast.classList.add('opacity-0', 'pointer-events-none');
+    }, 1800);
+  }
+</script></main></body></html>

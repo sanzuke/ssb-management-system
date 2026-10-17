@@ -20,9 +20,12 @@ export default function HasilNilai(props: { a: AssessmentView }) {
         </span>
       </p>
       <For each={props.a.aspects}>
-        {(x) => (
-          <section class="aspek" aria-label={aspectLabel[x.aspect]}>
+        {(x, i) => (
+          <section class="aspek kartu-aspek" aria-label={aspectLabel[x.aspect]}>
             <h3>
+              <span class="nomor-aspek" aria-hidden="true">
+                {i() + 1}
+              </span>
               {aspectLabel[x.aspect]} <span class="rata">rata-rata {koma(x.average)}</span>
             </h3>
             <ul class="daftar-butir">
