@@ -1,6 +1,6 @@
 """Uji e2e layar auth di 360 px. Butuh: harness API (:3000), web dev (:3001), PostgreSQL.
 Pakai: python3 tools/e2e/run.py [folder-screenshot]"""
-import json, re, sys, uuid, urllib.request, urllib.parse
+import datetime, json, re, sys, uuid, urllib.request, urllib.parse
 from playwright.sync_api import sync_playwright, expect
 
 WEB = "http://localhost:3001"
@@ -17,12 +17,23 @@ def no_overflow(page, label):
     w = page.evaluate("document.documentElement.scrollWidth")
     assert w <= 360, f"{label}: scroll horizontal {w}px"
 
+HIDE_DEV_BADGE = "document.addEventListener('DOMContentLoaded',()=>{const s=document.createElement('style');s.textContent='div:has(>div>span[data-start-text-size]),div:has(>span[data-start-text-size]){display:none!important}';document.head.append(s)})"
+
+def mkctx(b):
+    """Konteks 360 px; lencana devtools SolidStart (hanya mode dev) disembunyikan karena menutupi tombol bawah."""
+    c = b.new_context(viewport={"width": 360, "height": 740}, locale="id-ID")
+    c.add_init_script(HIDE_DEV_BADGE)
+    return c
+
+def api_get(page, path):
+    return page.evaluate("""async (p) => (await fetch('/api'+p)).json()""", path)
+
 def api_post(page, path, body):
     return page.evaluate("""async ([p,b]) => { const r = await fetch('/api'+p,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(b)}); return {s:r.status, j: await r.json().catch(()=>null)} }""", [path, body])
 
 with sync_playwright() as pw:
     b = pw.chromium.launch(executable_path="/opt/pw-browsers/chromium-1194/chrome-linux/chrome") if os.path.exists("/opt/pw-browsers/chromium-1194/chrome-linux/chrome") else pw.chromium.launch()
-    ctx = b.new_context(viewport={"width": 360, "height": 740}, locale="id-ID")
+    ctx = mkctx(b)
     page = ctx.new_page()
     errors = []
     page.on("pageerror", lambda e: errors.append(str(e)))
@@ -112,7 +123,7 @@ with sync_playwright() as pw:
     page.wait_for_url(HOME); expect(page.get_by_role("heading", name="Halo, Admin Uji")).to_be_visible()
 
     # 6. Undangan sebagai pengunjung baru (konteks bersih), terima dengan email
-    ctx2 = b.new_context(viewport={"width": 360, "height": 740}, locale="id-ID"); p2 = ctx2.new_page()
+    ctx2 = mkctx(b); p2 = ctx2.new_page()
     p2.goto(f"{WEB}/undangan/{token}"); expect(p2.get_by_role("heading", name=f"Bergabung dengan SSB Uji {uid}")).to_be_visible()
     p2.screenshot(path=f"{OUT}/6-undangan.png", full_page=True); no_overflow(p2, "undangan")
     p2.get_by_label("Nama Anda").fill("Pelatih Uji"); p2.get_by_label("Email").fill(f"pelatih-{uid}@uji.test"); p2.get_by_label("Kata sandi").fill(PASS)
@@ -127,12 +138,40 @@ with sync_playwright() as pw:
     p2.goto(f"{WEB}/pemain");
     expect(p2.get_by_text("1 pemain")).to_be_visible(); expect(p2.get_by_text("Budi Santoso")).to_be_visible(); expect(p2.get_by_text("Andi Pratama")).to_have_count(0)
     expect(p2.get_by_role("link", name="Tambah pemain")).to_have_count(0); p2.screenshot(path=f"{OUT}/16-pemain-pelatih.png", full_page=True)
+    # Jadwal: admin menjadwalkan (berulang), pelatih mengisi absensi sekali ketuk
+    today = datetime.date.today(); iso = lambda n: (today + datetime.timedelta(days=n)).isoformat()
+    ku10 = [g for g in api_get(page, "/age-groups") if g["name"] == "KU-10"][0]["id"]
+    for n in ("Cakra Uji", "Dodi Uji", "Eko Uji"):
+        assert api_post(page, "/players", {"fullName": n, "birthDate": "2016-06-06", "ageGroupId": ku10})["s"] == 201
+    page.goto(f"{WEB}/jadwal"); expect(page.get_by_text("Belum ada sesi latihan")).to_be_visible()
+    page.get_by_role("button", name="Tambah sesi").click()
+    page.get_by_label("KU", exact=True).select_option(label="KU-10"); page.get_by_label("Tanggal", exact=True).fill(iso(0)); page.get_by_label("Jam mulai (boleh dikosongkan)").fill("16:00")
+    page.get_by_label("Ulangi tiap minggu di hari yang sama").check(); page.get_by_label("Ulangi sampai tanggal").fill(iso(14))
+    page.get_by_role("button", name="Simpan jadwal").click(); expect(page.get_by_text("3 sesi dijadwalkan.")).to_be_visible()
+    expect(page.get_by_text("KU-10, jam 16:00")).to_have_count(3)
+    page.screenshot(path=f"{OUT}/17-jadwal-admin.png", full_page=True); no_overflow(page, "jadwal admin")
+    p2.goto(f"{WEB}/jadwal"); expect(p2.get_by_text("KU-10, jam 16:00")).to_have_count(3)
+    expect(p2.get_by_role("button", name="Tambah sesi")).to_have_count(0)
+    p2.get_by_text("KU-10, jam 16:00").first.click(); expect(p2.get_by_role("heading", name="Absensi KU-10")).to_be_visible()
+    expect(p2.get_by_text("Budi Santoso")).to_have_count(0)  # status cuti tidak masuk daftar
+    t0 = datetime.datetime.now()
+    p2.get_by_role("button", name="Tandai semua yang belum diisi hadir").click()
+    p2.get_by_role("group", name="Kehadiran Cakra Uji").get_by_role("button", name="Sakit").click()
+    p2.get_by_role("group", name="Kehadiran Dodi Uji").get_by_role("button", name="Alpa").click()
+    p2.get_by_role("button", name="Simpan absensi").click(); expect(p2.get_by_text("Absensi disimpan")).to_be_visible()
+    print("waktu isi absensi (otomatis, bukan uji manusia):", (datetime.datetime.now() - t0).total_seconds(), "dtk")
+    expect(p2.get_by_text("1 hadir, 0 izin, 1 sakit, 1 alpa, 0 belum")).to_be_visible()
+    p2.screenshot(path=f"{OUT}/18-absensi.png", full_page=True); no_overflow(p2, "absensi")
+    page.goto(f"{WEB}/jadwal"); expect(page.get_by_text("1 hadir, 1 sakit, 1 alpa")).to_be_visible()
+    page.get_by_role("button", name="Hapus").first.click(); page.get_by_role("button", name="Ya, hapus").click()
+    expect(page.get_by_role("alert")).to_contain_text("sudah punya absensi")
+
     # tautan sama tidak bisa dipakai lagi
     p2.goto(f"{WEB}/undangan/{token}"); expect(p2.get_by_role("heading", name="Undangan tidak berlaku")).to_be_visible()
     p2.screenshot(path=f"{OUT}/7-undangan-pakai-ulang.png")
 
     # 7. Google: daftar SSB baru dengan akun Google, lalu undangan kedua -> dua SSB -> pemilih
-    ctx3 = b.new_context(viewport={"width": 360, "height": 740}, locale="id-ID"); p3 = ctx3.new_page()
+    ctx3 = mkctx(b); p3 = ctx3.new_page()
     set_google(f"g-{uid}", f"gadmin-{uid}@uji.test", "Admin Google")
     p3.goto(f"{WEB}/daftar"); p3.get_by_label("Nama SSB").fill(f"SSB Google {uid}")
     p3.get_by_role("button", name="Daftar dengan Google").click()
@@ -147,7 +186,7 @@ with sync_playwright() as pw:
     expect(p2.get_by_text("sebagai Koordinator kelompok usia")).to_be_visible()
 
     # 8. Google untuk akun tak dikenal -> pesan jelas
-    ctx4 = b.new_context(viewport={"width": 360, "height": 740}, locale="id-ID"); p4 = ctx4.new_page()
+    ctx4 = mkctx(b); p4 = ctx4.new_page()
     set_google(f"asing-{uid}", f"asing-{uid}@uji.test", "Asing")
     p4.goto(f"{WEB}/masuk"); p4.get_by_role("link", name="Masuk dengan Google").click()
     p4.wait_for_url("**/masuk?error=*"); expect(p4.get_by_role("alert")).to_be_visible()

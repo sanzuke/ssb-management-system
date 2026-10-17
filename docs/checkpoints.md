@@ -18,3 +18,4 @@ Satu baris per checkpoint, yang terbaru di atas. Hash commit menjadi acuan utama
 | cp-11-pemain-api | `7632a34` | 2026-10-17 | Pemain (nomor anggota otomatis, riwayat KU/status), orang tua, penugasan pelatih, batas data per role; migrasi 0007; 55 test api |
 | cp-12-pemain-web | `085b5cd` | 2026-10-17 | Layar pemain (daftar, cari, filter, tambah, ubah, riwayat, orang tua) dan penugasan pelatih; e2e 360 px termasuk tampilan pelatih |
 | cp-13-jadwal-absensi-api | `46f42a0` | 2026-10-17 | Jadwal latihan (berulang mingguan), absensi massal, batas role; lokasi jadi FK; migrasi 0008-0011; 66 test api |
+| cp-14-jadwal-absensi-web | `HASH14` | 2026-10-17 | Layar jadwal (admin: tambah, ubah, hapus, berulang) dan absensi sekali ketuk untuk pelatih; e2e 360 px |

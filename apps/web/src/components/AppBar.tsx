@@ -24,6 +24,7 @@ export default function AppBar(props: { me: Me }) {
           <A class="tombol tipis" href="/pemain">{props.me.active!.role === "orang_tua" ? "Anak" : "Pemain"}</A>
         </Show>
         <Show when={["admin_ssb", "pelatih", "korlas"].includes(props.me.active?.role ?? "")}>
+          <A class="tombol tipis" href="/jadwal">Jadwal</A>
           <A class="tombol tipis" href="/master">Data master</A>
         </Show>
         <A class="tombol tipis" href="/akun">Akun</A>

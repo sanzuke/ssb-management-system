@@ -200,3 +200,20 @@ a { color: var(--rumput); text-underline-offset: 3px; }
 .rincian dt { color: var(--redup); }
 .rincian dd { margin: 0; }
 .field select { min-height: 48px; width: 100%; padding: 8px 10px; font: inherit; border: 1.5px solid var(--tinta); border-radius: 6px; background: #fff; color: var(--tinta); }
+
+/* Jadwal dan absensi */
+.centang { display: flex; align-items: center; gap: 10px; min-height: 48px; font-weight: 700; }
+.centang input { width: 24px; height: 24px; accent-color: var(--rumput); }
+.absensi { padding-bottom: 120px; }
+.daftar-absen { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--garis); }
+.baris-absen { display: grid; gap: 8px; padding: 12px 0; border-bottom: 1px solid var(--garis); }
+.baris-absen .nama { font-weight: 700; }
+.pilih-status { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+.status { min-height: 48px; border: 1.5px solid var(--tinta); border-radius: 6px; background: #fff; color: var(--tinta); font: inherit; font-weight: 700; cursor: pointer; }
+.status[aria-pressed="true"] { color: #fff; border-color: var(--tinta); }
+.status[aria-pressed="true"][data-v="hadir"] { background: var(--rumput); }
+.status[aria-pressed="true"][data-v="izin"] { background: #3a5f8a; }
+.status[aria-pressed="true"][data-v="sakit"] { background: #8a6a1d; }
+.status[aria-pressed="true"][data-v="alpa"] { background: var(--merah); }
+.bar-simpan { position: fixed; left: 0; right: 0; bottom: 0; display: grid; gap: 8px; padding: 10px 16px calc(10px + env(safe-area-inset-bottom)); background: var(--kapur); border-top: 2px solid var(--tinta); }
+.bar-simpan span { font-size: 0.9rem; }
