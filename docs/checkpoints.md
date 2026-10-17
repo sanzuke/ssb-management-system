@@ -15,4 +15,4 @@ Satu baris per checkpoint, yang terbaru di atas. Hash commit menjadi acuan utama
 | cp-8-layar-auth-web | `105f888` | 2026-10-17 | Layar masuk, daftar, undangan, pilih SSB, akun di web (360 px); proxy `/api`; e2e Playwright dengan Google tiruan |
 | cp-9-matriks-izin | `e61f235` | 2026-10-17 | Matriks izin satu sumber (`permissions`), `requirePermission`, docs/izin.md dibuat dari kode, test per role dan test cakupan penjaga; 30 test api |
 | cp-10-data-master | `d0cc18c` | 2026-10-17 | KU (tanpa tumpang tindih), periode, lokasi: API + layar admin (360 px); migrasi 0006; 43 test api |
-| cp-11-pemain-api | `HASH11` | 2026-10-17 | Pemain (nomor anggota otomatis, riwayat KU/status), orang tua, penugasan pelatih, batas data per role; migrasi 0007; 55 test api |
+| cp-11-pemain-api | `7632a34` | 2026-10-17 | Pemain (nomor anggota otomatis, riwayat KU/status), orang tua, penugasan pelatih, batas data per role; migrasi 0007; 55 test api |
