@@ -500,3 +500,127 @@
 .halaman form.form + h2 {
   margin-top: 32px;
 }
+
+/* ---- Beranda staf: panel, daftar tugas, pintasan ---- */
+.kolom-dashboard {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+  align-items: start;
+}
+.kolom-isi {
+  display: grid;
+  gap: 16px;
+  align-content: start;
+}
+.panel {
+  border: 1px solid var(--garis);
+  border-radius: 12px;
+  background: #fff;
+  overflow: hidden;
+}
+.panel-kepala {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--garis);
+  background: #f6f8f2;
+}
+.panel-kepala h2 {
+  margin: 0;
+  font-size: 1.05rem;
+}
+.panel-isi {
+  margin: 0;
+  padding: 16px;
+}
+.tautan-kecil {
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+.daftar-tugas {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.daftar-tugas li {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 16px;
+  border-top: 1px solid var(--garis);
+}
+.daftar-tugas li:first-child {
+  border-top: 0;
+}
+.daftar-tugas li > svg {
+  flex: none;
+  color: var(--redup);
+}
+.tugas-teks {
+  display: grid;
+  flex: 1;
+  min-width: 0;
+}
+.tugas-teks > .petunjuk {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.lencana-peringatan {
+  padding: 2px 10px;
+  border-radius: 999px;
+  background: #fbeeb8;
+  color: #6b5200;
+  font-size: 0.8rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.tombol.tombol-kecil {
+  width: auto;
+  min-height: 40px;
+  padding: 4px 12px;
+  border-radius: 8px;
+  border-width: 1px;
+  border-color: var(--garis);
+  font-size: 0.9rem;
+  white-space: nowrap;
+}
+.persen-lencana.rendah {
+  background: #f0dedb;
+  color: #8b1911;
+}
+.pintasan {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+  padding: 12px;
+}
+.pintasan-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 48px;
+  padding: 8px 12px;
+  border-radius: 10px;
+  background: #f1f4ec;
+  color: var(--tinta);
+  font-weight: 700;
+  text-decoration: none;
+}
+.pintasan-item:hover {
+  background: #e3ece4;
+  color: var(--rumput);
+}
+.pintasan-item svg {
+  flex: none;
+  color: var(--rumput);
+}
+
+@media (min-width: 900px) {
+  .kolom-dashboard {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
