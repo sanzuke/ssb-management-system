@@ -80,7 +80,7 @@ export default function DetailPemain() {
           <Show when={pl()} fallback={<p>Memuat…</p>}>
             <Title>{pl()!.fullName} · SSB App</Title>
             <h1>{pl()!.fullName}</h1>
-            <p><A class="tombol tipis" href={`/kartu/${pl()!.id}`}>Kartu pemain</A></p>
+            <p class="aksi-baris"><A class="tombol tipis" href={`/nilai/${pl()!.id}`}>Penilaian</A> <A class="tombol tipis" href={`/kartu/${pl()!.id}`}>Kartu pemain</A></p>
             <Show
               when={!editing()}
               fallback={

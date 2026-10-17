@@ -29,6 +29,7 @@ export default function AppBar(props: { me: Me }) {
         <Show when={["admin_ssb", "pelatih", "korlas"].includes(props.me.active?.role ?? "")}>
           <A class="tombol tipis" href="/jadwal">Jadwal</A>
           <A class="tombol tipis" href="/master">Data master</A>
+          <A class="tombol tipis" href="/indikator">Indikator</A>
         </Show>
         <A class="tombol tipis" href="/akun">Akun</A>
         <button class="tombol tipis" type="button" onClick={logout}>Keluar</button>

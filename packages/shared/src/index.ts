@@ -292,30 +292,10 @@ export type GuardianSession = {
 };
 
 // ---- Assessment (skala 1 sampai 10) ----
-export const assessmentAspects = ["technical", "physical", "tactical", "mental", "movement", "game_intelligence"] as const;
-export const aspectSchema = z.enum(assessmentAspects);
-export type AssessmentAspect = z.infer<typeof aspectSchema>;
-export const aspectLabel: Record<AssessmentAspect, string> = {
-  technical: "Teknik",
-  physical: "Fisik",
-  tactical: "Taktik",
-  mental: "Mental",
-  movement: "Gerak",
-  game_intelligence: "Kecerdasan bermain",
-};
-export const SCORE_MIN = 1;
-export const SCORE_MAX = 10;
+export * from "./aspects";
 
-/** Usulan awal dari rancangan; perlu divalidasi pelatih berlisensi sebelum dikunci. */
-export const defaultIndicators: Record<AssessmentAspect, string[]> = {
-  technical: ["Kontrol bola", "Passing", "Dribbling", "Shooting"],
-  physical: ["Kecepatan", "Kelincahan", "Daya tahan"],
-  tactical: ["Penempatan posisi", "Pemahaman peran"],
-  mental: ["Fokus", "Kerja sama", "Sportivitas"],
-  movement: ["Koordinasi", "Keseimbangan"],
-  game_intelligence: ["Pengambilan keputusan", "Membaca permainan"],
-};
-
+import { assessmentAspects as _aspects, SCORE_MIN, SCORE_MAX, type AssessmentAspect } from "./aspects";
+export const aspectSchema = z.enum(_aspects);
 export const indicatorInputSchema = z.object({ ageGroupId: uuidStr, aspect: aspectSchema, name: nameField });
 export const indicatorPatchSchema = z.object({ name: nameField, active: z.boolean(), sortOrder: z.number().int().min(0).max(999).optional() });
 export const indicatorDefaultsSchema = z.object({ ageGroupId: uuidStr });

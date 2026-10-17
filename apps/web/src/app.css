@@ -239,3 +239,22 @@ a { color: var(--rumput); text-underline-offset: 3px; }
 .kartu-data dd { margin: 0; font-weight: 700; }
 .qr { width: 100%; max-width: 15rem; height: auto; justify-self: center; border: 1px solid #c9d1c4; }
 @media print { .bar, .tautan-bawah, .petunjuk { display: none !important; } .kartu { border-color: #000; } }
+
+.aspek { margin: 20px 0; }
+.aspek h2, .aspek h3 { margin-bottom: 8px; }
+.rata { font-weight: 400; font-size: 0.9rem; color: var(--redup); }
+.indikator { display: grid; gap: 6px; padding: 10px 0; border-bottom: 1px solid #c9d1c4; }
+.indikator .nama { font-weight: 700; }
+.pilih-nilai { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; }
+.nilai-btn { min-height: 48px; border: 1.5px solid var(--tinta); border-radius: 6px; background: #fff; color: var(--tinta); font: inherit; font-weight: 700; font-size: 1.1rem; cursor: pointer; }
+.nilai-btn[aria-pressed="true"] { background: var(--rumput, #1B4D36); color: #fff; }
+.nilai { padding-bottom: 7rem; }
+.hasil-total { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+.skor { font-weight: 700; font-size: 1.15rem; min-width: 2rem; text-align: right; }
+.catatan { margin-top: 12px; }
+.nonaktif { color: var(--redup); text-decoration: line-through; }
+.riwayat-nilai { margin: 20px 0; }
+.riwayat-nilai summary { min-height: 48px; display: flex; align-items: center; cursor: pointer; font-weight: 700; }
+.aksi-baris { display: flex; gap: 8px; flex-wrap: wrap; }
+.aksi-baris .tombol { width: auto; }
+.hasil-total .persen { text-align: left; min-width: 0; font-size: 2rem; }

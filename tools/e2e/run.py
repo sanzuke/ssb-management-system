@@ -195,6 +195,34 @@ with sync_playwright() as pw:
     cakra = [p for p in api_get(page, "/players") if p["fullName"] == "Cakra Uji"][0]["id"]
     po.goto(f"{WEB}/kartu/{cakra}"); expect(po.get_by_role("heading", name="Kartu tidak ditemukan")).to_be_visible()
     page.goto(f"{WEB}/kartu/{cakra}"); expect(page.get_by_text("Cakra Uji", exact=True)).to_be_visible()
+    # Penilaian (skala 1-10): admin menyiapkan indikator, pelatih menilai di HP, admin menerbitkan, orang tua melihat
+    page.goto(f"{WEB}/indikator"); expect(page.get_by_role("heading", name="Indikator penilaian")).to_be_visible()
+    page.get_by_label("KU", exact=True).select_option(label="KU-10")
+    page.get_by_role("button", name="Pasang usulan awal").click(); expect(page.get_by_text("Usulan awal dipasang")).to_be_visible(); expect(page.get_by_text("Kontrol bola", exact=True)).to_be_visible()
+    page.get_by_label("Aspek", exact=True).select_option(label="Mental"); page.get_by_label("Nama indikator").fill("Disiplin")
+    page.get_by_role("button", name="Tambah indikator").click(); expect(page.get_by_text("Indikator ditambahkan.")).to_be_visible()
+    page.screenshot(path=f"{OUT}/23-indikator.png", full_page=True); no_overflow(page, "indikator")
+    invc = api_post(page, "/invitations", {"role": "orang_tua", "playerId": cakra}); assert invc["s"] in (200, 201), invc
+    ctc = mkctx(b); pc = ctc.new_page()
+    pc.goto(f"{WEB}/undangan/{invc['j']['token']}"); pc.wait_for_selector("h1")
+    pc.get_by_label("Nama Anda").fill("Ortu Cakra"); pc.get_by_label("Email").fill(f"ortu-cakra-{uid}@uji.test"); pc.get_by_label("Kata sandi").fill(PASS)
+    pc.get_by_role("button", name="Buat akun dan bergabung").click(); expect(pc.get_by_role("heading", name="Anak Anda")).to_be_visible()
+    pc.get_by_role("link", name="Penilaian").click(); expect(pc.get_by_text("Belum ada penilaian yang diterbitkan")).to_be_visible()
+    p2.goto(f"{WEB}/nilai/{cakra}"); expect(p2.get_by_role("heading", name="Penilaian Cakra Uji")).to_be_visible()
+    for nm in ("Kontrol bola 8", "Passing 6", "Fokus 9"): p2.get_by_role("button", name=nm, exact=True).click()
+    expect(p2.get_by_text("3 dari 17 indikator terisi")).to_be_visible()
+    p2.get_by_label("Catatan pelatih").fill("Cepat belajar, perlu lebih tenang di depan gawang.")
+    p2.screenshot(path=f"{OUT}/24-nilai-input.png", full_page=True); no_overflow(p2, "nilai input")
+    p2.get_by_role("button", name="Simpan penilaian").click(); expect(p2.get_by_text("Penilaian disimpan")).to_be_visible()
+    expect(p2.get_by_role("button", name="Terbitkan ke orang tua")).to_have_count(0)  # pelatih tidak menerbitkan
+    p2.get_by_text("Riwayat perubahan skor").click(); expect(p2.get_by_text("diisi 8")).to_be_visible()
+    page.goto(f"{WEB}/nilai/{cakra}"); expect(page.get_by_text("Belum diterbitkan ke orang tua")).to_be_visible()
+    page.get_by_role("button", name="Terbitkan ke orang tua").click(); expect(page.get_by_text("Penilaian diterbitkan")).to_be_visible()
+    pc.reload(); expect(pc.get_by_text("Kontrol bola", exact=True)).to_be_visible(); expect(pc.get_by_text("Cepat belajar")).to_be_visible(); expect(pc.get_by_text("7,7", exact=True).first).to_be_visible()
+    pc.screenshot(path=f"{OUT}/25-nilai-orang-tua.png", full_page=True); no_overflow(pc, "nilai orang tua")
+    po.goto(f"{WEB}/nilai/{cakra}"); expect(po.get_by_role("heading", name="Pemain tidak ditemukan")).to_be_visible()  # orang tua Eko tidak bisa melihat anak lain
+    page.get_by_role("button", name="Tarik dari orang tua").click(); expect(page.get_by_text("Penilaian ditarik")).to_be_visible()
+    pc.reload(); expect(pc.get_by_text("Belum ada penilaian yang diterbitkan")).to_be_visible()
 
     # tautan sama tidak bisa dipakai lagi
     p2.goto(f"{WEB}/undangan/{token}"); expect(p2.get_by_role("heading", name="Undangan tidak berlaku")).to_be_visible()

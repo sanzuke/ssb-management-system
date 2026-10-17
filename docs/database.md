@@ -81,10 +81,12 @@ Tabel (semua RLS dan FORCE RLS, migrasi 0012): `assessment_indicator` (indikator
 
 Endpoint:
 
-- `GET/POST /assessment-indicators`, `POST /assessment-indicators/defaults` (memasang 14 indikator usulan awal untuk satu KU; aman diulang), `PATCH/DELETE /assessment-indicators/:id`. Baca: `master.read`; ubah: `master.write` (admin). Hapus ditolak 409 `in_use` bila sudah dipakai skor; nonaktifkan saja.
+- `GET/POST /assessment-indicators`, `POST /assessment-indicators/defaults` (memasang 16 indikator usulan awal untuk satu KU; aman diulang), `PATCH/DELETE /assessment-indicators/:id`. Baca: `master.read`; ubah: `master.write` (admin). Hapus ditolak 409 `in_use` bila sudah dipakai skor; nonaktifkan saja.
 - `PUT /players/:playerId/assessments/:periodId` (izin `assessment.write`: admin dan pelatih; pelatih hanya KU yang ditugaskan). Isi: `scores` (1 sampai 10, bilangan bulat, tanpa duplikat, indikator harus aktif dan milik KU pemain), `note`, `assessedOn`. Skor yang tidak berubah tidak masuk jejak.
 - `GET /players/:playerId/assessments` (izin `assessment.read`): skor, rata-rata per aspek, rata-rata keseluruhan. Orang tua hanya melihat penilaian anaknya yang sudah diterbitkan.
 - `POST` dan `DELETE /players/:playerId/assessments/:periodId/publish` (izin `report.publish`: admin dan korlas, sementara): terbitkan dan tarik kembali.
 - `GET /players/:playerId/assessments/:periodId/history`: jejak perubahan skor (tidak untuk orang tua).
 
 Indikator usulan awal berasal dari rancangan dan perlu divalidasi pelatih berlisensi sebelum dikunci.
+
+Layar: `/indikator` (admin mengatur template per KU; pelatih dan korlas hanya melihat), `/nilai/<id pemain>` (pelatih dan admin mengisi skor 1-10 per indikator dengan catatan; admin dan korlas menerbitkan atau menarik; korlas hanya membaca; orang tua melihat semua penilaian anaknya yang sudah diterbitkan). Konstanta aspek ada di `@ssb/shared/aspects` (tanpa zod) agar bundel web tidak ikut memuat zod.
