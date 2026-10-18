@@ -8,6 +8,7 @@ import {
   indicatorDefaultsSchema,
   indicatorInputSchema,
   indicatorPatchSchema,
+  type AspectSummary,
   type AssessmentAspect,
   type AssessmentHistoryRow,
   type AssessmentIndicator,
@@ -221,6 +222,44 @@ export function assessmentRoutes(db: Db) {
           if (isFk(e)) throw new HttpError(409, "in_use", "Indikator sudah dipakai penilaian. Nonaktifkan saja agar riwayat tetap utuh.");
           throw e;
         }
+      })
+
+      // Rata-rata skor per aspek untuk dua periode terbaru yang punya penilaian (radar di dasbor).
+      // Dihitung dari pemain yang boleh dilihat peran pemanggil; orang tua hanya penilaian yang sudah terbit.
+      .get("/assessment-aspects", requirePermission("assessment.read"), async (c) => {
+        const m = member(c);
+        const out = await withTenant(db, m.ssbId, async (tx): Promise<AspectSummary[]> => {
+          const ids = (await tx.select({ id: schema.player.id }).from(schema.player).where(playersVisibleTo(m)).limit(500)).map((r) => r.id);
+          if (ids.length === 0) return [];
+          const rows = await tx
+            .select({
+              periodId: schema.period.id,
+              periodName: schema.period.name,
+              start: schema.period.startDate,
+              aspect: I.aspect,
+              rata: sql<string>`avg(${S.score})`,
+              jumlah: sql<number>`count(distinct ${A.id})::int`,
+            })
+            .from(S)
+            .innerJoin(A, and(eq(A.ssbId, S.ssbId), eq(A.id, S.assessmentId)))
+            .innerJoin(I, and(eq(I.ssbId, S.ssbId), eq(I.id, S.indicatorId)))
+            .innerJoin(schema.period, and(eq(schema.period.ssbId, A.ssbId), eq(schema.period.id, A.periodId)))
+            .where(and(inArray(A.playerId, ids), m.role === "orang_tua" ? isNotNull(A.publishedAt) : undefined))
+            .groupBy(schema.period.id, schema.period.name, schema.period.startDate, I.aspect);
+          const perPeriode = new Map<string, AspectSummary>();
+          for (const r of rows) {
+            const p = perPeriode.get(r.periodId) ?? { period: { id: r.periodId, name: r.periodName, startDate: r.start }, assessments: 0, aspects: [] };
+            p.assessments = Math.max(p.assessments, r.jumlah);
+            p.aspects.push({ aspect: r.aspect as AssessmentAspect, average: round1(Number(r.rata)) });
+            perPeriode.set(r.periodId, p);
+          }
+          const urutAspek = (a: AssessmentAspect) => assessmentAspects.indexOf(a);
+          return [...perPeriode.values()]
+            .sort((a, b) => b.period.startDate.localeCompare(a.period.startDate))
+            .slice(0, 2)
+            .map((p) => ({ ...p, aspects: p.aspects.sort((x, y) => urutAspek(x.aspect) - urutAspek(y.aspect)) }));
+        });
+        return c.json(out);
       })
 
       // ---- Penilaian per pemain per periode ----

@@ -376,6 +376,13 @@ export type AssessmentView = {
   /** Rata-rata semua skor (satu desimal); null bila belum ada skor. */
   overall: number | null;
 };
+/** Rata-rata skor per aspek untuk satu periode, dari seluruh penilaian yang boleh dilihat peran pemanggil. */
+export type AspectSummary = {
+  period: { id: string; name: string; startDate: string };
+  /** Jumlah penilaian (pemain) yang dihitung pada periode ini. */
+  assessments: number;
+  aspects: { aspect: AssessmentAspect; average: number }[];
+};
 export type AssessmentHistoryRow = { indicator: string; aspect: AssessmentAspect; from: number | null; to: number; by: string | null; at: string };
 
 export const developmentPlanItemInputSchema = z.object({
