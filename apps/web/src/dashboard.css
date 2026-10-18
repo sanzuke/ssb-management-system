@@ -1158,3 +1158,99 @@
     grid-column: auto;
   }
 }
+
+/* ---- Halaman Jadwal ---- */
+.bilah-jadwal {
+  grid-template-columns: 1fr;
+}
+.segmen {
+  display: flex;
+  overflow: hidden;
+  border: 1px solid var(--garis);
+  border-radius: 8px;
+  background: #f1f4ec;
+}
+.segmen button {
+  flex: 1;
+  min-height: 44px;
+  padding: 0 14px;
+  border: 0;
+  background: transparent;
+  font: inherit;
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: var(--redup);
+  cursor: pointer;
+}
+.segmen button[aria-pressed="true"] {
+  background: var(--rumput);
+  color: var(--kapur);
+}
+.form-sesi {
+  margin-bottom: 16px;
+}
+.hari-daftar {
+  display: grid;
+  gap: 14px;
+  margin-top: 8px;
+}
+.judul-hari {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.judul-hari h2 {
+  margin: 0;
+  font-size: 1.05rem;
+}
+.daftar-sesi {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.baris-sesi {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 16px;
+  padding: 10px 16px;
+  border-top: 1px solid var(--garis);
+}
+.baris-sesi:first-child {
+  border-top: 0;
+}
+.baris-sesi > .form {
+  flex: 1 1 100%;
+}
+.info-sesi {
+  display: grid;
+  flex: 1 1 14rem;
+  min-width: 0;
+  min-height: 44px;
+  align-content: center;
+  color: var(--tinta);
+  text-decoration: none;
+}
+.info-sesi:hover strong {
+  text-decoration: underline;
+}
+.baris-sesi .butir-aksi {
+  margin-left: auto;
+  align-items: center;
+}
+@media (min-width: 640px) {
+  .bilah-jadwal {
+    grid-template-columns: 1fr 1fr;
+  }
+  .bilah-jadwal .segmen {
+    grid-column: 1 / -1;
+  }
+}
+@media (min-width: 900px) {
+  .bilah-jadwal {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) minmax(0, 2fr) 44px;
+  }
+  .bilah-jadwal .segmen {
+    grid-column: auto;
+  }
+}
