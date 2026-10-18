@@ -1323,3 +1323,17 @@
     border-color: #d8a826;
   }
 }
+
+/* Daftar anak (orang tua): kartu tersusun beberapa kolom di layar lebar */
+.ortu-grid {
+  display: grid;
+  gap: 14px;
+}
+.ortu-grid .ortu-anak {
+  margin-bottom: 0;
+}
+@media (min-width: 900px) {
+  .ortu-grid {
+    grid-template-columns: repeat(auto-fill, minmax(24rem, 1fr));
+  }
+}

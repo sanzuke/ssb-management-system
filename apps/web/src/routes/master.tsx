@@ -14,7 +14,7 @@ export default function Master() {
   onMount(async () => {
     const m = await getMe().catch(() => null);
     if (!m) return nav("/masuk", { replace: true });
-    if (!m.active) return nav("/", { replace: true });
+    if (!m.active || m.active.role === "orang_tua") return nav("/", { replace: true }); // data master hanya untuk staf
     setMe(m);
   });
 

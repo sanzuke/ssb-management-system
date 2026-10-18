@@ -2,6 +2,7 @@ import { A, useNavigate, useSearchParams } from "@solidjs/router";
 import { Title } from "@solidjs/meta";
 import { createEffect, createMemo, createResource, createSignal, For, onMount, Show } from "solid-js";
 import Ikon from "~/components/Ikon";
+import KepalaHalaman from "~/components/KepalaHalaman";
 import { api, getMe, type Me } from "~/lib/api";
 import { inisial, posisiLabel, statusLabel, usia, tanggal, type AgeGroup, type PlayerSummary } from "~/lib/pemain";
 import type { AttendanceSummary, PlayerOverview } from "@ssb/shared";
@@ -131,26 +132,42 @@ export default function DaftarPemain() {
 
         {/* Orang tua: daftar anak sederhana */}
         <Show when={orangTua()}>
-          <h1>Anak Anda</h1>
+          <KepalaHalaman chip="Anak" judul="Anak Anda" sub="Pilih anak untuk melihat profil, penilaian, kehadiran, dan kartunya." />
           <Show when={players() && players()!.length === 0}>
             <p class="kosong">{kosong()}</p>
           </Show>
-          <ul class="daftar-butir">
+          <div class="ortu-grid">
             <For each={players()}>
               {(pl) => (
-                <li class="butir">
-                  <A class="pemain-tautan" href={`/pemain/${pl.id}`}>
-                    <strong>{pl.fullName}</strong>
-                    <span class="petunjuk">
-                      {[pl.memberNo, pl.ageGroup?.name ?? "Tanpa KU", `${usia(pl.birthDate)} th`, pl.position ? posisiLabel[pl.position] : null]
-                        .filter(Boolean)
-                        .join(", ")}
+                <article class="ortu-anak">
+                  <A class="ortu-profil" href={`/pemain/${pl.id}`}>
+                    <span class="ortu-foto" aria-hidden="true">
+                      {inisial(pl.fullName)}
+                    </span>
+                    <span class="ortu-teks">
+                      <span class="petunjuk">{pl.memberNo ?? "Belum ada nomor"}</span>
+                      <strong>{pl.fullName}</strong>
+                      <span class="petunjuk">
+                        {[pl.ageGroup?.name ?? "Tanpa KU", `${usia(pl.birthDate)} tahun`, pl.position ? posisiLabel[pl.position] : null]
+                          .filter(Boolean)
+                          .join(" • ")}
+                      </span>
                     </span>
                   </A>
-                </li>
+                  <div class="ortu-aksi">
+                    <A class="tombol utama-rumput" href={`/nilai/${pl.id}`}>
+                      <Ikon nama="buku" ukuran={18} />
+                      Penilaian
+                    </A>
+                    <A class="tombol sekunder" href={`/kartu/${pl.id}`}>
+                      <Ikon nama="kartu" ukuran={18} />
+                      Kartu pemain
+                    </A>
+                  </div>
+                </article>
               )}
             </For>
-          </ul>
+          </div>
         </Show>
 
         {/* Admin, korlas, pelatih: buku induk bergaya dashboard */}
