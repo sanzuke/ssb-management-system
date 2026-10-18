@@ -1,6 +1,6 @@
-import { A, useNavigate } from "@solidjs/router";
+import { A, useNavigate, useSearchParams } from "@solidjs/router";
 import { Title } from "@solidjs/meta";
-import { createMemo, createResource, createSignal, For, onMount, Show } from "solid-js";
+import { createEffect, createMemo, createResource, createSignal, For, onMount, Show } from "solid-js";
 import Ikon from "~/components/Ikon";
 import { api, getMe, type Me } from "~/lib/api";
 import { inisial, posisiLabel, statusLabel, usia, tanggal, type AgeGroup, type PlayerSummary } from "~/lib/pemain";
@@ -23,6 +23,12 @@ export default function DaftarPemain() {
   const [status, setStatus] = createSignal("");
   const [posisi, setPosisi] = createSignal("");
   const [halaman, setHalaman] = createSignal(1);
+  // Pencarian dari header atas membawa ?q=; isian halaman mengikutinya setiap kali berubah.
+  const [params] = useSearchParams();
+  createEffect(() => {
+    setQ(typeof params.q === "string" ? params.q : "");
+    setHalaman(1);
+  });
   const [groups, setGroups] = createSignal<AgeGroup[]>([]);
 
   onMount(async () => {
