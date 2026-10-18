@@ -23,10 +23,12 @@ export default function DaftarPemain() {
   const [status, setStatus] = createSignal("");
   const [posisi, setPosisi] = createSignal("");
   const [halaman, setHalaman] = createSignal(1);
-  // Pencarian dari header atas membawa ?q=; isian halaman mengikutinya setiap kali berubah.
+  // Pencarian dari header atas membawa ?q=, dan dasbor membawa ?ku= (id KU, atau "none" untuk pemain
+  // tanpa KU); isian halaman mengikutinya setiap kali berubah.
   const [params] = useSearchParams();
   createEffect(() => {
     setQ(typeof params.q === "string" ? params.q : "");
+    setKu(typeof params.ku === "string" ? params.ku : "");
     setHalaman(1);
   });
   const [groups, setGroups] = createSignal<AgeGroup[]>([]);
@@ -65,7 +67,7 @@ export default function DaftarPemain() {
     return (players() ?? []).filter(
       (p) =>
         (!kata || p.fullName.toLowerCase().includes(kata) || (p.memberNo ?? "").toLowerCase().includes(kata)) &&
-        (!ku() || p.ageGroup?.id === ku()) &&
+        (!ku() || (ku() === "none" ? !p.ageGroup : p.ageGroup?.id === ku())) &&
         (!status() || p.status === status()) &&
         (!posisi() || p.position === posisi()),
     );
@@ -228,7 +230,14 @@ export default function DaftarPemain() {
             </div>
             <select aria-label="Kelompok umur" value={ku()} onChange={(e) => ubah(setKu)(e.currentTarget.value)}>
               <option value="">Semua KU</option>
-              <For each={groups()}>{(g) => <option value={g.id}>{g.name}</option>}</For>
+              <For each={groups()}>
+                {(g) => (
+                  <option value={g.id} selected={ku() === g.id}>
+                    {g.name}
+                  </option>
+                )}
+              </For>
+              <option value="none">Tanpa KU</option>
             </select>
             <select aria-label="Status" value={status()} onChange={(e) => ubah(setStatus)(e.currentTarget.value)}>
               <option value="">Semua status</option>

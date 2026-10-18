@@ -1,6 +1,7 @@
 import { A, useNavigate } from "@solidjs/router";
 import { Title } from "@solidjs/meta";
 import { createSignal, onMount, Show } from "solid-js";
+import DashboardAdmin from "~/components/DashboardAdmin";
 import DashboardStaf from "~/components/DashboardStaf";
 import PortalOrangTua from "~/components/PortalOrangTua";
 import { getMe, roleLabel, type Me } from "~/lib/api";
@@ -48,7 +49,9 @@ export default function Beranda() {
             </>
           }
         >
-          <DashboardStaf me={me()!} />
+          <Show when={me()!.active!.role === "admin_ssb"} fallback={<DashboardStaf me={me()!} />}>
+            <DashboardAdmin me={me()!} />
+          </Show>
         </Show>
       </main>
     </Show>
