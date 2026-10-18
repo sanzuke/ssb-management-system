@@ -659,3 +659,122 @@
     min-height: 0;
   }
 }
+
+/* ---- Header atas (desktop): pencarian, periode, akun ---- */
+.header-atas {
+  display: none;
+}
+@media (min-width: 1024px) {
+  .header-atas {
+    position: sticky;
+    top: 0;
+    z-index: 15;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    height: 64px;
+    padding: 0 32px;
+    border-bottom: 1px solid var(--garis);
+    background: rgba(255, 255, 255, 0.92);
+    backdrop-filter: blur(8px);
+  }
+  .header-memuat {
+    background: #fff;
+  }
+  .header-kiri {
+    flex: 1;
+    max-width: 36rem;
+  }
+  .header-kanan {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  .cari-global {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0 10px 0 12px;
+    border: 1px solid var(--garis);
+    border-radius: 8px;
+    background: #f1f4ec;
+    color: var(--redup);
+  }
+  .cari-global:focus-within {
+    border-color: var(--rumput);
+    background: #fff;
+  }
+  .cari-global input {
+    flex: 1;
+    min-width: 0;
+    min-height: 40px;
+    border: 0;
+    background: transparent;
+    font: inherit;
+    color: var(--tinta);
+  }
+  .cari-global input:focus-visible {
+    outline: none;
+    box-shadow: none;
+  }
+  .cari-global .pintasan-cari {
+    padding: 1px 6px;
+    border-radius: 4px;
+    background: #e3ece4;
+    color: var(--redup);
+    font-family: ui-monospace, "Cascadia Mono", Consolas, monospace;
+    font-size: 0.7rem;
+  }
+  .chip-periode {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 3px 10px;
+    border-radius: 6px;
+    background: #edf1e7;
+    font-size: 0.8rem;
+    font-weight: 700;
+    white-space: nowrap;
+  }
+  .chip-periode svg {
+    color: var(--kuning-tua);
+  }
+  .pengguna {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding-left: 16px;
+    border-left: 1px solid var(--garis);
+    color: var(--tinta);
+    text-decoration: none;
+  }
+  .pengguna-teks {
+    display: grid;
+    text-align: right;
+    line-height: 1.25;
+  }
+  .pengguna-teks strong {
+    font-size: 0.85rem;
+  }
+  .pengguna-teks span {
+    font-size: 0.75rem;
+    color: var(--redup);
+  }
+  .avatar-pengguna {
+    display: grid;
+    place-items: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: var(--rumput);
+    color: var(--kuning);
+    font-family: var(--judul);
+    font-weight: 800;
+    font-size: 0.85rem;
+  }
+  /* Bilah progres penilaian menempel di bawah header, bukan di tepi layar */
+  .progres-nilai {
+    top: 64px;
+  }
+}

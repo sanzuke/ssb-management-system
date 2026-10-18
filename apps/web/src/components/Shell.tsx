@@ -2,6 +2,7 @@ import { useLocation } from "@solidjs/router";
 import { type JSX, onMount, Show } from "solid-js";
 import { getMe, meCache, meDicek } from "~/lib/api";
 import AppBar from "./AppBar";
+import HeaderAtas from "./HeaderAtas";
 
 /** Halaman tanpa menu: masuk, daftar, pilih SSB, dan undangan. */
 const TANPA_MENU = ["/masuk", "/daftar", "/pilih-ssb"];
@@ -22,8 +23,21 @@ export default function Shell(props: { children: JSX.Element }) {
   return (
     <>
       <Show when={denganMenu() && (meCache() || !meDicek())}>
-        <Show when={meCache()} fallback={<div class="bar bar-memuat" role="presentation" />}>
-          {(m) => <AppBar me={m()} />}
+        <Show
+          when={meCache()}
+          fallback={
+            <>
+              <div class="bar bar-memuat" role="presentation" />
+              <div class="header-atas header-memuat" role="presentation" />
+            </>
+          }
+        >
+          {(m) => (
+            <>
+              <AppBar me={m()} />
+              <HeaderAtas me={m()} />
+            </>
+          )}
         </Show>
       </Show>
       {props.children}
