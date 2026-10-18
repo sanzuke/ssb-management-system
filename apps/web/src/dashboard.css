@@ -1056,3 +1056,105 @@
 .tabel-ku tbody td {
   padding-inline: 8px;
 }
+
+/* ---- Halaman Kehadiran ---- */
+.bilah-hadir {
+  grid-template-columns: 1fr;
+}
+.centang-filter {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 0 12px;
+  border-radius: 8px;
+  background: #f1f4ec;
+  font-weight: 700;
+  font-size: 0.9rem;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.centang-filter input {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--rumput);
+}
+.hisa {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+.hisa > span[data-v] {
+  padding: 1px 8px;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.hisa [data-v="hadir"] {
+  background: #c9ecd6;
+  color: #1e5038;
+}
+.hisa [data-v="izin"] {
+  background: #fbeeb8;
+  color: #6b5200;
+}
+.hisa [data-v="sakit"] {
+  background: #dfe7f3;
+  color: #28466e;
+}
+.hisa [data-v="alpa"] {
+  background: #f0dedb;
+  color: #8b1911;
+}
+.persen-batang {
+  display: grid;
+  gap: 4px;
+  min-width: 9rem;
+}
+.persen-angka {
+  font-family: var(--judul);
+  font-weight: 800;
+  font-size: 1.05rem;
+  font-variant-numeric: tabular-nums;
+}
+.persen-batang .batang {
+  flex: none;
+  height: 8px;
+}
+.persen-batang[data-t="baik"] .persen-angka {
+  color: #1e5038;
+}
+.persen-batang[data-t="sedang"] .persen-angka {
+  color: #8a6a1d;
+}
+.persen-batang[data-t="sedang"] .batang > span {
+  background: #c0841a;
+}
+.persen-batang[data-t="rendah"] .persen-angka {
+  color: var(--merah);
+}
+.persen-batang[data-t="rendah"] .batang > span {
+  background: var(--merah);
+}
+.tabel-hadir .lebar-batang {
+  width: 14rem;
+}
+@media (min-width: 640px) {
+  .bilah-hadir {
+    grid-template-columns: 1fr 1fr 1fr;
+  }
+  .bilah-hadir .kolom-cari {
+    grid-column: 1 / -1;
+  }
+}
+@media (min-width: 900px) {
+  .bilah-hadir {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) minmax(0, 2.2fr) minmax(0, 1.3fr) auto 44px;
+  }
+  .bilah-hadir .kolom-cari {
+    grid-column: auto;
+  }
+}
