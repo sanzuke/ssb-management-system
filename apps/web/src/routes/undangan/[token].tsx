@@ -43,7 +43,7 @@ export default function Undangan() {
   const urlError = () => (typeof params.error === "string" ? (googleErrors[params.error] ?? "Gagal menerima undangan.") : "");
 
   return (
-    <AuthShell>
+    <AuthShell gaya="buku">
       <Title>Undangan · SSB App</Title>
       <Show when={!loading()} fallback={<p>Memeriksa undangan…</p>}>
         <Show

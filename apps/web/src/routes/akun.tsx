@@ -1,5 +1,6 @@
 import { A, useNavigate } from "@solidjs/router";
 import { Title } from "@solidjs/meta";
+import KepalaHalaman from "~/components/KepalaHalaman";
 import { createSignal, onMount, Show } from "solid-js";
 import Field from "~/components/Field";
 import { api, getMe, type Me } from "~/lib/api";
@@ -44,10 +45,7 @@ export default function Akun() {
     <Show when={me()} fallback={<p class="halaman">Memuat…</p>}>
       <Title>Akun · SSB App</Title>
       <main class="halaman">
-        <h1>Akun</h1>
-        <p>
-          {me()!.name}, {me()!.email}
-        </p>
+        <KepalaHalaman chip="Akun" judul={me()!.name} sub={me()!.email} />
 
         <Show when={me()!.active}>
           <h2>Kontak</h2>

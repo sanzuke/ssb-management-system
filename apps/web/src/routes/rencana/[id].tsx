@@ -1,5 +1,6 @@
 import { A, useNavigate, useParams } from "@solidjs/router";
 import { Title } from "@solidjs/meta";
+import KepalaHalaman from "~/components/KepalaHalaman";
 import { createSignal, Index, onMount, Show } from "solid-js";
 import RencanaBaca from "~/components/RencanaBaca";
 import SelectField from "~/components/SelectField";
@@ -100,8 +101,11 @@ export default function RencanaPemain() {
         >
           <Show when={pl()} fallback={<p>Memuat…</p>}>
             <Title>Rencana pengembangan {pl()!.fullName} · SSB App</Title>
-            <h1>Rencana pengembangan {pl()!.fullName}</h1>
-            <p class="petunjuk">Area yang dilatih lebih lanjut pada periode ini. Orang tua melihatnya setelah penilaian periode ini diterbitkan.</p>
+            <KepalaHalaman
+              chip="Rencana pengembangan"
+              judul={`Rencana ${pl()!.fullName}`}
+              sub="Area yang dilatih lebih lanjut pada periode ini. Orang tua melihatnya setelah penilaian periode ini diterbitkan."
+            />
             <Show when={error()}>
               <div class="peringatan" role="alert">
                 {error()}

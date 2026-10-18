@@ -53,7 +53,7 @@ export default function Daftar() {
   const urlError = () => (typeof params.error === "string" ? (googleErrors[params.error] ?? "Pendaftaran gagal. Coba lagi.") : "");
 
   return (
-    <AuthShell>
+    <AuthShell gaya="buku">
       <Title>Daftarkan SSB · SSB App</Title>
       <h1>Daftarkan SSB Anda</h1>
       <p>Anda menjadi admin SSB. Pelatih dan orang tua bergabung lewat tautan undangan.</p>

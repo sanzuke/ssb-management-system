@@ -1,5 +1,6 @@
 import { A, useNavigate, useParams } from "@solidjs/router";
 import { Title } from "@solidjs/meta";
+import KepalaHalaman from "~/components/KepalaHalaman";
 import { createMemo, createSignal, For, onMount, Show } from "solid-js";
 import GrafikNilai from "~/components/GrafikNilai";
 import HasilNilai from "~/components/HasilNilai";
@@ -152,14 +153,11 @@ export default function NilaiPemain() {
         >
           <Show when={pl()} fallback={<p>Memuat…</p>}>
             <Title>Penilaian {pl()!.fullName} · SSB App</Title>
-            <h1>Penilaian {pl()!.fullName}</h1>
-            <p class="ortu-chip-baris">
-              <Show when={pl()!.memberNo}>
-                <span class="ortu-chip">{pl()!.memberNo}</span>
-              </Show>
-              <span class="ortu-chip">{pl()!.ageGroup?.name ?? "Belum ada KU"}</span>
-              <span class="ortu-chip kuning">Skala 1 sampai 10</span>
-            </p>
+            <KepalaHalaman
+              chip="Penilaian"
+              judul={`Penilaian ${pl()!.fullName}`}
+              sub={[pl()!.memberNo, pl()!.ageGroup?.name ?? "Belum ada KU", "skala 1 sampai 10"].filter(Boolean).join(" • ")}
+            />
             <Show when={error()}>
               <div class="peringatan" role="alert">
                 {error()}

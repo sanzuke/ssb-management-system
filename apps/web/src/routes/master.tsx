@@ -1,5 +1,6 @@
 import { A, useNavigate } from "@solidjs/router";
 import { Title } from "@solidjs/meta";
+import KepalaHalaman from "~/components/KepalaHalaman";
 import { createSignal, onMount, Show } from "solid-js";
 import MasterSection from "~/components/MasterSection";
 import { getMe, type Me } from "~/lib/api";
@@ -24,12 +25,12 @@ export default function Master() {
     <Show when={me()} fallback={<p class="halaman">Memuat…</p>}>
       <Title>Data master · SSB App</Title>
       <main class="halaman">
-        <h1>Data master</h1>
+        <KepalaHalaman
+          chip="Pengaturan"
+          judul="Data master"
+          sub={`Kelompok usia, periode, dan lokasi latihan dipakai di data pemain dan jadwal.${role() === "admin_ssb" ? "" : " Hanya admin SSB yang bisa mengubahnya."}`}
+        />
         <Show when={canRead()} fallback={<p>Halaman ini hanya untuk admin, pelatih, dan koordinator.</p>}>
-          <p>
-            Kelompok usia, periode, dan lokasi latihan dipakai di data pemain dan jadwal.
-            {role() === "admin_ssb" ? "" : " Hanya admin SSB yang bisa mengubahnya."}
-          </p>
           <MasterSection
             title="Kelompok usia (KU)"
             path="/age-groups"

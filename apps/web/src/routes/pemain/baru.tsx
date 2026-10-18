@@ -1,5 +1,6 @@
 import { A, useNavigate } from "@solidjs/router";
 import { Title } from "@solidjs/meta";
+import KepalaHalaman from "~/components/KepalaHalaman";
 import { createSignal, onMount, Show } from "solid-js";
 import PlayerForm from "~/components/PlayerForm";
 import { api, getMe, type Me } from "~/lib/api";
@@ -22,7 +23,7 @@ export default function PemainBaru() {
     <Show when={me()} fallback={<p class="halaman">Memuat…</p>}>
       <Title>Tambah pemain · SSB App</Title>
       <main class="halaman">
-        <h1>Tambah pemain</h1>
+        <KepalaHalaman chip="Data pemain" judul="Tambah pemain" sub="Isi biodata pemain. Nomor induk dibuat otomatis." />
         <Show when={groups().length === 0}>
           <p class="info">
             Belum ada KU. Pemain tetap bisa ditambahkan sekarang, KU diisi nanti setelah dibuat di <A href="/master">Data master</A>.

@@ -1254,3 +1254,72 @@
     grid-column: auto;
   }
 }
+
+/* ---- Skin seragam untuk halaman lain (master, indikator, penugasan, profil, akun, rencana) ---- */
+.halaman .master,
+.halaman .aspek:not(.kartu-aspek),
+.halaman .rincian,
+.halaman > .form,
+.halaman > form {
+  padding: 16px;
+  border: 1px solid var(--garis);
+  border-radius: 12px;
+  background: #fff;
+}
+.halaman .master,
+.halaman .aspek:not(.kartu-aspek) {
+  margin: 16px 0;
+}
+.halaman .master > :last-child,
+.halaman .aspek:not(.kartu-aspek) > :last-child {
+  margin-bottom: 0;
+}
+.halaman .master h2,
+.halaman .aspek:not(.kartu-aspek) h2 {
+  margin: 0 0 10px;
+  font-size: 1.05rem;
+}
+.halaman .master .daftar-butir,
+.halaman .aspek:not(.kartu-aspek) .daftar-butir {
+  margin-bottom: 8px;
+}
+.halaman .rincian {
+  margin: 0 0 16px;
+}
+.halaman > .form,
+.halaman > form {
+  margin-bottom: 16px;
+}
+/* Formulir di dalam panel tidak perlu bingkai ganda */
+.halaman .master .form,
+.halaman .aspek .form,
+.halaman .master form,
+.halaman .aspek form {
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+.kepala-dashboard .aksi-baris {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0;
+}
+.halaman .tautan-bawah {
+  margin-top: 8px;
+}
+@media (min-width: 1024px) {
+  .halaman .master .tombol:not(.tipis):not(.bahaya),
+  .halaman .aspek:not(.kartu-aspek) .tombol:not(.tipis):not(.bahaya),
+  .halaman > form .tombol {
+    width: auto;
+    min-width: 10rem;
+    border-radius: 8px;
+    border-width: 1px;
+  }
+  .halaman .master .tombol.utama,
+  .halaman .aspek:not(.kartu-aspek) .tombol.utama,
+  .halaman > form .tombol.utama {
+    border-color: #d8a826;
+  }
+}
