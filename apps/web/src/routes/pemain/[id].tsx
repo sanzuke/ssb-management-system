@@ -1,6 +1,7 @@
 import { A, useNavigate, useParams } from "@solidjs/router";
 import { Title } from "@solidjs/meta";
-import FotoPemain from "~/components/FotoPemain";
+import KartuProfil from "~/components/KartuProfil";
+import RingkasanNilai from "~/components/RingkasanNilai";
 import KepalaHalaman from "~/components/KepalaHalaman";
 import { createSignal, For, onMount, Show } from "solid-js";
 import PlayerForm from "~/components/PlayerForm";
@@ -8,6 +9,7 @@ import SelectField from "~/components/SelectField";
 import { api, ApiError, getMe, type Me } from "~/lib/api";
 import { createSubmit } from "~/lib/form";
 import { posisiLabel, statusLabel, tanggal, usia, type AgeGroup, type PlayerDetail } from "~/lib/pemain";
+import type { AssessmentView } from "@ssb/shared";
 
 type Member = { id: string; name: string; email: string; role: string };
 
@@ -63,9 +65,16 @@ export default function DetailPemain() {
     }
   };
 
+  const [nilai, setNilai] = createSignal<AssessmentView[]>([]);
+  const [periodeId, setPeriodeId] = createSignal("");
+  // Periode yang tampil: pilihan pengguna, atau yang terbaru (yang punya skor lebih dulu).
+  const terbaru = () => [...nilai()].sort((a, b) => b.period.startDate.localeCompare(a.period.startDate));
+  const terpilih = () => nilai().find((a) => a.period.id === periodeId()) ?? terbaru().find((a) => a.overall !== null) ?? terbaru()[0] ?? null;
+
   const load = async () => {
     try {
       setPl(await api<PlayerDetail>(`/players/${encodeURIComponent(p.id)}`));
+      setNilai(await api<AssessmentView[]>(`/players/${encodeURIComponent(p.id)}/assessments`).catch(() => []));
     } catch (e) {
       if (e instanceof ApiError && e.status === 404) setMissing(true);
     }
@@ -128,163 +137,191 @@ export default function DetailPemain() {
                   Penilaian
                 </A>
                 <A class="tombol tombol-kecil" href={`/kartu/${pl()!.id}`}>
-                  Kartu pemain
+                  Kartu QR
                 </A>
+                <Show when={terpilih()}>
+                  <a class="tombol tombol-kecil" href={`/api/players/${encodeURIComponent(pl()!.id)}/assessments/${terpilih()!.period.id}/report`} download="">
+                    Rapor PDF
+                  </a>
+                </Show>
               </p>
             </KepalaHalaman>
-            <Show
-              when={!editing()}
-              fallback={
-                <>
-                  <PlayerForm
-                    initial={pl()!}
-                    ageGroups={groups()}
-                    onSaved={async () => {
-                      setEditing(false);
-                      setSaved(true);
-                      await load();
-                    }}
-                  />
-                  <p class="tautan-bawah">
-                    <button class="tombol tipis" type="button" onClick={() => setEditing(false)}>
-                      Batal
-                    </button>
-                  </p>
-                </>
-              }
-            >
-              <Show when={saved()}>
-                <div class="info" role="status">
-                  Perubahan disimpan.
-                </div>
-              </Show>
-              <div class="foto-kelola">
-                <FotoPemain id={pl()!.id} nama={pl()!.fullName} photoV={pl()!.photoV} ukuran="besar" />
-                <Show when={bisaFoto()}>
-                  {/* biome-ignore lint/a11y/noLabelWithoutControl: input berkas tersembunyi ada di dalam label */}
-                  <label class="tombol tombol-kecil" aria-disabled={fotoBusy()}>
-                    {fotoBusy() ? "Mengunggah…" : pl()!.photoV ? "Ganti foto" : "Unggah foto"}
-                    <input type="file" accept="image/jpeg,image/png,image/webp" disabled={fotoBusy()} onChange={unggahFoto} />
-                  </label>
-                  <Show when={pl()!.photoV}>
-                    <button class="tombol tipis tombol-kecil" type="button" disabled={fotoBusy()} onClick={hapusFoto}>
-                      Hapus foto
-                    </button>
-                  </Show>
-                  <span class="petunjuk">JPG, PNG, atau WebP, maksimal 2 MB. Foto persegi (wajah di tengah) paling pas.</span>
-                </Show>
-              </div>
-              <Show when={fotoError()}>
-                <div class="peringatan" role="alert">
-                  {fotoError()}
-                </div>
-              </Show>
-              <dl class="rincian">
-                <dt>Nomor anggota</dt>
-                <dd>{pl()!.memberNo ?? "-"}</dd>
-                <dt>Tanggal lahir</dt>
-                <dd>
-                  {tanggal(pl()!.birthDate)}, {usia(pl()!.birthDate)} tahun
-                </dd>
-                <dt>KU</dt>
-                <dd>{pl()!.ageGroup?.name ?? "Belum ditentukan"}</dd>
-                <dt>Posisi</dt>
-                <dd>{pl()!.position ? posisiLabel[pl()!.position!] : "Belum ditentukan"}</dd>
-                <dt>Sekolah</dt>
-                <dd>{pl()!.school ?? "-"}</dd>
-                <dt>Status</dt>
-                <dd>{statusLabel[pl()!.status]}</dd>
-              </dl>
-              <Show when={admin()}>
-                <button
-                  class="tombol"
-                  type="button"
-                  onClick={() => {
-                    setSaved(false);
-                    setEditing(true);
-                  }}
-                >
-                  Ubah data pemain
-                </button>
-              </Show>
-            </Show>
-
-            <Show when={admin()}>
-              <section class="master">
-                <h2>Orang tua</h2>
-                <Show when={guardianError()}>
-                  <div class="peringatan" role="alert">
-                    {guardianError()}
+            <div class="profil-grid">
+              <div class="profil-kiri">
+                <KartuProfil pl={pl()!} nilai={terpilih()}>
+                  <div class="foto-kelola">
+                    <Show when={bisaFoto()}>
+                      {/* biome-ignore lint/a11y/noLabelWithoutControl: input berkas tersembunyi ada di dalam label */}
+                      <label class="tombol tombol-kecil" aria-disabled={fotoBusy()}>
+                        {fotoBusy() ? "Mengunggah…" : pl()!.photoV ? "Ganti foto" : "Unggah foto"}
+                        <input type="file" accept="image/jpeg,image/png,image/webp" disabled={fotoBusy()} onChange={unggahFoto} />
+                      </label>
+                      <Show when={pl()!.photoV}>
+                        <button class="tombol tipis tombol-kecil" type="button" disabled={fotoBusy()} onClick={hapusFoto}>
+                          Hapus foto
+                        </button>
+                      </Show>
+                      <span class="petunjuk">JPG, PNG, atau WebP, maksimal 2 MB. Foto persegi dengan wajah di tengah paling pas.</span>
+                    </Show>
                   </div>
-                </Show>
-                <Show
-                  when={(pl()!.guardians ?? []).length > 0}
-                  fallback={
-                    <p class="kosong">
-                      Belum ada orang tua yang terhubung. Buat <A href="/undangan">undangan orang tua</A>, atau hubungkan akun yang sudah ada.
-                    </p>
-                  }
-                >
-                  <ul class="daftar-butir">
-                    <For each={pl()!.guardians}>
-                      {(g) => (
-                        <li class="butir">
-                          <span class="isi">
-                            {g.name}
-                            {g.relationship ? `, ${g.relationship}` : ""}
-                          </span>
-                          <button class="tombol tipis" type="button" onClick={() => removeGuardian(g.userId)}>
-                            Lepas
+                  <Show when={fotoError()}>
+                    <div class="peringatan" role="alert">
+                      {fotoError()}
+                    </div>
+                  </Show>
+                </KartuProfil>
+              </div>
+              <div class="profil-kanan">
+                {/* biome-ignore lint/a11y/useSemanticElements: pintasan ke bagian halaman, hanya di HP */}
+                <div class="profil-nav" role="group" aria-label="Loncat ke bagian">
+                  <a href="#radar">Radar</a>
+                  <a href="#atribut">Atribut</a>
+                  <a href="#data">Data</a>
+                </div>
+                <RingkasanNilai
+                  playerId={pl()!.id}
+                  list={nilai()}
+                  selectedId={terpilih()?.period.id ?? ""}
+                  onSelect={setPeriodeId}
+                  staf={me()!.active!.role !== "orang_tua"}
+                />
+                <div id="data">
+                  <Show
+                    when={!editing()}
+                    fallback={
+                      <>
+                        <PlayerForm
+                          initial={pl()!}
+                          ageGroups={groups()}
+                          onSaved={async () => {
+                            setEditing(false);
+                            setSaved(true);
+                            await load();
+                          }}
+                        />
+                        <p class="tautan-bawah">
+                          <button class="tombol tipis" type="button" onClick={() => setEditing(false)}>
+                            Batal
                           </button>
-                        </li>
-                      )}
-                    </For>
-                  </ul>
-                </Show>
-                <Show when={available().length > 0}>
-                  <form class="form" onSubmit={addGuardian.submit}>
-                    <Show when={addGuardian.error()}>
-                      <div class="peringatan" role="alert">
-                        {addGuardian.error()}
+                        </p>
+                      </>
+                    }
+                  >
+                    <Show when={saved()}>
+                      <div class="info" role="status">
+                        Perubahan disimpan.
                       </div>
                     </Show>
-                    <SelectField
-                      id="ortu"
-                      label="Hubungkan orang tua yang sudah bergabung"
-                      blank="Pilih orang tua"
-                      required
-                      value={pick()}
-                      onInput={setPick}
-                      options={available().map((u) => ({ value: u.id, label: `${u.name} (${u.email})` }))}
-                    />
-                    <button class="tombol" type="submit" disabled={addGuardian.busy()}>
-                      Hubungkan
-                    </button>
-                  </form>
-                </Show>
-              </section>
-            </Show>
+                    <dl class="rincian">
+                      <dt>Nomor anggota</dt>
+                      <dd>{pl()!.memberNo ?? "-"}</dd>
+                      <dt>Tanggal lahir</dt>
+                      <dd>
+                        {tanggal(pl()!.birthDate)}, {usia(pl()!.birthDate)} tahun
+                      </dd>
+                      <dt>KU</dt>
+                      <dd>{pl()!.ageGroup?.name ?? "Belum ditentukan"}</dd>
+                      <dt>Posisi</dt>
+                      <dd>{pl()!.position ? posisiLabel[pl()!.position!] : "Belum ditentukan"}</dd>
+                      <dt>Sekolah</dt>
+                      <dd>{pl()!.school ?? "-"}</dd>
+                      <dt>Status</dt>
+                      <dd>{statusLabel[pl()!.status]}</dd>
+                    </dl>
+                    <Show when={admin()}>
+                      <button
+                        class="tombol"
+                        type="button"
+                        onClick={() => {
+                          setSaved(false);
+                          setEditing(true);
+                        }}
+                      >
+                        Ubah data pemain
+                      </button>
+                    </Show>
+                  </Show>
 
-            <Show when={me()!.active!.role !== "orang_tua"}>
-              <section class="master">
-                <h2>Riwayat perubahan</h2>
-                <Show when={pl()!.history.length > 0} fallback={<p class="kosong">Belum ada perubahan KU atau status.</p>}>
-                  <ul class="daftar-butir">
-                    <For each={pl()!.history}>
-                      {(h) => (
-                        <li class="butir">
-                          <span class="isi">
-                            {h.field === "age_group" ? "KU" : "Status"}: {h.field === "status" ? (statusLabel[h.from ?? ""] ?? "-") : (h.from ?? "belum ada")}{" "}
-                            menjadi {h.field === "status" ? (statusLabel[h.to ?? ""] ?? "-") : (h.to ?? "belum ada")}
-                          </span>
-                          <span class="petunjuk">{tanggal(h.at)}</span>
-                        </li>
-                      )}
-                    </For>
-                  </ul>
-                </Show>
-              </section>
-            </Show>
+                  <Show when={admin()}>
+                    <section class="master">
+                      <h2>Orang tua</h2>
+                      <Show when={guardianError()}>
+                        <div class="peringatan" role="alert">
+                          {guardianError()}
+                        </div>
+                      </Show>
+                      <Show
+                        when={(pl()!.guardians ?? []).length > 0}
+                        fallback={
+                          <p class="kosong">
+                            Belum ada orang tua yang terhubung. Buat <A href="/undangan">undangan orang tua</A>, atau hubungkan akun yang sudah ada.
+                          </p>
+                        }
+                      >
+                        <ul class="daftar-butir">
+                          <For each={pl()!.guardians}>
+                            {(g) => (
+                              <li class="butir">
+                                <span class="isi">
+                                  {g.name}
+                                  {g.relationship ? `, ${g.relationship}` : ""}
+                                </span>
+                                <button class="tombol tipis" type="button" onClick={() => removeGuardian(g.userId)}>
+                                  Lepas
+                                </button>
+                              </li>
+                            )}
+                          </For>
+                        </ul>
+                      </Show>
+                      <Show when={available().length > 0}>
+                        <form class="form" onSubmit={addGuardian.submit}>
+                          <Show when={addGuardian.error()}>
+                            <div class="peringatan" role="alert">
+                              {addGuardian.error()}
+                            </div>
+                          </Show>
+                          <SelectField
+                            id="ortu"
+                            label="Hubungkan orang tua yang sudah bergabung"
+                            blank="Pilih orang tua"
+                            required
+                            value={pick()}
+                            onInput={setPick}
+                            options={available().map((u) => ({ value: u.id, label: `${u.name} (${u.email})` }))}
+                          />
+                          <button class="tombol" type="submit" disabled={addGuardian.busy()}>
+                            Hubungkan
+                          </button>
+                        </form>
+                      </Show>
+                    </section>
+                  </Show>
+
+                  <Show when={me()!.active!.role !== "orang_tua"}>
+                    <section class="master">
+                      <h2>Riwayat perubahan</h2>
+                      <Show when={pl()!.history.length > 0} fallback={<p class="kosong">Belum ada perubahan KU atau status.</p>}>
+                        <ul class="daftar-butir">
+                          <For each={pl()!.history}>
+                            {(h) => (
+                              <li class="butir">
+                                <span class="isi">
+                                  {h.field === "age_group" ? "KU" : "Status"}:{" "}
+                                  {h.field === "status" ? (statusLabel[h.from ?? ""] ?? "-") : (h.from ?? "belum ada")} menjadi{" "}
+                                  {h.field === "status" ? (statusLabel[h.to ?? ""] ?? "-") : (h.to ?? "belum ada")}
+                                </span>
+                                <span class="petunjuk">{tanggal(h.at)}</span>
+                              </li>
+                            )}
+                          </For>
+                        </ul>
+                      </Show>
+                    </section>
+                  </Show>
+                </div>
+              </div>
+            </div>
             <p class="tautan-bawah">
               <A href="/pemain">Kembali ke daftar pemain</A>
             </p>
