@@ -1,0 +1,2893 @@
+{
+  "id": "574c9c9a-7fd4-462d-9ed1-388c9ce421dc",
+  "prevId": "b367d30b-1c95-4cb5-8300-e7ec96f65794",
+  "version": "7",
+  "dialect": "postgresql",
+  "tables": {
+    "public.account": {
+      "name": "account",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "email": {
+          "name": "email",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "password_hash": {
+          "name": "password_hash",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "google_sub": {
+          "name": "google_sub",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "account_email_unique": {
+          "name": "account_email_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "email"
+          ]
+        },
+        "account_google_sub_unique": {
+          "name": "account_google_sub_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "google_sub"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {
+        "account_has_credential": {
+          "name": "account_has_credential",
+          "value": "\"account\".\"password_hash\" is not null or \"account\".\"google_sub\" is not null"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.age_group": {
+      "name": "age_group",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "ssb_id": {
+          "name": "ssb_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "min_age": {
+          "name": "min_age",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "max_age": {
+          "name": "max_age",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "monthly_fee": {
+          "name": "monthly_fee",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "age_group_ssb_id_ssb_id_fk": {
+          "name": "age_group_ssb_id_ssb_id_fk",
+          "tableFrom": "age_group",
+          "tableTo": "ssb",
+          "columnsFrom": [
+            "ssb_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "age_group_ssb_name": {
+          "name": "age_group_ssb_name",
+          "nullsNotDistinct": false,
+          "columns": [
+            "ssb_id",
+            "name"
+          ]
+        },
+        "age_group_ssb_id": {
+          "name": "age_group_ssb_id",
+          "nullsNotDistinct": false,
+          "columns": [
+            "ssb_id",
+            "id"
+          ]
+        }
+      },
+      "policies": {
+        "age_group_tenant": {
+          "name": "age_group_tenant",
+          "as": "PERMISSIVE",
+          "for": "ALL",
+          "to": [
+            "ssb_app"
+          ],
+          "using": "ssb_id = nullif(current_setting('app.ssb_id', true), '')::uuid",
+          "withCheck": "ssb_id = nullif(current_setting('app.ssb_id', true), '')::uuid"
+        }
+      },
+      "checkConstraints": {
+        "age_group_fee": {
+          "name": "age_group_fee",
+          "value": "\"age_group\".\"monthly_fee\" is null or \"age_group\".\"monthly_fee\" >= 0"
+        },
+        "age_group_range": {
+          "name": "age_group_range",
+          "value": "\"age_group\".\"min_age\" >= 0 AND \"age_group\".\"max_age\" >= \"age_group\".\"min_age\""
+        }
+      },
+      "isRLSEnabled": true
+    },
+    "public.app_user": {
+      "name": "app_user",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "ssb_id": {
+          "name": "ssb_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "account_id": {
+          "name": "account_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "whatsapp": {
+          "name": "whatsapp",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "role": {
+          "name": "role",
+          "type": "user_role",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "app_user_ssb_id_ssb_id_fk": {
+          "name": "app_user_ssb_id_ssb_id_fk",
+          "tableFrom": "app_user",
+          "tableTo": "ssb",
+          "columnsFrom": [
+            "ssb_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "app_user_account_id_account_id_fk": {
+          "name": "app_user_account_id_account_id_fk",
+          "tableFrom": "app_user",
+          "tableTo": "account",
+          "columnsFrom": [
+            "account_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "app_user_ssb_account": {
+          "name": "app_user_ssb_account",
+          "nullsNotDistinct": false,
+          "columns": [
+            "ssb_id",
+            "account_id"
+          ]
+        },
+        "app_user_ssb_id": {
+          "name": "app_user_ssb_id",
+          "nullsNotDistinct": false,
+          "columns": [
+            "ssb_id",
+            "id"
+          ]
+        }
+      },
+      "policies": {
+        "app_user_tenant": {
+          "name": "app_user_tenant",
+          "as": "PERMISSIVE",
+          "for": "ALL",
+          "to": [
+            "ssb_app"
+          ],
+          "using": "ssb_id = nullif(current_setting('app.ssb_id', true), '')::uuid",
+          "withCheck": "ssb_id = nullif(current_setting('app.ssb_id', true), '')::uuid"
+        },
+        "app_user_own_memberships": {
+          "name": "app_user_own_memberships",
+          "as": "PERMISSIVE",
+          "for": "SELECT",
+          "to": [
+            "ssb_app"
+          ],
+          "using": "account_id = nullif(current_setting('app.account_id', true), '')::uuid"
+        }
+      },
+      "checkConstraints": {},
+      "isRLSEnabled": true
+    },
+    "public.assessment": {
+      "name": "assessment",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "ssb_id": {
+          "name": "ssb_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "player_id": {
+          "name": "player_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "period_id": {
+          "name": "period_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "age_group_id": {
+          "name": "age_group_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "assessed_on": {
+          "name": "assessed_on",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "note": {
+          "name": "note",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "assessor_id": {
+          "name": "assessor_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "published_at": {
+          "name": "published_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "assessment_ssb_id_ssb_id_fk": {
+          "name": "assessment_ssb_id_ssb_id_fk",
+          "tableFrom": "assessment",
+          "tableTo": "ssb",
+          "columnsFrom": [
+            "ssb_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "assessment_player_fk": {
+          "name": "assessment_player_fk",
+          "tableFrom": "assessment",
+          "tableTo": "player",
+          "columnsFrom": [
+            "ssb_id",
+            "player_id"
+          ],
+          "columnsTo": [
+            "ssb_id",
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "assessment_period_fk": {
+          "name": "assessment_period_fk",
+          "tableFrom": "assessment",
+          "tableTo": "period",
+          "columnsFrom": [
+            "ssb_id",
+            "period_id"
+          ],
+          "columnsTo": [
+            "ssb_id",
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "assessment_age_group_fk": {
+          "name": "assessment_age_group_fk",
+          "tableFrom": "assessment",
+          "tableTo": "age_group",
+          "columnsFrom": [
+            "ssb_id",
+            "age_group_id"
+          ],
+          "columnsTo": [
+            "ssb_id",
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "assessment_assessor_fk": {
+          "name": "assessment_assessor_fk",
+          "tableFrom": "assessment",
+          "tableTo": "app_user",
+          "columnsFrom": [
+            "ssb_id",
+            "assessor_id"
+          ],
+          "columnsTo": [
+            "ssb_id",
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "assessment_ssb_id": {
+          "name": "assessment_ssb_id",
+          "nullsNotDistinct": false,
+          "columns": [
+            "ssb_id",
+            "id"
+          ]
+        },
+        "assessment_player_period": {
+          "name": "assessment_player_period",
+          "nullsNotDistinct": false,
+          "columns": [
+            "ssb_id",
+            "player_id",
+            "period_id"
+          ]
+        }
+      },
+      "policies": {
+        "assessment_tenant": {
+          "name": "assessment_tenant",
+          "as": "PERMISSIVE",
+          "for": "ALL",
+          "to": [
+            "ssb_app"
+          ],
+          "using": "ssb_id = nullif(current_setting('app.ssb_id', true), '')::uuid",
+          "withCheck": "ssb_id = nullif(current_setting('app.ssb_id', true), '')::uuid"
+        }
+      },
+      "checkConstraints": {},
+      "isRLSEnabled": true
+    },
+    "public.assessment_indicator": {
+      "name": "assessment_indicator",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "ssb_id": {
+          "name": "ssb_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "age_group_id": {
+          "name": "age_group_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "aspect": {
+          "name": "aspect",
+          "type": "assessment_aspect",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "sort_order": {
+          "name": "sort_order",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "active": {
+          "name": "active",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "assessment_indicator_ssb_id_ssb_id_fk": {
+          "name": "assessment_indicator_ssb_id_ssb_id_fk",
+          "tableFrom": "assessment_indicator",
+          "tableTo": "ssb",
+          "columnsFrom": [
+            "ssb_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "assessment_indicator_age_group_fk": {
+          "name": "assessment_indicator_age_group_fk",
+          "tableFrom": "assessment_indicator",
+          "tableTo": "age_group",
+          "columnsFrom": [
+            "ssb_id",
+            "age_group_id"
+          ],
+          "columnsTo": [
+            "ssb_id",
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "assessment_indicator_ssb_id": {
+          "name": "assessment_indicator_ssb_id",
+          "nullsNotDistinct": false,
+          "columns": [
+            "ssb_id",
+            "id"
+          ]
+        },
+        "assessment_indicator_group_name": {
+          "name": "assessment_indicator_group_name",
+          "nullsNotDistinct": false,
+          "columns": [
+            "ssb_id",
+            "age_group_id",
+            "name"
+          ]
+        }
+      },
+      "policies": {
+        "assessment_indicator_tenant": {
+          "name": "assessment_indicator_tenant",
+          "as": "PERMISSIVE",
+          "for": "ALL",
+          "to": [
+            "ssb_app"
+          ],
+          "using": "ssb_id = nullif(current_setting('app.ssb_id', true), '')::uuid",
+          "withCheck": "ssb_id = nullif(current_setting('app.ssb_id', true), '')::uuid"
+        }
+      },
+      "checkConstraints": {},
+      "isRLSEnabled": true
+    },
+    "public.assessment_score": {
+      "name": "assessment_score",
+      "schema": "",
+      "columns": {
+        "ssb_id": {
+          "name": "ssb_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "assessment_id": {
+          "name": "assessment_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "indicator_id": {
+          "name": "indicator_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "score": {
+          "name": "score",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "assessment_score_assessment_fk": {
+          "name": "assessment_score_assessment_fk",
+          "tableFrom": "assessment_score",
+          "tableTo": "assessment",
+          "columnsFrom": [
+            "ssb_id",
+            "assessment_id"
+          ],
+          "columnsTo": [
+            "ssb_id",
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "assessment_score_indicator_fk": {
+          "name": "assessment_score_indicator_fk",
+          "tableFrom": "assessment_score",
+          "tableTo": "assessment_indicator",
+          "columnsFrom": [
+            "ssb_id",
+            "indicator_id"
+          ],
+          "columnsTo": [
+            "ssb_id",
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "assessment_score_assessment_id_indicator_id_pk": {
+          "name": "assessment_score_assessment_id_indicator_id_pk",
+          "columns": [
+            "assessment_id",
+            "indicator_id"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "policies": {
+        "assessment_score_tenant": {
+          "name": "assessment_score_tenant",
+          "as": "PERMISSIVE",
+          "for": "ALL",
+          "to": [
+            "ssb_app"
+          ],
+          "using": "ssb_id = nullif(current_setting('app.ssb_id', true), '')::uuid",
+          "withCheck": "ssb_id = nullif(current_setting('app.ssb_id', true), '')::uuid"
+        }
+      },
+      "checkConstraints": {
+        "assessment_score_range": {
+          "name": "assessment_score_range",
+          "value": "\"assessment_score\".\"score\" between 1 and 10"
+        }
+      },
+      "isRLSEnabled": true
+    },
+    "public.assessment_score_log": {
+      "name": "assessment_score_log",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "ssb_id": {
+          "name": "ssb_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "assessment_id": {
+          "name": "assessment_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "indicator_id": {
+          "name": "indicator_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "old_score": {
+          "name": "old_score",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "new_score": {
+          "name": "new_score",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "changed_by": {
+          "name": "changed_by",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "changed_at": {
+          "name": "changed_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "assessment_score_log_assessment_idx": {
+          "name": "assessment_score_log_assessment_idx",
+          "columns": [
+            {
+              "expression": "ssb_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "assessment_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "changed_at",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "assessment_score_log_ssb_id_ssb_id_fk": {
+          "name": "assessment_score_log_ssb_id_ssb_id_fk",
+          "tableFrom": "assessment_score_log",
+          "tableTo": "ssb",
+          "columnsFrom": [
+            "ssb_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "assessment_score_log_assessment_fk": {
+          "name": "assessment_score_log_assessment_fk",
+          "tableFrom": "assessment_score_log",
+          "tableTo": "assessment",
+          "columnsFrom": [
+            "ssb_id",
+            "assessment_id"
+          ],
+          "columnsTo": [
+            "ssb_id",
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "assessment_score_log_indicator_fk": {
+          "name": "assessment_score_log_indicator_fk",
+          "tableFrom": "assessment_score_log",
+          "tableTo": "assessment_indicator",
+          "columnsFrom": [
+            "ssb_id",
+            "indicator_id"
+          ],
+          "columnsTo": [
+            "ssb_id",
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "assessment_score_log_changed_by_fk": {
+          "name": "assessment_score_log_changed_by_fk",
+          "tableFrom": "assessment_score_log",
+          "tableTo": "app_user",
+          "columnsFrom": [
+            "ssb_id",
+            "changed_by"
+          ],
+          "columnsTo": [
+            "ssb_id",
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {
+        "assessment_score_log_tenant": {
+          "name": "assessment_score_log_tenant",
+          "as": "PERMISSIVE",
+          "for": "ALL",
+          "to": [
+            "ssb_app"
+          ],
+          "using": "ssb_id = nullif(current_setting('app.ssb_id', true), '')::uuid",
+          "withCheck": "ssb_id = nullif(current_setting('app.ssb_id', true), '')::uuid"
+        }
+      },
+      "checkConstraints": {},
+      "isRLSEnabled": true
+    },
+    "public.attendance": {
+      "name": "attendance",
+      "schema": "",
+      "columns": {
+        "ssb_id": {
+          "name": "ssb_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "session_id": {
+          "name": "session_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "player_id": {
+          "name": "player_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "status": {
+          "name": "status",
+          "type": "attendance_status",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "note": {
+          "name": "note",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "recorded_by": {
+          "name": "recorded_by",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "recorded_at": {
+          "name": "recorded_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "attendance_player_idx": {
+          "name": "attendance_player_idx",
+          "columns": [
+            {
+              "expression": "ssb_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "player_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "attendance_session_fk": {
+          "name": "attendance_session_fk",
+          "tableFrom": "attendance",
+          "tableTo": "training_session",
+          "columnsFrom": [
+            "ssb_id",
+            "session_id"
+          ],
+          "columnsTo": [
+            "ssb_id",
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "attendance_player_fk": {
+          "name": "attendance_player_fk",
+          "tableFrom": "attendance",
+          "tableTo": "player",
+          "columnsFrom": [
+            "ssb_id",
+            "player_id"
+          ],
+          "columnsTo": [
+            "ssb_id",
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "attendance_recorded_by_fk": {
+          "name": "attendance_recorded_by_fk",
+          "tableFrom": "attendance",
+          "tableTo": "app_user",
+          "columnsFrom": [
+            "ssb_id",
+            "recorded_by"
+          ],
+          "columnsTo": [
+            "ssb_id",
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "attendance_session_id_player_id_pk": {
+          "name": "attendance_session_id_player_id_pk",
+          "columns": [
+            "session_id",
+            "player_id"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "policies": {
+        "attendance_tenant": {
+          "name": "attendance_tenant",
+          "as": "PERMISSIVE",
+          "for": "ALL",
+          "to": [
+            "ssb_app"
+          ],
+          "using": "ssb_id = nullif(current_setting('app.ssb_id', true), '')::uuid",
+          "withCheck": "ssb_id = nullif(current_setting('app.ssb_id', true), '')::uuid"
+        }
+      },
+      "checkConstraints": {},
+      "isRLSEnabled": true
+    },
+    "public.coach_assignment": {
+      "name": "coach_assignment",
+      "schema": "",
+      "columns": {
+        "ssb_id": {
+          "name": "ssb_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "age_group_id": {
+          "name": "age_group_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "period_id": {
+          "name": "period_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "coach_assignment_user_fk": {
+          "name": "coach_assignment_user_fk",
+          "tableFrom": "coach_assignment",
+          "tableTo": "app_user",
+          "columnsFrom": [
+            "ssb_id",
+            "user_id"
+          ],
+          "columnsTo": [
+            "ssb_id",
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "coach_assignment_age_group_fk": {
+          "name": "coach_assignment_age_group_fk",
+          "tableFrom": "coach_assignment",
+          "tableTo": "age_group",
+          "columnsFrom": [
+            "ssb_id",
+            "age_group_id"
+          ],
+          "columnsTo": [
+            "ssb_id",
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "coach_assignment_period_fk": {
+          "name": "coach_assignment_period_fk",
+          "tableFrom": "coach_assignment",
+          "tableTo": "period",
+          "columnsFrom": [
+            "ssb_id",
+            "period_id"
+          ],
+          "columnsTo": [
+            "ssb_id",
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "coach_assignment_user_id_age_group_id_period_id_pk": {
+          "name": "coach_assignment_user_id_age_group_id_period_id_pk",
+          "columns": [
+            "user_id",
+            "age_group_id",
+            "period_id"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "policies": {
+        "coach_assignment_tenant": {
+          "name": "coach_assignment_tenant",
+          "as": "PERMISSIVE",
+          "for": "ALL",
+          "to": [
+            "ssb_app"
+          ],
+          "using": "ssb_id = nullif(current_setting('app.ssb_id', true), '')::uuid",
+          "withCheck": "ssb_id = nullif(current_setting('app.ssb_id', true), '')::uuid"
+        }
+      },
+      "checkConstraints": {},
+      "isRLSEnabled": true
+    },
+    "public.development_plan_item": {
+      "name": "development_plan_item",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "ssb_id": {
+          "name": "ssb_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "player_id": {
+          "name": "player_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "period_id": {
+          "name": "period_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "aspect": {
+          "name": "aspect",
+          "type": "assessment_aspect",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "area": {
+          "name": "area",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "target": {
+          "name": "target",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "note": {
+          "name": "note",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "sort_order": {
+          "name": "sort_order",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "created_by": {
+          "name": "created_by",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "development_plan_item_player_period_idx": {
+          "name": "development_plan_item_player_period_idx",
+          "columns": [
+            {
+              "expression": "ssb_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "player_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "period_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "sort_order",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "development_plan_item_ssb_id_ssb_id_fk": {
+          "name": "development_plan_item_ssb_id_ssb_id_fk",
+          "tableFrom": "development_plan_item",
+          "tableTo": "ssb",
+          "columnsFrom": [
+            "ssb_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "development_plan_item_player_fk": {
+          "name": "development_plan_item_player_fk",
+          "tableFrom": "development_plan_item",
+          "tableTo": "player",
+          "columnsFrom": [
+            "ssb_id",
+            "player_id"
+          ],
+          "columnsTo": [
+            "ssb_id",
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "development_plan_item_period_fk": {
+          "name": "development_plan_item_period_fk",
+          "tableFrom": "development_plan_item",
+          "tableTo": "period",
+          "columnsFrom": [
+            "ssb_id",
+            "period_id"
+          ],
+          "columnsTo": [
+            "ssb_id",
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "development_plan_item_created_by_fk": {
+          "name": "development_plan_item_created_by_fk",
+          "tableFrom": "development_plan_item",
+          "tableTo": "app_user",
+          "columnsFrom": [
+            "ssb_id",
+            "created_by"
+          ],
+          "columnsTo": [
+            "ssb_id",
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "development_plan_item_ssb_id": {
+          "name": "development_plan_item_ssb_id",
+          "nullsNotDistinct": false,
+          "columns": [
+            "ssb_id",
+            "id"
+          ]
+        }
+      },
+      "policies": {
+        "development_plan_item_tenant": {
+          "name": "development_plan_item_tenant",
+          "as": "PERMISSIVE",
+          "for": "ALL",
+          "to": [
+            "ssb_app"
+          ],
+          "using": "ssb_id = nullif(current_setting('app.ssb_id', true), '')::uuid",
+          "withCheck": "ssb_id = nullif(current_setting('app.ssb_id', true), '')::uuid"
+        }
+      },
+      "checkConstraints": {},
+      "isRLSEnabled": true
+    },
+    "public.invitation": {
+      "name": "invitation",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "ssb_id": {
+          "name": "ssb_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "secret_hash": {
+          "name": "secret_hash",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "role": {
+          "name": "role",
+          "type": "user_role",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "label": {
+          "name": "label",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "player_id": {
+          "name": "player_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_by": {
+          "name": "created_by",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "expires_at": {
+          "name": "expires_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "accepted_at": {
+          "name": "accepted_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "invitation_ssb_id_ssb_id_fk": {
+          "name": "invitation_ssb_id_ssb_id_fk",
+          "tableFrom": "invitation",
+          "tableTo": "ssb",
+          "columnsFrom": [
+            "ssb_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "invitation_player_fk": {
+          "name": "invitation_player_fk",
+          "tableFrom": "invitation",
+          "tableTo": "player",
+          "columnsFrom": [
+            "ssb_id",
+            "player_id"
+          ],
+          "columnsTo": [
+            "ssb_id",
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "invitation_created_by_fk": {
+          "name": "invitation_created_by_fk",
+          "tableFrom": "invitation",
+          "tableTo": "app_user",
+          "columnsFrom": [
+            "ssb_id",
+            "created_by"
+          ],
+          "columnsTo": [
+            "ssb_id",
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "invitation_secret_hash_unique": {
+          "name": "invitation_secret_hash_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "secret_hash"
+          ]
+        }
+      },
+      "policies": {
+        "invitation_tenant": {
+          "name": "invitation_tenant",
+          "as": "PERMISSIVE",
+          "for": "ALL",
+          "to": [
+            "ssb_app"
+          ],
+          "using": "ssb_id = nullif(current_setting('app.ssb_id', true), '')::uuid",
+          "withCheck": "ssb_id = nullif(current_setting('app.ssb_id', true), '')::uuid"
+        }
+      },
+      "checkConstraints": {},
+      "isRLSEnabled": true
+    },
+    "public.invoice": {
+      "name": "invoice",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "ssb_id": {
+          "name": "ssb_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "player_id": {
+          "name": "player_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "month": {
+          "name": "month",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "amount": {
+          "name": "amount",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "due_on": {
+          "name": "due_on",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "voided_at": {
+          "name": "voided_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_by": {
+          "name": "created_by",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "invoice_month_idx": {
+          "name": "invoice_month_idx",
+          "columns": [
+            {
+              "expression": "ssb_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "month",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "invoice_ssb_id_ssb_id_fk": {
+          "name": "invoice_ssb_id_ssb_id_fk",
+          "tableFrom": "invoice",
+          "tableTo": "ssb",
+          "columnsFrom": [
+            "ssb_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "invoice_player_fk": {
+          "name": "invoice_player_fk",
+          "tableFrom": "invoice",
+          "tableTo": "player",
+          "columnsFrom": [
+            "ssb_id",
+            "player_id"
+          ],
+          "columnsTo": [
+            "ssb_id",
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "invoice_created_by_fk": {
+          "name": "invoice_created_by_fk",
+          "tableFrom": "invoice",
+          "tableTo": "app_user",
+          "columnsFrom": [
+            "ssb_id",
+            "created_by"
+          ],
+          "columnsTo": [
+            "ssb_id",
+            "id"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "invoice_ssb_id": {
+          "name": "invoice_ssb_id",
+          "nullsNotDistinct": false,
+          "columns": [
+            "ssb_id",
+            "id"
+          ]
+        },
+        "invoice_player_month": {
+          "name": "invoice_player_month",
+          "nullsNotDistinct": false,
+          "columns": [
+            "ssb_id",
+            "player_id",
+            "month"
+          ]
+        }
+      },
+      "policies": {
+        "invoice_tenant": {
+          "name": "invoice_tenant",
+          "as": "PERMISSIVE",
+          "for": "ALL",
+          "to": [
+            "ssb_app"
+          ],
+          "using": "ssb_id = nullif(current_setting('app.ssb_id', true), '')::uuid",
+          "withCheck": "ssb_id = nullif(current_setting('app.ssb_id', true), '')::uuid"
+        }
+      },
+      "checkConstraints": {
+        "invoice_amount": {
+          "name": "invoice_amount",
+          "value": "\"invoice\".\"amount\" > 0"
+        },
+        "invoice_month_first_day": {
+          "name": "invoice_month_first_day",
+          "value": "extract(day from \"invoice\".\"month\") = 1"
+        }
+      },
+      "isRLSEnabled": true
+    },
+    "public.location": {
+      "name": "location",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "ssb_id": {
+          "name": "ssb_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "address": {
+          "name": "address",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "location_ssb_id_ssb_id_fk": {
+          "name": "location_ssb_id_ssb_id_fk",
+          "tableFrom": "location",
+          "tableTo": "ssb",
+          "columnsFrom": [
+            "ssb_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "location_ssb_name": {
+          "name": "location_ssb_name",
+          "nullsNotDistinct": false,
+          "columns": [
+            "ssb_id",
+            "name"
+          ]
+        },
+        "location_ssb_id": {
+          "name": "location_ssb_id",
+          "nullsNotDistinct": false,
+          "columns": [
+            "ssb_id",
+            "id"
+          ]
+        }
+      },
+      "policies": {
+        "location_tenant": {
+          "name": "location_tenant",
+          "as": "PERMISSIVE",
+          "for": "ALL",
+          "to": [
+            "ssb_app"
+          ],
+          "using": "ssb_id = nullif(current_setting('app.ssb_id', true), '')::uuid",
+          "withCheck": "ssb_id = nullif(current_setting('app.ssb_id', true), '')::uuid"
+        }
+      },
+      "checkConstraints": {},
+      "isRLSEnabled": true
+    },
+    "public.password_reset": {
+      "name": "password_reset",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "account_id": {
+          "name": "account_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "token_hash": {
+          "name": "token_hash",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "issued_by": {
+          "name": "issued_by",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "expires_at": {
+          "name": "expires_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "used_at": {
+          "name": "used_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "password_reset_account_idx": {
+          "name": "password_reset_account_idx",
+          "columns": [
+            {
+              "expression": "account_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "password_reset_account_id_account_id_fk": {
+          "name": "password_reset_account_id_account_id_fk",
+          "tableFrom": "password_reset",
+          "tableTo": "account",
+          "columnsFrom": [
+            "account_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "password_reset_issued_by_account_id_fk": {
+          "name": "password_reset_issued_by_account_id_fk",
+          "tableFrom": "password_reset",
+          "tableTo": "account",
+          "columnsFrom": [
+            "issued_by"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "password_reset_token_hash_unique": {
+          "name": "password_reset_token_hash_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "token_hash"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.payment": {
+      "name": "payment",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "ssb_id": {
+          "name": "ssb_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "invoice_id": {
+          "name": "invoice_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "amount": {
+          "name": "amount",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "paid_on": {
+          "name": "paid_on",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "method": {
+          "name": "method",
+          "type": "payment_method",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'tunai'"
+        },
+        "note": {
+          "name": "note",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "recorded_by": {
+          "name": "recorded_by",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "payment_invoice_idx": {
+          "name": "payment_invoice_idx",
+          "columns": [
+            {
+              "expression": "ssb_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "invoice_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "payment_ssb_id_ssb_id_fk": {
+          "name": "payment_ssb_id_ssb_id_fk",
+          "tableFrom": "payment",
+          "tableTo": "ssb",
+          "columnsFrom": [
+            "ssb_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "payment_invoice_fk": {
+          "name": "payment_invoice_fk",
+          "tableFrom": "payment",
+          "tableTo": "invoice",
+          "columnsFrom": [
+            "ssb_id",
+            "invoice_id"
+          ],
+          "columnsTo": [
+            "ssb_id",
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "payment_recorded_by_fk": {
+          "name": "payment_recorded_by_fk",
+          "tableFrom": "payment",
+          "tableTo": "app_user",
+          "columnsFrom": [
+            "ssb_id",
+            "recorded_by"
+          ],
+          "columnsTo": [
+            "ssb_id",
+            "id"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {
+        "payment_tenant": {
+          "name": "payment_tenant",
+          "as": "PERMISSIVE",
+          "for": "ALL",
+          "to": [
+            "ssb_app"
+          ],
+          "using": "ssb_id = nullif(current_setting('app.ssb_id', true), '')::uuid",
+          "withCheck": "ssb_id = nullif(current_setting('app.ssb_id', true), '')::uuid"
+        }
+      },
+      "checkConstraints": {
+        "payment_amount": {
+          "name": "payment_amount",
+          "value": "\"payment\".\"amount\" > 0"
+        }
+      },
+      "isRLSEnabled": true
+    },
+    "public.period": {
+      "name": "period",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "ssb_id": {
+          "name": "ssb_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "start_date": {
+          "name": "start_date",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "end_date": {
+          "name": "end_date",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "period_ssb_id_ssb_id_fk": {
+          "name": "period_ssb_id_ssb_id_fk",
+          "tableFrom": "period",
+          "tableTo": "ssb",
+          "columnsFrom": [
+            "ssb_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "period_ssb_id": {
+          "name": "period_ssb_id",
+          "nullsNotDistinct": false,
+          "columns": [
+            "ssb_id",
+            "id"
+          ]
+        },
+        "period_ssb_name": {
+          "name": "period_ssb_name",
+          "nullsNotDistinct": false,
+          "columns": [
+            "ssb_id",
+            "name"
+          ]
+        }
+      },
+      "policies": {
+        "period_tenant": {
+          "name": "period_tenant",
+          "as": "PERMISSIVE",
+          "for": "ALL",
+          "to": [
+            "ssb_app"
+          ],
+          "using": "ssb_id = nullif(current_setting('app.ssb_id', true), '')::uuid",
+          "withCheck": "ssb_id = nullif(current_setting('app.ssb_id', true), '')::uuid"
+        }
+      },
+      "checkConstraints": {
+        "period_dates": {
+          "name": "period_dates",
+          "value": "\"period\".\"end_date\" >= \"period\".\"start_date\""
+        }
+      },
+      "isRLSEnabled": true
+    },
+    "public.player": {
+      "name": "player",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "ssb_id": {
+          "name": "ssb_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "member_no": {
+          "name": "member_no",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "full_name": {
+          "name": "full_name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "birth_date": {
+          "name": "birth_date",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "position": {
+          "name": "position",
+          "type": "player_position",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "school": {
+          "name": "school",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "photo_key": {
+          "name": "photo_key",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "status": {
+          "name": "status",
+          "type": "player_status",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'aktif'"
+        },
+        "age_group_id": {
+          "name": "age_group_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "player_age_group_idx": {
+          "name": "player_age_group_idx",
+          "columns": [
+            {
+              "expression": "ssb_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "age_group_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "player_ssb_id_ssb_id_fk": {
+          "name": "player_ssb_id_ssb_id_fk",
+          "tableFrom": "player",
+          "tableTo": "ssb",
+          "columnsFrom": [
+            "ssb_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "player_age_group_fk": {
+          "name": "player_age_group_fk",
+          "tableFrom": "player",
+          "tableTo": "age_group",
+          "columnsFrom": [
+            "ssb_id",
+            "age_group_id"
+          ],
+          "columnsTo": [
+            "ssb_id",
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "player_ssb_id": {
+          "name": "player_ssb_id",
+          "nullsNotDistinct": false,
+          "columns": [
+            "ssb_id",
+            "id"
+          ]
+        },
+        "player_ssb_member_no": {
+          "name": "player_ssb_member_no",
+          "nullsNotDistinct": false,
+          "columns": [
+            "ssb_id",
+            "member_no"
+          ]
+        }
+      },
+      "policies": {
+        "player_tenant": {
+          "name": "player_tenant",
+          "as": "PERMISSIVE",
+          "for": "ALL",
+          "to": [
+            "ssb_app"
+          ],
+          "using": "ssb_id = nullif(current_setting('app.ssb_id', true), '')::uuid",
+          "withCheck": "ssb_id = nullif(current_setting('app.ssb_id', true), '')::uuid"
+        }
+      },
+      "checkConstraints": {},
+      "isRLSEnabled": true
+    },
+    "public.player_guardian": {
+      "name": "player_guardian",
+      "schema": "",
+      "columns": {
+        "ssb_id": {
+          "name": "ssb_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "player_id": {
+          "name": "player_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "relationship": {
+          "name": "relationship",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "player_guardian_player_fk": {
+          "name": "player_guardian_player_fk",
+          "tableFrom": "player_guardian",
+          "tableTo": "player",
+          "columnsFrom": [
+            "ssb_id",
+            "player_id"
+          ],
+          "columnsTo": [
+            "ssb_id",
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "player_guardian_user_fk": {
+          "name": "player_guardian_user_fk",
+          "tableFrom": "player_guardian",
+          "tableTo": "app_user",
+          "columnsFrom": [
+            "ssb_id",
+            "user_id"
+          ],
+          "columnsTo": [
+            "ssb_id",
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "player_guardian_player_id_user_id_pk": {
+          "name": "player_guardian_player_id_user_id_pk",
+          "columns": [
+            "player_id",
+            "user_id"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "policies": {
+        "player_guardian_tenant": {
+          "name": "player_guardian_tenant",
+          "as": "PERMISSIVE",
+          "for": "ALL",
+          "to": [
+            "ssb_app"
+          ],
+          "using": "ssb_id = nullif(current_setting('app.ssb_id', true), '')::uuid",
+          "withCheck": "ssb_id = nullif(current_setting('app.ssb_id', true), '')::uuid"
+        }
+      },
+      "checkConstraints": {},
+      "isRLSEnabled": true
+    },
+    "public.player_history": {
+      "name": "player_history",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "ssb_id": {
+          "name": "ssb_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "player_id": {
+          "name": "player_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "field": {
+          "name": "field",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "from_value": {
+          "name": "from_value",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "to_value": {
+          "name": "to_value",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "changed_by": {
+          "name": "changed_by",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "changed_at": {
+          "name": "changed_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "player_history_player_idx": {
+          "name": "player_history_player_idx",
+          "columns": [
+            {
+              "expression": "ssb_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "player_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "changed_at",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "player_history_player_fk": {
+          "name": "player_history_player_fk",
+          "tableFrom": "player_history",
+          "tableTo": "player",
+          "columnsFrom": [
+            "ssb_id",
+            "player_id"
+          ],
+          "columnsTo": [
+            "ssb_id",
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {
+        "player_history_tenant": {
+          "name": "player_history_tenant",
+          "as": "PERMISSIVE",
+          "for": "ALL",
+          "to": [
+            "ssb_app"
+          ],
+          "using": "ssb_id = nullif(current_setting('app.ssb_id', true), '')::uuid",
+          "withCheck": "ssb_id = nullif(current_setting('app.ssb_id', true), '')::uuid"
+        }
+      },
+      "checkConstraints": {
+        "player_history_field": {
+          "name": "player_history_field",
+          "value": "\"player_history\".\"field\" in ('age_group', 'status')"
+        }
+      },
+      "isRLSEnabled": true
+    },
+    "public.ssb": {
+      "name": "ssb",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "city": {
+          "name": "city",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "province": {
+          "name": "province",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "plan": {
+          "name": "plan",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'dasar'"
+        },
+        "member_seq": {
+          "name": "member_seq",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {
+        "ssb_tenant": {
+          "name": "ssb_tenant",
+          "as": "PERMISSIVE",
+          "for": "ALL",
+          "to": [
+            "ssb_app"
+          ],
+          "using": "id = nullif(current_setting('app.ssb_id', true), '')::uuid",
+          "withCheck": "id = nullif(current_setting('app.ssb_id', true), '')::uuid"
+        },
+        "ssb_member_read": {
+          "name": "ssb_member_read",
+          "as": "PERMISSIVE",
+          "for": "SELECT",
+          "to": [
+            "ssb_app"
+          ],
+          "using": "id in (select ssb_id from app_user where account_id = nullif(current_setting('app.account_id', true), '')::uuid)"
+        }
+      },
+      "checkConstraints": {},
+      "isRLSEnabled": true
+    },
+    "public.ssb_directory": {
+      "name": "ssb_directory",
+      "schema": "",
+      "columns": {
+        "slug": {
+          "name": "slug",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "ssb_id": {
+          "name": "ssb_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "ssb_directory_ssb_id_ssb_id_fk": {
+          "name": "ssb_directory_ssb_id_ssb_id_fk",
+          "tableFrom": "ssb_directory",
+          "tableTo": "ssb",
+          "columnsFrom": [
+            "ssb_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "ssb_directory_ssb_id_unique": {
+          "name": "ssb_directory_ssb_id_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "ssb_id"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.training_session": {
+      "name": "training_session",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "ssb_id": {
+          "name": "ssb_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "age_group_id": {
+          "name": "age_group_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "period_id": {
+          "name": "period_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "session_date": {
+          "name": "session_date",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "start_time": {
+          "name": "start_time",
+          "type": "time",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "location_id": {
+          "name": "location_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {
+        "training_session_group_date_idx": {
+          "name": "training_session_group_date_idx",
+          "columns": [
+            {
+              "expression": "ssb_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "age_group_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "session_date",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "training_session_ssb_id_ssb_id_fk": {
+          "name": "training_session_ssb_id_ssb_id_fk",
+          "tableFrom": "training_session",
+          "tableTo": "ssb",
+          "columnsFrom": [
+            "ssb_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "training_session_age_group_fk": {
+          "name": "training_session_age_group_fk",
+          "tableFrom": "training_session",
+          "tableTo": "age_group",
+          "columnsFrom": [
+            "ssb_id",
+            "age_group_id"
+          ],
+          "columnsTo": [
+            "ssb_id",
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "training_session_period_fk": {
+          "name": "training_session_period_fk",
+          "tableFrom": "training_session",
+          "tableTo": "period",
+          "columnsFrom": [
+            "ssb_id",
+            "period_id"
+          ],
+          "columnsTo": [
+            "ssb_id",
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "training_session_location_fk": {
+          "name": "training_session_location_fk",
+          "tableFrom": "training_session",
+          "tableTo": "location",
+          "columnsFrom": [
+            "ssb_id",
+            "location_id"
+          ],
+          "columnsTo": [
+            "ssb_id",
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "training_session_ssb_id": {
+          "name": "training_session_ssb_id",
+          "nullsNotDistinct": false,
+          "columns": [
+            "ssb_id",
+            "id"
+          ]
+        }
+      },
+      "policies": {
+        "training_session_tenant": {
+          "name": "training_session_tenant",
+          "as": "PERMISSIVE",
+          "for": "ALL",
+          "to": [
+            "ssb_app"
+          ],
+          "using": "ssb_id = nullif(current_setting('app.ssb_id', true), '')::uuid",
+          "withCheck": "ssb_id = nullif(current_setting('app.ssb_id', true), '')::uuid"
+        }
+      },
+      "checkConstraints": {},
+      "isRLSEnabled": true
+    },
+    "public.user_session": {
+      "name": "user_session",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "token_hash": {
+          "name": "token_hash",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "account_id": {
+          "name": "account_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "ssb_id": {
+          "name": "ssb_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "expires_at": {
+          "name": "expires_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {
+        "user_session_account_idx": {
+          "name": "user_session_account_idx",
+          "columns": [
+            {
+              "expression": "account_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "user_session_account_id_account_id_fk": {
+          "name": "user_session_account_id_account_id_fk",
+          "tableFrom": "user_session",
+          "tableTo": "account",
+          "columnsFrom": [
+            "account_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "user_session_user_fk": {
+          "name": "user_session_user_fk",
+          "tableFrom": "user_session",
+          "tableTo": "app_user",
+          "columnsFrom": [
+            "ssb_id",
+            "user_id"
+          ],
+          "columnsTo": [
+            "ssb_id",
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "user_session_token_hash_unique": {
+          "name": "user_session_token_hash_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "token_hash"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {
+        "user_session_membership_pair": {
+          "name": "user_session_membership_pair",
+          "value": "(\"user_session\".\"ssb_id\" is null) = (\"user_session\".\"user_id\" is null)"
+        }
+      },
+      "isRLSEnabled": false
+    }
+  },
+  "enums": {
+    "public.assessment_aspect": {
+      "name": "assessment_aspect",
+      "schema": "public",
+      "values": [
+        "technical",
+        "physical",
+        "tactical",
+        "mental",
+        "movement",
+        "game_intelligence"
+      ]
+    },
+    "public.attendance_status": {
+      "name": "attendance_status",
+      "schema": "public",
+      "values": [
+        "hadir",
+        "izin",
+        "sakit",
+        "alpa"
+      ]
+    },
+    "public.payment_method": {
+      "name": "payment_method",
+      "schema": "public",
+      "values": [
+        "tunai",
+        "transfer",
+        "lainnya"
+      ]
+    },
+    "public.player_position": {
+      "name": "player_position",
+      "schema": "public",
+      "values": [
+        "GK",
+        "DF",
+        "MF",
+        "FW"
+      ]
+    },
+    "public.player_status": {
+      "name": "player_status",
+      "schema": "public",
+      "values": [
+        "aktif",
+        "cuti",
+        "keluar"
+      ]
+    },
+    "public.user_role": {
+      "name": "user_role",
+      "schema": "public",
+      "values": [
+        "admin_ssb",
+        "pelatih",
+        "korlas",
+        "orang_tua"
+      ]
+    }
+  },
+  "schemas": {},
+  "sequences": {},
+  "roles": {},
+  "policies": {},
+  "views": {},
+  "_meta": {
+    "columns": {},
+    "schemas": {},
+    "tables": {}
+  }
+}

@@ -32,6 +32,8 @@ export type UserRole = z.infer<typeof userRoleSchema>;
 export const permissions = {
   "user.list": { roles: ["admin_ssb"], desc: "Melihat daftar anggota SSB" },
   "invitation.create": { roles: ["admin_ssb"], desc: "Membuat tautan undangan" },
+  "fee.manage": { roles: ["admin_ssb"], desc: "Mengatur tarif SPP, membuat tagihan, dan mencatat atau mengoreksi pembayaran" },
+  "invoice.read": { roles: ["admin_ssb", "orang_tua"], desc: "Melihat tagihan SPP dan riwayat pembayarannya (orang tua: anaknya)" },
   "member.reset_password": { roles: ["admin_ssb"], desc: "Membuat tautan reset kata sandi untuk anggota SSB (akun yang hanya anggota SSB ini)" },
   "invitation.manage": { roles: ["admin_ssb"], desc: "Melihat daftar undangan, mencabut, dan membuat ulang tautan yang belum diterima" },
   "master.read": { roles: ["admin_ssb", "pelatih", "korlas"], desc: "Melihat KU, periode, dan lokasi" },
@@ -416,3 +418,64 @@ export const developmentPlanItemInputSchema = z.object({
 export const developmentPlanInputSchema = z.object({ items: z.array(developmentPlanItemInputSchema).max(8, "maksimal 8 butir") });
 export type DevelopmentPlanInput = z.infer<typeof developmentPlanInputSchema>;
 export type DevelopmentPlanItem = { id: string; aspect: AssessmentAspect | null; area: string; target: string | null; note: string | null };
+
+// ---- SPP: tarif, tagihan, dan pembayaran ----
+
+/** Tarif SPP per bulan (rupiah) tiap KU; null = belum diatur, pemain KU itu tidak ikut ditagih. */
+export const feeRatesInputSchema = z.object({
+  rates: z
+    .array(
+      z.object({
+        ageGroupId: z.uuid(),
+        monthlyFee: z.number().int("harus bilangan bulat").min(0, "tidak boleh negatif").max(100_000_000, "terlalu besar").nullable(),
+      }),
+    )
+    .max(50),
+});
+export type FeeRatesInput = z.infer<typeof feeRatesInputSchema>;
+export type FeeRate = { ageGroupId: string; name: string; monthlyFee: number | null; activePlayers: number };
+
+/** Membuat tagihan satu bulan (YYYY-MM) untuk semua pemain aktif di KU yang punya tarif; yang sudah ditagih dilewati. */
+export const generateInvoicesSchema = z.object({
+  month: z.string().regex(/^\d{4}-(0[1-9]|1[0-2])$/, "format bulan YYYY-MM"),
+  /** Tanggal jatuh tempo di bulan itu. */
+  dueDay: z.number().int().min(1).max(28).default(10),
+});
+export type GenerateInvoices = z.infer<typeof generateInvoicesSchema>;
+export type GenerateInvoicesResult = { created: number; existing: number; withoutRate: number };
+
+export const paymentMethodSchema = z.enum(["tunai", "transfer", "lainnya"]);
+export type PaymentMethod = z.infer<typeof paymentMethodSchema>;
+export const paymentInputSchema = z.object({
+  amount: z.number().int("harus bilangan bulat").min(1, "minimal 1 rupiah").max(100_000_000, "terlalu besar"),
+  paidOn: isoDate,
+  method: paymentMethodSchema.default("tunai"),
+  note: z.string().trim().max(200, "maksimal 200 karakter").optional(),
+});
+export type PaymentInput = z.infer<typeof paymentInputSchema>;
+
+export type InvoiceStatus = "belum" | "sebagian" | "lunas" | "dibatalkan";
+export type PaymentRow = { id: string; amount: number; paidOn: string; method: PaymentMethod; note: string | null; recordedBy: string | null };
+export type InvoiceRow = {
+  id: string;
+  player: { id: string; name: string; memberNo: string | null; ageGroup: string | null };
+  /** Tanggal 1 bulan yang ditagih. */
+  month: string;
+  amount: number;
+  paid: number;
+  remaining: number;
+  dueOn: string;
+  status: InvoiceStatus;
+  /** Lewat jatuh tempo dan belum lunas. */
+  overdue: boolean;
+  payments: PaymentRow[];
+};
+export type FeeSummary = {
+  month: string;
+  invoices: number;
+  billed: number;
+  paid: number;
+  outstanding: number;
+  overdueInvoices: number;
+  settledInvoices: number;
+};

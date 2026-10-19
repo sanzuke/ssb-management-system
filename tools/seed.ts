@@ -208,7 +208,9 @@ await withTenant(db, ssbId, async (tx) => {
   await tx.insert(schema.ssb).values({ id: ssbId, name: "SSB Garuda Muda", city: "Jakarta Selatan", province: "DKI Jakarta", memberSeq: players.length });
   await tx.insert(schema.ssbDirectory).values({ slug: SLUG, ssbId });
   await tx.insert(schema.appUser).values(accounts.map((a) => ({ id: a.userId, ssbId, accountId: a.accountId, name: a.nama, whatsapp: a.wa, role: a.role })));
-  await tx.insert(schema.ageGroup).values(kuRows.map((k) => ({ ...k, ssbId })));
+  // Tarif SPP contoh per KU (rupiah per bulan).
+  const tarifKu: Record<string, number> = { "KU-8": 100000, "KU-10": 150000, "KU-12": 175000 };
+  await tx.insert(schema.ageGroup).values(kuRows.map((k) => ({ ...k, ssbId, monthlyFee: tarifKu[k.name] ?? null })));
   await tx.insert(schema.period).values(periode.map((p) => ({ ...p, ssbId })));
   await tx.insert(schema.location).values(lokasi.map((l) => ({ ...l, ssbId })));
 
@@ -247,6 +249,40 @@ await withTenant(db, ssbId, async (tx) => {
     ),
   );
   await tx.insert(schema.assessmentIndicator).values(indikator);
+
+  // Tagihan SPP tiga bulan terakhir; bulan lama kebanyakan lunas, sebagian dicicil, sisanya menunggak.
+  const adminId = userOf(staf.admin.email);
+  const bulanKe = (mundur: number) => {
+    const d = new Date(today.getFullYear(), today.getMonth() - mundur, 1);
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-01`;
+  };
+  let nomor = 0;
+  for (const mundur of [2, 1, 0]) {
+    const bulan = bulanKe(mundur);
+    for (const p of players) {
+      const fee = tarifKu[p.ku];
+      if (!fee) continue;
+      nomor++;
+      const [inv] = await tx
+        .insert(schema.invoice)
+        .values({ ssbId, playerId: p.id, month: bulan, amount: fee, dueOn: bulan.slice(0, 8) + "10", createdBy: adminId })
+        .returning({ id: schema.invoice.id });
+      const nasib = nomor % 10; // 0-6 lunas, 7 sebagian, 8-9 belum (bulan berjalan: kebanyakan belum)
+      const lunas = mundur === 0 ? nasib < 3 : nasib < 7;
+      const sebagian = !lunas && nasib === 7;
+      if (lunas || sebagian) {
+        await tx.insert(schema.payment).values({
+          ssbId,
+          invoiceId: inv!.id,
+          amount: lunas ? fee : Math.round(fee / 2),
+          paidOn: bulan.slice(0, 8) + String(3 + (nomor % 6)).padStart(2, "0"),
+          method: nomor % 3 === 0 ? "transfer" : "tunai",
+          note: sebagian ? "cicilan pertama" : null,
+          recordedBy: adminId,
+        });
+      }
+    }
+  }
 
   // Sesi latihan: Rabu dan Sabtu, dari 1 Agustus 2026 sampai tiga minggu ke depan.
   const periodeKini = periode[1];

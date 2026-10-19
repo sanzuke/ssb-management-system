@@ -1587,3 +1587,97 @@
   overflow-wrap: anywhere;
   font-size: 0.85rem;
 }
+
+/* ---- SPP ---- */
+.spp-bulan {
+  display: grid;
+  gap: 8px 16px;
+  margin: 0 0 12px;
+}
+.spp-buat {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  gap: 8px 12px;
+}
+.spp-buat .field {
+  width: 9rem;
+}
+.spp-buat .tombol {
+  width: auto;
+  flex: 1 1 14rem;
+}
+.spp-daftar {
+  display: grid;
+  gap: 8px;
+  margin: 8px 0 0;
+  padding: 0;
+  list-style: none;
+}
+.spp-daftar > li {
+  display: grid;
+  gap: 8px;
+  min-height: 0;
+  padding: 12px;
+  border: 1px solid var(--garis);
+  border-radius: 12px;
+  background: #fff;
+}
+.spp-baris {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  align-items: start;
+  gap: 4px 12px;
+}
+.spp-angka {
+  display: grid;
+  justify-items: end;
+  text-align: right;
+}
+.spp-bayar {
+  display: grid;
+  gap: 4px;
+  margin: 0;
+  padding: 8px 10px;
+  list-style: none;
+  border-radius: 8px;
+  background: #f1f4ec;
+  font-size: 0.9rem;
+}
+.spp-bayar li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  min-height: 0;
+}
+.spp-form {
+  padding-top: 4px;
+  border-top: 1px dashed var(--garis);
+}
+.spp-tarif summary {
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  font-weight: 700;
+}
+@media (max-width: 520px) {
+  .spp-baris {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+  .spp-baris .status-undangan {
+    grid-column: 1 / -1;
+    justify-self: start;
+  }
+}
+.statistik.uang {
+  grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
+}
+.statistik.uang .angka-ubin {
+  white-space: nowrap;
+  font-size: 1.5rem;
+}
+.spp-buat .field {
+  min-width: 8rem;
+}

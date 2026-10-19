@@ -31,6 +31,7 @@ export const playerStatus = pgEnum("player_status", ["aktif", "cuti", "keluar"])
 export const playerPosition = pgEnum("player_position", ["GK", "DF", "MF", "FW"]);
 export const assessmentAspect = pgEnum("assessment_aspect", ["technical", "physical", "tactical", "mental", "movement", "game_intelligence"]);
 export const attendanceStatus = pgEnum("attendance_status", ["hadir", "izin", "sakit", "alpa"]);
+export const paymentMethod = pgEnum("payment_method", ["tunai", "transfer", "lainnya"]);
 
 /** Syarat tenant: baris hanya terlihat bila ssb_id sama dengan konteks transaksi. */
 const tenantMatch = sql`ssb_id = nullif(current_setting('app.ssb_id', true), '')::uuid`;
@@ -135,9 +136,12 @@ export const ageGroup = pgTable(
     name: text("name").notNull(),
     minAge: integer("min_age").notNull(),
     maxAge: integer("max_age").notNull(),
+    /** Tarif SPP per bulan dalam rupiah; kosong = belum diatur (pemain di KU ini tidak ikut ditagih). */
+    monthlyFee: integer("monthly_fee"),
   },
   (t) => [
     unique("age_group_ssb_name").on(t.ssbId, t.name),
+    check("age_group_fee", sql`${t.monthlyFee} is null or ${t.monthlyFee} >= 0`),
     unique("age_group_ssb_id").on(t.ssbId, t.id),
     check("age_group_range", sql`${t.minAge} >= 0 AND ${t.maxAge} >= ${t.minAge}`),
     tenantPolicy("age_group"),
@@ -433,6 +437,57 @@ export const userSession = pgTable(
     check("user_session_membership_pair", sql`(${t.ssbId} is null) = (${t.userId} is null)`),
   ],
 );
+
+/** Tagihan SPP satu pemain untuk satu bulan. Jumlah terbayar dihitung dari tabel payment; tagihan dibatalkan lewat voided_at. */
+export const invoice = pgTable(
+  "invoice",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    ssbId: ssbId().references(() => ssb.id, { onDelete: "cascade" }),
+    playerId: uuid("player_id").notNull(),
+    /** Selalu tanggal 1 bulan yang ditagih. */
+    month: date("month").notNull(),
+    /** Rupiah, tarif KU saat tagihan dibuat (perubahan tarif tidak mengubah tagihan lama). */
+    amount: integer("amount").notNull(),
+    dueOn: date("due_on").notNull(),
+    voidedAt: timestamp("voided_at", { withTimezone: true }),
+    createdBy: uuid("created_by"),
+    createdAt: createdAt(),
+  },
+  (t) => [
+    unique("invoice_ssb_id").on(t.ssbId, t.id),
+    unique("invoice_player_month").on(t.ssbId, t.playerId, t.month),
+    check("invoice_amount", sql`${t.amount} > 0`),
+    check("invoice_month_first_day", sql`extract(day from ${t.month}) = 1`),
+    index("invoice_month_idx").on(t.ssbId, t.month),
+    foreignKey({ columns: [t.ssbId, t.playerId], foreignColumns: [player.ssbId, player.id], name: "invoice_player_fk" }).onDelete("cascade"),
+    foreignKey({ columns: [t.ssbId, t.createdBy], foreignColumns: [appUser.ssbId, appUser.id], name: "invoice_created_by_fk" }).onDelete("set null"),
+    tenantPolicy("invoice"),
+  ],
+).enableRLS();
+
+/** Pembayaran yang dicatat admin terhadap satu tagihan; boleh dicicil. */
+export const payment = pgTable(
+  "payment",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    ssbId: ssbId().references(() => ssb.id, { onDelete: "cascade" }),
+    invoiceId: uuid("invoice_id").notNull(),
+    amount: integer("amount").notNull(),
+    paidOn: date("paid_on").notNull(),
+    method: paymentMethod("method").notNull().default("tunai"),
+    note: text("note"),
+    recordedBy: uuid("recorded_by"),
+    createdAt: createdAt(),
+  },
+  (t) => [
+    check("payment_amount", sql`${t.amount} > 0`),
+    index("payment_invoice_idx").on(t.ssbId, t.invoiceId),
+    foreignKey({ columns: [t.ssbId, t.invoiceId], foreignColumns: [invoice.ssbId, invoice.id], name: "payment_invoice_fk" }).onDelete("cascade"),
+    foreignKey({ columns: [t.ssbId, t.recordedBy], foreignColumns: [appUser.ssbId, appUser.id], name: "payment_recorded_by_fk" }).onDelete("set null"),
+    tenantPolicy("payment"),
+  ],
+).enableRLS();
 
 /**
  * Tautan reset kata sandi, sekali pakai dan berumur pendek. Hanya hash token yang disimpan.
