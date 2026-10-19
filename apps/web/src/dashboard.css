@@ -2022,3 +2022,125 @@
     scroll-margin-top: 80px;
   }
 }
+
+/* ---- Menu di HP: bilah ringkas + deretan pil yang bisa digeser ---- */
+@media (max-width: 1023.98px) {
+  .bar {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas:
+      "merek bawah"
+      "menu menu";
+    align-items: center;
+    gap: 8px 8px;
+    padding: 10px 0 10px 16px;
+  }
+  .bar .merek-bar {
+    grid-area: merek;
+    min-width: 0;
+  }
+  .bar .nama-ssb {
+    font-size: 1.05rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .bar .peran {
+    font-size: 0.8rem;
+  }
+  .bar .aksi.bawah {
+    grid-area: bawah;
+    flex-wrap: nowrap;
+    padding-right: 10px;
+  }
+  /* Tombol Keluar dan Ganti SSB: hanya ikon (teks tetap ada untuk pembaca layar). */
+  .bar .aksi.bawah .menu {
+    width: 40px;
+    min-height: 40px;
+    padding: 0;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.12);
+  }
+  .bar .aksi.bawah .menu span {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+  .bar .aksi.bawah .menu svg {
+    display: block;
+  }
+  .bar .aksi:not(.bawah) {
+    grid-area: menu;
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+    gap: 8px;
+    overflow-x: auto;
+    padding: 2px 16px 2px 0;
+    margin-left: 0;
+    scroll-snap-type: x proximity;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+    mask-image: linear-gradient(to right, #000 calc(100% - 24px), transparent);
+  }
+  .bar .aksi:not(.bawah)::-webkit-scrollbar {
+    display: none;
+  }
+  .bar .aksi:not(.bawah) .menu {
+    flex: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 40px;
+    padding: 0 14px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.12);
+    color: var(--kapur);
+    font-weight: 700;
+    text-decoration: none;
+    white-space: nowrap;
+    scroll-snap-align: center;
+  }
+  .bar .aksi:not(.bawah) .menu svg {
+    display: block;
+    width: 16px;
+    height: 16px;
+  }
+  .bar .aksi:not(.bawah) .menu.active {
+    background: var(--kuning);
+    color: var(--tinta);
+  }
+}
+
+/* ---- Dialog konfirmasi keluar ---- */
+.dialog-konfirmasi {
+  width: min(24rem, calc(100vw - 32px));
+  padding: 20px;
+  border: 0;
+  border-radius: 16px;
+  background: #fff;
+  color: var(--tinta);
+  box-shadow: 0 12px 40px rgba(20, 32, 26, 0.35);
+}
+.dialog-konfirmasi::backdrop {
+  background: rgba(20, 32, 26, 0.55);
+}
+.dialog-konfirmasi h2 {
+  margin: 0 0 6px;
+  font-size: 1.2rem;
+}
+.dialog-konfirmasi p {
+  margin: 0 0 16px;
+  color: var(--redup);
+}
+.dialog-konfirmasi .aksi-baris {
+  justify-content: flex-end;
+}
+.dialog-konfirmasi .tombol {
+  width: auto;
+  min-width: 7rem;
+}
