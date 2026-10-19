@@ -2564,3 +2564,33 @@ button.pengguna[aria-expanded="true"] .panah-menu {
   font-weight: 800;
   font-size: 0.85rem;
 }
+
+/* ---- Nama SSB panjang di sidebar dan bilah HP: maksimal dua baris, ukuran menyesuaikan, nama lengkap di tooltip ---- */
+.bar .nama-ssb {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  overflow: hidden;
+  overflow-wrap: anywhere;
+  line-height: 1.15;
+}
+.bar .nama-ssb[data-panjang="panjang"] {
+  font-size: 1rem;
+}
+.bar .nama-ssb[data-panjang="sangat"] {
+  font-size: 0.88rem;
+}
+@media (max-width: 1023.98px) {
+  /* Di HP sebelumnya satu baris dengan titik-titik; kini dua baris agar nama tetap terbaca. */
+  .bar .nama-ssb {
+    white-space: normal;
+    font-size: 1.05rem;
+  }
+  .bar .nama-ssb[data-panjang="panjang"] {
+    font-size: 0.95rem;
+  }
+  .bar .nama-ssb[data-panjang="sangat"] {
+    font-size: 0.85rem;
+  }
+}

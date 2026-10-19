@@ -17,11 +17,18 @@ export default function AppBar(props: { me: Me }) {
     lokasi.pathname;
     queueMicrotask(() => daftarMenu?.querySelector(".menu.active")?.scrollIntoView({ inline: "center", block: "nearest" }));
   });
+  // Nama SSB yang panjang diperkecil dan boleh dua baris; ukuran ditentukan dari jumlah huruf.
+  const panjangNama = () => {
+    const n = (props.me.active?.ssbName ?? "").length;
+    return n > 32 ? "sangat" : n > 18 ? "panjang" : undefined;
+  };
   const staf = () => ["admin_ssb", "pelatih", "korlas"].includes(props.me.active?.role ?? "");
   return (
     <header class="bar">
       <div class="merek-bar">
-        <div class="nama-ssb">{props.me.active?.ssbName ?? "SSB App"}</div>
+        <div class="nama-ssb" title={props.me.active?.ssbName} attr:data-panjang={panjangNama()}>
+          {props.me.active?.ssbName ?? "SSB App"}
+        </div>
         <Show when={props.me.active}>
           <div class="peran">{roleLabel[props.me.active!.role]}</div>
         </Show>
