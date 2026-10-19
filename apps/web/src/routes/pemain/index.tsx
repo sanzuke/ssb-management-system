@@ -154,9 +154,9 @@ export default function DaftarPemain() {
                     </span>
                   </A>
                   <div class="ortu-aksi">
-                    <A class="tombol utama-rumput" href={`/nilai/${pl.id}`}>
-                      <Ikon nama="buku" ukuran={18} />
-                      Penilaian
+                    <A class="tombol utama-rumput" href={`/pemain/${pl.id}`}>
+                      <Ikon nama="profil" ukuran={18} />
+                      Profil dan nilai
                     </A>
                     <A class="tombol sekunder" href={`/kartu/${pl.id}`}>
                       <Ikon nama="kartu" ukuran={18} />

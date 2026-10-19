@@ -102,9 +102,9 @@ export default function PortalOrangTua() {
                 </A>
               </div>
               <div class="ortu-aksi">
-                <A class="tombol utama-rumput" href={`/nilai/${k.id}`}>
-                  <Ikon nama="buku" ukuran={18} />
-                  Penilaian
+                <A class="tombol utama-rumput" href={`/pemain/${k.id}`}>
+                  <Ikon nama="profil" ukuran={18} />
+                  Profil dan nilai
                 </A>
                 <A class="tombol sekunder" href={`/kartu/${k.id}`}>
                   <Ikon nama="kartu" ukuran={18} />

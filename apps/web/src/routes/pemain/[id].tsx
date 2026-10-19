@@ -134,7 +134,7 @@ export default function DetailPemain() {
             >
               <p class="aksi-baris">
                 <A class="tombol tombol-kecil" href={`/nilai/${pl()!.id}`}>
-                  Penilaian
+                  {me()!.active!.role === "orang_tua" ? "Riwayat nilai" : "Penilaian"}
                 </A>
                 <A class="tombol tombol-kecil" href={`/kartu/${pl()!.id}`}>
                   Kartu QR
