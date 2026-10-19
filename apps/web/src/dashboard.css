@@ -436,15 +436,20 @@
     align-items: stretch;
     justify-content: flex-start;
     gap: 6px;
-    padding: 20px 12px;
+    padding: 0 12px 20px;
     overflow-y: auto;
     background: #fff;
     color: var(--tinta);
     border-right: 1px solid var(--garis);
   }
+  /* Tinggi dan garis bawah sama dengan header atas (64px) supaya garisnya sejajar di sepanjang layar. */
   .bar .merek-bar {
-    margin-bottom: 8px;
-    padding: 4px 10px 16px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    height: 64px;
+    margin: 0 -12px 8px;
+    padding: 0 22px;
     border-bottom: 1px solid var(--garis);
   }
   .bar .nama-ssb {
