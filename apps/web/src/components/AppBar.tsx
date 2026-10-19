@@ -1,5 +1,5 @@
-import { A, useNavigate } from "@solidjs/router";
-import { Show } from "solid-js";
+import { A, useLocation, useNavigate } from "@solidjs/router";
+import { createEffect, Show } from "solid-js";
 import { api, lupaMe, roleLabel, type Me } from "~/lib/api";
 import Ikon from "./Ikon";
 
@@ -14,6 +14,15 @@ export default function AppBar(props: { me: Me }) {
     lupaMe();
     nav("/masuk", { replace: true });
   };
+  const lokasi = useLocation();
+  let konfirmasi: HTMLDialogElement | undefined;
+  let daftarMenu: HTMLElement | undefined;
+
+  // Di HP menu bisa digeser; menu halaman yang sedang dibuka dibawa ke tengah supaya selalu terlihat.
+  createEffect(() => {
+    lokasi.pathname;
+    queueMicrotask(() => daftarMenu?.querySelector(".menu.active")?.scrollIntoView({ inline: "center", block: "nearest" }));
+  });
   const staf = () => ["admin_ssb", "pelatih", "korlas"].includes(props.me.active?.role ?? "");
   return (
     <header class="bar">
@@ -23,7 +32,7 @@ export default function AppBar(props: { me: Me }) {
           <div class="peran">{roleLabel[props.me.active!.role]}</div>
         </Show>
       </div>
-      <nav class="aksi" aria-label="Menu utama">
+      <nav class="aksi" aria-label="Menu utama" ref={daftarMenu}>
         <Show when={props.me.active}>
           <A class="tombol tipis menu" href="/" end>
             <Ikon nama="beranda" />
@@ -76,11 +85,23 @@ export default function AppBar(props: { me: Me }) {
             <span>Ganti SSB</span>
           </A>
         </Show>
-        <button class="tombol tipis menu" type="button" onClick={logout}>
+        <button class="tombol tipis menu" type="button" onClick={() => konfirmasi?.showModal()}>
           <Ikon nama="keluar" />
           <span>Keluar</span>
         </button>
       </div>
+      <dialog class="dialog-konfirmasi" ref={konfirmasi} aria-labelledby="judul-keluar">
+        <h2 id="judul-keluar">Keluar dari aplikasi?</h2>
+        <p>Anda perlu masuk lagi dengan email dan kata sandi untuk membuka SSB App.</p>
+        <div class="aksi-baris">
+          <button class="tombol" type="button" onClick={() => konfirmasi?.close()}>
+            Batal
+          </button>
+          <button class="tombol utama" type="button" onClick={logout}>
+            Ya, keluar
+          </button>
+        </div>
+      </dialog>
     </header>
   );
 }
