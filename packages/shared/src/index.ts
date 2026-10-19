@@ -32,6 +32,7 @@ export type UserRole = z.infer<typeof userRoleSchema>;
 export const permissions = {
   "user.list": { roles: ["admin_ssb"], desc: "Melihat daftar anggota SSB" },
   "invitation.create": { roles: ["admin_ssb"], desc: "Membuat tautan undangan" },
+  "member.reset_password": { roles: ["admin_ssb"], desc: "Membuat tautan reset kata sandi untuk anggota SSB (akun yang hanya anggota SSB ini)" },
   "invitation.manage": { roles: ["admin_ssb"], desc: "Melihat daftar undangan, mencabut, dan membuat ulang tautan yang belum diterima" },
   "master.read": { roles: ["admin_ssb", "pelatih", "korlas"], desc: "Melihat KU, periode, dan lokasi" },
   "master.write": { roles: ["admin_ssb"], desc: "Mengubah KU, periode, dan lokasi" },
@@ -157,6 +158,9 @@ export const acceptInvitationSchema = z.object({
 export const updateProfileSchema = z.object({
   whatsapp: z.preprocess(emptyToNull, whatsappSchema.nullable()),
 });
+
+export const forgotPasswordSchema = z.object({ email: emailSchema });
+export const resetPasswordSchema = z.object({ newPassword: passwordSchema });
 
 export const changePasswordSchema = z.object({
   /** Wajib bila akun sudah punya kata sandi; akun yang hanya login Google boleh mengosongkannya. */

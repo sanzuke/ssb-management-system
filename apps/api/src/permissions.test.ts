@@ -34,6 +34,10 @@ describe("matriks izin (tanpa database)", () => {
       "POST /auth/register-ssb",
       "POST /auth/login",
       "POST /auth/logout",
+      "GET /auth/features",
+      "POST /auth/forgot-password",
+      "GET /auth/reset-password/:token",
+      "POST /auth/reset-password/:token",
       "GET /invitations/:token",
       "POST /invitations/:token/accept",
     ]);

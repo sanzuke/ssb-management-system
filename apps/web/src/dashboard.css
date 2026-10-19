@@ -1572,3 +1572,18 @@
     grid-template-columns: minmax(0, 24rem) minmax(0, 1fr);
   }
 }
+
+/* ---- Lupa kata sandi ---- */
+.tautan-lupa {
+  margin: -4px 0 0;
+  text-align: right;
+}
+.kartu-bantuan code {
+  display: block;
+  margin-top: 6px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: rgba(20, 32, 26, 0.08);
+  overflow-wrap: anywhere;
+  font-size: 0.85rem;
+}

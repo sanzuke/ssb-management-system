@@ -72,6 +72,9 @@ export default function Masuk() {
           onInput={setPassword}
           error={form.fields().password}
         />
+        <p class="tautan-lupa">
+          <A href="/lupa-sandi">Lupa kata sandi?</A>
+        </p>
         <button class="tombol utama" type="submit" disabled={form.busy()}>
           {form.busy() ? "Memeriksa…" : "Masuk"}
           <Show when={!form.busy()}>
