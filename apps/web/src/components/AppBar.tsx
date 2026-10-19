@@ -91,10 +91,13 @@ export default function AppBar(props: { me: Me }) {
         </button>
       </div>
       <dialog class="dialog-konfirmasi" ref={konfirmasi} aria-labelledby="judul-keluar">
+        <span class="dialog-ikon" aria-hidden="true">
+          <Ikon nama="keluar" ukuran={26} />
+        </span>
         <h2 id="judul-keluar">Keluar dari aplikasi?</h2>
         <p>Anda perlu masuk lagi dengan email dan kata sandi untuk membuka SSB App.</p>
-        <div class="aksi-baris">
-          <button class="tombol" type="button" onClick={() => konfirmasi?.close()}>
+        <div class="dialog-aksi">
+          <button class="tombol batal" type="button" onClick={() => konfirmasi?.close()}>
             Batal
           </button>
           <button class="tombol utama" type="button" onClick={logout}>

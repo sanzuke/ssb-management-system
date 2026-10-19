@@ -2117,30 +2117,73 @@
 }
 
 /* ---- Dialog konfirmasi keluar ---- */
+/* Dialog berada di dalam .bar (hijau), jadi warna teks tombol harus ditetapkan ulang di sini. */
 .dialog-konfirmasi {
-  width: min(24rem, calc(100vw - 32px));
-  padding: 20px;
+  width: min(22rem, calc(100vw - 32px));
+  padding: 24px 20px 20px;
   border: 0;
-  border-radius: 16px;
+  border-radius: 20px;
   background: #fff;
   color: var(--tinta);
-  box-shadow: 0 12px 40px rgba(20, 32, 26, 0.35);
+  text-align: center;
+  box-shadow: 0 16px 48px rgba(20, 32, 26, 0.4);
 }
 .dialog-konfirmasi::backdrop {
   background: rgba(20, 32, 26, 0.55);
+  backdrop-filter: blur(2px);
+}
+.dialog-konfirmasi[open] {
+  animation: dialog-masuk 0.16s ease-out;
+}
+@keyframes dialog-masuk {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.97);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .dialog-konfirmasi[open] {
+    animation: none;
+  }
+}
+.dialog-ikon {
+  display: grid;
+  place-items: center;
+  width: 52px;
+  height: 52px;
+  margin: 0 auto 12px;
+  border-radius: 50%;
+  background: #fbeeb8;
+  color: var(--rumput);
 }
 .dialog-konfirmasi h2 {
   margin: 0 0 6px;
-  font-size: 1.2rem;
+  font-size: 1.25rem;
+  color: var(--tinta);
 }
 .dialog-konfirmasi p {
-  margin: 0 0 16px;
+  margin: 0 0 20px;
   color: var(--redup);
+  line-height: 1.5;
 }
-.dialog-konfirmasi .aksi-baris {
-  justify-content: flex-end;
+.dialog-aksi {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
 }
 .dialog-konfirmasi .tombol {
-  width: auto;
-  min-width: 7rem;
+  width: 100%;
+  min-height: 48px;
+  justify-content: center;
+}
+.dialog-konfirmasi .tombol.batal {
+  border: 1.5px solid var(--garis);
+  background: #fff;
+  color: var(--tinta);
+}
+.dialog-konfirmasi .tombol.batal:hover {
+  background: #f1f4ec;
+}
+.dialog-konfirmasi .tombol.utama {
+  color: var(--tinta);
 }
