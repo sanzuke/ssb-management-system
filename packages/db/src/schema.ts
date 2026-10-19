@@ -451,6 +451,9 @@ export const invoice = pgTable(
     amount: integer("amount").notNull(),
     dueOn: date("due_on").notNull(),
     voidedAt: timestamp("voided_at", { withTimezone: true }),
+    /** Terakhir kali admin mengirim pengingat tagihan ini (dicatat saat tombol kirim ditekan) dan jumlahnya. */
+    lastRemindedAt: timestamp("last_reminded_at", { withTimezone: true }),
+    reminderCount: integer("reminder_count").notNull().default(0),
     createdBy: uuid("created_by"),
     createdAt: createdAt(),
   },

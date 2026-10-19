@@ -11,6 +11,7 @@ import {
   type InvoiceRow,
   type InvoiceStatus,
   type PaymentRow,
+  type ReminderRow,
 } from "@ssb/shared";
 import { requirePermission, type AppEnv } from "./auth/middleware";
 import { HttpError } from "./errors";
@@ -52,6 +53,8 @@ export function feeRoutes(db: Db) {
           amount: I.amount,
           dueOn: I.dueOn,
           voidedAt: I.voidedAt,
+          lastRemindedAt: I.lastRemindedAt,
+          reminderCount: I.reminderCount,
           playerId: schema.player.id,
           playerName: schema.player.fullName,
           memberNo: schema.player.memberNo,
@@ -112,6 +115,8 @@ export function feeRoutes(db: Db) {
           status,
           overdue: (status === "belum" || status === "sebagian") && r.dueOn < hariIni,
           payments,
+          lastRemindedAt: r.lastRemindedAt?.toISOString() ?? null,
+          reminderCount: r.reminderCount,
         };
       });
     });
@@ -188,6 +193,66 @@ export function feeRoutes(db: Db) {
         const playerId = c.req.query("playerId");
         if (playerId && !UUID.test(playerId)) throw new HttpError(400, "bad_request", "Pemain tidak valid");
         return c.json(await loadInvoices(m.ssbId, m, { month, playerId }));
+      })
+
+      // Tagihan yang perlu diingatkan: sudah lewat jatuh tempo atau jatuh tempo dalam `days` hari ke depan (bawaan 3),
+      // beserta nama dan WhatsApp wali. Yang paling terlambat di atas. Pengingat dikirim admin sendiri lewat WhatsApp.
+      .get("/fees/reminders", requirePermission("fee.manage"), async (c) => {
+        const m = c.get("auth")!.member!;
+        const days = Math.min(30, Math.max(0, Number.parseInt(c.req.query("days") ?? "3", 10) || 0));
+        const hariIni = todayWib();
+        const batas = new Date(Date.parse(`${hariIni}T00:00:00Z`) + days * 86400000).toISOString().slice(0, 10);
+        const semua = await loadInvoices(m.ssbId, m, {});
+        const perlu = semua.filter((r) => (r.status === "belum" || r.status === "sebagian") && r.dueOn <= batas);
+        const wali = new Map<string, ReminderRow["guardians"]>();
+        if (perlu.length > 0) {
+          const rows = await withTenant(db, m.ssbId, (tx) =>
+            tx
+              .select({
+                playerId: schema.playerGuardian.playerId,
+                name: schema.appUser.name,
+                whatsapp: schema.appUser.whatsapp,
+                relationship: schema.playerGuardian.relationship,
+              })
+              .from(schema.playerGuardian)
+              .innerJoin(schema.appUser, and(eq(schema.appUser.ssbId, schema.playerGuardian.ssbId), eq(schema.appUser.id, schema.playerGuardian.userId)))
+              .where(inArray(schema.playerGuardian.playerId, [...new Set(perlu.map((r) => r.player.id))])),
+          );
+          for (const w of rows) wali.set(w.playerId, [...(wali.get(w.playerId) ?? []), { name: w.name, whatsapp: w.whatsapp, relationship: w.relationship }]);
+        }
+        const out: ReminderRow[] = perlu
+          .map(({ payments: _p, ...r }) => ({
+            ...r,
+            daysToDue: Math.round((Date.parse(`${r.dueOn}T00:00:00Z`) - Date.parse(`${hariIni}T00:00:00Z`)) / 86400000),
+            guardians: wali.get(r.player.id) ?? [],
+          }))
+          .sort((a, b) => a.daysToDue - b.daysToDue || a.player.name.localeCompare(b.player.name));
+        return c.json(out);
+      })
+
+      // Catat bahwa admin mengirim pengingat untuk tagihan ini (dipanggil saat tombol kirim WhatsApp ditekan).
+      .post("/invoices/:id/reminded", requirePermission("fee.manage"), async (c) => {
+        const m = c.get("auth")!.member!;
+        const id = idOr404(c.req.param("id"), "Tagihan");
+        const res = await withTenant(db, m.ssbId, async (tx) => {
+          const [inv] = await tx.select({ voidedAt: I.voidedAt, amount: I.amount }).from(I).where(eq(I.id, id)).for("update").limit(1);
+          if (!inv) return "none" as const;
+          if (inv.voidedAt) return "void" as const;
+          const [jumlah] = await tx
+            .select({ paid: sql<number>`coalesce(sum(${P.amount}), 0)::int` })
+            .from(P)
+            .where(eq(P.invoiceId, id));
+          if ((jumlah?.paid ?? 0) >= inv.amount) return "lunas" as const;
+          const [upd] = await tx
+            .update(I)
+            .set({ lastRemindedAt: new Date(), reminderCount: sql`${I.reminderCount} + 1` })
+            .where(eq(I.id, id))
+            .returning({ at: I.lastRemindedAt, n: I.reminderCount });
+          return upd!;
+        });
+        if (res === "none") throw notFound("Tagihan");
+        if (res === "void" || res === "lunas") throw new HttpError(409, "not_payable", "Tagihan ini sudah lunas atau dibatalkan, tidak perlu diingatkan");
+        return c.json({ lastRemindedAt: res.at!.toISOString(), reminderCount: res.n });
       })
 
       // Ringkasan satu bulan untuk dasbor admin.

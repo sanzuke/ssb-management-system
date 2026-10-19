@@ -2,7 +2,8 @@ import { A } from "@solidjs/router";
 import { createMemo, createResource, For, Show } from "solid-js";
 import { api } from "~/lib/api";
 import FotoPemain from "~/components/FotoPemain";
-import type { AttendanceSummary, GuardianSession, PlayerSummary } from "@ssb/shared";
+import { rupiah } from "~/lib/waktu";
+import type { AttendanceSummary, GuardianSession, InvoiceRow, PlayerSummary } from "@ssb/shared";
 import Ikon from "./Ikon";
 
 const statusLabel = { hadir: "Hadir", izin: "Izin", sakit: "Sakit", alpa: "Alpa" } as const;
@@ -23,6 +24,11 @@ export default function PortalOrangTua() {
   const [kids] = createResource(() => api<PlayerSummary[]>("/players"));
   const [sum] = createResource(() => api<AttendanceSummary>("/attendance/summary"));
   const [sessions] = createResource(() => api<GuardianSession[]>("/guardian/sessions"));
+  // Tagihan SPP yang belum lunas; gagal memuat tidak mengganggu beranda.
+  const [tagihan] = createResource(() => api<InvoiceRow[]>("/invoices").catch(() => [] as InvoiceRow[]));
+  const belumLunas = createMemo(() => (tagihan() ?? []).filter((t) => t.status === "belum" || t.status === "sebagian"));
+  const menunggak = createMemo(() => belumLunas().filter((t) => t.overdue));
+  const sisaSpp = createMemo(() => belumLunas().reduce((s, t) => s + t.remaining, 0));
 
   const upcoming = createMemo(() => (sessions() ?? []).filter((s) => s.sessionDate >= today()));
   const recent = createMemo(() =>
@@ -63,6 +69,16 @@ export default function PortalOrangTua() {
         <div class="peringatan" role="alert">
           Sebagian data tidak bisa dimuat. Muat ulang halaman.
         </div>
+      </Show>
+
+      <Show when={belumLunas().length > 0}>
+        <A class="ortu-tagihan" classList={{ menunggak: menunggak().length > 0 }} href="/spp">
+          <span class="ortu-tagihan-teks">
+            <strong>{menunggak().length > 0 ? `${menunggak().length} tagihan SPP lewat jatuh tempo` : "Ada tagihan SPP yang belum dibayar"}</strong>
+            <span>Sisa {rupiah(sisaSpp())}. Lihat rincian dan jatuh tempo.</span>
+          </span>
+          <Ikon nama="panah" ukuran={20} />
+        </A>
       </Show>
 
       <section class="ortu-bagian" aria-label="Anak Anda">

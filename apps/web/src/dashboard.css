@@ -2187,3 +2187,48 @@
 .dialog-konfirmasi .tombol.utama {
   color: var(--tinta);
 }
+
+/* ---- Pengingat SPP ---- */
+.pengingat-atur {
+  display: grid;
+  gap: 8px 16px;
+  margin-bottom: 8px;
+}
+.pengingat-atur textarea {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--garis);
+  border-radius: 8px;
+  font: inherit;
+  resize: vertical;
+}
+.ortu-tagihan {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 0 0 16px;
+  padding: 14px 16px;
+  border: 1px solid #d8a826;
+  border-radius: 14px;
+  background: #fff8dc;
+  color: var(--tinta);
+  text-decoration: none;
+}
+.ortu-tagihan.menunggak {
+  border-color: #e3b5ae;
+  background: #fdf3f1;
+}
+.ortu-tagihan-teks {
+  display: grid;
+  gap: 2px;
+}
+.ortu-tagihan.menunggak strong {
+  color: var(--merah);
+}
+@media (min-width: 900px) {
+  .pengingat-atur {
+    grid-template-columns: minmax(0, 20rem) minmax(0, 1fr);
+    align-items: start;
+  }
+}

@@ -469,6 +469,15 @@ export type InvoiceRow = {
   /** Lewat jatuh tempo dan belum lunas. */
   overdue: boolean;
   payments: PaymentRow[];
+  /** Pengingat yang sudah dikirim admin (dicatat saat tombol kirim ditekan). */
+  lastRemindedAt: string | null;
+  reminderCount: number;
+};
+/** Tagihan yang perlu diingatkan (menunggak atau segera jatuh tempo) beserta wali yang bisa dihubungi. */
+export type ReminderRow = Omit<InvoiceRow, "payments"> & {
+  /** Hari menuju jatuh tempo; negatif = sudah terlambat sekian hari. */
+  daysToDue: number;
+  guardians: { name: string; whatsapp: string | null; relationship: string | null }[];
 };
 export type FeeSummary = {
   month: string;

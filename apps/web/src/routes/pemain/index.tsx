@@ -5,17 +5,12 @@ import Ikon from "~/components/Ikon";
 import KepalaHalaman from "~/components/KepalaHalaman";
 import { api, getMe, type Me } from "~/lib/api";
 import FotoPemain from "~/components/FotoPemain";
+import { linkWa } from "~/lib/wa";
 import { posisiLabel, statusLabel, usia, tanggal, type AgeGroup, type PlayerSummary } from "~/lib/pemain";
 import type { AttendanceSummary, PlayerOverview } from "@ssb/shared";
 
 const PER_HALAMAN = 10;
 const koma = (n: number) => String(n).replace(".", ",");
-/** Tautan WhatsApp dari nomor lokal (08...) atau internasional; null bila tidak terbaca sebagai nomor. */
-const linkWa = (nomor: string | null) => {
-  const d = (nomor ?? "").replace(/D/g, "");
-  if (d.length < 8) return null;
-  return `https://wa.me/${d.startsWith("0") ? `62${d.slice(1)}` : d}`;
-};
 
 export default function DaftarPemain() {
   const nav = useNavigate();
