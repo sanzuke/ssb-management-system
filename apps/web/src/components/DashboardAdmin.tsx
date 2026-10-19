@@ -2,8 +2,8 @@ import { A } from "@solidjs/router";
 import { createMemo, createResource, For, Show } from "solid-js";
 import { api, roleLabel, type Me } from "~/lib/api";
 import { inisial, type AgeGroup, type PlayerSummary } from "~/lib/pemain";
-import { hariIni, tambahHari, tanggalSesi } from "~/lib/waktu";
-import type { Assignment, AspectSummary, AttendanceSummary, Period, PlayerOverview, TrainingSession } from "@ssb/shared";
+import { bulanIni, hariIni, namaBulan, rupiah, tambahHari, tanggalSesi } from "~/lib/waktu";
+import type { Assignment, AspectSummary, AttendanceSummary, FeeSummary, Period, PlayerOverview, ReminderRow, TrainingSession } from "@ssb/shared";
 import Ikon from "./Ikon";
 import RadarAspek from "./RadarAspek";
 
@@ -25,6 +25,13 @@ export default function DashboardAdmin(props: { me: Me }) {
   const [tugas] = createResource(() => api<Assignment[]>("/assignments").catch(() => null));
   const [periode] = createResource(() => api<Period[]>("/periods").catch(() => null));
   const [aspek] = createResource(() => api<AspectSummary[]>("/assessment-aspects").catch(() => null));
+  // SPP bulan berjalan dan tagihan yang perlu diingatkan (menunggak atau jatuh tempo 3 hari lagi).
+  const bulan = bulanIni();
+  const [spp] = createResource(() => api<FeeSummary>(`/fees/summary?month=${bulan}`).catch(() => null));
+  const [ingat] = createResource(() => api<ReminderRow[]>("/fees/reminders?days=3").catch(() => null));
+  const menunggak = () => (ingat() ?? []).filter((r) => r.daysToDue < 0);
+  const segera = () => (ingat() ?? []).filter((r) => r.daysToDue >= 0);
+  const persenBayar = () => (spp() && spp()!.billed > 0 ? Math.round((spp()!.paid / spp()!.billed) * 100) : null);
 
   const kini = createMemo(() => periode()?.find((p) => p.startDate <= hari && hari <= p.endDate) ?? null);
   const mingguKe = () => {
@@ -119,6 +126,25 @@ export default function DashboardAdmin(props: { me: Me }) {
         isi: `Sesi ${s.ageGroup.name} ${tanggalSesi(s.sessionDate).toLowerCase()} masih ${s.attendance.belum} pemain belum diabsen.`,
         tombol: "Isi absensi",
         href: `/absensi/${s.id}`,
+      });
+    }
+    if (spp() && spp()!.invoices === 0) {
+      out.push({
+        judul: "Tagihan SPP bulan ini belum dibuat",
+        badge: namaBulan(bulan),
+        isi: "Belum ada tagihan SPP untuk bulan berjalan. Atur tarif tiap KU, lalu buat tagihannya.",
+        tombol: "Buat tagihan",
+        href: "/spp",
+      });
+    }
+    if (menunggak().length > 0) {
+      const total = menunggak().reduce((t, r) => t + r.remaining, 0);
+      out.push({
+        judul: "SPP menunggak",
+        badge: `${menunggak().length} tagihan`,
+        isi: `Sisa ${rupiah(total)} sudah lewat jatuh tempo${segera().length > 0 ? `, ditambah ${segera().length} tagihan yang jatuh tempo dalam 3 hari` : ""}. Kirim pengingat ke orang tua lewat WhatsApp.`,
+        tombol: "Kirim pengingat",
+        href: "/spp?tab=pengingat",
       });
     }
     const tanpaPelatih = barisKu().filter((b) => b.pelatih === null);
@@ -236,6 +262,56 @@ export default function DashboardAdmin(props: { me: Me }) {
               </span>
               <span class="petunjuk">Sudah bisa dibaca orang tua</span>
             </div>
+          </section>
+
+          {/* SPP bulan ini */}
+          <section class="panel" aria-label="SPP bulan ini">
+            <header class="panel-kepala">
+              <div>
+                <h2>SPP {namaBulan(bulan)}</h2>
+                <p class="petunjuk panel-sub">Tagihan, pembayaran, dan yang perlu diingatkan bulan ini.</p>
+              </div>
+              <A class="tombol tombol-kecil" href="/spp">
+                Kelola SPP
+              </A>
+            </header>
+            <Show when={spp()} fallback={<p class="panel-isi petunjuk">Memuat…</p>}>
+              {(d) => (
+                <div class="panel-isi">
+                  <Show when={d().invoices > 0} fallback={<p class="kosong">Belum ada tagihan bulan ini.</p>}>
+                    <section class="statistik uang" aria-label="Ringkasan SPP">
+                      <div class="ubin">
+                        <span class="label-ubin">Ditagih</span>
+                        <span class="angka-ubin">{rupiah(d().billed)}</span>
+                        <span class="petunjuk">{d().invoices} tagihan</span>
+                      </div>
+                      <div class="ubin">
+                        <span class="label-ubin">Sudah dibayar</span>
+                        <span class="angka-ubin">{rupiah(d().paid)}</span>
+                        <span class="petunjuk">{d().settledInvoices} lunas</span>
+                      </div>
+                      <div class="ubin" classList={{ perhatian: d().overdueInvoices > 0 }}>
+                        <span class="label-ubin">Belum dibayar</span>
+                        <span class="angka-ubin">{rupiah(d().outstanding)}</span>
+                        <span class="petunjuk">{d().overdueInvoices > 0 ? `${d().overdueInvoices} lewat jatuh tempo` : "Belum ada yang menunggak"}</span>
+                      </div>
+                    </section>
+                    <div class="spp-progres" role="img" aria-label={`${persenBayar()} persen sudah dibayar`}>
+                      <span class="batang">
+                        <span style={{ width: `${persenBayar() ?? 0}%` }} />
+                      </span>
+                      <span class="petunjuk">{persenBayar()}% dari tagihan bulan ini sudah dibayar</span>
+                    </div>
+                  </Show>
+                  <Show when={(ingat() ?? []).length > 0}>
+                    <p class="spp-ingat">
+                      <strong>{(ingat() ?? []).length} tagihan perlu diingatkan</strong> ({menunggak().length} menunggak, {segera().length} segera jatuh tempo).{" "}
+                      <A href="/spp?tab=pengingat">Buka pengingat</A>
+                    </p>
+                  </Show>
+                </div>
+              )}
+            </Show>
           </section>
 
           {/* Status per KU */}
@@ -359,6 +435,13 @@ export default function DashboardAdmin(props: { me: Me }) {
                 <span>
                   <strong>Indikator penilaian</strong>
                   <small>Aspek dan indikator per KU</small>
+                </span>
+              </A>
+              <A class="pintasan-item" href="/spp">
+                <Ikon nama="kartu" />
+                <span>
+                  <strong>Tagihan SPP</strong>
+                  <small>Tarif, tagihan, pembayaran, dan pengingat</small>
                 </span>
               </A>
               <A class="pintasan-item" href="/kehadiran">

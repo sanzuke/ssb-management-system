@@ -28,6 +28,7 @@ Status tidak disimpan, tetapi dihitung dari pembayaran: `belum`, `sebagian`, `lu
 
 - Admin: menu **SPP**. Ringkasan bulan, pembuatan tagihan, daftar tagihan bersaring (belum lunas, menunggak, lunas) dengan pencatatan pembayaran, dan tarif per KU.
 - Admin, tab **Pengingat**: daftar tagihan menunggak dan yang segera jatuh tempo (3 atau 7 hari), isi pesan yang bisa diubah (kata {wali}, {anak}, {bulan}, {sisa}, {status}, {ssb} diisi otomatis; tersimpan di peramban), dan tombol **Kirim ke <wali>** yang membuka WhatsApp dengan pesan terisi. Admin yang menekan kirim di WhatsApp; setiap penekanan dicatat sebagai satu pengingat.
+- Dasbor admin: panel **SPP bulan ini** (ditagih, dibayar, belum dibayar, persen terbayar, jumlah yang perlu diingatkan), kartu "Perlu tindakan" (tagihan bulan ini belum dibuat, SPP menunggak) yang menautkan ke tab Pengingat (`/spp?tab=pengingat`), dan pintasan Tagihan SPP.
 - Orang tua: beranda menampilkan kartu peringatan bila ada tagihan belum lunas (merah bila lewat jatuh tempo).
 - Orang tua: menu **SPP**. Sisa yang harus dibayar, tagihan per anak, dan riwayat pembayaran. Pembayaran dilakukan langsung ke SSB.
 - Pelatih dan korlas tidak punya akses ke data keuangan.

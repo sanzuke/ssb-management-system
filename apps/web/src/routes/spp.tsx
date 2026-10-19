@@ -1,4 +1,4 @@
-import { useNavigate } from "@solidjs/router";
+import { useNavigate, useSearchParams } from "@solidjs/router";
 import { Title } from "@solidjs/meta";
 import { createSignal, onMount, Show } from "solid-js";
 import KepalaHalaman from "~/components/KepalaHalaman";
@@ -10,7 +10,10 @@ import { getMe, type Me } from "~/lib/api";
 export default function Spp() {
   const nav = useNavigate();
   const [me, setMe] = createSignal<Me | null>(null);
-  const [tab, setTab] = createSignal<"tagihan" | "pengingat">("tagihan");
+  const [params, setParams] = useSearchParams();
+  // Tab tersimpan di alamat (?tab=pengingat) supaya bisa ditautkan dari dasbor.
+  const tab = () => (params.tab === "pengingat" ? "pengingat" : "tagihan");
+  const setTab = (t: "tagihan" | "pengingat") => setParams({ tab: t === "tagihan" ? undefined : t }, { replace: true });
 
   onMount(async () => {
     const m = await getMe().catch(() => null);
