@@ -2,6 +2,7 @@ import { useLocation } from "@solidjs/router";
 import { type JSX, onMount, Show } from "solid-js";
 import { getMe, meCache, meDicek } from "~/lib/api";
 import AppBar from "./AppBar";
+import DialogKeluar from "./DialogKeluar";
 import HeaderAtas from "./HeaderAtas";
 
 /** Halaman tanpa menu: masuk, daftar, pilih SSB, undangan, dan lupa atau reset kata sandi. */
@@ -44,6 +45,7 @@ export default function Shell(props: { children: JSX.Element }) {
           )}
         </Show>
       </Show>
+      <DialogKeluar />
       {props.children}
     </>
   );

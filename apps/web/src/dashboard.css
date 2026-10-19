@@ -2302,3 +2302,131 @@
     padding: 14px;
   }
 }
+
+/* ---- Menu profil di header atas ---- */
+.profil-menu {
+  position: relative;
+}
+button.pengguna {
+  border: 0;
+  border-left: 1px solid var(--garis);
+  background: transparent;
+  font: inherit;
+  cursor: pointer;
+  min-height: 44px;
+  padding-right: 4px;
+  border-radius: 0;
+}
+button.pengguna:hover .pengguna-teks strong {
+  text-decoration: underline;
+}
+button.pengguna:focus-visible {
+  outline: 3px solid var(--kuning);
+  outline-offset: 2px;
+  border-radius: 10px;
+}
+.panah-menu {
+  width: 8px;
+  height: 8px;
+  margin: 0 4px 3px 2px;
+  border-right: 2px solid var(--redup);
+  border-bottom: 2px solid var(--redup);
+  transform: rotate(45deg);
+  transition: transform 0.15s;
+}
+button.pengguna[aria-expanded="true"] .panah-menu {
+  transform: rotate(-135deg) translate(-2px, -2px);
+}
+.menu-profil {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 10px);
+  z-index: 40;
+  width: 17rem;
+  padding: 8px;
+  border: 1px solid var(--garis);
+  border-radius: 16px;
+  background: #fff;
+  box-shadow: 0 12px 32px rgba(20, 32, 26, 0.18);
+  animation: dialog-masuk 0.14s ease-out;
+}
+.menu-profil-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 10px 12px;
+  border-bottom: 1px solid var(--garis);
+  margin-bottom: 6px;
+}
+.menu-profil-info > div {
+  display: grid;
+  min-width: 0;
+  line-height: 1.3;
+}
+.menu-profil-info strong {
+  overflow-wrap: anywhere;
+}
+.menu-profil-info span {
+  font-size: 0.8rem;
+  color: var(--redup);
+  overflow-wrap: anywhere;
+}
+.menu-profil-info .menu-profil-peran {
+  margin-top: 4px;
+  font-weight: 700;
+  color: var(--rumput);
+}
+.avatar-pengguna.besar {
+  flex: none;
+  width: 44px;
+  height: 44px;
+  font-size: 1rem;
+}
+.butir-menu {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 44px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--tinta);
+  font: inherit;
+  font-weight: 700;
+  text-align: left;
+  text-decoration: none;
+  cursor: pointer;
+}
+.butir-menu:hover,
+.butir-menu:focus-visible {
+  background: #eef3ea;
+  outline: none;
+}
+.butir-menu:focus-visible {
+  box-shadow: inset 0 0 0 2px var(--kuning);
+}
+.butir-menu.bahaya {
+  color: var(--merah);
+}
+.butir-menu.bahaya:hover,
+.butir-menu.bahaya:focus-visible {
+  background: var(--merah-muda);
+}
+.menu-profil-garis {
+  height: 1px;
+  margin: 6px 4px;
+  border: 0;
+  background: var(--garis);
+}
+/* Layar lebar: Ganti SSB dan Keluar pindah ke menu profil, jadi hilang dari sidebar. */
+@media (min-width: 1024px) {
+  .bar .aksi.bawah {
+    display: none;
+  }
+}
+.menu-profil-info .avatar-pengguna {
+  color: var(--kuning);
+  font-size: 1rem;
+}

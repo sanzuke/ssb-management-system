@@ -1,6 +1,7 @@
-import { A, useLocation, useNavigate } from "@solidjs/router";
+import { A, useLocation } from "@solidjs/router";
 import { createEffect, Show } from "solid-js";
-import { api, lupaMe, roleLabel, type Me } from "~/lib/api";
+import { roleLabel, type Me } from "~/lib/api";
+import { mintaKeluar } from "./DialogKeluar";
 import Ikon from "./Ikon";
 
 /**
@@ -8,14 +9,7 @@ import Ikon from "./Ikon";
  * seperti desain Stitch "Data Pemain - Admin".
  */
 export default function AppBar(props: { me: Me }) {
-  const nav = useNavigate();
-  const logout = async () => {
-    await api("/auth/logout", { method: "POST" });
-    lupaMe();
-    nav("/masuk", { replace: true });
-  };
   const lokasi = useLocation();
-  let konfirmasi: HTMLDialogElement | undefined;
   let daftarMenu: HTMLElement | undefined;
 
   // Di HP menu bisa digeser; menu halaman yang sedang dibuka dibawa ke tengah supaya selalu terlihat.
@@ -85,26 +79,11 @@ export default function AppBar(props: { me: Me }) {
             <span>Ganti SSB</span>
           </A>
         </Show>
-        <button class="tombol tipis menu" type="button" onClick={() => konfirmasi?.showModal()}>
+        <button class="tombol tipis menu" type="button" onClick={mintaKeluar}>
           <Ikon nama="keluar" />
           <span>Keluar</span>
         </button>
       </div>
-      <dialog class="dialog-konfirmasi" ref={konfirmasi} aria-labelledby="judul-keluar">
-        <span class="dialog-ikon" aria-hidden="true">
-          <Ikon nama="keluar" ukuran={26} />
-        </span>
-        <h2 id="judul-keluar">Keluar dari aplikasi?</h2>
-        <p>Anda perlu masuk lagi dengan email dan kata sandi untuk membuka SSB App.</p>
-        <div class="dialog-aksi">
-          <button class="tombol batal" type="button" onClick={() => konfirmasi?.close()}>
-            Batal
-          </button>
-          <button class="tombol utama" type="button" onClick={logout}>
-            Ya, keluar
-          </button>
-        </div>
-      </dialog>
     </header>
   );
 }
