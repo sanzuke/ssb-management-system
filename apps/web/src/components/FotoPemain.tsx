@@ -8,10 +8,14 @@ export const fotoUrl = (id: string, v: string) => `/api/players/${encodeURICompo
  * Foto pemain dalam kotak membulat; bila belum ada (atau gagal dimuat) tampil dua huruf inisial.
  * Dekoratif: nama pemain selalu ada di teks sebelahnya.
  */
-export default function FotoPemain(props: { id: string; nama: string; photoV: string | null; ukuran?: "kecil" | "besar" }) {
+export default function FotoPemain(props: { id: string; nama: string; photoV: string | null; ukuran?: "kecil" | "besar" | "potret" }) {
   const [gagal, setGagal] = createSignal<string | null>(null);
   return (
-    <span class="ortu-foto" classList={{ kecil: props.ukuran === "kecil", besar: props.ukuran === "besar" }} aria-hidden="true">
+    <span
+      class="ortu-foto"
+      classList={{ kecil: props.ukuran === "kecil", besar: props.ukuran === "besar", potret: props.ukuran === "potret" }}
+      aria-hidden="true"
+    >
       <Show when={props.photoV && gagal() !== props.photoV} fallback={inisial(props.nama)}>
         <img class="foto-img" src={fotoUrl(props.id, props.photoV!)} alt="" loading="lazy" decoding="async" onError={() => setGagal(props.photoV)} />
       </Show>
