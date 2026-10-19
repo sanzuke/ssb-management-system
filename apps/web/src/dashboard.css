@@ -1781,6 +1781,8 @@
   .profil-kiri {
     position: sticky;
     top: 16px;
+    max-height: calc(100vh - 32px);
+    overflow-y: auto;
   }
   #radar,
   #atribut,
@@ -2002,4 +2004,16 @@
 }
 .spp-buat .field {
   min-width: 8rem;
+}
+/* Header atas (64px) menempel di layar lebar: kartu pemain dan tujuan anchor harus berhenti di bawahnya. */
+@media (min-width: 1024px) {
+  .profil-kiri {
+    top: 80px;
+    max-height: calc(100vh - 96px);
+  }
+  #radar,
+  #atribut,
+  #data {
+    scroll-margin-top: 80px;
+  }
 }
