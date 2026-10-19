@@ -13,7 +13,11 @@ const TANPA_MENU = ["/masuk", "/daftar", "/pilih-ssb"];
  */
 export default function Shell(props: { children: JSX.Element }) {
   const lokasi = useLocation();
-  const denganMenu = () => !TANPA_MENU.includes(lokasi.pathname) && !lokasi.pathname.startsWith("/undangan");
+  // /undangan (kelola undangan, admin) memakai menu; /undangan/<token> (terima undangan) tidak.
+  const denganMenu = () => {
+    const jalur = lokasi.pathname.length > 1 ? lokasi.pathname.replace(/\/+$/, "") : lokasi.pathname;
+    return !TANPA_MENU.includes(jalur) && !jalur.startsWith("/undangan/");
+  };
 
   // Muat akun sekali di awal (hasilnya dipakai bersama oleh menu dan halaman).
   onMount(() => {

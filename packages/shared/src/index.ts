@@ -32,6 +32,7 @@ export type UserRole = z.infer<typeof userRoleSchema>;
 export const permissions = {
   "user.list": { roles: ["admin_ssb"], desc: "Melihat daftar anggota SSB" },
   "invitation.create": { roles: ["admin_ssb"], desc: "Membuat tautan undangan" },
+  "invitation.manage": { roles: ["admin_ssb"], desc: "Melihat daftar undangan, mencabut, dan membuat ulang tautan yang belum diterima" },
   "master.read": { roles: ["admin_ssb", "pelatih", "korlas"], desc: "Melihat KU, periode, dan lokasi" },
   "master.write": { roles: ["admin_ssb"], desc: "Mengubah KU, periode, dan lokasi" },
   "player.read": {
@@ -107,6 +108,19 @@ export type Login = z.infer<typeof loginSchema>;
 export const selectSsbSchema = z.object({ ssbId: z.uuid() });
 
 /** Peran yang bisa diundang. Admin SSB pertama dibuat saat pendaftaran SSB. */
+/** Satu baris daftar undangan (token tidak pernah disimpan, jadi tautan lama tidak bisa ditampilkan lagi). */
+export type InvitationRow = {
+  id: string;
+  role: UserRole;
+  label: string | null;
+  player: { id: string; name: string } | null;
+  createdBy: string | null;
+  createdAt: string;
+  expiresAt: string;
+  acceptedAt: string | null;
+  status: "menunggu" | "diterima" | "kedaluwarsa";
+};
+
 export const invitableRoleSchema = z.enum(["pelatih", "korlas", "orang_tua"]);
 
 export const createInvitationSchema = z.object({

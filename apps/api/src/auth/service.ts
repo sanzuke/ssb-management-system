@@ -100,6 +100,34 @@ export async function createInvitation(
   return { token: `${by.ssbId}.${secret}`, expiresAt };
 }
 
+/**
+ * Membuat ulang tautan undangan yang belum diterima: undangan baru (role, catatan, dan pemain sama,
+ * masa berlaku baru) menggantikan yang lama dalam satu transaksi, sehingga tautan lama langsung tidak berlaku.
+ */
+export async function renewInvitation(db: Db, by: { ssbId: string; userId: string }, id: string) {
+  const secret = newToken();
+  const expiresAt = new Date(Date.now() + INVITATION_TTL_MS);
+  const ok = await withTenant(db, by.ssbId, async (tx) => {
+    const [old] = await tx.select().from(schema.invitation).where(eq(schema.invitation.id, id)).limit(1);
+    if (!old) return "none" as const;
+    if (old.acceptedAt) return "accepted" as const;
+    await tx.delete(schema.invitation).where(eq(schema.invitation.id, id));
+    await tx.insert(schema.invitation).values({
+      ssbId: by.ssbId,
+      secretHash: hashToken(secret),
+      role: old.role,
+      label: old.label,
+      playerId: old.playerId,
+      createdBy: by.userId,
+      expiresAt,
+    });
+    return "ok" as const;
+  });
+  if (ok === "none") throw new HttpError(404, "not_found", "Undangan tidak ditemukan");
+  if (ok === "accepted") throw new HttpError(409, "already_accepted", "Undangan ini sudah diterima");
+  return { token: `${by.ssbId}.${secret}`, expiresAt };
+}
+
 function parseToken(token: string) {
   const i = token.indexOf(".");
   const ssbId = token.slice(0, i);

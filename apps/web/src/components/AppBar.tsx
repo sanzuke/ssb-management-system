@@ -52,6 +52,12 @@ export default function AppBar(props: { me: Me }) {
             <span>Indikator</span>
           </A>
         </Show>
+        <Show when={props.me.active?.role === "admin_ssb"}>
+          <A class="tombol tipis menu" href="/undangan">
+            <Ikon nama="surat" />
+            <span>Undangan</span>
+          </A>
+        </Show>
         <A class="tombol tipis menu" href="/akun">
           <Ikon nama="akun" />
           <span>Akun</span>

@@ -7,6 +7,7 @@ Endpoint dijaga dengan `requirePermission(<izin>)`. Pembatasan data per baris (p
 |---|---|:-:|:-:|:-:|:-:|
 | `user.list` | Melihat daftar anggota SSB | ya | - | - | - |
 | `invitation.create` | Membuat tautan undangan | ya | - | - | - |
+| `invitation.manage` | Melihat daftar undangan, mencabut, dan membuat ulang tautan yang belum diterima | ya | - | - | - |
 | `master.read` | Melihat KU, periode, dan lokasi | ya | ya | ya | - |
 | `master.write` | Mengubah KU, periode, dan lokasi | ya | - | - | - |
 | `player.read` | Melihat pemain (pelatih dan korlas: KU yang ditugaskan; orang tua: anaknya) | ya | ya | ya | ya |
