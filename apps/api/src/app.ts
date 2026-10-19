@@ -21,7 +21,7 @@ export type AppDeps = { google?: GoogleProvider | null; logger?: Logger };
 export function createApp(
   db: Db,
   env: Pick<Env, "NODE_ENV" | "ALLOWED_ORIGINS"> &
-    Partial<Pick<Env, "WEB_URL" | "PUBLIC_API_URL" | "SESSION_SECRET" | "GOOGLE_CLIENT_ID" | "GOOGLE_CLIENT_SECRET">>,
+    Partial<Pick<Env, "WEB_URL" | "PUBLIC_API_URL" | "SESSION_SECRET" | "GOOGLE_CLIENT_ID" | "GOOGLE_CLIENT_SECRET" | "UPLOAD_DIR">>,
   deps: AppDeps = {},
 ) {
   const secureCookie = env.NODE_ENV === "production";
@@ -57,7 +57,7 @@ export function createApp(
       .route("/auth", authRoutes(db, { secureCookie }))
       .route("/invitations", invitationRoutes(db, { secureCookie, webUrl }))
       .route("/", masterRoutes(db))
-      .route("/", playerRoutes(db))
+      .route("/", playerRoutes(db, { uploadDir: env.UPLOAD_DIR ?? "./uploads" }))
       .route("/", sessionRoutes(db))
       .route("/", assessmentRoutes(db))
       // Daftar anggota SSB sendiri; hanya admin SSB.

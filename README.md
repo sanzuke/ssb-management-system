@@ -97,6 +97,8 @@ docker compose --profile seed run --rm seed   # lewat Docker Compose
 
 Akun contoh (domain `garudamuda.test`): `admin@`, `korlas@`, `budi@` (KU-10), `sari@` (KU-12 dan KU-8), `ortu01@` sampai `ortu23@`. Kata sandi semuanya `SEED_PASSWORD`; bawaan lokal ada di `tools/seed.ts`.
 
+Foto contoh (siluet berwarna) ikut dibuat di folder `uploads/` untuk sebagian besar pemain; sisanya sengaja tanpa foto agar avatar inisial terlihat.
+
 Di server demo atau staging: `NODE_ENV=production ALLOW_SEED=1 SEED_PASSWORD=<kata sandi kuat> bun run db:seed`. Tanpa `ALLOW_SEED=1` skrip menolak jalan saat `NODE_ENV=production`, dan `SEED_PASSWORD` wajib diisi. Jangan dijalankan di database produksi yang berisi data sungguhan.
 
 ### Menjalankan di server
@@ -123,7 +125,10 @@ Contoh untuk satu server Linux (Bun, Node.js 24, dan PostgreSQL terpasang). Semu
    ALLOWED_ORIGINS=https://<domain-web>
    PUBLIC_API_URL=https://<domain-web>/api
    SESSION_SECRET=<acak-minimal-32-karakter>
+   UPLOAD_DIR=/var/lib/ssb/uploads
    ```
+
+   `UPLOAD_DIR` adalah folder foto pemain (bawaan `./uploads`). Buat foldernya, pastikan bisa ditulis oleh pengguna yang menjalankan API, dan masukkan ke cadangan bersama database. Foto tidak disimpan di database.
 
 3. Pasang, migrasi, dan build.
 

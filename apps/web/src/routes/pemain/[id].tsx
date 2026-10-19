@@ -1,5 +1,6 @@
 import { A, useNavigate, useParams } from "@solidjs/router";
 import { Title } from "@solidjs/meta";
+import FotoPemain from "~/components/FotoPemain";
 import KepalaHalaman from "~/components/KepalaHalaman";
 import { createSignal, For, onMount, Show } from "solid-js";
 import PlayerForm from "~/components/PlayerForm";
@@ -24,6 +25,43 @@ export default function DetailPemain() {
   const [guardianError, setGuardianError] = createSignal("");
 
   const admin = () => me()?.active?.role === "admin_ssb";
+  const bisaFoto = () => me()?.active?.role !== "orang_tua";
+  const [fotoBusy, setFotoBusy] = createSignal(false);
+  const [fotoError, setFotoError] = createSignal("");
+
+  const unggahFoto = async (e: Event) => {
+    const input = e.currentTarget as HTMLInputElement;
+    const file = input.files?.[0];
+    input.value = "";
+    if (!file) return;
+    setFotoError("");
+    if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) return setFotoError("Foto harus berformat JPG, PNG, atau WebP.");
+    if (file.size > 2 * 1024 * 1024) return setFotoError("Foto terlalu besar. Maksimal 2 MB.");
+    setFotoBusy(true);
+    try {
+      const body = new FormData();
+      body.set("file", file);
+      const res = await fetch(`/api/players/${encodeURIComponent(p.id)}/photo`, { method: "PUT", credentials: "same-origin", body });
+      if (!res.ok) throw new ApiError(res.status, "error", (await res.json().catch(() => null))?.error?.message ?? "Foto tidak bisa diunggah. Coba lagi.", {});
+      await load();
+    } catch (err) {
+      setFotoError(err instanceof ApiError ? err.message : "Tidak bisa terhubung ke server. Coba lagi.");
+    } finally {
+      setFotoBusy(false);
+    }
+  };
+  const hapusFoto = async () => {
+    setFotoError("");
+    setFotoBusy(true);
+    try {
+      await api(`/players/${encodeURIComponent(p.id)}/photo`, { method: "DELETE" });
+      await load();
+    } catch (err) {
+      setFotoError(err instanceof ApiError ? err.message : "Tidak bisa terhubung ke server. Coba lagi.");
+    } finally {
+      setFotoBusy(false);
+    }
+  };
 
   const load = async () => {
     try {
@@ -118,6 +156,27 @@ export default function DetailPemain() {
               <Show when={saved()}>
                 <div class="info" role="status">
                   Perubahan disimpan.
+                </div>
+              </Show>
+              <div class="foto-kelola">
+                <FotoPemain id={pl()!.id} nama={pl()!.fullName} photoV={pl()!.photoV} ukuran="besar" />
+                <Show when={bisaFoto()}>
+                  {/* biome-ignore lint/a11y/noLabelWithoutControl: input berkas tersembunyi ada di dalam label */}
+                  <label class="tombol tombol-kecil" aria-disabled={fotoBusy()}>
+                    {fotoBusy() ? "Mengunggah…" : pl()!.photoV ? "Ganti foto" : "Unggah foto"}
+                    <input type="file" accept="image/jpeg,image/png,image/webp" disabled={fotoBusy()} onChange={unggahFoto} />
+                  </label>
+                  <Show when={pl()!.photoV}>
+                    <button class="tombol tipis tombol-kecil" type="button" disabled={fotoBusy()} onClick={hapusFoto}>
+                      Hapus foto
+                    </button>
+                  </Show>
+                  <span class="petunjuk">JPG, PNG, atau WebP, maksimal 2 MB. Foto persegi (wajah di tengah) paling pas.</span>
+                </Show>
+              </div>
+              <Show when={fotoError()}>
+                <div class="peringatan" role="alert">
+                  {fotoError()}
                 </div>
               </Show>
               <dl class="rincian">

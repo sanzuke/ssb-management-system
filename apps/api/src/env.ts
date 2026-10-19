@@ -16,6 +16,8 @@ const envSchema = z
     GOOGLE_CLIENT_ID: z.string().optional(),
     GOOGLE_CLIENT_SECRET: z.string().optional(),
     /** Jalur Chromium untuk membuat rapor PDF; kosong = memakai Chromium bawaan Playwright. */
+    /** Folder penyimpanan foto pemain; di server arahkan ke volume yang ikut dicadangkan. */
+    UPLOAD_DIR: z.string().default("./uploads"),
     CHROMIUM_PATH: z.string().optional(),
   })
   .superRefine((v, ctx) => {

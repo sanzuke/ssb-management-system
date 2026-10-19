@@ -4,7 +4,8 @@ import { createEffect, createMemo, createResource, createSignal, For, onMount, S
 import Ikon from "~/components/Ikon";
 import KepalaHalaman from "~/components/KepalaHalaman";
 import { api, getMe, type Me } from "~/lib/api";
-import { inisial, posisiLabel, statusLabel, usia, tanggal, type AgeGroup, type PlayerSummary } from "~/lib/pemain";
+import FotoPemain from "~/components/FotoPemain";
+import { posisiLabel, statusLabel, usia, tanggal, type AgeGroup, type PlayerSummary } from "~/lib/pemain";
 import type { AttendanceSummary, PlayerOverview } from "@ssb/shared";
 
 const PER_HALAMAN = 10;
@@ -141,9 +142,7 @@ export default function DaftarPemain() {
               {(pl) => (
                 <article class="ortu-anak">
                   <A class="ortu-profil" href={`/pemain/${pl.id}`}>
-                    <span class="ortu-foto" aria-hidden="true">
-                      {inisial(pl.fullName)}
-                    </span>
+                    <FotoPemain id={pl.id} nama={pl.fullName} photoV={pl.photoV} />
                     <span class="ortu-teks">
                       <span class="petunjuk">{pl.memberNo ?? "Belum ada nomor"}</span>
                       <strong>{pl.fullName}</strong>
@@ -307,9 +306,7 @@ export default function DaftarPemain() {
                           </td>
                           <td class="sel-profil">
                             <A class="profil-baris" href={`/pemain/${pl.id}`}>
-                              <span class="ortu-foto kecil" aria-hidden="true">
-                                {inisial(pl.fullName)}
-                              </span>
+                              <FotoPemain id={pl.id} nama={pl.fullName} photoV={pl.photoV} ukuran="kecil" />
                               <span class="ortu-teks">
                                 <strong>{pl.fullName}</strong>
                                 <span class="petunjuk">

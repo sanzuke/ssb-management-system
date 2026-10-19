@@ -4,7 +4,8 @@ import { createSignal, onMount, Show } from "solid-js";
 import KepalaHalaman from "~/components/KepalaHalaman";
 import QrCode from "~/components/QrCode";
 import { api, ApiError, getMe, type Me } from "~/lib/api";
-import { inisial, posisiLabel, statusLabel, type PlayerDetail } from "~/lib/pemain";
+import FotoPemain from "~/components/FotoPemain";
+import { posisiLabel, statusLabel, type PlayerDetail } from "~/lib/pemain";
 
 export default function KartuPemain() {
   const nav = useNavigate();
@@ -66,9 +67,7 @@ export default function KartuPemain() {
                 </header>
                 <div class="kartu-badan">
                   <div class="kartu-profil">
-                    <span class="ortu-foto" aria-hidden="true">
-                      {inisial(d().fullName)}
-                    </span>
+                    <FotoPemain id={d().id} nama={d().fullName} photoV={d().photoV} />
                     <div class="ortu-teks">
                       <span class="ortu-chip hijau">{d().ageGroup?.name ?? "KU belum ditentukan"}</span>
                       <div class="kartu-nama">{d().fullName}</div>

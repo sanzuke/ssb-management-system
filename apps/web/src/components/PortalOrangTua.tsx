@@ -1,7 +1,7 @@
 import { A } from "@solidjs/router";
 import { createMemo, createResource, For, Show } from "solid-js";
 import { api } from "~/lib/api";
-import { inisial } from "~/lib/pemain";
+import FotoPemain from "~/components/FotoPemain";
 import type { AttendanceSummary, GuardianSession, PlayerSummary } from "@ssb/shared";
 import Ikon from "./Ikon";
 
@@ -74,9 +74,7 @@ export default function PortalOrangTua() {
           {(k) => (
             <article class="ortu-anak">
               <A class="ortu-profil" href={`/pemain/${k.id}`}>
-                <span class="ortu-foto" aria-hidden="true">
-                  {inisial(k.fullName)}
-                </span>
+                <FotoPemain id={k.id} nama={k.fullName} photoV={k.photoV} />
                 <span class="ortu-teks">
                   <span class="petunjuk">{k.memberNo ?? "Belum ada nomor"}</span>
                   <strong>{k.fullName}</strong>

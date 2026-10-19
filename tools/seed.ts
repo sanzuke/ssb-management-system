@@ -12,7 +12,10 @@
  * Jangan jalankan di database produksi yang berisi data sungguhan.
  */
 import { and, eq, like } from "drizzle-orm";
+import { randomBytes } from "node:crypto";
+import { mkdirSync, writeFileSync } from "node:fs";
 import { createDb, schema, withTenant } from "@ssb/db";
+import { fotoContoh } from "./seed-foto";
 import { defaultIndicators, assessmentAspects } from "@ssb/shared/aspects";
 
 const url = process.env.DATABASE_URL;
@@ -190,6 +193,17 @@ const players = pemain.map((p, i) => {
   return { ...p, id: id(), memberNo: `P${String(i + 1).padStart(4, "0")}`, lahir };
 });
 
+// Foto contoh (siluet berwarna) untuk sebagian besar pemain; sisanya sengaja tanpa foto agar avatar inisial tetap terlihat.
+const uploadDir = process.env.UPLOAD_DIR ?? "./uploads";
+const fotoKey = (p: (typeof players)[number]) => {
+  const i = players.indexOf(p);
+  if (i % 5 === 4) return null;
+  const key = `${ssbId}/${p.id}-${randomBytes(4).toString("hex")}.png`;
+  mkdirSync(`${uploadDir}/${ssbId}`, { recursive: true });
+  writeFileSync(`${uploadDir}/${key}`, fotoContoh(i));
+  return key;
+};
+
 await withTenant(db, ssbId, async (tx) => {
   await tx.insert(schema.ssb).values({ id: ssbId, name: "SSB Garuda Muda", city: "Jakarta Selatan", province: "DKI Jakarta", memberSeq: players.length });
   await tx.insert(schema.ssbDirectory).values({ slug: SLUG, ssbId });
@@ -209,6 +223,7 @@ await withTenant(db, ssbId, async (tx) => {
       school: p.sekolah,
       status: "aktif" as const,
       ageGroupId: kuId(p.ku),
+      photoKey: fotoKey(p),
     })),
   );
   await tx

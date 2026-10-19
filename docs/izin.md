@@ -11,6 +11,7 @@ Endpoint dijaga dengan `requirePermission(<izin>)`. Pembatasan data per baris (p
 | `master.write` | Mengubah KU, periode, dan lokasi | ya | - | - | - |
 | `player.read` | Melihat pemain (pelatih dan korlas: KU yang ditugaskan; orang tua: anaknya) | ya | ya | ya | ya |
 | `player.write` | Menambah dan mengubah pemain | ya | - | - | - |
+| `player.photo` | Mengunggah dan menghapus foto pemain (pelatih dan korlas: KU yang ditugaskan) | ya | ya | ya | - |
 | `attendance.record` | Mencatat absensi latihan | ya | ya | ya | - |
 | `attendance.read` | Melihat absensi (orang tua: anaknya) | ya | ya | ya | ya |
 | `assessment.write` | Mengisi penilaian pemain dan rencana pengembangannya | ya | ya | - | - |
