@@ -2605,3 +2605,19 @@ button.pengguna[aria-expanded="true"] .panah-menu {
     line-height: 1.2;
   }
 }
+
+/* Layar lebar: peran ("Admin SSB") tidak ditampilkan di sidebar; ada di menu profil kanan atas. Di HP tetap tampil karena tanpa header. */
+@media (min-width: 1024px) {
+  .bar .peran {
+    display: none;
+  }
+  .bar .nama-ssb {
+    font-size: 1.1rem;
+  }
+  .bar .nama-ssb[data-panjang="panjang"] {
+    font-size: 1.05rem;
+  }
+  .bar .nama-ssb[data-panjang="sangat"] {
+    font-size: 0.95rem;
+  }
+}
