@@ -30,6 +30,8 @@ export default function KelolaUndangan() {
   const [salin, setSalin] = createSignal("");
   const [galat, setGalat] = createSignal("");
   const [sibuk, setSibuk] = createSignal("");
+  const [resetLink, setResetLink] = createSignal<{ url: string; name: string; expiresAt: string } | null>(null);
+  const [salinReset, setSalinReset] = createSignal("");
 
   const load = async () => setRows(await api<InvitationRow[]>("/invitations").catch(() => []));
 
@@ -79,6 +81,24 @@ export default function KelolaUndangan() {
       await api(`/invitations/${r.id}`, { method: "DELETE" });
       await load();
     });
+
+  const buatReset = (u: Member) =>
+    aksi(u.id, async () => {
+      setResetLink(await api<{ url: string; name: string; expiresAt: string }>(`/users/${u.id}/reset-link`, { method: "POST" }));
+      setSalinReset("");
+    });
+  const salinResetLink = async () => {
+    try {
+      await navigator.clipboard.writeText(resetLink()!.url);
+      setSalinReset("Tautan disalin.");
+    } catch {
+      setSalinReset("Salin manual: pilih tautan di atas, lalu tekan Ctrl+C.");
+    }
+  };
+  const pesanResetWa = () => {
+    const t = resetLink()!;
+    return `https://wa.me/?text=${encodeURIComponent(`Halo ${t.name}, ini tautan untuk mengatur ulang kata sandi SSB App Anda (berlaku sampai ${tgl(t.expiresAt)}): ${t.url}`)}`;
+  };
 
   const salinTautan = async () => {
     try {
@@ -240,6 +260,29 @@ export default function KelolaUndangan() {
 
         <section class="master" aria-label="Anggota SSB">
           <h2>Anggota SSB ({members().length})</h2>
+          <Show when={resetLink()}>
+            {(t) => (
+              <div class="tautan-baru" role="status">
+                <h3>Tautan reset kata sandi untuk {t().name}</h3>
+                <p class="petunjuk">Kirim tautan ini langsung ke orangnya. Berlaku sampai {tgl(t().expiresAt)}, sekali pakai, dan tampil sekali ini saja.</p>
+                <input class="tautan-isi" readonly value={t().url} aria-label="Tautan reset kata sandi" onFocus={(e) => e.currentTarget.select()} />
+                <div class="aksi-baris">
+                  <button class="tombol utama" type="button" onClick={salinResetLink}>
+                    Salin tautan
+                  </button>
+                  <a class="tombol" href={pesanResetWa()} target="_blank" rel="noopener noreferrer">
+                    Kirim lewat WhatsApp
+                  </a>
+                  <button class="tombol tipis" type="button" onClick={() => setResetLink(null)}>
+                    Tutup
+                  </button>
+                </div>
+                <Show when={salinReset()}>
+                  <p class="petunjuk">{salinReset()}</p>
+                </Show>
+              </div>
+            )}
+          </Show>
           <Show when={members().length > 0} fallback={<p class="kosong">Belum ada anggota.</p>}>
             <ul class="daftar-butir">
               <For each={members()}>
@@ -249,6 +292,11 @@ export default function KelolaUndangan() {
                       {u.name} <span class="petunjuk">{u.email}</span>
                     </span>
                     <span class="petunjuk">{roleLabel[u.role]}</span>
+                    <Show when={u.id !== me()?.active?.userId}>
+                      <button class="tombol tipis tombol-kecil" type="button" disabled={sibuk() === u.id} onClick={() => buatReset(u)}>
+                        Tautan reset sandi
+                      </button>
+                    </Show>
                   </li>
                 )}
               </For>

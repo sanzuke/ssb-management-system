@@ -18,10 +18,15 @@ const envSchema = z
     /** Jalur Chromium untuk membuat rapor PDF; kosong = memakai Chromium bawaan Playwright. */
     /** Folder penyimpanan foto pemain; di server arahkan ke volume yang ikut dicadangkan. */
     UPLOAD_DIR: z.string().default("./uploads"),
+    /** Server SMTP untuk email reset kata sandi, mis. smtps://user:sandi@smtp.contoh.id:465. Kosong = email reset tidak aktif. */
+    SMTP_URL: z.string().optional(),
+    /** Pengirim email, mis. "SSB App <no-reply@contoh.id>". Wajib bila SMTP_URL diisi. */
+    MAIL_FROM: z.string().optional(),
     CHROMIUM_PATH: z.string().optional(),
   })
   .superRefine((v, ctx) => {
     const g = [v.GOOGLE_CLIENT_ID, v.GOOGLE_CLIENT_SECRET].filter(Boolean).length;
+    if (v.SMTP_URL && !v.MAIL_FROM) ctx.addIssue({ code: "custom", path: ["MAIL_FROM"], message: "wajib diisi bila SMTP_URL diisi" });
     if (g === 1) ctx.addIssue({ code: "custom", path: ["GOOGLE_CLIENT_SECRET"], message: "GOOGLE_CLIENT_ID dan GOOGLE_CLIENT_SECRET harus diisi berpasangan" });
     if (g === 2 && !v.SESSION_SECRET) ctx.addIssue({ code: "custom", path: ["SESSION_SECRET"], message: "wajib diisi bila login Google aktif" });
   });

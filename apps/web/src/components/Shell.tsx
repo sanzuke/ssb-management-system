@@ -4,8 +4,8 @@ import { getMe, meCache, meDicek } from "~/lib/api";
 import AppBar from "./AppBar";
 import HeaderAtas from "./HeaderAtas";
 
-/** Halaman tanpa menu: masuk, daftar, pilih SSB, dan undangan. */
-const TANPA_MENU = ["/masuk", "/daftar", "/pilih-ssb"];
+/** Halaman tanpa menu: masuk, daftar, pilih SSB, undangan, dan lupa atau reset kata sandi. */
+const TANPA_MENU = ["/masuk", "/daftar", "/pilih-ssb", "/lupa-sandi"];
 
 /**
  * Tata letak bersama: menu dirender di sini, bukan di tiap halaman, sehingga tetap ada saat
@@ -16,7 +16,7 @@ export default function Shell(props: { children: JSX.Element }) {
   // /undangan (kelola undangan, admin) memakai menu; /undangan/<token> (terima undangan) tidak.
   const denganMenu = () => {
     const jalur = lokasi.pathname.length > 1 ? lokasi.pathname.replace(/\/+$/, "") : lokasi.pathname;
-    return !TANPA_MENU.includes(jalur) && !jalur.startsWith("/undangan/");
+    return !TANPA_MENU.includes(jalur) && !jalur.startsWith("/undangan/") && !jalur.startsWith("/reset-sandi/");
   };
 
   // Muat akun sekali di awal (hasilnya dipakai bersama oleh menu dan halaman).

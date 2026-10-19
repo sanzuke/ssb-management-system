@@ -126,7 +126,12 @@ Contoh untuk satu server Linux (Bun, Node.js 24, dan PostgreSQL terpasang). Semu
    PUBLIC_API_URL=https://<domain-web>/api
    SESSION_SECRET=<acak-minimal-32-karakter>
    UPLOAD_DIR=/var/lib/ssb/uploads
+   # opsional: email reset kata sandi
+   SMTP_URL=smtps://<user>:<sandi>@<host-smtp>:465
+   MAIL_FROM="SSB App <no-reply@<domain>>"
    ```
+
+   Tanpa `SMTP_URL`, halaman Lupa kata sandi meminta pengguna menghubungi admin SSB, yang bisa membuat tautan reset di halaman Undangan. Admin yang terkunci: `bun run auth:reset <email>` di server.
 
    `UPLOAD_DIR` adalah folder foto pemain (bawaan `./uploads`). Buat foldernya, pastikan bisa ditulis oleh pengguna yang menjalankan API, dan masukkan ke cadangan bersama database. Foto tidak disimpan di database.
 

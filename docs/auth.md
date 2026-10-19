@@ -15,6 +15,15 @@ Tabel `account` sengaja tanpa RLS karena dicari sebelum konteks tenant ada. Kean
 - `POST /auth/logout`, `GET /auth/me`, `POST /auth/select`, `POST /auth/ssb` (akun membuat SSB tambahan), `POST /auth/change-password` (mencabut sesi lain; akun yang hanya login Google boleh menambahkan kata sandi tanpa kata sandi lama).
 - `GET /users`: contoh endpoint khusus `admin_ssb`.
 
+## Lupa dan reset kata sandi
+
+Tautan reset disimpan sebagai hash (`password_reset`), sekali pakai, dan hanya satu yang aktif per akun. Setelah dipakai, kata sandi diganti dan **semua sesi akun dicabut**; pengguna masuk lagi dengan kata sandi baru.
+
+- `GET /auth/features` (`emailReset`), `POST /auth/forgot-password` (jawaban selalu sama; email hanya terkirim bila akun ada dan SMTP aktif; jeda 1 menit per akun), `GET|POST /auth/reset-password/:token`.
+- Email dikirim lewat SMTP bila `SMTP_URL` dan `MAIL_FROM` diisi; tautan berlaku 1 jam.
+- Admin SSB membuat tautan untuk anggotanya: `POST /users/:userId/reset-link` (24 jam, diteruskan manual). Ditolak untuk akun yang juga anggota SSB lain atau yang hanya login Google, karena kata sandi akun itu membuka data di luar SSB admin.
+- Admin yang lupa kata sandi dan tanpa email: `bun run auth:reset <email>` di server mencetak tautan 24 jam.
+
 ## Login dan daftar dengan Google
 
 Authorization code + PKCE, validasi ID token (tanda tangan lewat JWKS Google, penerbit, audience, kedaluwarsa, nonce). Status alur disimpan di cookie bertanda tangan (`oauth_tx`, 10 menit).

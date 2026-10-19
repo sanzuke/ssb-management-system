@@ -26,7 +26,7 @@ Butir bertanda **(butuh keputusan)** terhambat oleh pertanyaan terbuka di `docs/
 - [ ] Jalur admin platform untuk membuat SSB baru tanpa konteks tenant
 - [x] Daftar SSB baru: membuat akun + SSB + admin pertama dalam satu transaksi (test); akun yang sudah ada bisa membuat SSB tambahan
 - [x] Autentikasi: login, sesi aman (cookie HttpOnly, hash token di database, argon2id), logout, ganti kata sandi (test)
-- [ ] Lupa dan reset kata sandi lewat tautan yang kedaluwarsa
+- [x] Lupa dan reset kata sandi: tautan sekali pakai (hash di DB; 1 jam lewat email SMTP opsional, 24 jam bila dibuat admin atau lewat `bun run auth:reset`), sesi akun dicabut setelah reset, jawaban lupa-sandi seragam dan dijarangkan; admin tidak bisa mereset akun yang juga anggota SSB lain (test)
 - [x] Middleware tenant: `ssb_id` dari sesi, bukan dari input klien (test: input `ssbId` palsu diabaikan)
 - [x] Guard role untuk empat role; matriks izin tertulis (`docs/izin.md`, dibuat dari kode) dan diuji per endpoint (test per role; test gagal bila ada endpoint tanpa penjaga)
 - [x] Undang pelatih, korlas, dan orang tua lewat tautan sekali pakai yang kedaluwarsa dalam 7 hari; undangan orang tua langsung menghubungkan ke pemain (test)

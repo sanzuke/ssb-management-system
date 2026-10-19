@@ -435,6 +435,27 @@ export const userSession = pgTable(
 );
 
 /**
+ * Tautan reset kata sandi, sekali pakai dan berumur pendek. Hanya hash token yang disimpan.
+ * Dibuat oleh akun itu sendiri (lupa kata sandi, dikirim lewat email) atau oleh admin SSB (diberikan manual).
+ */
+export const passwordReset = pgTable(
+  "password_reset",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    accountId: uuid("account_id")
+      .notNull()
+      .references(() => account.id, { onDelete: "cascade" }),
+    tokenHash: text("token_hash").notNull().unique(),
+    /** Akun admin yang membuat tautan; kosong bila diminta sendiri lewat email. */
+    issuedBy: uuid("issued_by").references(() => account.id, { onDelete: "set null" }),
+    expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+    usedAt: timestamp("used_at", { withTimezone: true }),
+    createdAt: createdAt(),
+  },
+  (t) => [index("password_reset_account_idx").on(t.accountId)],
+);
+
+/**
  * Undangan bergabung ke SSB. Token = "<ssb_id>.<rahasia>"; hanya hash rahasia yang
  * disimpan. Awalan ssb_id memungkinkan konteks tenant diatur sebelum mencari undangan.
  */

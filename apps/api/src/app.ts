@@ -9,6 +9,8 @@ import { authRoutes } from "./auth/routes";
 import { googleRoutes } from "./auth/google-routes";
 import { createGoogleProvider, type GoogleProvider } from "./auth/google";
 import { invitationRoutes } from "./invitations";
+import type { Mailer } from "./mail";
+import { passwordResetRoutes } from "./password-reset";
 import { masterRoutes } from "./master";
 import { playerRoutes } from "./players";
 import { sessionRoutes } from "./sessions";
@@ -16,7 +18,7 @@ import { assessmentRoutes } from "./assessments";
 import type { Env } from "./env";
 import { createLogger, requestLogger, type Logger } from "./logger";
 
-export type AppDeps = { google?: GoogleProvider | null; logger?: Logger };
+export type AppDeps = { google?: GoogleProvider | null; logger?: Logger; mailer?: Mailer | null };
 
 export function createApp(
   db: Db,
@@ -53,6 +55,7 @@ export function createApp(
         const body: Health = { status: "ok", service: "ssb-api", time: new Date().toISOString() };
         return c.json(body);
       })
+      .route("/", passwordResetRoutes(db, { webUrl, mailer: deps.mailer ?? null, logger }))
       .route("/auth/google", googleRoutes(db, { provider: google, secret: env.SESSION_SECRET, webUrl, secureCookie }))
       .route("/auth", authRoutes(db, { secureCookie }))
       .route("/invitations", invitationRoutes(db, { secureCookie, webUrl }))
