@@ -442,12 +442,12 @@
     color: var(--tinta);
     border-right: 1px solid var(--garis);
   }
-  /* Tinggi dan garis bawah sama dengan header atas (64px) supaya garisnya sejajar di sepanjang layar. */
+  /* Tinggi dan garis bawah sama dengan header atas (80px) supaya garisnya sejajar di sepanjang layar; cukup lega untuk nama SSB dua baris. */
   .bar .merek-bar {
     display: flex;
     flex-direction: column;
     justify-content: center;
-    height: 64px;
+    height: 80px;
     margin: 0 -12px 8px;
     padding: 0 22px;
     border-bottom: 1px solid var(--garis);
@@ -652,7 +652,7 @@
 
 /* Placeholder menu selama akun belum selesai dimuat, agar tata letak tidak melompat */
 .bar-memuat {
-  min-height: 64px;
+  min-height: 80px;
 }
 @media (min-width: 1024px) {
   .bar-memuat {
@@ -673,7 +673,7 @@
     align-items: center;
     justify-content: space-between;
     gap: 16px;
-    height: 64px;
+    height: 80px;
     padding: 0 32px;
     border-bottom: 1px solid var(--garis);
     background: rgba(255, 255, 255, 0.92);
@@ -775,7 +775,7 @@
   }
   /* Bilah progres penilaian menempel di bawah header, bukan di tepi layar */
   .progres-nilai {
-    top: 64px;
+    top: 80px;
   }
 }
 
@@ -2011,16 +2011,16 @@
 .spp-buat .field {
   min-width: 8rem;
 }
-/* Header atas (64px) menempel di layar lebar: kartu pemain dan tujuan anchor harus berhenti di bawahnya. */
+/* Header atas (80px) menempel di layar lebar: kartu pemain dan tujuan anchor harus berhenti di bawahnya. */
 @media (min-width: 1024px) {
   .profil-kiri {
-    top: 80px;
-    max-height: calc(100vh - 96px);
+    top: 96px;
+    max-height: calc(100vh - 112px);
   }
   #radar,
   #atribut,
   #data {
-    scroll-margin-top: 80px;
+    scroll-margin-top: 96px;
   }
 }
 
@@ -2592,5 +2592,16 @@ button.pengguna[aria-expanded="true"] .panah-menu {
   }
   .bar .nama-ssb[data-panjang="sangat"] {
     font-size: 0.85rem;
+  }
+}
+
+/* Nama SSB di sidebar: jarak atas dan bawah yang lega, baris nama dan peran tidak menempel. */
+@media (min-width: 1024px) {
+  .bar .merek-bar {
+    gap: 3px;
+    padding: 10px 22px;
+  }
+  .bar .nama-ssb {
+    line-height: 1.2;
   }
 }
