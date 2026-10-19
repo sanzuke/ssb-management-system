@@ -58,6 +58,12 @@ export default function AppBar(props: { me: Me }) {
             <span>Undangan</span>
           </A>
         </Show>
+        <Show when={props.me.active?.role === "admin_ssb" || props.me.active?.role === "orang_tua"}>
+          <A class="tombol tipis menu" href="/spp">
+            <Ikon nama="kartu" />
+            <span>SPP</span>
+          </A>
+        </Show>
         <A class="tombol tipis menu" href="/akun">
           <Ikon nama="akun" />
           <span>Akun</span>

@@ -7,6 +7,8 @@ Endpoint dijaga dengan `requirePermission(<izin>)`. Pembatasan data per baris (p
 |---|---|:-:|:-:|:-:|:-:|
 | `user.list` | Melihat daftar anggota SSB | ya | - | - | - |
 | `invitation.create` | Membuat tautan undangan | ya | - | - | - |
+| `fee.manage` | Mengatur tarif SPP, membuat tagihan, dan mencatat atau mengoreksi pembayaran | ya | - | - | - |
+| `invoice.read` | Melihat tagihan SPP dan riwayat pembayarannya (orang tua: anaknya) | ya | - | - | ya |
 | `member.reset_password` | Membuat tautan reset kata sandi untuk anggota SSB (akun yang hanya anggota SSB ini) | ya | - | - | - |
 | `invitation.manage` | Melihat daftar undangan, mencabut, dan membuat ulang tautan yang belum diterima | ya | - | - | - |
 | `master.read` | Melihat KU, periode, dan lokasi | ya | ya | ya | - |
