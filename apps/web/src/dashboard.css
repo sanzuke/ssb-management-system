@@ -1475,6 +1475,328 @@
   outline-offset: 2px;
 }
 
+/* ---- Detail pemain: kartu koleksi + ringkasan nilai (desain Stitch "Statistik Pemain Interaktif") ---- */
+.profil-grid {
+  display: grid;
+  gap: 16px;
+  align-items: start;
+}
+.profil-kanan {
+  display: grid;
+  gap: 16px;
+  min-width: 0;
+}
+.profil-nav {
+  position: sticky;
+  top: 0;
+  z-index: 4;
+  display: flex;
+  gap: 6px;
+  margin: 0 -16px;
+  padding: 8px 16px;
+  background: var(--kapur);
+  border-bottom: 1px solid var(--garis);
+}
+.profil-nav a {
+  flex: 1;
+  min-height: 40px;
+  display: grid;
+  place-items: center;
+  border-radius: 10px;
+  background: #e3ece4;
+  color: var(--rumput);
+  font-weight: 700;
+  text-decoration: none;
+}
+.kartu-pro {
+  border: 1px solid var(--garis);
+  border-radius: 20px;
+  background: #fff;
+  padding: 12px;
+  box-shadow: 0 2px 8px rgba(20, 32, 26, 0.08);
+}
+.kartu-pro-badan {
+  position: relative;
+  overflow: hidden;
+  padding: 16px;
+  border-radius: 14px;
+  color: #fff;
+  background: linear-gradient(180deg, var(--rumput) 0%, #143a29 55%, #0b2419 100%);
+}
+.kartu-pro-garis {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0.1;
+  pointer-events: none;
+}
+.kartu-pro-badan > * {
+  position: relative;
+}
+.kartu-pro-badan > .kartu-pro-garis {
+  position: absolute;
+}
+.kartu-pro-atas {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 8px;
+}
+.kartu-pro-ovr {
+  display: grid;
+  justify-items: center;
+  min-width: 64px;
+  padding: 6px 10px;
+  border-radius: 10px;
+  background: var(--kuning);
+  color: var(--tinta);
+  line-height: 1;
+}
+.kartu-pro-ovr strong {
+  font-family: var(--judul);
+  font-size: 1.9rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+}
+.kartu-pro-ovr span {
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+}
+.kartu-pro-ovr em {
+  margin-top: 4px;
+  padding-top: 3px;
+  border-top: 2px solid rgba(20, 32, 26, 0.25);
+  width: 100%;
+  text-align: center;
+  font-style: normal;
+  font-weight: 800;
+  color: var(--rumput);
+}
+.kartu-pro-ku {
+  display: grid;
+  justify-items: end;
+  gap: 4px;
+  font-size: 0.85rem;
+  color: #cfe0d4;
+}
+.kartu-pro-ku .pil {
+  padding: 3px 12px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.16);
+  color: var(--kuning);
+  font-weight: 800;
+  letter-spacing: 0.05em;
+}
+.kartu-pro-foto {
+  position: relative;
+  width: 11rem;
+  height: 12rem;
+  margin: 12px auto 8px;
+}
+.kartu-pro-foto .ortu-foto.potret {
+  width: 100%;
+  height: 100%;
+  border-radius: 14px;
+  font-size: 3.4rem;
+  background: rgba(255, 255, 255, 0.12);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3);
+}
+.kartu-pro-foto .ortu-foto.potret .foto-img {
+  object-position: center top;
+}
+.kartu-pro-nomor {
+  position: absolute;
+  right: 8px;
+  bottom: 6px;
+  font-family: var(--judul);
+  font-weight: 800;
+  font-style: italic;
+  font-size: 1.4rem;
+  color: rgba(240, 194, 59, 0.92);
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.6);
+}
+.kartu-pro-nama {
+  text-align: center;
+}
+.kartu-pro-nama h2 {
+  margin: 0;
+  color: #fbeeb8;
+  font-size: 1.5rem;
+  text-transform: uppercase;
+  letter-spacing: -0.01em;
+  line-height: 1.1;
+}
+.kartu-pro-nama p {
+  margin: 2px 0 0;
+  color: #cfe0d4;
+  font-size: 0.9rem;
+}
+.kartu-pro-atribut {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 2px;
+  margin: 12px 0 0;
+  padding: 8px 4px;
+  list-style: none;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.12);
+  text-align: center;
+}
+.kartu-pro-atribut li {
+  display: grid;
+  gap: 1px;
+  min-height: 0;
+}
+.kartu-pro-atribut span {
+  font-size: 0.7rem;
+  letter-spacing: 0.04em;
+  color: #cfe0d4;
+}
+.kartu-pro-atribut strong {
+  font-family: var(--judul);
+  font-size: 1.1rem;
+  color: var(--kuning);
+}
+.kartu-pro-kaki {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 6px 12px;
+  padding: 10px 4px 2px;
+  font-size: 0.85rem;
+  color: var(--redup);
+}
+.status-pil {
+  padding: 2px 10px;
+  border-radius: 6px;
+  background: #e3ece4;
+  color: var(--tinta);
+  font-weight: 700;
+}
+.kartu-pro .foto-kelola {
+  margin: 8px 0 0;
+}
+.panel-nilai {
+  padding: 14px;
+  border: 1px solid var(--garis);
+  border-radius: 16px;
+  background: #fff;
+}
+.panel-kepala {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4px 12px;
+  margin-bottom: 8px;
+}
+.panel-kepala h3 {
+  margin: 0;
+}
+.panel-kepala .petunjuk {
+  margin: 0;
+}
+.delta {
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: #e3ece4;
+  color: var(--rumput);
+  font-weight: 700;
+  font-size: 0.85rem;
+}
+.delta[data-turun] {
+  background: var(--merah-muda);
+  color: var(--merah);
+}
+.profil-radar .radar {
+  margin: 0;
+}
+.profil-radar .radar svg {
+  max-width: 340px;
+  margin-inline: auto;
+  display: block;
+}
+.profil-radar .radar-tabel {
+  display: none;
+}
+.butir[data-rendah] .batang > span {
+  background: var(--kuning-tua);
+}
+.butir[data-rendah] .skor {
+  color: #8a6400;
+}
+.misi-daftar {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.misi-daftar li {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  min-height: 0;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: #f1f4ec;
+}
+.misi-daftar li > div {
+  display: grid;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+}
+.misi-ikon {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--kuning);
+  color: var(--tinta);
+  font-size: 0.8rem;
+}
+#data {
+  display: grid;
+  gap: 12px;
+  scroll-margin-top: 64px;
+}
+#radar,
+#atribut {
+  scroll-margin-top: 64px;
+}
+@media (min-width: 900px) {
+  .profil-nav {
+    display: none;
+  }
+  .profil-grid {
+    grid-template-columns: minmax(0, 22rem) minmax(0, 1fr);
+    gap: 24px;
+  }
+  .profil-kiri {
+    position: sticky;
+    top: 16px;
+  }
+  #radar,
+  #atribut,
+  #data {
+    scroll-margin-top: 16px;
+  }
+}
+@media (min-width: 1400px) {
+  .profil-grid {
+    grid-template-columns: minmax(0, 24rem) minmax(0, 1fr);
+  }
+}
+.grid-aspek .butir .isi {
+  flex: 1 1 5rem;
+}
+
 /* ---- Kelola undangan ---- */
 .tautan-baru {
   display: grid;
