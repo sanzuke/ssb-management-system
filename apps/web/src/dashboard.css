@@ -1056,3 +1056,284 @@
 .tabel-ku tbody td {
   padding-inline: 8px;
 }
+
+/* ---- Halaman Kehadiran ---- */
+.bilah-hadir {
+  grid-template-columns: 1fr;
+}
+.centang-filter {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 0 12px;
+  border-radius: 8px;
+  background: #f1f4ec;
+  font-weight: 700;
+  font-size: 0.9rem;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.centang-filter input {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--rumput);
+}
+.hisa {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+.hisa > span[data-v] {
+  padding: 1px 8px;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.hisa [data-v="hadir"] {
+  background: #c9ecd6;
+  color: #1e5038;
+}
+.hisa [data-v="izin"] {
+  background: #fbeeb8;
+  color: #6b5200;
+}
+.hisa [data-v="sakit"] {
+  background: #dfe7f3;
+  color: #28466e;
+}
+.hisa [data-v="alpa"] {
+  background: #f0dedb;
+  color: #8b1911;
+}
+.persen-batang {
+  display: grid;
+  gap: 4px;
+  min-width: 9rem;
+}
+.persen-angka {
+  font-family: var(--judul);
+  font-weight: 800;
+  font-size: 1.05rem;
+  font-variant-numeric: tabular-nums;
+}
+.persen-batang .batang {
+  flex: none;
+  height: 8px;
+}
+.persen-batang[data-t="baik"] .persen-angka {
+  color: #1e5038;
+}
+.persen-batang[data-t="sedang"] .persen-angka {
+  color: #8a6a1d;
+}
+.persen-batang[data-t="sedang"] .batang > span {
+  background: #c0841a;
+}
+.persen-batang[data-t="rendah"] .persen-angka {
+  color: var(--merah);
+}
+.persen-batang[data-t="rendah"] .batang > span {
+  background: var(--merah);
+}
+.tabel-hadir .lebar-batang {
+  width: 14rem;
+}
+@media (min-width: 640px) {
+  .bilah-hadir {
+    grid-template-columns: 1fr 1fr 1fr;
+  }
+  .bilah-hadir .kolom-cari {
+    grid-column: 1 / -1;
+  }
+}
+@media (min-width: 900px) {
+  .bilah-hadir {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) minmax(0, 2.2fr) minmax(0, 1.3fr) auto 44px;
+  }
+  .bilah-hadir .kolom-cari {
+    grid-column: auto;
+  }
+}
+
+/* ---- Halaman Jadwal ---- */
+.bilah-jadwal {
+  grid-template-columns: 1fr;
+}
+.segmen {
+  display: flex;
+  overflow: hidden;
+  border: 1px solid var(--garis);
+  border-radius: 8px;
+  background: #f1f4ec;
+}
+.segmen button {
+  flex: 1;
+  min-height: 44px;
+  padding: 0 14px;
+  border: 0;
+  background: transparent;
+  font: inherit;
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: var(--redup);
+  cursor: pointer;
+}
+.segmen button[aria-pressed="true"] {
+  background: var(--rumput);
+  color: var(--kapur);
+}
+.form-sesi {
+  margin-bottom: 16px;
+}
+.hari-daftar {
+  display: grid;
+  gap: 14px;
+  margin-top: 8px;
+}
+.judul-hari {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.judul-hari h2 {
+  margin: 0;
+  font-size: 1.05rem;
+}
+.daftar-sesi {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.baris-sesi {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 16px;
+  padding: 10px 16px;
+  border-top: 1px solid var(--garis);
+}
+.baris-sesi:first-child {
+  border-top: 0;
+}
+.baris-sesi > .form {
+  flex: 1 1 100%;
+}
+.info-sesi {
+  display: grid;
+  flex: 1 1 14rem;
+  min-width: 0;
+  min-height: 44px;
+  align-content: center;
+  color: var(--tinta);
+  text-decoration: none;
+}
+.info-sesi:hover strong {
+  text-decoration: underline;
+}
+.baris-sesi .butir-aksi {
+  margin-left: auto;
+  align-items: center;
+}
+@media (min-width: 640px) {
+  .bilah-jadwal {
+    grid-template-columns: 1fr 1fr;
+  }
+  .bilah-jadwal .segmen {
+    grid-column: 1 / -1;
+  }
+}
+@media (min-width: 900px) {
+  .bilah-jadwal {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) minmax(0, 2fr) 44px;
+  }
+  .bilah-jadwal .segmen {
+    grid-column: auto;
+  }
+}
+
+/* ---- Skin seragam untuk halaman lain (master, indikator, penugasan, profil, akun, rencana) ---- */
+.halaman .master,
+.halaman .aspek:not(.kartu-aspek),
+.halaman .rincian,
+.halaman > .form,
+.halaman > form {
+  padding: 16px;
+  border: 1px solid var(--garis);
+  border-radius: 12px;
+  background: #fff;
+}
+.halaman .master,
+.halaman .aspek:not(.kartu-aspek) {
+  margin: 16px 0;
+}
+.halaman .master > :last-child,
+.halaman .aspek:not(.kartu-aspek) > :last-child {
+  margin-bottom: 0;
+}
+.halaman .master h2,
+.halaman .aspek:not(.kartu-aspek) h2 {
+  margin: 0 0 10px;
+  font-size: 1.05rem;
+}
+.halaman .master .daftar-butir,
+.halaman .aspek:not(.kartu-aspek) .daftar-butir {
+  margin-bottom: 8px;
+}
+.halaman .rincian {
+  margin: 0 0 16px;
+}
+.halaman > .form,
+.halaman > form {
+  margin-bottom: 16px;
+}
+/* Formulir di dalam panel tidak perlu bingkai ganda */
+.halaman .master .form,
+.halaman .aspek .form,
+.halaman .master form,
+.halaman .aspek form {
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+.kepala-dashboard .aksi-baris {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0;
+}
+.halaman .tautan-bawah {
+  margin-top: 8px;
+}
+@media (min-width: 1024px) {
+  .halaman .master .tombol:not(.tipis):not(.bahaya),
+  .halaman .aspek:not(.kartu-aspek) .tombol:not(.tipis):not(.bahaya),
+  .halaman > form .tombol {
+    width: auto;
+    min-width: 10rem;
+    border-radius: 8px;
+    border-width: 1px;
+  }
+  .halaman .master .tombol.utama,
+  .halaman .aspek:not(.kartu-aspek) .tombol.utama,
+  .halaman > form .tombol.utama {
+    border-color: #d8a826;
+  }
+}
+
+/* Daftar anak (orang tua): kartu tersusun beberapa kolom di layar lebar */
+.ortu-grid {
+  display: grid;
+  gap: 14px;
+}
+.ortu-grid .ortu-anak {
+  margin-bottom: 0;
+}
+@media (min-width: 900px) {
+  .ortu-grid {
+    grid-template-columns: repeat(auto-fill, minmax(24rem, 1fr));
+  }
+}

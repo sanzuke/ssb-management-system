@@ -1,5 +1,6 @@
 import { A, useNavigate, useParams } from "@solidjs/router";
 import { Title } from "@solidjs/meta";
+import KepalaHalaman from "~/components/KepalaHalaman";
 import { createSignal, For, onMount, Show } from "solid-js";
 import PlayerForm from "~/components/PlayerForm";
 import SelectField from "~/components/SelectField";
@@ -79,15 +80,20 @@ export default function DetailPemain() {
         >
           <Show when={pl()} fallback={<p>Memuat…</p>}>
             <Title>{pl()!.fullName} · SSB App</Title>
-            <h1>{pl()!.fullName}</h1>
-            <p class="aksi-baris">
-              <A class="tombol tipis" href={`/nilai/${pl()!.id}`}>
-                Penilaian
-              </A>{" "}
-              <A class="tombol tipis" href={`/kartu/${pl()!.id}`}>
-                Kartu pemain
-              </A>
-            </p>
+            <KepalaHalaman
+              chip="Profil pemain"
+              judul={pl()!.fullName}
+              sub={[pl()!.memberNo, pl()!.ageGroup?.name ?? "Belum ada KU"].filter(Boolean).join(" • ")}
+            >
+              <p class="aksi-baris">
+                <A class="tombol tombol-kecil" href={`/nilai/${pl()!.id}`}>
+                  Penilaian
+                </A>
+                <A class="tombol tombol-kecil" href={`/kartu/${pl()!.id}`}>
+                  Kartu pemain
+                </A>
+              </p>
+            </KepalaHalaman>
             <Show
               when={!editing()}
               fallback={

@@ -24,7 +24,7 @@ export default function PilihSsb() {
   });
 
   return (
-    <AuthShell>
+    <AuthShell gaya="buku">
       <Title>Pilih SSB · SSB App</Title>
       <Show when={ready()} fallback={<p>Memuat…</p>}>
         <h1>Pilih SSB</h1>

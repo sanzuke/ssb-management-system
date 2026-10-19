@@ -1,5 +1,6 @@
 import { A, useNavigate } from "@solidjs/router";
 import { Title } from "@solidjs/meta";
+import KepalaHalaman from "~/components/KepalaHalaman";
 import { createSignal, For, onMount, Show } from "solid-js";
 import SelectField from "~/components/SelectField";
 import { api, ApiError, getMe, roleLabel, type Me } from "~/lib/api";
@@ -57,8 +58,11 @@ export default function Penugasan() {
     <Show when={me()} fallback={<p class="halaman">Memuat…</p>}>
       <Title>Penugasan · SSB App</Title>
       <main class="halaman">
-        <h1>Penugasan pelatih</h1>
-        <p>Pelatih dan koordinator hanya melihat pemain di KU yang ditugaskan kepada mereka pada periode yang sedang berjalan.</p>
+        <KepalaHalaman
+          chip="Pengaturan"
+          judul="Penugasan pelatih"
+          sub="Pelatih dan koordinator hanya melihat pemain di KU yang ditugaskan kepada mereka pada periode yang sedang berjalan."
+        />
 
         <Show when={rowError()}>
           <div class="peringatan" role="alert">

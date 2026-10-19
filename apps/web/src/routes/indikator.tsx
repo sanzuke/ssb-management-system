@@ -1,5 +1,6 @@
 import { A, useNavigate } from "@solidjs/router";
 import { Title } from "@solidjs/meta";
+import KepalaHalaman from "~/components/KepalaHalaman";
 import { createMemo, createSignal, For, onMount, Show } from "solid-js";
 import Field from "~/components/Field";
 import SelectField from "~/components/SelectField";
@@ -84,11 +85,11 @@ export default function Indikator() {
     <Show when={me()} fallback={<p class="halaman">Memuat…</p>}>
       <Title>Indikator penilaian · SSB App</Title>
       <main class="halaman">
-        <h1>Indikator penilaian</h1>
-        <p>
-          Indikator yang dinilai pelatih untuk tiap KU, dikelompokkan dalam enam aspek. Skalanya 1 sampai 10.
-          {admin() ? "" : " Hanya admin SSB yang bisa mengubahnya."}
-        </p>
+        <KepalaHalaman
+          chip="Penilaian"
+          judul="Indikator penilaian"
+          sub={`Indikator yang dinilai pelatih untuk tiap KU, dikelompokkan dalam enam aspek. Skalanya 1 sampai 10.${admin() ? "" : " Hanya admin SSB yang bisa mengubahnya."}`}
+        />
         <Show when={groups().length === 0}>
           <p class="kosong">
             Belum ada KU. Buat KU di <A href="/master">Data master</A> dulu.

@@ -1,6 +1,7 @@
 import { A, useNavigate, useParams } from "@solidjs/router";
 import { Title } from "@solidjs/meta";
 import { createSignal, onMount, Show } from "solid-js";
+import KepalaHalaman from "~/components/KepalaHalaman";
 import QrCode from "~/components/QrCode";
 import { api, ApiError, getMe, type Me } from "~/lib/api";
 import { inisial, posisiLabel, statusLabel, type PlayerDetail } from "~/lib/pemain";
@@ -49,7 +50,7 @@ export default function KartuPemain() {
         <Show when={pl()}>
           {(d) => (
             <>
-              <h1>Kartu pemain</h1>
+              <KepalaHalaman chip="Kartu pemain" judul={`Kartu ${d().fullName}`} sub="Tunjukkan kode QR ke pelatih saat tiba di lapangan." />
               <article class="kartu" aria-label={`Kartu pemain ${d().fullName}`}>
                 <header>
                   <div>
