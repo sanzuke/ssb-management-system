@@ -1,4 +1,5 @@
 import { Hono } from "hono";
+import { bodyLimit } from "hono/body-limit";
 import { and, asc, desc, eq, ilike, inArray, isNotNull, sql, type SQL } from "drizzle-orm";
 import { schema, withTenant, type Db, type Tx } from "@ssb/db";
 import {
@@ -14,6 +15,7 @@ import { HttpError } from "./errors";
 import { requirePermission, type AppEnv, type Member } from "./auth/middleware";
 import { isUniqueViolation } from "./auth/service";
 import { zv } from "./validator";
+import { newPhotoKey, PHOTO_MAX_BYTES, photoExt, photoMime, photoStore, photoVersion, sniffImage } from "./photo";
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const notFound = (what: string) => new HttpError(404, "not_found", `${what} tidak ditemukan`);
@@ -47,6 +49,7 @@ const playerCols = {
   status: schema.player.status,
   ageGroupId: schema.ageGroup.id,
   ageGroupName: schema.ageGroup.name,
+  photoKey: schema.player.photoKey,
 };
 const toSummary = (r: {
   id: string;
@@ -58,6 +61,7 @@ const toSummary = (r: {
   status: any;
   ageGroupId: string | null;
   ageGroupName: string | null;
+  photoKey: string | null;
 }): PlayerSummary => ({
   id: r.id,
   memberNo: r.memberNo,
@@ -67,6 +71,7 @@ const toSummary = (r: {
   school: r.school,
   status: r.status,
   ageGroup: r.ageGroupId ? { id: r.ageGroupId, name: r.ageGroupName! } : null,
+  photoV: photoVersion(r.photoKey),
 });
 
 const selectPlayers = (tx: Tx) =>
@@ -81,7 +86,8 @@ async function ageGroupName(tx: Tx, id: string | null | undefined) {
   return g?.name ?? null;
 }
 
-export function playerRoutes(db: Db) {
+export function playerRoutes(db: Db, opts: { uploadDir: string }) {
+  const store = photoStore(opts.uploadDir);
   const ctx = (c: { get: (k: "auth") => any }) => c.get("auth")!.member as Member;
 
   return (
@@ -313,6 +319,82 @@ export function playerRoutes(db: Db) {
       })
 
       // ---- Penugasan pelatih dan korlas ke KU per periode ----
+      // Foto pemain. Berkas disimpan di folder lokal dan hanya bisa dibaca lewat endpoint ini (dengan login dan batas data per role).
+      .put(
+        "/players/:id/photo",
+        requirePermission("player.photo"),
+        bodyLimit({
+          maxSize: PHOTO_MAX_BYTES + 64 * 1024,
+          onError: () => {
+            throw new HttpError(413, "photo_too_large", "Foto terlalu besar (maksimal 2 MB)");
+          },
+        }),
+        async (c) => {
+          const m = ctx(c);
+          const id = uuidOr404(c.req.param("id"), "Pemain");
+          const body = await c.req.parseBody().catch(() => ({}) as Record<string, unknown>);
+          const file = body.file;
+          if (!(file instanceof File)) throw new HttpError(400, "bad_request", 'Kirim berkas foto pada kolom "file"');
+          if (file.size > PHOTO_MAX_BYTES) throw new HttpError(413, "photo_too_large", "Foto terlalu besar (maksimal 2 MB)");
+          const bytes = new Uint8Array(await file.arrayBuffer());
+          const ext = sniffImage(bytes);
+          if (!ext) throw new HttpError(415, "photo_type", "Foto harus berformat JPG, PNG, atau WebP");
+          const key = newPhotoKey(m.ssbId, id, ext);
+          const old = await withTenant(db, m.ssbId, async (tx) => {
+            const [cur] = await tx
+              .select({ key: schema.player.photoKey })
+              .from(schema.player)
+              .where(and(eq(schema.player.id, id), visibleTo(m)))
+              .limit(1);
+            if (!cur) return undefined;
+            await store.put(key, bytes);
+            await tx.update(schema.player).set({ photoKey: key }).where(eq(schema.player.id, id));
+            return cur.key;
+          });
+          if (old === undefined) throw notFound("Pemain");
+          if (old) await store.remove(old);
+          return c.json({ photoV: photoVersion(key) });
+        },
+      )
+
+      .get("/players/:id/photo", requirePermission("player.read"), async (c) => {
+        const m = ctx(c);
+        const id = uuidOr404(c.req.param("id"), "Pemain");
+        const [row] = await withTenant(db, m.ssbId, (tx) =>
+          tx
+            .select({ key: schema.player.photoKey })
+            .from(schema.player)
+            .where(and(eq(schema.player.id, id), visibleTo(m)))
+            .limit(1),
+        );
+        const bytes = row?.key ? await store.get(row.key) : null;
+        if (!row?.key || !bytes) throw notFound("Foto");
+        // URL berversi (?v=), jadi aman disimpan lama di cache browser; tetap private karena foto anak.
+        return c.body(bytes, 200, {
+          "content-type": photoMime(photoExt(row.key)),
+          "cache-control": "private, max-age=31536000, immutable",
+          "x-content-type-options": "nosniff",
+        });
+      })
+
+      .delete("/players/:id/photo", requirePermission("player.photo"), async (c) => {
+        const m = ctx(c);
+        const id = uuidOr404(c.req.param("id"), "Pemain");
+        const old = await withTenant(db, m.ssbId, async (tx) => {
+          const [cur] = await tx
+            .select({ key: schema.player.photoKey })
+            .from(schema.player)
+            .where(and(eq(schema.player.id, id), visibleTo(m)))
+            .limit(1);
+          if (!cur) return undefined;
+          await tx.update(schema.player).set({ photoKey: null }).where(eq(schema.player.id, id));
+          return cur.key;
+        });
+        if (old === undefined) throw notFound("Pemain");
+        if (old) await store.remove(old);
+        return c.body(null, 204);
+      })
+
       .get("/assignments", requirePermission("assignment.manage"), async (c) => {
         const m = ctx(c);
         const rows = await withTenant(db, m.ssbId, (tx) =>

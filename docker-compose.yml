@@ -55,6 +55,8 @@ services:
   api:
     <<: *app
     command: ["bun", "run", "dev:api"]
+    volumes:
+      - uploads:/app/uploads # foto pemain
     ports:
       - "3000:3000"
     depends_on:
@@ -86,3 +88,4 @@ services:
 
 volumes:
   pgdata:
+  uploads:

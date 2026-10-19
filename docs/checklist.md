@@ -48,7 +48,8 @@ Butir bertanda **(butuh keputusan)** terhambat oleh pertanyaan terbuka di `docs/
 
 - [x] CRUD pemain: biodata, posisi, sekolah, status; nomor anggota otomatis dan unik per SSB (penghitung atomik per SSB; test serentak)
 - [x] Riwayat perubahan KU dan status tersimpan (tabel riwayat + test)
-- [ ] Unggah foto dan dokumen ke penyimpanan S3-compatible; batas ukuran dan tipe berkas **(butuh keputusan: tempat penyimpanan)**
+- [x] Unggah, ganti, dan hapus foto pemain: disimpan di folder lokal (`UPLOAD_DIR`), JPG/PNG/WebP maksimal 2 MB, tipe dicek dari isi berkas, dibaca hanya lewat API dengan batas data per role (test); tampil di tabel, profil, kartu, dan portal orang tua
+- [ ] Unggah dokumen pemain dan pindah penyimpanan ke S3-compatible bila SSB banyak (foto saat ini di folder lokal)
 - [ ] Persetujuan orang tua untuk foto dan dokumen tercatat
 - [x] Hubungkan orang tua ke satu atau beberapa anak (lewat undangan atau manual oleh admin)
 - [x] Penugasan pelatih dan korlas ke KU per periode, API dan layar admin (profil pelatih memakai nama anggota; kontak dan lisensi menyusul bila dibutuhkan)

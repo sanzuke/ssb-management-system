@@ -39,6 +39,7 @@ export const permissions = {
     desc: "Melihat pemain (pelatih dan korlas: KU yang ditugaskan; orang tua: anaknya)",
   },
   "player.write": { roles: ["admin_ssb"], desc: "Menambah dan mengubah pemain" },
+  "player.photo": { roles: ["admin_ssb", "pelatih", "korlas"], desc: "Mengunggah dan menghapus foto pemain (pelatih dan korlas: KU yang ditugaskan)" },
   "attendance.record": { roles: ["admin_ssb", "pelatih", "korlas"], desc: "Mencatat absensi latihan" },
   "attendance.read": { roles: ["admin_ssb", "pelatih", "korlas", "orang_tua"], desc: "Melihat absensi (orang tua: anaknya)" },
   "assessment.write": { roles: ["admin_ssb", "pelatih"], desc: "Mengisi penilaian pemain dan rencana pengembangannya" },
@@ -243,6 +244,8 @@ export type PlayerSummary = {
   school: string | null;
   status: PlayerStatus;
   ageGroup: { id: string; name: string } | null;
+  /** Versi foto; null bila belum ada. Dipakai untuk URL `/players/:id/photo?v=<versi>`. */
+  photoV: string | null;
 };
 export type PlayerDetail = PlayerSummary & {
   history: { field: "age_group" | "status"; from: string | null; to: string | null; at: string }[];
