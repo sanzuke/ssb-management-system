@@ -2247,3 +2247,58 @@
 .tab-periode[role="tablist"] + section > h2:first-child {
   margin-top: 0;
 }
+
+/* ---- Tab bergaya map: isi tab satu bingkai dengan tab yang aktif (halaman Akun) ---- */
+.tab-periode[role="tablist"] {
+  flex-wrap: wrap;
+  gap: 4px;
+  margin: 12px 0 0;
+  padding: 0;
+  overflow: visible;
+}
+.tab-periode[role="tablist"] button {
+  min-height: 44px;
+  padding: 0 16px;
+  border: 1px solid var(--garis);
+  border-bottom-color: var(--garis);
+  border-radius: 12px 12px 0 0;
+  background: #e9efe3;
+  color: var(--redup);
+}
+.tab-periode[role="tablist"] button:hover {
+  background: #f1f4ec;
+  color: var(--tinta);
+}
+.tab-periode[role="tablist"] button[aria-selected="true"] {
+  position: relative;
+  z-index: 1;
+  margin-bottom: -1px; /* menutup garis atas bingkai di bawah tab ini */
+  border-color: var(--garis);
+  border-bottom-color: #fff;
+  background: #fff;
+  color: var(--rumput);
+}
+.tab-periode[role="tablist"] button:focus-visible {
+  outline: 3px solid var(--kuning);
+  outline-offset: -3px;
+}
+[role="tabpanel"] {
+  padding: 16px;
+  border: 1px solid var(--garis);
+  border-radius: 0 14px 14px 14px;
+  background: #fff;
+}
+[role="tabpanel"] > h2:first-child {
+  margin-top: 0;
+}
+[role="tabpanel"] > :last-child {
+  margin-bottom: 0;
+}
+@media (max-width: 400px) {
+  .tab-periode[role="tablist"] button {
+    padding: 0 12px;
+  }
+  [role="tabpanel"] {
+    padding: 14px;
+  }
+}
