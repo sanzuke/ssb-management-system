@@ -381,7 +381,7 @@ export default function DashboardAdmin(props: { me: Me }) {
             </header>
             <Show when={aspek()} fallback={<p class="panel-isi petunjuk">Memuat…</p>}>
               <Show when={aspek()!.length > 0} fallback={<p class="kosong panel-isi">Belum ada penilaian untuk ditampilkan.</p>}>
-                <div class="panel-isi">
+                <div class="panel-isi radar-samping">
                   <RadarAspek sekarang={aspek()![0]!} sebelumnya={aspek()![1]} />
                 </div>
               </Show>

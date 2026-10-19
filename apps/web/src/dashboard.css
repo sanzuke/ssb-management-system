@@ -2430,3 +2430,36 @@ button.pengguna[aria-expanded="true"] .panah-menu {
   color: var(--kuning);
   font-size: 1rem;
 }
+
+/* Dasbor admin: bila panel cukup lebar, grafik radar di kiri dan tabel aspek di kanan (bukan atas bawah). */
+.radar-samping {
+  container-type: inline-size;
+}
+@container (min-width: 540px) {
+  .radar-samping .radar {
+    grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+    grid-template-areas:
+      "gambar tabel"
+      "legenda tabel";
+    align-items: center;
+    gap: 8px 28px;
+    justify-items: stretch;
+  }
+  .radar-samping .radar svg {
+    grid-area: gambar;
+    max-width: none;
+    justify-self: center;
+  }
+  .radar-samping .radar-legenda {
+    grid-area: legenda;
+  }
+  .radar-samping .radar-tabel {
+    grid-area: tabel;
+    max-width: none;
+    font-size: 0.95rem;
+  }
+  .radar-samping .radar-tabel th,
+  .radar-samping .radar-tabel td {
+    padding: 8px 10px;
+  }
+}
