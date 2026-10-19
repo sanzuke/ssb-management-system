@@ -1387,7 +1387,8 @@
   font-weight: 700;
   cursor: pointer;
 }
-.tab-periode button[aria-pressed="true"] {
+.tab-periode button[aria-pressed="true"],
+.tab-periode button[aria-selected="true"] {
   border-color: var(--rumput);
   background: var(--rumput);
   color: var(--kapur);
@@ -2231,4 +2232,18 @@
     grid-template-columns: minmax(0, 20rem) minmax(0, 1fr);
     align-items: start;
   }
+}
+
+/* Deretan tab yang bisa digeser: tanpa batang gulir, dan jarak ke isi tab. */
+.tab-periode {
+  scrollbar-width: none;
+}
+.tab-periode::-webkit-scrollbar {
+  display: none;
+}
+.tab-periode[role="tablist"] {
+  margin-bottom: 16px;
+}
+.tab-periode[role="tablist"] + section > h2:first-child {
+  margin-top: 0;
 }
