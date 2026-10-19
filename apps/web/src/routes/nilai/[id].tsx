@@ -39,6 +39,10 @@ export default function NilaiPemain() {
   const canWrite = () => role() === "admin_ssb" || role() === "pelatih";
   const canPublish = () => role() === "admin_ssb" || role() === "korlas";
   const current = createMemo(() => list().find((a) => a.period.id === periodId()) ?? null);
+  // Orang tua: satu periode tampil sekali; bawaannya yang terbaru.
+  const terbaruDulu = createMemo(() => [...list()].sort((a, b) => b.period.startDate.localeCompare(a.period.startDate)));
+  const [ortuId, setOrtuId] = createSignal("");
+  const ortuPilih = createMemo(() => terbaruDulu().find((a) => a.period.id === ortuId()) ?? terbaruDulu()[0] ?? null);
 
   const fill = (a: AssessmentView | null) => {
     setScores(a ? Object.fromEntries(a.scores.map((s) => [s.indicatorId, s.score])) : {});
@@ -177,20 +181,32 @@ export default function NilaiPemain() {
               <Show when={list().length > 0}>
                 <GrafikNilai list={list()} />
               </Show>
-              <For each={list()}>
+              <Show when={terbaruDulu().length > 1}>
+                {/* biome-ignore lint/a11y/useSemanticElements: deretan tab periode */}
+                <div class="tab-periode" role="group" aria-label="Pilih periode">
+                  <For each={terbaruDulu()}>
+                    {(a) => (
+                      <button type="button" aria-pressed={ortuPilih()?.period.id === a.period.id} onClick={() => setOrtuId(a.period.id)}>
+                        {a.period.name}
+                      </button>
+                    )}
+                  </For>
+                </div>
+              </Show>
+              <Show when={ortuPilih()}>
                 {(a) => (
-                  <section class="master" aria-label={a.period.name}>
-                    <h2>{a.period.name}</h2>
-                    <p>
-                      <a class="tombol utama" href={`/api/players/${encodeURIComponent(p.id)}/assessments/${a.period.id}/report`} download="">
+                  <section class="master" aria-label={a().period.name}>
+                    <div class="judul-periode">
+                      <h2>{a().period.name}</h2>
+                      <a class="tombol utama" href={`/api/players/${encodeURIComponent(p.id)}/assessments/${a().period.id}/report`} download="">
                         Unduh rapor (PDF)
                       </a>
-                    </p>
-                    <HasilNilai a={a} />
-                    <RencanaBaca items={plans()[a.period.id] ?? []} />
+                    </div>
+                    <HasilNilai a={a()} />
+                    <RencanaBaca items={plans()[a().period.id] ?? []} />
                   </section>
                 )}
-              </For>
+              </Show>
             </Show>
 
             {/* Admin, pelatih, korlas */}
@@ -287,52 +303,54 @@ export default function NilaiPemain() {
                       </span>
                       <span class="petunjuk">Rata-rata sementara: {rataSementara()}</span>
                     </div>
-                    <For each={groups()}>
-                      {(g, gi) => (
-                        <section class="aspek kartu-aspek" aria-label={aspectLabel[g.aspect]}>
-                          <h2>
-                            <span class="nomor-aspek" aria-hidden="true">
-                              {gi() + 1}
-                            </span>
-                            {aspectLabel[g.aspect]}
-                            <span class="rata">
-                              {g.items.filter((i) => scores()[i.id] !== undefined).length}/{g.items.length} terisi
-                            </span>
-                          </h2>
-                          <For each={g.items}>
-                            {(i) => (
-                              <div class="indikator">
-                                <span class="nama">
-                                  {i.name}
-                                  <Show when={scores()[i.id] !== undefined}>
-                                    <span class="nilai-terpilih" data-tinggi={scores()[i.id]! >= 9 ? "" : undefined}>
-                                      {scores()[i.id]}
-                                    </span>
-                                  </Show>
-                                </span>
-                                {/* biome-ignore lint/a11y/useSemanticElements: fieldset merusak tata letak grid tombol */}
-                                <div class="pilih-nilai" role="group" aria-label={`Skor ${i.name}`}>
-                                  <For each={NILAI}>
-                                    {(n) => (
-                                      <button
-                                        type="button"
-                                        class="nilai-btn"
-                                        attr:data-tinggi={n >= 9 ? "" : undefined}
-                                        aria-pressed={scores()[i.id] === n}
-                                        aria-label={`${i.name} ${n}`}
-                                        onClick={() => setScore(i.id, n)}
-                                      >
-                                        {n}
-                                      </button>
-                                    )}
-                                  </For>
+                    <div class="grid-aspek">
+                      <For each={groups()}>
+                        {(g, gi) => (
+                          <section class="aspek kartu-aspek" aria-label={aspectLabel[g.aspect]}>
+                            <h2>
+                              <span class="nomor-aspek" aria-hidden="true">
+                                {gi() + 1}
+                              </span>
+                              {aspectLabel[g.aspect]}
+                              <span class="rata">
+                                {g.items.filter((i) => scores()[i.id] !== undefined).length}/{g.items.length} terisi
+                              </span>
+                            </h2>
+                            <For each={g.items}>
+                              {(i) => (
+                                <div class="indikator">
+                                  <span class="nama">
+                                    {i.name}
+                                    <Show when={scores()[i.id] !== undefined}>
+                                      <span class="nilai-terpilih" data-tinggi={scores()[i.id]! >= 9 ? "" : undefined}>
+                                        {scores()[i.id]}
+                                      </span>
+                                    </Show>
+                                  </span>
+                                  {/* biome-ignore lint/a11y/useSemanticElements: fieldset merusak tata letak grid tombol */}
+                                  <div class="pilih-nilai" role="group" aria-label={`Skor ${i.name}`}>
+                                    <For each={NILAI}>
+                                      {(n) => (
+                                        <button
+                                          type="button"
+                                          class="nilai-btn"
+                                          attr:data-tinggi={n >= 9 ? "" : undefined}
+                                          aria-pressed={scores()[i.id] === n}
+                                          aria-label={`${i.name} ${n}`}
+                                          onClick={() => setScore(i.id, n)}
+                                        >
+                                          {n}
+                                        </button>
+                                      )}
+                                    </For>
+                                  </div>
                                 </div>
-                              </div>
-                            )}
-                          </For>
-                        </section>
-                      )}
-                    </For>
+                              )}
+                            </For>
+                          </section>
+                        )}
+                      </For>
+                    </div>
                     <div class="field">
                       <label for="catatan">Catatan pelatih (boleh dikosongkan)</label>
                       <textarea
