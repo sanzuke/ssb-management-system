@@ -254,7 +254,7 @@ export default function DetailPemain() {
                         when={(pl()!.guardians ?? []).length > 0}
                         fallback={
                           <p class="kosong">
-                            Belum ada orang tua yang terhubung. Buat undangan orang tua untuk pemain ini, atau hubungkan akun yang sudah ada.
+                            Belum ada orang tua yang terhubung. Buat <A href="/undangan">undangan orang tua</A>, atau hubungkan akun yang sudah ada.
                           </p>
                         }
                       >

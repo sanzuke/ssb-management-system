@@ -1796,3 +1796,101 @@
 .grid-aspek .butir .isi {
   flex: 1 1 5rem;
 }
+
+/* ---- Kelola undangan ---- */
+.tautan-baru {
+  display: grid;
+  gap: 8px;
+  margin: 0 0 16px;
+  padding: 14px;
+  border: 1px solid #d8a826;
+  border-radius: 16px;
+  background: #fff8dc;
+}
+.tautan-baru h2 {
+  margin: 0;
+  font-size: 1.1rem;
+}
+.tautan-isi {
+  width: 100%;
+  min-height: 44px;
+  padding: 0 12px;
+  border: 1px solid var(--garis);
+  border-radius: 8px;
+  background: #fff;
+  font: inherit;
+  font-size: 0.9rem;
+}
+.tautan-baru .tombol {
+  width: auto;
+}
+.undangan-grid {
+  display: grid;
+  gap: 16px;
+  align-items: start;
+}
+.undangan-daftar {
+  display: grid;
+  gap: 8px;
+  margin: 8px 0 0;
+  padding: 0;
+  list-style: none;
+}
+.undangan-daftar li {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 6px 12px;
+  align-items: start;
+  min-height: 0;
+  padding: 12px;
+  border: 1px solid var(--garis);
+  border-radius: 12px;
+  background: #fff;
+}
+.undangan-daftar .aksi-baris {
+  grid-column: 1 / -1;
+}
+.undangan-info {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+.status-undangan {
+  padding: 2px 10px;
+  border-radius: 999px;
+  background: #fbeeb8;
+  color: #6b5200;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+.status-undangan[data-status="diterima"] {
+  background: #dcefe2;
+  color: var(--rumput);
+}
+.status-undangan[data-status="kedaluwarsa"] {
+  background: var(--merah-muda);
+  color: var(--merah);
+}
+@media (min-width: 1100px) {
+  .undangan-grid {
+    grid-template-columns: minmax(0, 24rem) minmax(0, 1fr);
+    gap: 24px;
+  }
+}
+.undangan-grid {
+  grid-template-columns: minmax(0, 1fr);
+}
+.undangan-grid > section {
+  min-width: 0;
+}
+.undangan-daftar li {
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+.undangan-info strong {
+  overflow-wrap: anywhere;
+}
+@media (min-width: 1100px) {
+  .undangan-grid {
+    grid-template-columns: minmax(0, 24rem) minmax(0, 1fr);
+  }
+}
