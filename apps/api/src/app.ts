@@ -9,6 +9,7 @@ import { authRoutes } from "./auth/routes";
 import { googleRoutes } from "./auth/google-routes";
 import { createGoogleProvider, type GoogleProvider } from "./auth/google";
 import { feeRoutes } from "./fees";
+import { memberRoutes } from "./members";
 import { invitationRoutes } from "./invitations";
 import type { Mailer } from "./mail";
 import { passwordResetRoutes } from "./password-reset";
@@ -64,6 +65,7 @@ export function createApp(
       .route("/", playerRoutes(db, { uploadDir: env.UPLOAD_DIR ?? "./uploads" }))
       .route("/", sessionRoutes(db))
       .route("/", feeRoutes(db))
+      .route("/", memberRoutes(db))
       .route("/", assessmentRoutes(db))
       // Daftar anggota SSB sendiri; hanya admin SSB.
       .get("/users", requirePermission("user.list"), async (c) => {

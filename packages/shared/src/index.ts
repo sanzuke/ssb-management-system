@@ -35,6 +35,7 @@ export const permissions = {
   "fee.manage": { roles: ["admin_ssb"], desc: "Mengatur tarif SPP, membuat tagihan, dan mencatat atau mengoreksi pembayaran" },
   "invoice.read": { roles: ["admin_ssb", "orang_tua"], desc: "Melihat tagihan SPP dan riwayat pembayarannya (orang tua: anaknya)" },
   "member.reset_password": { roles: ["admin_ssb"], desc: "Membuat tautan reset kata sandi untuk anggota SSB (akun yang hanya anggota SSB ini)" },
+  "member.manage": { roles: ["admin_ssb"], desc: "Melihat anggota beserta kontaknya, mengubah nama, kontak, dan peran, serta mengeluarkan anggota dari SSB" },
   "invitation.manage": { roles: ["admin_ssb"], desc: "Melihat daftar undangan, mencabut, dan membuat ulang tautan yang belum diterima" },
   "master.read": { roles: ["admin_ssb", "pelatih", "korlas"], desc: "Melihat KU, periode, dan lokasi" },
   "master.write": { roles: ["admin_ssb"], desc: "Mengubah KU, periode, dan lokasi" },
@@ -163,6 +164,34 @@ export const updateProfileSchema = z.object({
 
 export const forgotPasswordSchema = z.object({ email: emailSchema });
 export const resetPasswordSchema = z.object({ newPassword: passwordSchema });
+
+/** Admin SSB mengubah anggota: nama tampilan, nomor WhatsApp (kosong menghapus), dan/atau peran. */
+export const memberUpdateSchema = z
+  .object({
+    name: z.string().trim().min(2, "minimal 2 karakter").max(120, "maksimal 120 karakter").optional(),
+    whatsapp: z.preprocess(emptyToNull, whatsappSchema.nullable()).optional(),
+    role: userRoleSchema.optional(),
+  })
+  .refine((v) => v.name !== undefined || v.whatsapp !== undefined || v.role !== undefined, { message: "tidak ada yang diubah" });
+export type MemberUpdate = z.infer<typeof memberUpdateSchema>;
+export type MemberRow = {
+  userId: string;
+  name: string;
+  email: string;
+  role: UserRole;
+  whatsapp: string | null;
+  joinedAt: string;
+  isSelf: boolean;
+  /** Anak yang dihubungkan (orang tua) dan jumlah penugasan KU (pelatih, korlas). */
+  children: number;
+  assignments: number;
+  /** Cara masuk akun ini, supaya admin tahu apakah reset kata sandi relevan. */
+  hasPassword: boolean;
+  hasGoogle: boolean;
+};
+
+/** Menghapus akun sendiri: kata sandi untuk akun berkata sandi, atau mengetik email untuk akun yang hanya login Google. */
+export const deleteAccountSchema = z.object({ confirm: z.string().min(1).max(200) });
 
 export const changePasswordSchema = z.object({
   /** Wajib bila akun sudah punya kata sandi; akun yang hanya login Google boleh mengosongkannya. */

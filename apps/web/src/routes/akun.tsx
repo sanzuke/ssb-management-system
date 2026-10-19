@@ -3,7 +3,7 @@ import { Title } from "@solidjs/meta";
 import KepalaHalaman from "~/components/KepalaHalaman";
 import { createMemo, createSignal, For, onMount, Show } from "solid-js";
 import Field from "~/components/Field";
-import { api, getMe, roleLabel, type Me } from "~/lib/api";
+import { api, getMe, lupaMe, roleLabel, type Me } from "~/lib/api";
 import { createSubmit } from "~/lib/form";
 
 type Tab = "kontak" | "keamanan" | "keanggotaan";
@@ -53,6 +53,14 @@ export default function Akun() {
     setMe({ ...me()!, whatsapp: r.whatsapp });
     setWa(r.whatsapp ?? "");
     setWaDone(true);
+  });
+
+  const [hapusBuka, setHapusBuka] = createSignal(false);
+  const [konfirmasiHapus, setKonfirmasiHapus] = createSignal("");
+  const hapus = createSubmit(async () => {
+    await api("/auth/delete-account", { method: "POST", body: { confirm: konfirmasiHapus() } });
+    lupaMe();
+    nav("/masuk", { replace: true });
   });
 
   const form = createSubmit(async () => {
@@ -205,6 +213,46 @@ export default function Akun() {
                 Daftarkan SSB baru
               </A>
             </p>
+            <div class="zona-bahaya">
+              <h3>Hapus akun</h3>
+              <p>
+                Akun dan semua keanggotaan Anda dihapus permanen. Riwayat absensi dan penilaian di SSB tetap tersimpan, hanya nama pencatatnya dikosongkan.
+                Admin yang menjadi satu-satunya admin di sebuah SSB perlu menjadikan anggota lain admin dulu.
+              </p>
+              <Show
+                when={hapusBuka()}
+                fallback={
+                  <button class="tombol bahaya" type="button" onClick={() => setHapusBuka(true)}>
+                    Hapus akun saya
+                  </button>
+                }
+              >
+                <form class="form" onSubmit={hapus.submit}>
+                  <Show when={hapus.error()}>
+                    <div class="peringatan" role="alert">
+                      {hapus.error()}
+                    </div>
+                  </Show>
+                  <Field
+                    id="konfirmasi-hapus"
+                    label={me()!.hasPassword ? "Ketik kata sandi Anda untuk konfirmasi" : "Ketik email akun Anda untuk konfirmasi"}
+                    type={me()!.hasPassword ? "password" : "email"}
+                    autocomplete={me()!.hasPassword ? "current-password" : "off"}
+                    required
+                    value={konfirmasiHapus()}
+                    onInput={setKonfirmasiHapus}
+                  />
+                  <div class="aksi-baris">
+                    <button class="tombol bahaya" type="submit" disabled={hapus.busy()}>
+                      {hapus.busy() ? "Menghapus…" : "Ya, hapus akun saya"}
+                    </button>
+                    <button class="tombol tipis" type="button" onClick={() => setHapusBuka(false)}>
+                      Batal
+                    </button>
+                  </div>
+                </form>
+              </Show>
+            </div>
           </section>
         </Show>
         <p class="tautan-bawah">

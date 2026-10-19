@@ -30,11 +30,12 @@ Butir bertanda **(butuh keputusan)** terhambat oleh pertanyaan terbuka di `docs/
 - [x] Middleware tenant: `ssb_id` dari sesi, bukan dari input klien (test: input `ssbId` palsu diabaikan)
 - [x] Guard role untuk empat role; matriks izin tertulis (`docs/izin.md`, dibuat dari kode) dan diuji per endpoint (test per role; test gagal bila ada endpoint tanpa penjaga)
 - [x] Undang pelatih, korlas, dan orang tua lewat tautan sekali pakai yang kedaluwarsa dalam 7 hari; undangan orang tua langsung menghubungkan ke pemain (test)
+- [x] Kelola anggota (admin): daftar bersaring dan cari, ubah nama, WhatsApp, dan peran dengan penjaga (peran sendiri, orang tua berkaitan anak, penugasan KU), keluarkan anggota, tautan reset kata sandi; test
 - [x] Kelola undangan di web (admin): buat, daftar dengan status (menunggu, diterima, kedaluwarsa), cabut, buat ulang tautan, salin dan kirim lewat WhatsApp manual; test API
 - [x] Login dan daftar dengan Google (OIDC, authorization code + PKCE, `email_verified` wajib, tanpa tautan otomatis lewat email); diuji dengan penyedia Google tiruan
 - [ ] Uji alur Google sungguhan: kredensial OAuth dari Google Cloud diisi di env, lalu coba daftar, login, dan terima undangan dari browser
 - [ ] Tautkan Google ke akun kata sandi (dan sebaliknya) dari pengaturan akun
-- [ ] Penghapusan akun: keanggotaan dan kaitan data (pembuat undangan, pencatat absensi) ditangani tanpa merusak riwayat
+- [x] Penghapusan akun: akun menghapus diri sendiri dengan konfirmasi kata sandi (atau email untuk akun Google), ditolak bila satu-satunya admin di suatu SSB; keanggotaan, penugasan, dan kaitan anak ikut lepas sementara riwayat tetap (pencatat dikosongkan, migrasi 0017); test
 - [ ] Kirim tautan undangan lewat WhatsApp otomatis (fase 2; fase 1 admin menyalin tautan)
 - [x] Layar login (tombol Google + email), halaman terima undangan, pemilih SSB, dan pengaturan akun di web, nyaman di layar 360 px
 

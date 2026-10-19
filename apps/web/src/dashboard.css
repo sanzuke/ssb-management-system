@@ -2476,3 +2476,91 @@ button.pengguna[aria-expanded="true"] .panah-menu {
   border-radius: 10px;
   background: #fff8dc;
 }
+
+/* ---- Kelola anggota ---- */
+.anggota-daftar {
+  display: grid;
+  gap: 8px;
+  margin: 8px 0 0;
+  padding: 0;
+  list-style: none;
+}
+.anggota-daftar > li {
+  display: grid;
+  gap: 8px;
+  min-height: 0;
+  padding: 12px;
+  border: 1px solid var(--garis);
+  border-radius: 12px;
+  background: #fff;
+}
+.anggota-baris {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: start;
+  gap: 4px 12px;
+}
+.anggota-baris .undangan-info strong {
+  overflow-wrap: anywhere;
+}
+.anggota-chip {
+  grid-column: 2;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 12px;
+}
+.anggota-yakin {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 10px;
+  padding: 6px 10px;
+  border-radius: 10px;
+  background: var(--merah-muda);
+  font-size: 0.9rem;
+}
+/* Aksi berbahaya ringan (mis. Keluarkan): bingkai merah, tanpa isi; yang tegas (Ya, keluarkan) memakai .tombol.bahaya polos. */
+.tombol.tipis.bahaya {
+  background: transparent;
+  border-color: var(--merah);
+  color: var(--merah);
+}
+.tombol.tipis.bahaya:hover {
+  background: var(--merah-muda);
+}
+.zona-bahaya {
+  margin-top: 24px;
+  padding: 16px;
+  border: 1px solid #e3b5ae;
+  border-radius: 12px;
+  background: #fdf3f1;
+}
+.zona-bahaya h3 {
+  margin: 0 0 6px;
+  color: var(--merah);
+}
+.zona-bahaya .tombol.bahaya {
+  width: auto;
+}
+@media (min-width: 900px) {
+  .anggota-baris {
+    grid-template-columns: auto minmax(0, 1fr) minmax(0, 22rem);
+  }
+  .anggota-chip {
+    grid-column: 3;
+    justify-content: flex-end;
+  }
+}
+.anggota-baris .avatar-pengguna {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--rumput);
+  color: var(--kuning);
+  font-family: var(--judul);
+  font-weight: 800;
+  font-size: 0.85rem;
+}

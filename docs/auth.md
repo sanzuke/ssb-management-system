@@ -24,6 +24,12 @@ Tautan reset disimpan sebagai hash (`password_reset`), sekali pakai, dan hanya s
 - Admin SSB membuat tautan untuk anggotanya: `POST /users/:userId/reset-link` (24 jam, diteruskan manual). Ditolak untuk akun yang juga anggota SSB lain atau yang hanya login Google, karena kata sandi akun itu membuka data di luar SSB admin.
 - Admin yang lupa kata sandi dan tanpa email: `bun run auth:reset <email>` di server mencetak tautan 24 jam.
 
+## Manajemen anggota dan hapus akun
+
+- `GET /members`, `PATCH /members/:userId` (nama, WhatsApp, peran), `DELETE /members/:userId`: izin `member.manage` (admin SSB). Peran sendiri tidak bisa diubah, anggota tidak bisa mengeluarkan diri sendiri, orang tua yang masih terhubung ke anak dan pelatih yang masih bertugas di KU tidak bisa berganti peran dari atau ke orang tua, dan SSB selalu punya minimal satu admin.
+- Mengeluarkan anggota menghapus keanggotaannya (penugasan, kaitan anak, dan sesinya ikut hilang); akunnya tetap ada. Riwayat absensi, penilaian, tagihan, dan undangan tetap, hanya kolom pembuat atau pencatatnya dikosongkan.
+- `POST /auth/delete-account`: akun menghapus dirinya sendiri dengan kata sandi (atau mengetik email untuk akun yang hanya login Google). Ditolak (409 `sole_admin`) bila akun itu satu-satunya admin di suatu SSB.
+
 ## Login dan daftar dengan Google
 
 Authorization code + PKCE, validasi ID token (tanda tangan lewat JWKS Google, penerbit, audience, kedaluwarsa, nonce). Status alur disimpan di cookie bertanda tangan (`oauth_tx`, 10 menit).

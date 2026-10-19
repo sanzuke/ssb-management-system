@@ -535,7 +535,7 @@ export const invitation = pgTable(
   },
   (t) => [
     foreignKey({ columns: [t.ssbId, t.playerId], foreignColumns: [player.ssbId, player.id], name: "invitation_player_fk" }).onDelete("cascade"),
-    foreignKey({ columns: [t.ssbId, t.createdBy], foreignColumns: [appUser.ssbId, appUser.id], name: "invitation_created_by_fk" }),
+    foreignKey({ columns: [t.ssbId, t.createdBy], foreignColumns: [appUser.ssbId, appUser.id], name: "invitation_created_by_fk" }).onDelete("set null"),
     tenantPolicy("invitation"),
   ],
 ).enableRLS();
