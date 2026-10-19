@@ -1337,3 +1337,102 @@
     grid-template-columns: repeat(auto-fill, minmax(24rem, 1fr));
   }
 }
+
+/* ---- Detail penilaian: ringkas di HP, berkolom di layar lebar ---- */
+.grafik-baris {
+  display: grid;
+  gap: 4px 16px;
+}
+.grafik-baris .grafik {
+  margin: 8px 0;
+  padding: 14px;
+  border: 1px solid var(--garis);
+  border-radius: 16px;
+  background: #fff;
+}
+.grafik-baris .grafik svg {
+  max-width: 400px;
+  margin-inline: auto;
+}
+.grafik-baris .riwayat-nilai {
+  margin: 4px 0 8px;
+}
+.grid-aspek {
+  display: grid;
+  gap: 0 14px;
+  align-items: start;
+}
+.grid-aspek .kartu-aspek {
+  margin: 8px 0;
+}
+.grid-aspek .butir {
+  padding-block: 6px;
+}
+.tab-periode {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  margin: 12px 0;
+  padding-bottom: 2px;
+}
+.tab-periode button {
+  flex: none;
+  min-height: 40px;
+  padding: 0 16px;
+  border: 1px solid var(--garis);
+  border-radius: 999px;
+  background: #fff;
+  color: var(--tinta);
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+.tab-periode button[aria-pressed="true"] {
+  border-color: var(--rumput);
+  background: var(--rumput);
+  color: var(--kapur);
+}
+.judul-periode {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 16px;
+  margin-bottom: 8px;
+}
+.judul-periode h2 {
+  margin: 0;
+}
+.judul-periode .tombol {
+  width: auto;
+}
+@media (min-width: 480px) {
+  .pilih-nilai {
+    grid-template-columns: repeat(10, 1fr);
+    gap: 4px;
+  }
+  .nilai-btn {
+    min-height: 44px;
+    font-size: 1rem;
+  }
+}
+@media (min-width: 900px) {
+  .grafik-baris {
+    grid-template-columns: 1fr 1fr;
+    align-items: start;
+  }
+  .grafik-baris .riwayat-nilai {
+    grid-column: 1 / -1;
+  }
+  .grid-aspek {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .halaman.nilai {
+    padding-bottom: 6rem;
+  }
+}
+@media (min-width: 1400px) {
+  .grid-aspek {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}

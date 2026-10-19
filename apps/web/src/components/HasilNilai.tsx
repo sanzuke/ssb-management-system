@@ -19,33 +19,35 @@ export default function HasilNilai(props: { a: AssessmentView }) {
           {props.a.assessor ? ` oleh ${props.a.assessor}` : ""}
         </span>
       </p>
-      <For each={props.a.aspects}>
-        {(x, i) => (
-          <section class="aspek kartu-aspek" aria-label={aspectLabel[x.aspect]}>
-            <h3>
-              <span class="nomor-aspek" aria-hidden="true">
-                {i() + 1}
-              </span>
-              {aspectLabel[x.aspect]} <span class="rata">rata-rata {koma(x.average)}</span>
-            </h3>
-            <ul class="daftar-butir">
-              <For each={rows(x.aspect)}>
-                {(s) => (
-                  <li class="butir">
-                    <span class="isi">{s.name}</span>
-                    <span class="skor" role="img" aria-label={`${s.name}: ${s.score} dari 10`}>
-                      {s.score}
-                    </span>
-                    <span class="batang" aria-hidden="true">
-                      <span style={{ width: `${s.score * 10}%` }} />
-                    </span>
-                  </li>
-                )}
-              </For>
-            </ul>
-          </section>
-        )}
-      </For>
+      <div class="grid-aspek">
+        <For each={props.a.aspects}>
+          {(x, i) => (
+            <section class="aspek kartu-aspek" aria-label={aspectLabel[x.aspect]}>
+              <h3>
+                <span class="nomor-aspek" aria-hidden="true">
+                  {i() + 1}
+                </span>
+                {aspectLabel[x.aspect]} <span class="rata">rata-rata {koma(x.average)}</span>
+              </h3>
+              <ul class="daftar-butir">
+                <For each={rows(x.aspect)}>
+                  {(s) => (
+                    <li class="butir">
+                      <span class="isi">{s.name}</span>
+                      <span class="skor" role="img" aria-label={`${s.name}: ${s.score} dari 10`}>
+                        {s.score}
+                      </span>
+                      <span class="batang" aria-hidden="true">
+                        <span style={{ width: `${s.score * 10}%` }} />
+                      </span>
+                    </li>
+                  )}
+                </For>
+              </ul>
+            </section>
+          )}
+        </For>
+      </div>
       <Show when={props.a.note}>
         <p class="catatan">
           <strong>Catatan pelatih:</strong> {props.a.note}
