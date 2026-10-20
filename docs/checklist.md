@@ -108,3 +108,16 @@ Butir bertanda **(butuh keputusan)** terhambat oleh pertanyaan terbuka di `docs/
 - [ ] Data nyata pilot dimuat (impor CSV) dan dipakai satu siklus latihan penuh
 - [ ] Umpan balik pelatih dan orang tua dicatat; daftar perbaikan diprioritaskan
 - [ ] Kriteria lanjut ke fase 2 ditetapkan **(butuh keputusan)**
+
+## J. Fase 2: tagihan SPP
+
+Detail di `docs/spp.md`. Dikerjakan lebih awal dari rencana karena SSB percontohan membutuhkannya.
+
+- [x] Tarif SPP per KU (admin), tagihan bulanan per pemain dibuat idempoten, status dihitung (belum, sebagian, lunas, dibatalkan, terlambat menurut tanggal WIB); test
+- [x] Catat pembayaran (sebagian atau penuh) dan batalkan tagihan; orang tua hanya melihat tagihan anaknya; test
+- [x] Pengingat jatuh tempo lewat WhatsApp: daftar tunggakan, pesan siap kirim (tautan wa.me), penanda sudah diingatkan dan jumlah pengingat; test
+- [x] SPP di dasbor admin: panel bulan berjalan, tindakan, pintasan; banner tagihan di portal orang tua
+- [ ] Pengaturan SPP di server: tanggal jatuh tempo bawaan, templat pesan bersama, info rekening, jeda pengingat
+- [ ] Tarif khusus per pemain (keringanan atau saudara kandung)
+- [ ] Ubah nominal tagihan yang sudah dibuat; tagihan yang dibatalkan bisa dibuat ulang
+- [ ] Pengiriman WhatsApp otomatis (butuh penyedia API resmi)
