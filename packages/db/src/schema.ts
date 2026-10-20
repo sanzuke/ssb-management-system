@@ -495,6 +495,28 @@ export const playerFeeOverride = pgTable(
   ],
 ).enableRLS();
 
+/**
+ * Pengaturan pengiriman WhatsApp milik satu SSB. Satu baris per SSB; dibuat
+ * otomatis saat admin menyimpan. Token API Fonnte disimpan terenkripsi, jadi
+ * hanya bisa dibaca server dan tidak pernah dikembalikan ke peramban.
+ */
+export const whatsappSetting = pgTable(
+  "whatsapp_setting",
+  {
+    ssbId: uuid("ssb_id")
+      .primaryKey()
+      .references(() => ssb.id, { onDelete: "cascade" }),
+    /** Token API Fonnte dalam bentuk terenkripsi (base64). Null = pengiriman otomatis belum aktif. */
+    tokenEncrypted: text("token_encrypted"),
+    /** Kode negara untuk normalisasi nomor tujuan; default Indonesia (62). */
+    countryCode: text("country_code").notNull().default("62"),
+    /** Aktifkan pengiriman pengingat tagihan otomatis lewat Fonnte. */
+    autoReminder: boolean("auto_reminder").notNull().default(false),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [check("whatsapp_setting_country_code", sql`${t.countryCode} ~ '^[0-9]{1,4}$'`), tenantPolicy("whatsapp_setting")],
+).enableRLS();
+
 /** Tagihan SPP satu pemain untuk satu bulan. Jumlah terbayar dihitung dari tabel payment; tagihan dibatalkan lewat voided_at. */
 export const invoice = pgTable(
   "invoice",

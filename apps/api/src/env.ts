@@ -13,6 +13,8 @@ const envSchema = z
     PUBLIC_API_URL: z.string().default("http://localhost:3000"),
     /** Kunci penandatangan cookie sementara alur OAuth. Wajib bila login Google diaktifkan. */
     SESSION_SECRET: z.string().min(32, "minimal 32 karakter").optional(),
+    /** Kunci enkripsi token API pihak ketiga (mis. Fonnte). Bila kosong, memakai SESSION_SECRET. */
+    TOKEN_SECRET: z.string().min(32, "minimal 32 karakter").optional(),
     GOOGLE_CLIENT_ID: z.string().optional(),
     GOOGLE_CLIENT_SECRET: z.string().optional(),
     /** Jalur Chromium untuk membuat rapor PDF; kosong = memakai Chromium bawaan Playwright. */

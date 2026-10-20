@@ -19,6 +19,7 @@ type Props = {
   maxlength?: number;
   pattern?: string;
   inputmode?: "text" | "email" | "numeric" | "tel";
+  placeholder?: string;
 };
 
 export default function Field(p: Props) {
@@ -48,6 +49,7 @@ export default function Field(p: Props) {
           maxlength={p.maxlength}
           pattern={p.pattern}
           inputmode={p.inputmode}
+          placeholder={p.placeholder}
           aria-invalid={p.error ? "true" : undefined}
           aria-describedby={describedBy()}
         />

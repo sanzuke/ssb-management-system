@@ -4,6 +4,7 @@ import { schema, withTenant, type Db } from "@ssb/db";
 import {
   feeRatesInputSchema,
   generateInvoicesSchema,
+  isiTemplat,
   invoiceAmountSchema,
   paymentInputSchema,
   type FeeRate,
@@ -13,12 +14,15 @@ import {
   type InvoiceStatus,
   type PaymentRow,
   type ReminderRow,
+  type WaSendResult,
 } from "@ssb/shared";
 import { requirePermission, type AppEnv } from "./auth/middleware";
 import { HttpError } from "./errors";
 import { bacaPengaturan } from "./fee-settings";
+import { kirimFonnte, keFonnte } from "./fonnte";
 import { visibleTo } from "./players";
 import { zv } from "./validator";
+import { bacaWhatsapp, tokenFonnte } from "./whatsapp";
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const MONTH = /^\d{4}-(0[1-9]|1[0-2])$/;
@@ -37,7 +41,7 @@ export function invoiceStatus(amount: number, paid: number, voided: boolean): In
   return paid > 0 ? "sebagian" : "belum";
 }
 
-export function feeRoutes(db: Db) {
+export function feeRoutes(db: Db, opts: { secret: string }) {
   const I = schema.invoice;
   const P = schema.payment;
 
@@ -278,6 +282,74 @@ export function feeRoutes(db: Db) {
         if (res === "none") throw notFound("Tagihan");
         if (res === "void" || res === "lunas") throw new HttpError(409, "not_payable", "Tagihan ini sudah lunas atau dibatalkan, tidak perlu diingatkan");
         return c.json({ lastRemindedAt: res.at!.toISOString(), reminderCount: res.n });
+      })
+
+      // Kirim pengingat lewat Fonnte ke semua wali tagihan ini, lalu catat sebagai satu pengingat.
+      // Tanpa token Fonnte, endpoint menolak: admin masih bisa memakai tombol kirim manual.
+      .post("/invoices/:id/remind", requirePermission("fee.manage"), async (c) => {
+        const m = c.get("auth")!.member!;
+        const id = idOr404(c.req.param("id"), "Tagihan");
+        const token = await tokenFonnte(db, m.ssbId, opts.secret);
+        if (!token) throw new HttpError(409, "no_token", "Token API Fonnte belum diisi. Isi di tab Pengaturan dulu.");
+        const pengaturan = await bacaPengaturan(db, m.ssbId);
+        const wa = await bacaWhatsapp(db, m.ssbId);
+        const [ssb] = await withTenant(db, m.ssbId, (tx) => tx.select({ name: schema.ssb.name }).from(schema.ssb).limit(1));
+        const tagihan = (await loadInvoices(m.ssbId, m, { id }))[0];
+        if (!tagihan) throw notFound("Tagihan");
+        if (tagihan.status === "dibatalkan") throw new HttpError(409, "not_payable", "Tagihan ini sudah dibatalkan");
+        if (tagihan.remaining <= 0) throw new HttpError(409, "not_payable", "Tagihan ini sudah lunas");
+
+        // Wali yang punya nomor WhatsApp; wali tanpa nomor dilewati.
+        const wali = await withTenant(db, m.ssbId, (tx) =>
+          tx
+            .select({
+              name: schema.appUser.name,
+              whatsapp: schema.appUser.whatsapp,
+              relationship: schema.playerGuardian.relationship,
+            })
+            .from(schema.playerGuardian)
+            .innerJoin(schema.appUser, and(eq(schema.appUser.ssbId, schema.playerGuardian.ssbId), eq(schema.appUser.id, schema.playerGuardian.userId)))
+            .where(eq(schema.playerGuardian.playerId, tagihan.player.id)),
+        );
+        const punyaNomor = wali.filter((w) => w.whatsapp);
+        if (punyaNomor.length === 0) throw new HttpError(409, "no_whatsapp", "Belum ada wali dengan nomor WhatsApp untuk pemain ini");
+
+        const hariIni = todayWib();
+        const hariKeJatuhTempo = Math.round((Date.parse(`${tagihan.dueOn}T00:00:00Z`) - Date.parse(`${hariIni}T00:00:00Z`)) / 86400000);
+        const hasil: WaSendResult[] = [];
+        for (const w of punyaNomor) {
+          const pesan = isiTemplat(pengaturan.reminderTemplate, {
+            wali: w.name,
+            anak: tagihan.player.name,
+            bulan: tagihan.month,
+            sisa: tagihan.remaining,
+            hari: hariKeJatuhTempo,
+            ssb: ssb?.name ?? "SSB",
+          });
+          const kirim = await kirimFonnte({
+            token,
+            target: keFonnte(w.whatsapp!, wa.countryCode),
+            message: pesan,
+            countryCode: wa.countryCode,
+          });
+          hasil.push(kirim.ok ? { ok: true, ids: kirim.ids, reason: null } : { ok: false, ids: [], reason: kirim.reason });
+        }
+
+        // Dicatat sebagai satu pengingat bila ada yang berhasil terkirim.
+        const sukses = hasil.filter((h) => h.ok).length;
+        if (sukses > 0) {
+          await withTenant(db, m.ssbId, async (tx) => {
+            await tx
+              .update(I)
+              .set({ lastRemindedAt: new Date(), reminderCount: sql`${I.reminderCount} + 1` })
+              .where(eq(I.id, id));
+          });
+        }
+        return c.json({
+          terkirim: sukses,
+          gagal: hasil.length - sukses,
+          rincian: hasil.map((h, i) => ({ wali: punyaNomor[i]?.name ?? "", ok: h.ok, reason: h.reason })),
+        });
       })
 
       // Ringkasan satu bulan untuk dasbor admin.

@@ -4,30 +4,20 @@ import { api, ApiError } from "~/lib/api";
 import { linkWa } from "~/lib/wa";
 import { namaBulan, rupiah } from "~/lib/waktu";
 import { tanggal } from "~/lib/pemain";
-import type { FeeSettings, ReminderRow } from "@ssb/shared";
+import { isiTemplat, statusTempo, type FeeSettings, type ReminderRow, type WhatsappSettings } from "@ssb/shared";
 import SelectField from "./SelectField";
-
-/** Keterangan jatuh tempo: terlambat sekian hari, hari ini, atau sekian hari lagi. */
-export const statusTempo = (hari: number) =>
-  hari < 0 ? `terlambat ${-hari} hari` : hari === 0 ? "jatuh tempo hari ini" : hari === 1 ? "jatuh tempo besok" : `jatuh tempo ${hari} hari lagi`;
-
-/** Mengisi {wali}, {anak}, {bulan}, {sisa}, {status}, dan {ssb} pada templat pesan. */
-export const isiTemplat = (templat: string, r: ReminderRow, wali: string, ssb: string) =>
-  templat
-    .replaceAll("{wali}", wali)
-    .replaceAll("{anak}", r.player.name)
-    .replaceAll("{bulan}", namaBulan(r.month))
-    .replaceAll("{sisa}", rupiah(r.remaining))
-    .replaceAll("{status}", statusTempo(r.daysToDue))
-    .replaceAll("{ssb}", ssb);
 
 /** Pengingat tagihan SPP: daftar yang menunggak atau segera jatuh tempo, dengan tombol kirim WhatsApp ke wali. */
 export default function SppPengingat(props: { ssbName: string }) {
   const [hari, setHari] = createSignal("3");
   const [galat, setGalat] = createSignal("");
+  const [pesan, setPesan] = createSignal("");
+  const [sibuk, setSibuk] = createSignal<string | null>(null);
   const [rows, { refetch }] = createResource(hari, (d) => api<ReminderRow[]>(`/fees/reminders?days=${d}`).catch(() => [] as ReminderRow[]));
   // Templat pesan diambil dari pengaturan SPP di server, jadi sama untuk semua admin.
   const [pengaturan] = createResource(async () => api<FeeSettings>("/fees/settings").catch(() => null));
+  // Status Fonnte: token sudah tersimpan berarti pesan bisa dikirim dari server.
+  const [wa] = createResource(async () => api<WhatsappSettings>("/whatsapp/settings").catch(() => null));
   const templat = () => pengaturan()?.reminderTemplate ?? "";
 
   // Dicatat saat tombol ditekan (WhatsApp terbuka di tab baru); admin yang menekan kirim di WhatsApp.
@@ -41,12 +31,32 @@ export default function SppPengingat(props: { ssbName: string }) {
     }
   };
 
+  // Kirim langsung lewat Fonnte; server mengirim ke semua wali yang punya nomor.
+  const kirimOtomatis = async (r: ReminderRow) => {
+    setGalat("");
+    setPesan("");
+    setSibuk(r.id);
+    try {
+      const hasil = await api<{ terkirim: number; gagal: number; rincian: { wali: string; ok: boolean; reason: string | null }[] }>(
+        `/invoices/${r.id}/remind`,
+        { method: "POST" },
+      );
+      const gagal = hasil.rincian.filter((x) => !x.ok).map((x) => `${x.wali}: ${x.reason ?? "gagal"}`);
+      setPesan(`Pengingat untuk ${r.player.name} dikirim ke ${hasil.terkirim} wali${hasil.gagal > 0 ? `, ${hasil.gagal} gagal (${gagal.join("; ")})` : ""}.`);
+      await refetch();
+    } catch (e) {
+      setGalat(e instanceof ApiError ? e.message : "Tidak bisa menghubungi server. Coba lagi.");
+    } finally {
+      setSibuk(null);
+    }
+  };
+
   return (
     <section class="master" aria-label="Pengingat tagihan">
       <h2>Pengingat tagihan</h2>
       <p class="petunjuk">
-        Daftar tagihan yang sudah lewat jatuh tempo atau segera jatuh tempo. Tombol WhatsApp membuka pesan yang sudah terisi; Anda tinggal menekan kirim.
-        Pengingat otomatis tanpa menekan kirim belum tersedia.
+        Daftar tagihan yang sudah lewat jatuh tempo atau segera jatuh tempo. Tombol WhatsApp membuka pesan yang sudah terisi; Anda tinggal menekan kirim. Bila
+        token Fonnte sudah diisi, tombol <strong>Kirim otomatis</strong> mengirim pesan langsung dari server tanpa perlu membuka WhatsApp.
       </p>
       <div class="pengingat-atur">
         <SelectField
@@ -73,6 +83,11 @@ export default function SppPengingat(props: { ssbName: string }) {
       <Show when={galat()}>
         <div class="peringatan" role="alert">
           {galat()}
+        </div>
+      </Show>
+      <Show when={pesan()}>
+        <div class="info" role="status">
+          {pesan()}
         </div>
       </Show>
       <Show when={rows()} fallback={<p>Memuat…</p>}>
@@ -104,9 +119,25 @@ export default function SppPengingat(props: { ssbName: string }) {
                     <span class="petunjuk">Masih dalam jeda pengingat: {r.sisaJedaHari} hari lagi boleh diingatkan.</span>
                   </Show>
                   <div class="aksi-baris">
+                    <Show when={wa()?.hasToken}>
+                      <button class="tombol utama tombol-kecil" type="button" disabled={sibuk() === r.id} onClick={() => kirimOtomatis(r)}>
+                        {sibuk() === r.id ? "Mengirim…" : "Kirim otomatis"}
+                      </button>
+                    </Show>
                     <For each={r.guardians}>
                       {(w) => {
-                        const href = () => linkWa(w.whatsapp, isiTemplat(templat(), r, w.name, props.ssbName));
+                        const href = () =>
+                          linkWa(
+                            w.whatsapp,
+                            isiTemplat(templat(), {
+                              wali: w.name,
+                              anak: r.player.name,
+                              bulan: r.month,
+                              sisa: r.remaining,
+                              hari: r.daysToDue,
+                              ssb: props.ssbName,
+                            }),
+                          );
                         return (
                           <Show
                             when={href()}
@@ -116,7 +147,7 @@ export default function SppPengingat(props: { ssbName: string }) {
                               </span>
                             }
                           >
-                            <a class="tombol utama tombol-kecil" href={href()!} target="_blank" rel="noopener noreferrer" onClick={() => catat(r)}>
+                            <a class="tombol tipis tombol-kecil" href={href()!} target="_blank" rel="noopener noreferrer" onClick={() => catat(r)}>
                               Kirim ke {w.name}
                               {w.relationship ? ` (${w.relationship})` : ""}
                             </a>

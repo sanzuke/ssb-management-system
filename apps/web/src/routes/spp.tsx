@@ -7,6 +7,7 @@ import SppPengingat from "~/components/SppPengingat";
 import SppPengaturan from "~/components/SppPengaturan";
 import SppOrtu from "~/components/SppOrtu";
 import SppTarifKhusus from "~/components/SppTarifKhusus";
+import WhatsappPengaturan from "~/components/WhatsappPengaturan";
 import { getMe, type Me } from "~/lib/api";
 
 type TabSpp = "tagihan" | "pengingat" | "pengaturan";
@@ -60,6 +61,7 @@ export default function Spp() {
           </Show>
           <Show when={tab() === "pengaturan"}>
             <SppPengaturan />
+            <WhatsappPengaturan />
           </Show>
         </Show>
       </main>

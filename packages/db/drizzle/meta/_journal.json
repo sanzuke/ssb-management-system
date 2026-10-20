@@ -134,6 +134,13 @@
       "when": 1792479316426,
       "tag": "0018_spp_pengaturan",
       "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "7",
+      "when": 1792483790402,
+      "tag": "0019_whatsapp_fonnte",
+      "breakpoints": true
     }
   ]
 }

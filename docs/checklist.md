@@ -120,4 +120,5 @@ Detail di `docs/spp.md`. Dikerjakan lebih awal dari rencana karena SSB percontoh
 - [x] Pengaturan SPP di server: tanggal jatuh tempo bawaan, templat pesan bersama, info rekening, jeda pengingat (tab Pengaturan); test
 - [x] Tarif khusus per pemain (keringanan atau saudara kandung); tarif 0 berarti tidak ditagih; test
 - [x] Ubah nominal tagihan yang sudah dibuat; tagihan yang dibatalkan bisa dibuat ulang; test
-- [ ] Pengiriman WhatsApp otomatis (butuh penyedia API resmi)
+- [x] Pengiriman WhatsApp lewat Fonnte: token API disimpan terenkripsi di server, periksa token dan profil perangkat, pesan uji, dan tombol kirim otomatis per tagihan; test (`docs/fonnte.md`)
+- [ ] Pengiriman WhatsApp terjadwal harian tanpa admin menekan tombol

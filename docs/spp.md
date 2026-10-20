@@ -30,12 +30,16 @@ Status tidak disimpan, tetapi dihitung dari pembayaran: `belum`, `sebagian`, `lu
 | `POST /invoices/:id/reminded` | `fee.manage` | Mencatat satu pengingat terkirim (`last_reminded_at`, `reminder_count`). Ditolak untuk tagihan lunas atau batal. |
 | `POST /invoices/:id/void` | `fee.manage` | Batalkan tagihan yang salah; ditolak bila sudah ada pembayaran (hapus pembayarannya dulu). |
 | `POST /invoices/:id/recreate` | `fee.manage` | Buat ulang tagihan yang dibatalkan, memakai tarif dan jatuh tempo saat ini. Tagihan lama tetap tercatat sebagai batal. |
+| `GET/PUT /whatsapp/settings` | `fee.manage` | Pengaturan pengiriman WhatsApp (Fonnte): token API terenkripsi, kode negara, mode otomatis. Lihat `docs/fonnte.md`. |
+| `POST /whatsapp/settings/check` | `fee.manage` | Periksa token Fonnte dan baca profil perangkat (status, kuota). |
+| `POST /whatsapp/test` | `fee.manage` | Kirim pesan uji ke satu nomor. |
+| `POST /invoices/:id/remind` | `fee.manage` | Kirim pengingat ke semua wali yang punya nomor lewat Fonnte, lalu catat sebagai satu pengingat. |
 
 ## Layar
 
 - Admin: menu **SPP**. Ringkasan bulan, pembuatan tagihan, daftar tagihan bersaring (belum lunas, menunggak, lunas) dengan pencatatan pembayaran, ubah nominal, batalkan, dan buat ulang, tarif per KU, dan tarif khusus per pemain.
-- Admin, tab **Pengingat**: daftar tagihan menunggak dan yang segera jatuh tempo (3 atau 7 hari), isi pesan yang diambil dari pengaturan SPP (kata {wali}, {anak}, {bulan}, {sisa}, {status}, {ssb} diisi otomatis), penanda jeda pengingat, dan tombol **Kirim ke <wali>** yang membuka WhatsApp dengan pesan terisi. Admin yang menekan kirim di WhatsApp; setiap penekanan dicatat sebagai satu pengingat.
-- Admin, tab **Pengaturan**: tanggal jatuh tempo bawaan, isi pesan pengingat, info rekening, dan jeda antar pengingat. Disimpan di server, jadi sama untuk semua admin SSB.
+- Admin, tab **Pengingat**: daftar tagihan menunggak dan yang segera jatuh tempo (3 atau 7 hari), isi pesan yang diambil dari pengaturan SPP (kata {wali}, {anak}, {bulan}, {sisa}, {status}, {ssb} diisi otomatis), penanda jeda pengingat, tombol **Kirim ke <wali>** yang membuka WhatsApp dengan pesan terisi, dan tombol **Kirim otomatis** yang mengirim pesan dari server lewat Fonnte (bila token sudah diisi; lihat `docs/fonnte.md`).
+- Admin, tab **Pengaturan**: tanggal jatuh tempo bawaan, isi pesan pengingat, info rekening, dan jeda antar pengingat. Disimpan di server, jadi sama untuk semua admin SSB. Bagian kedua: pengaturan pengiriman WhatsApp lewat Fonnte (token API, kode negara, pesan uji).
 - Dasbor admin: panel **SPP bulan ini** (ditagih, dibayar, belum dibayar, persen terbayar, jumlah yang perlu diingatkan), kartu "Perlu tindakan" (tagihan bulan ini belum dibuat, SPP menunggak) yang menautkan ke tab Pengingat (`/spp?tab=pengingat`), dan pintasan Tagihan SPP.
 - Orang tua: beranda menampilkan kartu peringatan bila ada tagihan belum lunas (merah bila lewat jatuh tempo).
 - Orang tua: menu **SPP**. Sisa yang harus dibayar, tagihan per anak, riwayat pembayaran, dan info rekening tujuan pembayaran.
@@ -43,4 +47,4 @@ Status tidak disimpan, tetapi dihitung dari pembayaran: `belum`, `sebagian`, `lu
 
 ## Belum ada
 
-Pembayaran online, pengingat WhatsApp yang terkirim otomatis (butuh penyedia WhatsApp Business API seperti Fonnte, Twilio, atau Meta Cloud API; saat ini admin menekan kirim sendiri), notifikasi push, bukti pembayaran (foto), ekspor laporan, dan pembukuan.
+Pembayaran online, pengingat WhatsApp terjadwal tanpa admin menekan tombol (pengiriman lewat Fonnte sudah ada tapi masih dipicu manual; lihat `docs/fonnte.md`), notifikasi push, bukti pembayaran (foto), ekspor laporan, dan pembukuan.

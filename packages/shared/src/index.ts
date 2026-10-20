@@ -526,6 +526,30 @@ export type FeeSummary = {
 export const TEMPLAT_PENGINGAT_AWAL =
   "Yth. {wali}, kami dari {ssb} mengingatkan bahwa SPP {anak} bulan {bulan} sebesar {sisa} ({status}). Mohon pembayarannya diselesaikan. Bila sudah membayar, abaikan pesan ini. Terima kasih.";
 
+/** Keterangan jatuh tempo: terlambat sekian hari, hari ini, atau sekian hari lagi. */
+export const statusTempo = (hari: number) =>
+  hari < 0 ? `terlambat ${-hari} hari` : hari === 0 ? "jatuh tempo hari ini" : hari === 1 ? "jatuh tempo besok" : `jatuh tempo ${hari} hari lagi`;
+
+/** Rupiah dengan pemisah ribuan titik: 150000 menjadi "Rp 150.000". */
+export const rupiah = (n: number) => `Rp ${n.toLocaleString("id-ID")}`;
+
+/** "2026-10" atau "2026-10-01" menjadi "Oktober 2026". */
+export const namaBulan = (iso: string) => new Date(`${iso.slice(0, 7)}-01T00:00:00`).toLocaleDateString("id-ID", { month: "long", year: "numeric" });
+
+/**
+ * Isi templat pesan pengingat. Kata kunci yang didukung: {wali}, {anak},
+ * {bulan}, {sisa}, {status}, dan {ssb}. Dipakai di server (pengiriman
+ * otomatis) dan di peramban (pratinjau pesan), jadi hasilnya sama.
+ */
+export const isiTemplat = (templat: string, data: { wali: string; anak: string; bulan: string; sisa: number; hari: number; ssb: string }) =>
+  templat
+    .replaceAll("{wali}", data.wali)
+    .replaceAll("{anak}", data.anak)
+    .replaceAll("{bulan}", namaBulan(data.bulan))
+    .replaceAll("{sisa}", rupiah(data.sisa))
+    .replaceAll("{status}", statusTempo(data.hari))
+    .replaceAll("{ssb}", data.ssb);
+
 /** Pengaturan SPP milik SSB: satu baris, dibuat saat admin pertama kali menyimpan. */
 export const feeSettingsSchema = z.object({
   /** Tanggal jatuh tempo bawaan untuk tagihan baru (1-28). */
@@ -542,6 +566,48 @@ export type FeeSettings = FeeSettingsInput;
 
 /** Pengaturan yang boleh dilihat orang tua: hanya info rekening. */
 export type FeePublicInfo = { bankInfo: string | null };
+
+/**
+ * Pengaturan pengiriman WhatsApp (Fonnte) milik SSB.
+ * Token API tidak pernah dikembalikan ke peramban; hanya status keberadaannya.
+ */
+export const whatsappSettingsSchema = z.object({
+  /** Token API Fonnte. Kosong berarti token dihapus dan pengiriman otomatis nonaktif. */
+  token: z.string().trim().max(200, "terlalu panjang").optional(),
+  /** Kode negara untuk normalisasi nomor tujuan; default 62 (Indonesia). */
+  countryCode: z
+    .string()
+    .trim()
+    .regex(/^\d{1,4}$/, "kode negara berupa angka, mis. 62")
+    .default("62"),
+  /** Aktifkan pengiriman pengingat tagihan otomatis. */
+  autoReminder: z.boolean().default(false),
+});
+export type WhatsappSettingsInput = z.infer<typeof whatsappSettingsSchema>;
+export type WhatsappSettings = {
+  /** True bila token tersimpan di server. Nilainya sendiri tidak pernah dikirim ke peramban. */
+  hasToken: boolean;
+  countryCode: string;
+  autoReminder: boolean;
+};
+
+/** Hasil pengiriman pesan lewat Fonnte. */
+export type WaSendResult = {
+  ok: boolean;
+  /** Id pesan dari Fonnte bila berhasil. */
+  ids: string[];
+  /** Alasan kegagalan dari Fonnte (mis. "token invalid") bila gagal. */
+  reason: string | null;
+};
+
+/** Pesan uji: nomor tujuan dan teksnya. */
+export const whatsappTestSchema = z.object({
+  /** Nomor tujuan; boleh format lokal (08...) atau internasional (62...). */
+  number: whatsappSchema,
+  /** Isi pesan uji. */
+  message: z.string().trim().min(1, "wajib diisi").max(1000, "maksimal 1000 karakter"),
+});
+export type WhatsappTestInput = z.infer<typeof whatsappTestSchema>;
 
 /** Tarif SPP khusus satu pemain; menggantikan tarif KU. 0 = tidak ditagih. */
 export const playerFeeOverrideSchema = z.object({

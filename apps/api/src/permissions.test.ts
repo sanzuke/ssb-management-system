@@ -115,6 +115,7 @@ run("matriks izin per endpoint (database)", () => {
     { method: "GET", path: "/fees/settings", perm: "fee.manage" },
     { method: "GET", path: "/fees/player-overrides", perm: "fee.manage" },
     { method: "GET", path: "/fees/public-info", perm: "invoice.read" },
+    { method: "GET", path: "/whatsapp/settings", perm: "fee.manage" },
   ];
   for (const e of endpoints) {
     test(`${e.method} ${e.path}: hanya role dengan izin ${e.perm} yang lolos`, async () => {

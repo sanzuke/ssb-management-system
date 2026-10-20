@@ -10,6 +10,7 @@ import { googleRoutes } from "./auth/google-routes";
 import { createGoogleProvider, type GoogleProvider } from "./auth/google";
 import { feeRoutes } from "./fees";
 import { feeSettingRoutes } from "./fee-settings";
+import { whatsappSettingRoutes } from "./whatsapp";
 import { memberRoutes } from "./members";
 import { invitationRoutes } from "./invitations";
 import type { Mailer } from "./mail";
@@ -26,7 +27,7 @@ export type AppDeps = { google?: GoogleProvider | null; logger?: Logger; mailer?
 export function createApp(
   db: Db,
   env: Pick<Env, "NODE_ENV" | "ALLOWED_ORIGINS"> &
-    Partial<Pick<Env, "WEB_URL" | "PUBLIC_API_URL" | "SESSION_SECRET" | "GOOGLE_CLIENT_ID" | "GOOGLE_CLIENT_SECRET" | "UPLOAD_DIR">>,
+    Partial<Pick<Env, "WEB_URL" | "PUBLIC_API_URL" | "SESSION_SECRET" | "TOKEN_SECRET" | "GOOGLE_CLIENT_ID" | "GOOGLE_CLIENT_SECRET" | "UPLOAD_DIR">>,
   deps: AppDeps = {},
 ) {
   const secureCookie = env.NODE_ENV === "production";
@@ -65,8 +66,9 @@ export function createApp(
       .route("/", masterRoutes(db))
       .route("/", playerRoutes(db, { uploadDir: env.UPLOAD_DIR ?? "./uploads" }))
       .route("/", sessionRoutes(db))
-      .route("/", feeRoutes(db))
+      .route("/", feeRoutes(db, { secret: env.TOKEN_SECRET ?? env.SESSION_SECRET ?? "" }))
       .route("/", feeSettingRoutes(db))
+      .route("/", whatsappSettingRoutes(db, { secret: env.TOKEN_SECRET ?? env.SESSION_SECRET ?? "" }))
       .route("/", memberRoutes(db))
       .route("/", assessmentRoutes(db))
       // Daftar anggota SSB sendiri; hanya admin SSB.
