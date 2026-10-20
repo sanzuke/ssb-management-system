@@ -4,20 +4,8 @@ import { api, ApiError } from "~/lib/api";
 import { linkWa } from "~/lib/wa";
 import { namaBulan, rupiah } from "~/lib/waktu";
 import { tanggal } from "~/lib/pemain";
-import type { ReminderRow } from "@ssb/shared";
+import type { FeeSettings, ReminderRow } from "@ssb/shared";
 import SelectField from "./SelectField";
-
-const KUNCI_TEMPLAT = "spp-templat-pengingat";
-const TEMPLAT_AWAL =
-  "Yth. {wali}, kami dari {ssb} mengingatkan bahwa SPP {anak} bulan {bulan} sebesar {sisa} ({status}). Mohon pembayarannya diselesaikan. Bila sudah membayar, abaikan pesan ini. Terima kasih.";
-
-const bacaTemplat = () => {
-  try {
-    return localStorage.getItem(KUNCI_TEMPLAT) || TEMPLAT_AWAL;
-  } catch {
-    return TEMPLAT_AWAL;
-  }
-};
 
 /** Keterangan jatuh tempo: terlambat sekian hari, hari ini, atau sekian hari lagi. */
 export const statusTempo = (hari: number) =>
@@ -36,18 +24,12 @@ export const isiTemplat = (templat: string, r: ReminderRow, wali: string, ssb: s
 /** Pengingat tagihan SPP: daftar yang menunggak atau segera jatuh tempo, dengan tombol kirim WhatsApp ke wali. */
 export default function SppPengingat(props: { ssbName: string }) {
   const [hari, setHari] = createSignal("3");
-  const [templat, setTemplat] = createSignal(bacaTemplat());
   const [galat, setGalat] = createSignal("");
   const [rows, { refetch }] = createResource(hari, (d) => api<ReminderRow[]>(`/fees/reminders?days=${d}`).catch(() => [] as ReminderRow[]));
+  // Templat pesan diambil dari pengaturan SPP di server, jadi sama untuk semua admin.
+  const [pengaturan] = createResource(async () => api<FeeSettings>("/fees/settings").catch(() => null));
+  const templat = () => pengaturan()?.reminderTemplate ?? "";
 
-  const simpanTemplat = (v: string) => {
-    setTemplat(v);
-    try {
-      localStorage.setItem(KUNCI_TEMPLAT, v);
-    } catch {
-      /* penyimpanan peramban tidak tersedia: templat berlaku sampai halaman ditutup */
-    }
-  };
   // Dicatat saat tombol ditekan (WhatsApp terbuka di tab baru); admin yang menekan kirim di WhatsApp.
   const catat = async (r: ReminderRow) => {
     setGalat("");
@@ -80,15 +62,11 @@ export default function SppPengingat(props: { ssbName: string }) {
         />
         <div class="field">
           <label for="templat">Isi pesan</label>
-          <textarea id="templat" rows="4" maxlength="600" value={templat()} onInput={(e) => simpanTemplat(e.currentTarget.value)} />
+          <textarea id="templat" rows="4" maxlength="600" value={templat()} readOnly />
           <span class="petunjuk">
-            Kata dalam kurung diisi otomatis: {"{wali}"} {"{anak}"} {"{bulan}"} {"{sisa}"} {"{status}"} {"{ssb}"}. Pesan Anda tersimpan di peramban ini.
+            Kata dalam kurung diisi otomatis: {"{wali}"} {"{anak}"} {"{bulan}"} {"{sisa}"} {"{status}"} {"{ssb}"}. Isi pesan diubah di tab{" "}
+            <A href="/spp?tab=pengaturan">Pengaturan</A>.
           </span>
-          <Show when={templat() !== TEMPLAT_AWAL}>
-            <button class="tombol tipis tombol-kecil" type="button" onClick={() => simpanTemplat(TEMPLAT_AWAL)}>
-              Kembalikan pesan bawaan
-            </button>
-          </Show>
         </div>
       </div>
 
@@ -121,6 +99,9 @@ export default function SppPengingat(props: { ssbName: string }) {
                     <span class="petunjuk">
                       Sudah diingatkan {r.reminderCount} kali, terakhir {tanggal(r.lastRemindedAt!)}
                     </span>
+                  </Show>
+                  <Show when={r.dalamJeda}>
+                    <span class="petunjuk">Masih dalam jeda pengingat: {r.sisaJedaHari} hari lagi boleh diingatkan.</span>
                   </Show>
                   <div class="aksi-baris">
                     <For each={r.guardians}>

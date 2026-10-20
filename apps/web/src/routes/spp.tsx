@@ -4,16 +4,20 @@ import { createSignal, onMount, Show } from "solid-js";
 import KepalaHalaman from "~/components/KepalaHalaman";
 import SppAdmin from "~/components/SppAdmin";
 import SppPengingat from "~/components/SppPengingat";
+import SppPengaturan from "~/components/SppPengaturan";
 import SppOrtu from "~/components/SppOrtu";
+import SppTarifKhusus from "~/components/SppTarifKhusus";
 import { getMe, type Me } from "~/lib/api";
+
+type TabSpp = "tagihan" | "pengingat" | "pengaturan";
 
 export default function Spp() {
   const nav = useNavigate();
   const [me, setMe] = createSignal<Me | null>(null);
   const [params, setParams] = useSearchParams();
-  // Tab tersimpan di alamat (?tab=pengingat) supaya bisa ditautkan dari dasbor.
-  const tab = () => (params.tab === "pengingat" ? "pengingat" : "tagihan");
-  const setTab = (t: "tagihan" | "pengingat") => setParams({ tab: t === "tagihan" ? undefined : t }, { replace: true });
+  // Tab tersimpan di alamat (?tab=...) supaya bisa ditautkan dari dasbor.
+  const tab = (): TabSpp => (params.tab === "pengingat" || params.tab === "pengaturan" ? params.tab : "tagihan");
+  const setTab = (t: TabSpp) => setParams({ tab: t === "tagihan" ? undefined : t }, { replace: true });
 
   onMount(async () => {
     const m = await getMe().catch(() => null);
@@ -44,9 +48,18 @@ export default function Spp() {
             <button type="button" aria-pressed={tab() === "pengingat"} onClick={() => setTab("pengingat")}>
               Pengingat
             </button>
+            <button type="button" aria-pressed={tab() === "pengaturan"} onClick={() => setTab("pengaturan")}>
+              Pengaturan
+            </button>
           </div>
-          <Show when={tab() === "tagihan"} fallback={<SppPengingat ssbName={me()?.active?.ssbName ?? "SSB"} />}>
+          <Show when={tab() === "tagihan"}>
             <SppAdmin />
+          </Show>
+          <Show when={tab() === "pengingat"}>
+            <SppPengingat ssbName={me()?.active?.ssbName ?? "SSB"} />
+          </Show>
+          <Show when={tab() === "pengaturan"}>
+            <SppPengaturan />
           </Show>
         </Show>
       </main>

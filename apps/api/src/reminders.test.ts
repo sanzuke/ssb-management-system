@@ -115,4 +115,42 @@ run("pengingat SPP: daftar dan pencatatan", () => {
     expect((await call("GET", "/fees/reminders", pelatih)).status).toBe(403);
     expect((await call("GET", "/fees/reminders")).status).toBe(401);
   });
+
+  test("jeda pengingat dari pengaturan ditandai tanpa menyembunyikan tagihan", async () => {
+    const reg = await call("POST", "/auth/register-ssb", undefined, {
+      ssbName: `Jeda ${uid}`,
+      slug: `j-${uid}`,
+      adminName: "Admin",
+      email: `jeda-${uid}@uji.test`,
+      password: PASS,
+    });
+    expect(reg.status).toBe(201);
+    const { ssbId } = await json(reg);
+    ssbIds.push(ssbId);
+    const admin = sessionOf(reg);
+    const ku = (await json(await call("POST", "/age-groups", admin, { name: "KU-10", minAge: 9, maxAge: 10 }))).id;
+    await call("PUT", "/fees/rates", admin, { rates: [{ ageGroupId: ku, monthlyFee: 100000 }] });
+    const a = await json(await call("POST", "/players", admin, { fullName: "Anak Jeda", birthDate: "2016-04-05", ageGroupId: ku }));
+    await call("POST", "/invoices/generate", admin, { month: "2020-01" });
+    const id = (await json(await call("GET", "/invoices?month=2020-01", admin))).find((i: any) => i.player.name === "Anak Jeda").id as string;
+
+    // sebelum ada pengingat, tagihan tidak dalam jeda
+    const sebelum = (await json(await call("GET", "/fees/reminders", admin))).find((r: any) => r.id === id);
+    expect([sebelum.dalamJeda, sebelum.sisaJedaHari]).toEqual([false, 0]);
+
+    // setelah dicatat, tagihan tetap muncul tapi ditandai dalam jeda
+    await call("POST", `/invoices/${id}/reminded`, admin);
+    const sesudah = (await json(await call("GET", "/fees/reminders", admin))).find((r: any) => r.id === id);
+    expect([sesudah.dalamJeda, sesudah.sisaJedaHari]).toEqual([true, 7]); // jeda bawaan 7 hari
+
+    // jeda 0: boleh diingatkan lagi tanpa jeda
+    await call("PUT", "/fees/settings", admin, {
+      dueDay: 10,
+      reminderTemplate: "x",
+      bankInfo: null,
+      reminderIntervalDays: 0,
+    });
+    const tanpaJeda = (await json(await call("GET", "/fees/reminders", admin))).find((r: any) => r.id === id);
+    expect([tanpaJeda.dalamJeda, tanpaJeda.sisaJedaHari]).toEqual([false, 0]);
+  });
 });

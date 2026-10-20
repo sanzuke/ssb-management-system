@@ -117,7 +117,7 @@ Detail di `docs/spp.md`. Dikerjakan lebih awal dari rencana karena SSB percontoh
 - [x] Catat pembayaran (sebagian atau penuh) dan batalkan tagihan; orang tua hanya melihat tagihan anaknya; test
 - [x] Pengingat jatuh tempo lewat WhatsApp: daftar tunggakan, pesan siap kirim (tautan wa.me), penanda sudah diingatkan dan jumlah pengingat; test
 - [x] SPP di dasbor admin: panel bulan berjalan, tindakan, pintasan; banner tagihan di portal orang tua
-- [ ] Pengaturan SPP di server: tanggal jatuh tempo bawaan, templat pesan bersama, info rekening, jeda pengingat
-- [ ] Tarif khusus per pemain (keringanan atau saudara kandung)
-- [ ] Ubah nominal tagihan yang sudah dibuat; tagihan yang dibatalkan bisa dibuat ulang
+- [x] Pengaturan SPP di server: tanggal jatuh tempo bawaan, templat pesan bersama, info rekening, jeda pengingat (tab Pengaturan); test
+- [x] Tarif khusus per pemain (keringanan atau saudara kandung); tarif 0 berarti tidak ditagih; test
+- [x] Ubah nominal tagihan yang sudah dibuat; tagihan yang dibatalkan bisa dibuat ulang; test
 - [ ] Pengiriman WhatsApp otomatis (butuh penyedia API resmi)

@@ -127,6 +127,13 @@
       "when": 1792401473377,
       "tag": "0017_undangan_pembuat_set_null",
       "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "7",
+      "when": 1792479316426,
+      "tag": "0018_spp_pengaturan",
+      "breakpoints": true
     }
   ]
 }

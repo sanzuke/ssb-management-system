@@ -4,6 +4,7 @@ import { schema, withTenant, type Db } from "@ssb/db";
 import {
   feeRatesInputSchema,
   generateInvoicesSchema,
+  invoiceAmountSchema,
   paymentInputSchema,
   type FeeRate,
   type FeeSummary,
@@ -15,6 +16,7 @@ import {
 } from "@ssb/shared";
 import { requirePermission, type AppEnv } from "./auth/middleware";
 import { HttpError } from "./errors";
+import { bacaPengaturan } from "./fee-settings";
 import { visibleTo } from "./players";
 import { zv } from "./validator";
 
@@ -159,28 +161,40 @@ export function feeRoutes(db: Db) {
       })
 
       // Buat tagihan satu bulan untuk semua pemain aktif di KU bertarif. Aman dijalankan ulang: yang sudah ditagih dilewati.
+      // Tarif khusus pemain menggantikan tarif KU; tarif 0 berarti pemain itu tidak ikut ditagih.
       .post("/invoices/generate", requirePermission("fee.manage"), zv("json", generateInvoicesSchema), async (c) => {
         const m = c.get("auth")!.member!;
         const { month, dueDay } = c.req.valid("json");
+        const pengaturan = await bacaPengaturan(db, m.ssbId);
         const bulan = `${month}-01`;
-        const jatuhTempo = `${month}-${String(dueDay).padStart(2, "0")}`;
+        const jatuhTempo = `${month}-${String(dueDay ?? pengaturan.dueDay).padStart(2, "0")}`;
         const out = await withTenant(db, m.ssbId, async (tx): Promise<GenerateInvoicesResult> => {
           const aktif = await tx
-            .select({ id: schema.player.id, fee: schema.ageGroup.monthlyFee })
+            .select({
+              id: schema.player.id,
+              fee: schema.ageGroup.monthlyFee,
+              khusus: schema.playerFeeOverride.monthlyFee,
+            })
             .from(schema.player)
             .leftJoin(schema.ageGroup, and(eq(schema.ageGroup.ssbId, schema.player.ssbId), eq(schema.ageGroup.id, schema.player.ageGroupId)))
+            .leftJoin(
+              schema.playerFeeOverride,
+              and(eq(schema.playerFeeOverride.ssbId, schema.player.ssbId), eq(schema.playerFeeOverride.playerId, schema.player.id)),
+            )
             .where(eq(schema.player.status, "aktif"));
-          const bertarif = aktif.filter((p): p is { id: string; fee: number } => p.fee !== null && p.fee > 0);
+          // Tarif khusus menggantikan tarif KU, termasuk 0 yang berarti tidak ditagih.
+          const tarif = aktif.map((p) => ({ id: p.id, fee: p.khusus ?? p.fee }));
+          const bertarif = tarif.filter((p): p is { id: string; fee: number } => p.fee !== null && p.fee > 0);
           let created = 0;
           for (const p of bertarif) {
             const ins = await tx
               .insert(I)
               .values({ ssbId: m.ssbId, playerId: p.id, month: bulan, amount: p.fee, dueOn: jatuhTempo, createdBy: m.userId })
-              .onConflictDoNothing({ target: [I.ssbId, I.playerId, I.month] })
+              .onConflictDoNothing({ target: [I.ssbId, I.playerId, I.month], where: sql`${I.voidedAt} is null` })
               .returning({ id: I.id });
             created += ins.length;
           }
-          return { created, existing: bertarif.length - created, withoutRate: aktif.length - bertarif.length };
+          return { created, existing: bertarif.length - created, withoutRate: tarif.length - bertarif.length };
         });
         return c.json(out, 201);
       })
@@ -197,9 +211,12 @@ export function feeRoutes(db: Db) {
 
       // Tagihan yang perlu diingatkan: sudah lewat jatuh tempo atau jatuh tempo dalam `days` hari ke depan (bawaan 3),
       // beserta nama dan WhatsApp wali. Yang paling terlambat di atas. Pengingat dikirim admin sendiri lewat WhatsApp.
+      // Tagihan yang baru saja diingatkan tetap tampil, tapi ditandai `dalamJeda` supaya admin tahu
+      // pengingat berikutnya sebaiknya ditunda sesuai jeda yang ditetapkan di pengaturan.
       .get("/fees/reminders", requirePermission("fee.manage"), async (c) => {
         const m = c.get("auth")!.member!;
         const days = Math.min(30, Math.max(0, Number.parseInt(c.req.query("days") ?? "3", 10) || 0));
+        const pengaturan = await bacaPengaturan(db, m.ssbId);
         const hariIni = todayWib();
         const batas = new Date(Date.parse(`${hariIni}T00:00:00Z`) + days * 86400000).toISOString().slice(0, 10);
         const semua = await loadInvoices(m.ssbId, m, {});
@@ -221,11 +238,19 @@ export function feeRoutes(db: Db) {
           for (const w of rows) wali.set(w.playerId, [...(wali.get(w.playerId) ?? []), { name: w.name, whatsapp: w.whatsapp, relationship: w.relationship }]);
         }
         const out: ReminderRow[] = perlu
-          .map(({ payments: _p, ...r }) => ({
-            ...r,
-            daysToDue: Math.round((Date.parse(`${r.dueOn}T00:00:00Z`) - Date.parse(`${hariIni}T00:00:00Z`)) / 86400000),
-            guardians: wali.get(r.player.id) ?? [],
-          }))
+          .map(({ payments: _p, ...r }) => {
+            // Sisa jeda: berapa hari lagi tagihan ini boleh diingatkan lagi.
+            const sisaJedaHari = r.lastRemindedAt
+              ? Math.max(0, Math.ceil((Date.parse(r.lastRemindedAt) + pengaturan.reminderIntervalDays * 86400000 - Date.now()) / 86400000))
+              : 0;
+            return {
+              ...r,
+              daysToDue: Math.round((Date.parse(`${r.dueOn}T00:00:00Z`) - Date.parse(`${hariIni}T00:00:00Z`)) / 86400000),
+              dalamJeda: sisaJedaHari > 0,
+              sisaJedaHari,
+              guardians: wali.get(r.player.id) ?? [],
+            };
+          })
           .sort((a, b) => a.daysToDue - b.daysToDue || a.player.name.localeCompare(b.player.name));
         return c.json(out);
       })
@@ -309,6 +334,69 @@ export function feeRoutes(db: Db) {
         const del = await withTenant(db, m.ssbId, (tx) => tx.delete(P).where(eq(P.id, id)).returning({ id: P.id }));
         if (del.length === 0) throw notFound("Pembayaran");
         return c.body(null, 204);
+      })
+
+      // Koreksi nominal tagihan. Tidak boleh membuat sisa tagihan negatif.
+      .patch("/invoices/:id", requirePermission("fee.manage"), zv("json", invoiceAmountSchema), async (c) => {
+        const m = c.get("auth")!.member!;
+        const id = idOr404(c.req.param("id"), "Tagihan");
+        const b = c.req.valid("json");
+        const res = await withTenant(db, m.ssbId, async (tx) => {
+          const [inv] = await tx.select().from(I).where(eq(I.id, id)).for("update").limit(1);
+          if (!inv) return "none" as const;
+          if (inv.voidedAt) return "void" as const;
+          const [jumlah] = await tx
+            .select({ paid: sql<number>`coalesce(sum(${P.amount}), 0)::int` })
+            .from(P)
+            .where(eq(P.invoiceId, id));
+          if (b.amount < (jumlah?.paid ?? 0)) return { underpaid: jumlah?.paid ?? 0 } as const;
+          await tx.update(I).set({ amount: b.amount }).where(eq(I.id, id));
+          return "ok" as const;
+        });
+        if (res === "none") throw notFound("Tagihan");
+        if (res === "void") throw new HttpError(409, "invoice_void", "Tagihan ini sudah dibatalkan");
+        if (typeof res === "object")
+          throw new HttpError(409, "underpaid", `Nominal tidak boleh lebih kecil dari yang sudah dibayar (Rp ${res.underpaid.toLocaleString("id-ID")})`);
+        return c.json((await loadInvoices(m.ssbId, m, { id }))[0]);
+      })
+
+      // Buat ulang tagihan yang dibatalkan: nomor tagihan lama dibuang dan tagihan baru dibuat
+      // dengan tarif dan jatuh tempo saat ini.
+      .post("/invoices/:id/recreate", requirePermission("fee.manage"), async (c) => {
+        const m = c.get("auth")!.member!;
+        const id = idOr404(c.req.param("id"), "Tagihan");
+        const pengaturan = await bacaPengaturan(db, m.ssbId);
+        const res = await withTenant(db, m.ssbId, async (tx) => {
+          const [inv] = await tx.select().from(I).where(eq(I.id, id)).for("update").limit(1);
+          if (!inv) return "none" as const;
+          if (!inv.voidedAt) return "aktif" as const;
+          const [adaBayar] = await tx.select({ n: sql<number>`count(*)::int` }).from(P).where(eq(P.invoiceId, id));
+          if ((adaBayar?.n ?? 0) > 0) return "paid" as const;
+          const [tarif] = await tx
+            .select({ fee: schema.ageGroup.monthlyFee, khusus: schema.playerFeeOverride.monthlyFee })
+            .from(schema.player)
+            .leftJoin(schema.ageGroup, and(eq(schema.ageGroup.ssbId, schema.player.ssbId), eq(schema.ageGroup.id, schema.player.ageGroupId)))
+            .leftJoin(
+              schema.playerFeeOverride,
+              and(eq(schema.playerFeeOverride.ssbId, schema.player.ssbId), eq(schema.playerFeeOverride.playerId, schema.player.id)),
+            )
+            .where(and(eq(schema.player.ssbId, m.ssbId), eq(schema.player.id, inv.playerId)))
+            .limit(1);
+          const fee = tarif?.khusus ?? tarif?.fee ?? null;
+          if (fee === null || fee <= 0) return "tanpaTarif" as const;
+          const bulan = inv.month.slice(0, 10);
+          const jatuhTempo = `${bulan.slice(0, 7)}-${String(pengaturan.dueDay).padStart(2, "0")}`;
+          const [baru] = await tx
+            .insert(I)
+            .values({ ssbId: m.ssbId, playerId: inv.playerId, month: inv.month, amount: fee, dueOn: jatuhTempo, createdBy: m.userId })
+            .returning({ id: I.id });
+          return { id: baru!.id };
+        });
+        if (res === "none") throw notFound("Tagihan");
+        if (res === "aktif") throw new HttpError(409, "invoice_active", "Tagihan ini belum dibatalkan, tidak perlu dibuat ulang");
+        if (res === "paid") throw new HttpError(409, "has_payments", "Tagihan lama masih punya catatan pembayaran. Hapus pembayarannya dulu");
+        if (res === "tanpaTarif") throw new HttpError(409, "no_rate", "Pemain ini belum punya tarif. Atur tarif KU atau tarif khusus pemain dulu");
+        return c.json((await loadInvoices(m.ssbId, m, { id: res.id }))[0], 201);
       })
 
       // Batalkan tagihan yang salah buat; hanya bila belum ada pembayaran (hapus dulu pembayarannya bila perlu).

@@ -2,9 +2,10 @@ import { createMemo, createResource, createSignal, For, Show } from "solid-js";
 import { api, ApiError } from "~/lib/api";
 import { bulanIni, hariIni, namaBulan, rupiah } from "~/lib/waktu";
 import { tanggal } from "~/lib/pemain";
-import type { FeeRate, FeeSummary, GenerateInvoicesResult, InvoiceRow, PaymentMethod } from "@ssb/shared";
+import type { FeeRate, FeeSettings, FeeSummary, GenerateInvoicesResult, InvoiceRow, PaymentMethod } from "@ssb/shared";
 import Field from "./Field";
 import SelectField from "./SelectField";
+import SppTarifKhusus from "./SppTarifKhusus";
 
 type Saring = "semua" | "belum" | "terlambat" | "lunas";
 const metodeLabel: Record<PaymentMethod, string> = { tunai: "Tunai", transfer: "Transfer", lainnya: "Lainnya" };
@@ -18,12 +19,17 @@ export default function SppAdmin() {
   const [galat, setGalat] = createSignal("");
   const [sibuk, setSibuk] = createSignal("");
   const [jatuhTempo, setJatuhTempo] = createSignal("10");
+  // True setelah admin memilih tanggal sendiri; sebelum itu ikut pengaturan SSB.
+  const [jatuhTempoSendiri, setJatuhTempoSendiri] = createSignal(false);
   const [buka, setBuka] = createSignal<string | null>(null);
   const [jumlah, setJumlah] = createSignal("");
   const [tglBayar, setTglBayar] = createSignal(hariIni());
   const [metode, setMetode] = createSignal<PaymentMethod>("tunai");
   const [catatan, setCatatan] = createSignal("");
   const [tarif, setTarif] = createSignal<Record<string, string>>({});
+  // Koreksi nominal tagihan: id tagihan yang form-nya terbuka.
+  const [ubahNominal, setUbahNominal] = createSignal<string | null>(null);
+  const [nominalBaru, setNominalBaru] = createSignal("");
 
   const [rows, { refetch: muatTagihan }] = createResource(bulan, (b) => api<InvoiceRow[]>(`/invoices?month=${b}`).catch(() => [] as InvoiceRow[]));
   const [ringkas, { refetch: muatRingkas }] = createResource(bulan, (b) => api<FeeSummary>(`/fees/summary?month=${b}`).catch(() => null));
@@ -31,6 +37,13 @@ export default function SppAdmin() {
     const r = await api<FeeRate[]>("/fees/rates").catch(() => [] as FeeRate[]);
     setTarif(Object.fromEntries(r.map((x) => [x.ageGroupId, x.monthlyFee === null ? "" : String(x.monthlyFee)])));
     return r;
+  });
+  // Pengaturan SPP: tanggal jatuh tempo bawaan dipakai saat membuat tagihan.
+  const [pengaturan] = createResource(async () => {
+    const p = await api<FeeSettings>("/fees/settings").catch(() => null);
+    // Selama admin belum memilih tanggal sendiri, ikuti bawaan pengaturan.
+    if (p && !jatuhTempoSendiri()) setJatuhTempo(String(p.dueDay));
+    return p;
   });
 
   const muatUlang = async () => {
@@ -107,6 +120,25 @@ export default function SppAdmin() {
       await api(`/invoices/${r.id}/void`, { method: "POST" });
       await muatUlang();
     });
+  const bukaUbah = (r: InvoiceRow) => {
+    setUbahNominal(ubahNominal() === r.id ? null : r.id);
+    setNominalBaru(String(r.amount));
+    setGalat("");
+  };
+  const simpanNominal = (r: InvoiceRow) =>
+    aksi(r.id, async () => {
+      await api(`/invoices/${r.id}`, { method: "PATCH", body: { amount: Number(nominalBaru()) } });
+      setUbahNominal(null);
+      setPesan(`Nominal tagihan ${r.player.name} diubah.`);
+      await muatUlang();
+    });
+  // Buat ulang tagihan yang dibatalkan: tagihan lama dibuang, yang baru memakai tarif dan jatuh tempo sekarang.
+  const buatUlang = (r: InvoiceRow) =>
+    aksi(r.id, async () => {
+      await api(`/invoices/${r.id}/recreate`, { method: "POST" });
+      setPesan(`Tagihan ${r.player.name} dibuat ulang.`);
+      await muatUlang();
+    });
 
   return (
     <>
@@ -117,8 +149,12 @@ export default function SppAdmin() {
             id="jatuh"
             label="Jatuh tempo tanggal"
             value={jatuhTempo()}
-            onInput={setJatuhTempo}
+            onInput={(v) => {
+              setJatuhTempo(v);
+              setJatuhTempoSendiri(true);
+            }}
             options={[1, 5, 10, 15, 20, 25, 28].map((d) => ({ value: String(d), label: String(d) }))}
+            hint={pengaturan() ? `Bawaan pengaturan: tanggal ${pengaturan()!.dueDay}.` : undefined}
           />
           <button class="tombol utama" type="button" disabled={sibuk() === "buat"} onClick={buatTagihan}>
             {sibuk() === "buat" ? "Membuat…" : `Buat tagihan ${namaBulan(bulan())}`}
@@ -215,12 +251,45 @@ export default function SppAdmin() {
                             {buka() === r.id ? "Tutup" : "Catat pembayaran"}
                           </button>
                         </Show>
+                        <button class="tombol tipis tombol-kecil" type="button" onClick={() => bukaUbah(r)}>
+                          {ubahNominal() === r.id ? "Tutup" : "Ubah nominal"}
+                        </button>
                         <Show when={r.payments.length === 0}>
                           <button class="tombol tipis tombol-kecil" type="button" disabled={sibuk() === r.id} onClick={() => batalkan(r)}>
                             Batalkan tagihan
                           </button>
                         </Show>
                       </div>
+                    </Show>
+                    <Show when={r.status === "dibatalkan"}>
+                      <div class="aksi-baris">
+                        <button class="tombol tipis tombol-kecil" type="button" disabled={sibuk() === r.id} onClick={() => buatUlang(r)}>
+                          Buat ulang tagihan
+                        </button>
+                      </div>
+                    </Show>
+                    <Show when={ubahNominal() === r.id}>
+                      <form
+                        class="form spp-form"
+                        onSubmit={(e) => {
+                          e.preventDefault();
+                          simpanNominal(r);
+                        }}
+                      >
+                        <Field
+                          id={`nominal-${r.id}`}
+                          label="Nominal baru (Rp)"
+                          type="number"
+                          inputmode="numeric"
+                          required
+                          value={nominalBaru()}
+                          onInput={setNominalBaru}
+                          hint={`Tagihan lama ${rupiah(r.amount)} • sudah dibayar ${rupiah(r.paid)}`}
+                        />
+                        <button class="tombol utama" type="submit" disabled={sibuk() === r.id}>
+                          {sibuk() === r.id ? "Menyimpan…" : "Simpan nominal"}
+                        </button>
+                      </form>
                     </Show>
                     <Show when={r.payments.length > 0}>
                       <ul class="spp-bayar">
@@ -319,6 +388,8 @@ export default function SppAdmin() {
           </Show>
         </Show>
       </details>
+
+      <SppTarifKhusus />
     </>
   );
 }

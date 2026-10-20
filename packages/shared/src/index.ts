@@ -467,8 +467,8 @@ export type FeeRate = { ageGroupId: string; name: string; monthlyFee: number | n
 /** Membuat tagihan satu bulan (YYYY-MM) untuk semua pemain aktif di KU yang punya tarif; yang sudah ditagih dilewati. */
 export const generateInvoicesSchema = z.object({
   month: z.string().regex(/^\d{4}-(0[1-9]|1[0-2])$/, "format bulan YYYY-MM"),
-  /** Tanggal jatuh tempo di bulan itu. */
-  dueDay: z.number().int().min(1).max(28).default(10),
+  /** Tanggal jatuh tempo di bulan itu. Bila diisi, menimpa pengaturan bawaan SSB. */
+  dueDay: z.number().int().min(1).max(28).optional(),
 });
 export type GenerateInvoices = z.infer<typeof generateInvoicesSchema>;
 export type GenerateInvoicesResult = { created: number; existing: number; withoutRate: number };
@@ -506,6 +506,10 @@ export type InvoiceRow = {
 export type ReminderRow = Omit<InvoiceRow, "payments"> & {
   /** Hari menuju jatuh tempo; negatif = sudah terlambat sekian hari. */
   daysToDue: number;
+  /** Sudah diingatkan dalam masa jeda pengaturan, jadi pengingat berikutnya sebaiknya ditunda. */
+  dalamJeda: boolean;
+  /** Sisa hari jeda sebelum tagihan ini boleh diingatkan lagi; 0 bila sudah boleh. */
+  sisaJedaHari: number;
   guardians: { name: string; whatsapp: string | null; relationship: string | null }[];
 };
 export type FeeSummary = {
@@ -517,3 +521,45 @@ export type FeeSummary = {
   overdueInvoices: number;
   settledInvoices: number;
 };
+
+/** Templat pesan pengingat bawaan. Kata kunci di dalam kurung diisi sistem. */
+export const TEMPLAT_PENGINGAT_AWAL =
+  "Yth. {wali}, kami dari {ssb} mengingatkan bahwa SPP {anak} bulan {bulan} sebesar {sisa} ({status}). Mohon pembayarannya diselesaikan. Bila sudah membayar, abaikan pesan ini. Terima kasih.";
+
+/** Pengaturan SPP milik SSB: satu baris, dibuat saat admin pertama kali menyimpan. */
+export const feeSettingsSchema = z.object({
+  /** Tanggal jatuh tempo bawaan untuk tagihan baru (1-28). */
+  dueDay: z.number().int("harus bilangan bulat").min(1, "minimal 1").max(28, "maksimal 28"),
+  /** Templat pesan pengingat; kata kunci {wali} {anak} {bulan} {sisa} {status} {ssb} diisi sistem. */
+  reminderTemplate: z.string().trim().min(1, "wajib diisi").max(600, "maksimal 600 karakter"),
+  /** Info rekening tujuan pembayaran; boleh kosong. */
+  bankInfo: z.string().trim().max(300, "maksimal 300 karakter").nullable(),
+  /** Jeda minimal antar pengingat untuk tagihan yang sama, dalam hari. 0 = boleh setiap hari. */
+  reminderIntervalDays: z.number().int("harus bilangan bulat").min(0, "tidak boleh negatif").max(90, "maksimal 90 hari"),
+});
+export type FeeSettingsInput = z.infer<typeof feeSettingsSchema>;
+export type FeeSettings = FeeSettingsInput;
+
+/** Pengaturan yang boleh dilihat orang tua: hanya info rekening. */
+export type FeePublicInfo = { bankInfo: string | null };
+
+/** Tarif SPP khusus satu pemain; menggantikan tarif KU. 0 = tidak ditagih. */
+export const playerFeeOverrideSchema = z.object({
+  playerId: z.uuid(),
+  monthlyFee: z.number().int("harus bilangan bulat").min(0, "tidak boleh negatif").max(100_000_000, "terlalu besar"),
+  note: z.string().trim().max(120, "maksimal 120 karakter").nullable(),
+});
+export type PlayerFeeOverrideInput = z.infer<typeof playerFeeOverrideSchema>;
+export type PlayerFeeOverrideRow = {
+  playerId: string;
+  playerName: string;
+  ageGroup: string | null;
+  monthlyFee: number;
+  note: string | null;
+};
+
+/** Ubah nominal tagihan yang sudah dibuat. */
+export const invoiceAmountSchema = z.object({
+  amount: z.number().int("harus bilangan bulat").min(1, "minimal 1 rupiah").max(100_000_000, "terlalu besar"),
+});
+export type InvoiceAmountInput = z.infer<typeof invoiceAmountSchema>;

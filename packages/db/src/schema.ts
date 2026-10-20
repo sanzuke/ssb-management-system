@@ -16,6 +16,7 @@ import {
   time,
   timestamp,
   unique,
+  uniqueIndex,
   uuid,
 } from "drizzle-orm/pg-core";
 
@@ -438,6 +439,62 @@ export const userSession = pgTable(
   ],
 );
 
+/**
+ * Pengaturan SPP milik satu SSB. Satu baris per SSB; dibuat otomatis saat
+ * admin pertama kali menyimpan pengaturan. Menyimpan tanggal jatuh tempo
+ * bawaan, templat pesan pengingat, info rekening, dan jeda antar pengingat.
+ */
+export const feeSetting = pgTable(
+  "fee_setting",
+  {
+    ssbId: uuid("ssb_id")
+      .primaryKey()
+      .references(() => ssb.id, { onDelete: "cascade" }),
+    /** Tanggal jatuh tempo bawaan untuk tagihan baru (1-28). */
+    dueDay: integer("due_day").notNull().default(10),
+    /** Templat pesan pengingat; kata kunci {wali} {anak} {bulan} {sisa} {status} {ssb} diisi sistem. */
+    reminderTemplate: text("reminder_template").notNull(),
+    /** Info rekening untuk orang tua (kirim pembayaran ke mana). */
+    bankInfo: text("bank_info"),
+    /** Jeda minimal antar pengingat untuk tagihan yang sama, dalam hari. 0 = boleh setiap hari. */
+    reminderIntervalDays: integer("reminder_interval_days").notNull().default(7),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    check("fee_setting_due_day", sql`${t.dueDay} between 1 and 28`),
+    check("fee_setting_interval", sql`${t.reminderIntervalDays} between 0 and 90`),
+    tenantPolicy("fee_setting"),
+  ],
+).enableRLS();
+
+/**
+ * Tarif SPP khusus untuk satu pemain (keringanan, saudara kandung, dan sejenisnya).
+ * Bila baris ini ada, tarifnya menggantikan tarif KU; 0 berarti pemain itu tidak ditagih.
+ */
+export const playerFeeOverride = pgTable(
+  "player_fee_override",
+  {
+    ssbId: ssbId(),
+    playerId: uuid("player_id").notNull(),
+    /** Rupiah per bulan; 0 = tidak ditagih. */
+    monthlyFee: integer("monthly_fee").notNull(),
+    /** Alasan keringanan, mis. "saudara kandung". */
+    note: text("note"),
+    createdBy: uuid("created_by"),
+    createdAt: createdAt(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    primaryKey({ columns: [t.ssbId, t.playerId] }),
+    check("player_fee_override_amount", sql`${t.monthlyFee} >= 0`),
+    foreignKey({ columns: [t.ssbId, t.playerId], foreignColumns: [player.ssbId, player.id], name: "player_fee_override_player_fk" }).onDelete("cascade"),
+    foreignKey({ columns: [t.ssbId, t.createdBy], foreignColumns: [appUser.ssbId, appUser.id], name: "player_fee_override_created_by_fk" }).onDelete(
+      "set null",
+    ),
+    tenantPolicy("player_fee_override"),
+  ],
+).enableRLS();
+
 /** Tagihan SPP satu pemain untuk satu bulan. Jumlah terbayar dihitung dari tabel payment; tagihan dibatalkan lewat voided_at. */
 export const invoice = pgTable(
   "invoice",
@@ -447,7 +504,7 @@ export const invoice = pgTable(
     playerId: uuid("player_id").notNull(),
     /** Selalu tanggal 1 bulan yang ditagih. */
     month: date("month").notNull(),
-    /** Rupiah, tarif KU saat tagihan dibuat (perubahan tarif tidak mengubah tagihan lama). */
+    /** Rupiah, tarif KU atau tarif khusus pemain saat tagihan dibuat (perubahan tarif tidak mengubah tagihan lama). */
     amount: integer("amount").notNull(),
     dueOn: date("due_on").notNull(),
     voidedAt: timestamp("voided_at", { withTimezone: true }),
@@ -459,7 +516,8 @@ export const invoice = pgTable(
   },
   (t) => [
     unique("invoice_ssb_id").on(t.ssbId, t.id),
-    unique("invoice_player_month").on(t.ssbId, t.playerId, t.month),
+    // Tagihan batal tidak menghalangi tagihan baru untuk pemain dan bulan yang sama.
+    uniqueIndex("invoice_player_month").on(t.ssbId, t.playerId, t.month).where(sql`voided_at is null`),
     check("invoice_amount", sql`${t.amount} > 0`),
     check("invoice_month_first_day", sql`extract(day from ${t.month}) = 1`),
     index("invoice_month_idx").on(t.ssbId, t.month),

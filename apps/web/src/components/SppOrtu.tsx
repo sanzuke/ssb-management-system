@@ -2,13 +2,14 @@ import { createMemo, createResource, For, Show } from "solid-js";
 import { api } from "~/lib/api";
 import { tanggal } from "~/lib/pemain";
 import { namaBulan, rupiah } from "~/lib/waktu";
-import type { InvoiceRow, PaymentMethod } from "@ssb/shared";
+import type { FeePublicInfo, InvoiceRow, PaymentMethod } from "@ssb/shared";
 
 const metodeLabel: Record<PaymentMethod, string> = { tunai: "Tunai", transfer: "Transfer", lainnya: "Lainnya" };
 
 /** Tagihan SPP anak untuk orang tua: sisa yang harus dibayar, jatuh tempo, dan riwayat pembayaran. */
 export default function SppOrtu() {
   const [rows] = createResource(() => api<InvoiceRow[]>("/invoices").catch(() => [] as InvoiceRow[]));
+  const [info] = createResource(() => api<FeePublicInfo>("/fees/public-info").catch(() => null));
   const aktif = createMemo(() => (rows() ?? []).filter((r) => r.status !== "dibatalkan"));
   const perAnak = createMemo(() => {
     const m = new Map<string, { nama: string; ku: string | null; list: InvoiceRow[] }>();
@@ -35,6 +36,12 @@ export default function SppOrtu() {
           </div>
         </section>
         <p class="petunjuk">Pembayaran dilakukan langsung ke SSB. Status berubah setelah admin SSB mencatat pembayaran Anda.</p>
+        <Show when={info()?.bankInfo}>
+          <div class="info">
+            <strong>Cara pembayaran</strong>
+            <p>{info()!.bankInfo}</p>
+          </div>
+        </Show>
         <For each={perAnak()}>
           {([id, g]) => (
             <section class="master" aria-label={`SPP ${g.nama}`}>
