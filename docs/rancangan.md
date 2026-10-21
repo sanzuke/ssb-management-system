@@ -63,7 +63,7 @@ MVP mencakup semua yang dibutuhkan untuk satu siklus pengembangan pemain: data p
 
 - Tagihan SPP, pembayaran online, gaji pelatih dan kasbon, aplikasi mobile native (fase 2)
 - Event dan pertandingan, termasuk statistik pertandingan (fase 2)
-- Pembukuan, neraca, laba rugi, website akademi, multi-cabang (fase 3)
+- Pembukuan, neraca, laba rugi, portal profil publik akademi, multi-cabang (fase 3)
 - AI dan Computer Vision (fase 4)
 
 ## Modul MVP
@@ -141,11 +141,11 @@ Semua entitas berada di bawah satu SSB (tenant), dan assessment dihubungkan ke p
 
 Paket mengikuti fase pengembangan: tiap fase membuka satu lapisan fitur, dan harga belum ditetapkan.
 
-| Paket (usulan) | Fase | Isi |
+| Paket (ususan) | Fase | Isi |
 | --- | --- | --- |
 | Dasar | 1 | Pemain, pelatih, absensi, assessment, rapor, portal orang tua, kartu pemain |
 | Operasional | 2 | Semua isi Dasar, ditambah SPP, pembayaran online, pengingat WhatsApp, event, gaji pelatih |
-| Akademi | 3 | Semua isi Operasional, ditambah pembukuan, website akademi, multi-cabang, staff dan otoritas, analitik lanjutan |
+| Akademi | 3 | Semua isi Operasional, ditambah pembukuan, portal profil publik, multi-cabang, staff dan otoritas, analitik lanjutan |
 
 Sebagai pembanding, [Inscout.id](https://inscout.id/) menjual paket Pro Rp199.000 dan Elite Rp450.000 per bulan, harga tetap per akademi tanpa batas jumlah pemain. Paket Free mereka sudah ditutup karena kuotanya habis (dicek 15 Oktober 2026).
 
@@ -157,23 +157,24 @@ Usulan untuk kita, belum diputuskan:
 
 ## Roadmap
 
-Roadmap dibagi empat fase: MVP berfokus pada pengembangan pemain, dan AI serta Computer Vision berada di fase terakhir sebagai rencana ke depan. Aplikasi mobile native hadir di fase 2; di fase 1 pengguna memakai web yang nyaman di layar HP.
+Roadmap dibagi empat fase: MVP berfokus pada pengembangan pemain, dan AI serta Computer Vision berada di fase terakhir sebagai rencana ke depan. Jalur mobile berkembang bertahap: PWA yang bisa dipasang di fase 2, lalu aplikasi native ke toko aplikasi bila perlu. Rinciannya ada di `docs/mobile.md`.
 
 | Fase | Fokus | Isi | Jalur mobile |
 | --- | --- | --- | --- |
 | 1 (MVP) | Pengembangan pemain | Akun, role, tenant; pemain dan pelatih; jadwal dan absensi; assessment dan rapor; portal orang tua; kartu pemain QR | Web mobile-first, belum aplikasi native |
-| 2 | Administrasi dasar | Tagihan SPP; pembayaran QRIS/VA; pengingat WhatsApp; event dan pertandingan; gaji pelatih dan kasbon | Aplikasi pelatih, aplikasi orang tua, notifikasi push |
-| 3 | Bisnis dan keuangan | Pembukuan dan laporan; website akademi; multi-cabang; staff dan otoritas; analitik lanjutan | Mode offline, dashboard admin di HP |
+| 2 | Administrasi dasar | Tagihan SPP; pembayaran QRIS/VA; pengingat WhatsApp; event dan pertandingan; gaji pelatih dan kasbon; PWA yang bisa dipasang di layar HP; notifikasi push | PWA terpasang, notifikasi push; aplikasi native menyusul |
+| 3 | Bisnis dan keuangan | Pembukuan dan laporan; portal profil publik akademi; multi-cabang; staff dan otoritas; analitik lanjutan | Mode offline, dashboard admin di HP, aplikasi native di toko |
 | 4 | AI dan Computer Vision | Ringkasan rapor oleh AI; visual pemain (CV); butuh dataset video | Unggah video latihan, ringkasan AI di HP |
 
 Urutan fase tidak berskala waktu. Tanggal dan kriteria lanjut antar fase belum ditetapkan.
 
 ## Fitur aplikasi mobile
 
-Aplikasi mobile paling berguna bagi pelatih di lapangan dan orang tua yang ingin kabar cepat, jadi fiturnya dikelompokkan per pengguna dan per fase.
+Aplikasi mobile paling berguna bagi pelatih di lapangan dan orang tua yang ingin kabar cepat, jadi fiturnya dikelompokkan per pengguna dan per fase. Rancangan lengkap, termasuk cara membangunnya, ada di `docs/mobile.md`.
 
 | Fitur | Untuk | Fase (usulan) |
 | --- | --- | --- |
+| PWA yang bisa dipasang di layar HP (manifest, service worker, ikon) | Pelatih dan orang tua | 2 |
 | Absensi sekali ketuk: daftar pemain KU hari ini, tandai hadir, izin, sakit, atau alpa | Pelatih | 2 |
 | Scan QR kartu pemain untuk absensi | Pelatih | 2 |
 | Input assessment dengan tampilan sentuh, skor per indikator dalam beberapa ketukan | Pelatih | 2 |
@@ -184,6 +185,7 @@ Aplikasi mobile paling berguna bagi pelatih di lapangan dan orang tua yang ingin
 | Ajukan izin tidak hadir untuk anak | Orang tua | 2 |
 | Kartu pemain digital dengan QR (sudah ada di web fase 1) | Orang tua | 2 |
 | Bayar SPP lewat QRIS atau VA, mengikuti modul SPP | Orang tua | 2 |
+| Aplikasi native di Play Store dan App Store (Capacitor) | Pelatih dan orang tua | 3 |
 | Mode offline: absensi dan assessment tersimpan saat sinyal lemah, lalu sinkron | Pelatih | 3 |
 | Dashboard ringkas: kehadiran, tagihan menunggak, pengumuman | Admin dan Korlas | 3 |
 | Pengumuman ke seluruh KU | Admin | 3 |
@@ -192,7 +194,21 @@ Aplikasi mobile paling berguna bagi pelatih di lapangan dan orang tua yang ingin
 
 Ide lain yang bisa dipertimbangkan setelah fase di atas berjalan: pencatatan skor pertandingan langsung dari HP, galeri highlight pemain, dan chat singkat antara pelatih dan orang tua. Ketiganya belum dijadwalkan.
 
-Pilihan bentuk aplikasinya, Capacitor atau Flutter, ada di bagian Tech stack.
+Pilihan bentuk aplikasinya, PWA dulu atau langsung native, ada di `docs/mobile.md` dan bagian Tech stack.
+
+## Portal profil publik akademi
+
+Aplikasi menjawab pertanyaan orang tua tentang anaknya. Portal profil menjawab pertanyaan calon orang tua tentang akademi: apakah akademi ini ada, programnya apa, dan cara mendaftarnya. Dua hal berbeda, dan yang kedua belum ada.
+
+Rancangan lengkap ada di `docs/profil.md`. Bentuk dasarnya:
+
+- Satu halaman publik per SSB di alamat `/s/<slug>`, mobile-first, dengan identitas, lokasi, kontak, program, tim, galeri, dan langkah pendaftaran.
+- Admin SSB mengisi profil lewat tab **Profil**, mengunggah logo, sampul, dan galeri, lalu menekan terbitkan. Yang belum terbit tidak tampil dan tidak ter-index.
+- Data pemain tidak pernah tampil publik: nama, foto, absensi, nilai, rapor, dan tagihan dikecualikan. Nama pelatih hanya tampil setelah anggota yang bersangkutan menyetujui.
+- Program, tim, dan fasilitas diturunkan dari data yang sudah ada (KU, sesi latihan, anggota, lokasi), bukan disalin.
+- Bentuk akhir bisa memakai domain sendiri per SSB, misalnya `familyunitedfa.com`, lewat tabel pemetaan domain ke SSB. Fase pertama memakai sub-path supaya tidak menambah beban operasional per akademi.
+
+Portal ini masuk fase 3, bersama pembukuan dan multi-cabang.
 
 ## Kebutuhan non-fungsional
 
@@ -257,16 +273,17 @@ Halaman uji: absensi 200 pemain, dirender di server, dengan pencarian dan checkb
 
 Batasan: tidak ada browser sehingga hydration dan LCP tidak terukur; halaman sintetis tanpa database; SolidStart 2 masih beta. Pertimbangan di luar angka: ekosistem dan ketersediaan developer Next.js jauh lebih besar. **Keputusan: SolidStart.** Risikonya, v2 masih beta dan komunitasnya lebih kecil; versi dikunci di lockfile dan upgrade dilakukan terencana.
 
-### Aplikasi mobile: dua opsi
+### Aplikasi mobile: PWA dulu, native menyusul
 
-Keputusan ini sengaja belum dikunci karena baru dibutuhkan di fase 2, dan tergantung seberapa penting mode offline di fase 3.
+Keputusan ini sengaja belum dikunci untuk bentuk native, karena baru dibutuhkan di fase 2, dan tergantung seberapa penting mode offline di fase 3. Rinciannya ada di `docs/mobile.md`.
 
 | Opsi | Kelebihan | Kekurangan |
 | --- | --- | --- |
-| Capacitor (membungkus PWA SolidJS) | Kode web dipakai ulang, paling cepat sampai ke toko aplikasi | Mode offline dan rasa native kurang kuat |
+| PWA (manifest dan service worker di atas SolidStart yang sekarang) | Tidak perlu toko aplikasi, bisa dipakai hari ini, satu basis kode | Push di iOS baru bekerja setelah dipasang ke layar utama; tidak ada offline penuh |
+| Capacitor (membungkus PWA SolidJS) | Kode web dipakai ulang, paling cepat sampai ke toko aplikasi | Mode offline dan rasa native kurang kuat; menambah lapisan build Android dan iOS |
 | Flutter | Pengalaman native lebih baik, sinkronisasi offline lebih kokoh | Dua basis kode: web dan mobile |
 
-Bila fase 3 (offline penuh) benar-benar dikejar, Flutter lebih aman. Bila kecepatan menuju toko aplikasi lebih penting, Capacitor.
+Usulan urutan: PWA di fase 2 awal untuk menutup pemasangan ke layar HP dan notifikasi push, lalu Capacitor untuk versi toko aplikasi di fase 3, dan Flutter hanya kalau mode offline terbukti dibutuhkan. Bila fase 3 (offline penuh) benar-benar dikejar, Flutter lebih aman. Bila kecepatan menuju toko aplikasi lebih penting, Capacitor.
 
 ### Prinsip arsitektur
 
@@ -285,6 +302,8 @@ Risiko terbesar MVP ada di sisi pengguna, bukan teknis: indikator yang tidak dip
 | Pelatih enggan mengisi data di lapangan | Buat alur pendek yang nyaman di HP; uji langsung saat latihan |
 | Orang tua jarang membuka rapor | Rapor ringkas dan mudah dibaca; pengingat WhatsApp di fase 2 |
 | Kebocoran atau penyalahgunaan data anak | Akses per role, jejak perubahan, dan peninjauan aspek hukum |
+| Profil publik membocorkan data pemain atau anak | Hanya data yang ditandai terbit yang tampil; nama pemain dikecualikan seluruhnya |
+| Notifikasi push tidak sampai ke orang tua | PWA punya batas di iOS; aplikasi native ke toko aplikasi menutupnya |
 
 Pertanyaan yang perlu dijawab sebelum membangun:
 
@@ -294,4 +313,9 @@ Pertanyaan yang perlu dijawab sebelum membangun:
 - [ ] SSB percontohan untuk menguji MVP
 - [ ] Kriteria untuk lanjut dari satu fase ke fase berikutnya
 - [ ] Harga dan struktur paket
-- [ ] Bentuk aplikasi mobile: Capacitor atau Flutter
+- [ ] Bentuk aplikasi mobile: PWA dulu atau langsung native, dan kalau native, Capacitor atau Flutter
+- [ ] Bentuk portal profil: sub-path aplikasi, subdomain, atau domain sendiri per SSB
+- [ ] Apakah nama pelatih ditampilkan di profil publik, dan bagaimana persetujuannya
+- [ ] Apakah tarif SPP ditampilkan di profil publik
+- [ ] Apakah orang tua boleh absen sendiri lewat QR
+- [ ] Kapan mode offline dianggap wajib, bukan bonus

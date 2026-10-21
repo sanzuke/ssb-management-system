@@ -122,3 +122,52 @@ Detail di `docs/spp.md`. Dikerjakan lebih awal dari rencana karena SSB percontoh
 - [x] Ubah nominal tagihan yang sudah dibuat; tagihan yang dibatalkan bisa dibuat ulang; test
 - [x] Pengiriman WhatsApp lewat Fonnte: token API disimpan terenkripsi di server, periksa token dan profil perangkat, pesan uji, dan tombol kirim otomatis per tagihan; test (`docs/fonnte.md`)
 - [ ] Pengiriman WhatsApp terjadwal harian tanpa admin menekan tombol
+
+## K. Portal profil publik akademi
+
+Detail di `docs/profil.md`. Fase 3. Bertujuan menjawab pertanyaan calon orang tua: akademi ini ada, program apa yang tersedia, dan cara mendaftar.
+
+- [ ] Putuskan bentuk portal profil: sub-path aplikasi, subdomain, atau domain sendiri per SSB **(butuh keputusan)**
+- [ ] Tabel profil SSB: tagline, deskripsi, alamat, kontak, logo, sampul, penanda terbit; RLS dan test
+- [ ] Tabel galeri SSB: foto, keterangan, urutan, penanda terbit; RLS dan test
+- [ ] Endpoint publik profil tanpa sesi: isi profil, program, tim, lokasi; 404 bila belum terbit
+- [ ] Endpoint admin profil: baca dan ubah, unggah logo, sampul, dan galeri; batas ukuran dan tipe berkas sama seperti foto pemain
+- [ ] Halaman publik `/s/<slug>`: identitas, lokasi, kontak, program, tim, galeri, langkah pendaftaran; mobile-first
+- [ ] Data pemain tidak pernah tampil di halaman publik: nama, foto, absensi, nilai, rapor, dan tagihan dikecualikan; test
+- [ ] Nama pelatih hanya tampil setelah anggota menyetujui; kolom persetujuan untuk anggota
+- [ ] Tab Profil di admin SSB: editor, unggah logo dan sampul, pratinjau, tombol terbitkan
+- [ ] Tab Galeri di admin SSB: unggah, urutkan, tandai foto yang terbit
+- [ ] Peta pemetaan domain sendiri ke SSB, dengan verifikasi kepemilikan domain
+- [ ] Aturan penanda terbit berlaku juga pada hasil mesin pencari: profil belum terbit tidak ter-index
+- [ ] Indikator untuk orang tua: berapa persen pengunjung profil yang jadi daftar akun **(butuh keputusan)**
+
+## L. PWA dan aplikasi mobile
+
+Detail di `docs/mobile.md`. Fase 2 untuk PWA dan push, fase 3 untuk aplikasi native.
+
+- [ ] PWA: manifest, service worker, ikon, mode standalone, tombol pasang; terpasang di layar HP
+- [ ] PWA: cache aset aplikasi supaya halaman terbuka tanpa sinyal; data tetap dari server
+- [ ] Notifikasi push: tabel langganan perangkat, endpoint FCM, dan layar pengaturan notifikasi per pengguna
+- [ ] Notifikasi push untuk orang tua: jadwal berubah, rapor terbit, tagihan baru, tagihan mendekati jatuh tempo
+- [ ] Notifikasi push untuk pelatih: sesi hari ini, absensi belum terisi
+- [ ] Shortcut aplikasi: absensi hari ini, jadwal hari ini, rapor terbaru
+- [ ] Formulir izin tidak hadir dari orang tua, masuk ke daftar tugas admin
+- [ ] Widget layar utama: sesi berikutnya untuk pelatih, rapor terbaru untuk orang tua
+- [ ] Aplikasi native dengan Capacitor: build Android dan iOS, penandatanganan, dan listing toko
+- [ ] Mode offline: antrean perubahan di perangkat, sinkron per entitas, status terlihat oleh pengguna
+- [ ] Aturan konflik offline: overwrite per entitas, jejak perubahan di server tetap utuh
+- [ ] Uji aplikasi di perangkat nyata: iPhone dan Android kelas bawah, bukan hanya emulator **(butuh keputusan)**
+- [ ] Putuskan bentuk native: Capacitor atau Flutter, dan apakah mode offline wajib **(butuh keputusan)**
+
+## M. Email domain akademi
+
+Detail di `docs/email.md`. Server email milik sendiri di zukelabs (`mail.zukelabs.web.id`) sudah melayani beberapa domain.
+
+- [x] Domain `familyunitedfa.com` terdaftar di mail stack: domain, 3 mailbox, dan kunci DKIM selektor `family`; email uji keluar dengan tanda tangan DKIM yang benar
+- [ ] Record DNS `familyunitedfa.com`: A untuk `mail`, MX, SPF, DKIM, dan DMARC (domain belum aktif di DNS, dicek 21 Oktober 2026)
+- [ ] Arahkan domain `familyunitedfa.com` ke server zukelabs untuk portal profil, termasuk sertifikat TLS
+- [x] `SMTP_URL` dan `MAIL_FROM` untuk SSB App di server zukelabs; email uji terkirim, tautan lupa kata sandi berjalan
+- [ ] Atur SPF `zukelabs.web.id` agar menyertakan IP server (sekarang masih `include:spf.kirim.email ~all`)
+- [ ] Pengaturan SMTP per SSB, supaya tiap akademi bisa mengirim dari domainnya sendiri
+- [ ] Email keluar diuji ke Gmail, Outlook, dan Yahoo (cek folder spam) setelah DNS aktif
+- [ ] Akses mailbox lewat IMAP diuji di satu aplikasi email, untuk memastikan membaca email juga benar

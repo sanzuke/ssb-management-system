@@ -2,7 +2,7 @@
 
 Aplikasi manajemen dan pengembangan pemain untuk Sekolah Sepak Bola (SSB) dan akademi usia dini. MVP berfokus pada pengembangan pemain: data pemain, absensi, assessment, rapor, dan portal orang tua.
 
-Status saat ini: rancangan selesai, kerangka monorepo sudah berjalan. Fitur MVP belum dibangun.
+Status saat ini: MVP, modul SPP, dan integrasi WhatsApp sudah dibangun. Lihat `docs/checklist.md` untuk daftar kerja yang tersisa.
 
 ## Struktur repositori
 
@@ -14,6 +14,21 @@ packages/shared/    Skema Zod dan tipe yang dipakai bersama
 packages/db/        Skema Drizzle, migrasi, dan RLS (lihat docs/database.md)
 tools/bench/        Skrip benchmark untuk keputusan tech stack
 ```
+
+Dokumen rancangan:
+
+| Berkas | Isi |
+|---|---|
+| `docs/rancangan.md` | Visi, scope, modul, model data, paket, roadmap, tech stack |
+| `docs/checklist.md` | Daftar kerja terukur per bagian, dengan kriteria selesai |
+| `docs/profil.md` | Portal profil publik akademi (fase 3) |
+| `docs/mobile.md` | PWA dan aplikasi native untuk pelatih dan orang tua (fase 2-3) |
+| `docs/email.md` | Email domain akademi di server zukelabs, termasuk daftar record DNS |
+| `docs/spp.md` | Modul tagihan SPP dan pembayaran manual |
+| `docs/fonnte.md` | Pengiriman WhatsApp lewat Fonnte |
+| `docs/izin.md` | Matriks izin, dibuat otomatis dari kode |
+| `docs/database.md` | Skema database, RLS, dan migrasi |
+| `docs/auth.md` | Autentikasi, sesi, Google OIDC, dan reset kata sandi |
 
 ## Instalasi
 
@@ -163,6 +178,24 @@ Contoh untuk satu server Linux (Bun, Node.js 24, dan PostgreSQL terpasang). Semu
 Login Google bersifat opsional; cara menyiapkannya ada di `docs/auth.md` (redirect URI: `https://<domain-web>/api/auth/google/callback`).
 
 Pembaruan berikutnya: `git pull`, `bun install --frozen-lockfile`, `bun run db:migrate`, `bun run build`, lalu mulai ulang kedua proses.
+
+### Server yang dipakai
+
+Deploy SSB App berjalan di satu VPS zukelabs: `ubuntu@43.156.92.240` (hostname `mail.zukelabs.web.id`), aplikasi di `/opt/ssb-management-system`, domain publik `https://ssb-ms.zukelabs.web.id`. Nginx meneruskan ke web di port 3111, dan API berjalan di port 3110 sebagai dua service systemd (`ssb-api.service` dan `ssb-web.service`), keduanya membaca `/opt/ssb-management-system/.env`.
+
+Host itu juga menjalankan aplikasi lain, jadi jangan mengubah apa pun di luar `/opt/ssb-management-system` dan dua service itu. Email untuk domain akademi dilayani dari host yang sama; detailnya ada di `docs/email.md`.
+
+Langkah pembaruan di server:
+
+```
+cd /opt/ssb-management-system
+git pull --ff-only origin main
+bun install --frozen-lockfile
+set -a; source .env; set +a
+bun run db:migrate
+bun run build
+sudo systemctl restart ssb-api.service ssb-web.service
+```
 
 ### Rapor PDF
 
