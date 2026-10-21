@@ -83,6 +83,16 @@ Record lain yang perlu untuk domain akademi (bukan email, tapi untuk portal prof
 
 MX tidak boleh di-proxy (abu-abu di Cloudflare), dan hostname `mail.zukelabs.web.id` juga tidak boleh di-proxy karena MX mengarah ke sana.
 
+Vhost Nginx untuk `familyunitedfa.com` dan `www.familyunitedfa.com` sudah dibuat di server zukelabs (`/etc/nginx/sites-available/familyunitedfa.com.conf`, sudah di-*enable*), dan meneruskan ke web di port 3111 seperti vhost `ssb-ms.zukelabs.web.id`. Vhost itu masih HTTP saja, karena Let's Encrypt belum bisa menerbitkan sertifikat untuk domain yang belum mengarah ke server.
+
+Setelah DNS terpasang, terbitkan sertifikatnya:
+
+```
+sudo certbot --nginx -d familyunitedfa.com -d www.familyunitedfa.com
+```
+
+Lalu tambahkan domain akademi ke `ALLOWED_ORIGINS` di `.env` bila portal profilnya memakai origin sendiri, dan restart `ssb-api.service`.
+
 ### Verifikasi
 
 Setelah DNS dipasang:

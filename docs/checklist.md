@@ -165,7 +165,9 @@ Detail di `docs/email.md`. Server email milik sendiri di zukelabs (`mail.zukelab
 
 - [x] Domain `familyunitedfa.com` terdaftar di mail stack: domain, 3 mailbox, dan kunci DKIM selektor `family`; email uji keluar dengan tanda tangan DKIM yang benar
 - [ ] Record DNS `familyunitedfa.com`: A untuk `mail`, MX, SPF, DKIM, dan DMARC (domain belum aktif di DNS, dicek 21 Oktober 2026)
-- [ ] Arahkan domain `familyunitedfa.com` ke server zukelabs untuk portal profil, termasuk sertifikat TLS
+- [x] Vhost Nginx untuk `familyunitedfa.com` dan `www.familyunitedfa.com` di server zukelabs, meneruskan ke web port 3111
+- [ ] Terbitkan sertifikat Let's Encrypt untuk `familyunitedfa.com` setelah DNS terpasang (`certbot --nginx`)
+- [ ] Tambahkan domain akademi ke `ALLOWED_ORIGINS` di `.env` server bila portal profil memakai origin sendiri
 - [x] `SMTP_URL` dan `MAIL_FROM` untuk SSB App di server zukelabs; email uji terkirim, tautan lupa kata sandi berjalan
 - [ ] Atur SPF `zukelabs.web.id` agar menyertakan IP server (sekarang masih `include:spf.kirim.email ~all`)
 - [ ] Pengaturan SMTP per SSB, supaya tiap akademi bisa mengirim dari domainnya sendiri
