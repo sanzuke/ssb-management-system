@@ -4,6 +4,8 @@ import { createMemo, createSignal, For, onMount, Show } from "solid-js";
 import Field from "~/components/Field";
 import KepalaHalaman from "~/components/KepalaHalaman";
 import SelectField from "~/components/SelectField";
+import Memuat from "~/components/Memuat";
+import Kerangka from "~/components/Kerangka";
 import { api, ApiError, getMe, roleLabel, type Me } from "~/lib/api";
 import { inisial, tanggal } from "~/lib/pemain";
 import { linkWa } from "~/lib/wa";
@@ -119,7 +121,7 @@ export default function Anggota() {
       .join(" • ");
 
   return (
-    <Show when={me()} fallback={<p class="halaman">Memuat…</p>}>
+    <Show when={me()} fallback={<Memuat halaman />}>
       <Title>Anggota · SSB App</Title>
       <main class="halaman lebar">
         <KepalaHalaman
@@ -189,7 +191,7 @@ export default function Anggota() {
           </div>
           <Field id="cari-anggota" label="Cari nama atau email" type="search" autocomplete="off" value={cari()} onInput={setCari} />
 
-          <Show when={rows()} fallback={<p>Memuat…</p>}>
+          <Show when={rows()} fallback={<Kerangka />}>
             <Show when={tampil().length > 0} fallback={<p class="kosong">Tidak ada anggota yang cocok.</p>}>
               <ul class="anggota-daftar">
                 <For each={tampil()}>

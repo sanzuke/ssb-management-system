@@ -2621,3 +2621,128 @@ button.pengguna[aria-expanded="true"] .panah-menu {
     font-size: 0.95rem;
   }
 }
+
+/* ---- Memuat: bola memantul (halaman) dan kerangka (bagian halaman) ---- */
+.memuat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 40px 16px;
+  color: var(--redup);
+}
+.memuat.halaman {
+  min-height: 50vh;
+  justify-content: center;
+}
+.memuat-panggung {
+  position: relative;
+  width: 64px;
+  height: 88px;
+}
+.memuat-lompat {
+  position: absolute;
+  left: 8px;
+  bottom: 12px;
+  width: 48px;
+  height: 48px;
+  transform-origin: 50% 100%;
+  animation: bola-pantul 0.9s cubic-bezier(0.3, 0, 0.7, 1) infinite;
+}
+.memuat-bola {
+  display: block;
+  animation: bola-putar 0.9s linear infinite;
+}
+.memuat-bayangan {
+  position: absolute;
+  left: 14px;
+  bottom: 4px;
+  width: 36px;
+  height: 8px;
+  border-radius: 50%;
+  background: rgba(20, 32, 26, 0.25);
+  animation: bola-bayangan 0.9s cubic-bezier(0.3, 0, 0.7, 1) infinite;
+}
+.memuat-teks {
+  margin: 0;
+  font-size: 0.9rem;
+}
+@keyframes bola-pantul {
+  0%,
+  100% {
+    transform: translateY(0) scale(1.12, 0.88);
+  }
+  15% {
+    transform: translateY(-6px) scale(1, 1);
+  }
+  50% {
+    transform: translateY(-44px) scale(1, 1);
+  }
+  85% {
+    transform: translateY(-6px) scale(1, 1);
+  }
+}
+@keyframes bola-putar {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@keyframes bola-bayangan {
+  0%,
+  100% {
+    transform: scale(1.1);
+    opacity: 0.35;
+  }
+  50% {
+    transform: scale(0.5);
+    opacity: 0.12;
+  }
+}
+
+.kerangka {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 4px 0;
+}
+.kerangka-baris,
+.kerangka-kartu {
+  display: block;
+  border-radius: 6px;
+  background: linear-gradient(90deg, #e4e9df 25%, #f1f4ec 45%, #e4e9df 65%);
+  background-size: 300% 100%;
+  animation: kerangka-kilau 1.4s ease-in-out infinite;
+}
+.kerangka-baris {
+  height: 14px;
+}
+.kerangka-kartu {
+  height: 96px;
+  border-radius: 10px;
+}
+.kerangka-inline {
+  display: inline-flex;
+  padding: 0;
+  vertical-align: middle;
+}
+.kerangka-inline .kerangka-baris {
+  width: 7rem;
+  height: 12px;
+}
+@keyframes kerangka-kilau {
+  from {
+    background-position: 100% 0;
+  }
+  to {
+    background-position: 0 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .memuat-lompat,
+  .memuat-bola,
+  .memuat-bayangan,
+  .kerangka-baris,
+  .kerangka-kartu {
+    animation: none;
+  }
+}

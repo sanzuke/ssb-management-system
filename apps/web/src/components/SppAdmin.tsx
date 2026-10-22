@@ -6,6 +6,7 @@ import type { FeeRate, FeeSettings, FeeSummary, GenerateInvoicesResult, InvoiceR
 import Field from "./Field";
 import SelectField from "./SelectField";
 import SppTarifKhusus from "./SppTarifKhusus";
+import Kerangka from "~/components/Kerangka";
 
 type Saring = "semua" | "belum" | "terlambat" | "lunas";
 const metodeLabel: Record<PaymentMethod, string> = { tunai: "Tunai", transfer: "Transfer", lainnya: "Lainnya" };
@@ -212,7 +213,7 @@ export default function SppAdmin() {
             )}
           </For>
         </div>
-        <Show when={rows()} fallback={<p>Memuat…</p>}>
+        <Show when={rows()} fallback={<Kerangka />}>
           <Show
             when={tampil().length > 0}
             fallback={
@@ -359,7 +360,7 @@ export default function SppAdmin() {
 
       <details class="master spp-tarif" open={(rates() ?? []).every((r) => r.monthlyFee === null)}>
         <summary>Tarif SPP per KU</summary>
-        <Show when={rates()} fallback={<p>Memuat…</p>}>
+        <Show when={rates()} fallback={<Kerangka />}>
           <Show when={(rates() ?? []).length > 0} fallback={<p class="kosong">Belum ada KU. Buat KU di Data master dulu.</p>}>
             <p class="petunjuk">Rupiah per bulan. Kosongkan bila KU itu tidak ditagih. Perubahan tarif hanya berlaku untuk tagihan yang dibuat sesudahnya.</p>
             <form

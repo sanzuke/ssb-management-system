@@ -2,6 +2,8 @@ import { A, useNavigate, useParams } from "@solidjs/router";
 import { Title } from "@solidjs/meta";
 import { createMemo, createSignal, For, onMount, Show } from "solid-js";
 import Ikon from "~/components/Ikon";
+import Memuat from "~/components/Memuat";
+import Kerangka from "~/components/Kerangka";
 import { api, ApiError, getMe, type Me } from "~/lib/api";
 import { createSubmit } from "~/lib/form";
 import { inisial } from "~/lib/pemain";
@@ -77,7 +79,7 @@ export default function Absensi() {
   });
 
   return (
-    <Show when={me()} fallback={<p class="halaman">Memuat…</p>}>
+    <Show when={me()} fallback={<Memuat halaman />}>
       <main class="halaman absensi">
         <Show
           when={!missing()}
@@ -92,7 +94,7 @@ export default function Absensi() {
             </>
           }
         >
-          <Show when={roster()} fallback={<p>Memuat…</p>}>
+          <Show when={roster()} fallback={<Kerangka />}>
             <Title>Absensi {roster()!.session.ageGroup.name} · SSB App</Title>
             <p class="ortu-chip-baris">
               <span class="ortu-chip hijau">Sesi lapangan</span>

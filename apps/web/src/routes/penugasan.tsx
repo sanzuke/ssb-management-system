@@ -3,6 +3,7 @@ import { Title } from "@solidjs/meta";
 import KepalaHalaman from "~/components/KepalaHalaman";
 import { createSignal, For, onMount, Show } from "solid-js";
 import SelectField from "~/components/SelectField";
+import Memuat from "~/components/Memuat";
 import { api, ApiError, getMe, roleLabel, type Me } from "~/lib/api";
 import { createSubmit } from "~/lib/form";
 import type { AgeGroup, Assignment, Period } from "@ssb/shared";
@@ -55,7 +56,7 @@ export default function Penugasan() {
   const ready = () => coaches().length > 0 && groups().length > 0 && periods().length > 0;
 
   return (
-    <Show when={me()} fallback={<p class="halaman">Memuat…</p>}>
+    <Show when={me()} fallback={<Memuat halaman />}>
       <Title>Penugasan · SSB App</Title>
       <main class="halaman">
         <KepalaHalaman

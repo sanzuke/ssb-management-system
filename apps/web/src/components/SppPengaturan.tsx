@@ -3,6 +3,7 @@ import { api, ApiError } from "~/lib/api";
 import { TEMPLAT_PENGINGAT_AWAL, type FeeSettings } from "@ssb/shared";
 import Field from "./Field";
 import SelectField from "./SelectField";
+import Kerangka from "~/components/Kerangka";
 
 /**
  * Pengaturan SPP milik SSB: tanggal jatuh tempo bawaan, templat pesan pengingat,
@@ -71,7 +72,7 @@ export default function SppPengaturan() {
           {pesan()}
         </div>
       </Show>
-      <Show when={pengaturan()} fallback={<p>Memuat…</p>}>
+      <Show when={pengaturan()} fallback={<Kerangka />}>
         {(p) => {
           isi(p());
           return (

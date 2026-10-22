@@ -3,6 +3,7 @@ import { api } from "~/lib/api";
 import { tanggal } from "~/lib/pemain";
 import { namaBulan, rupiah } from "~/lib/waktu";
 import type { FeePublicInfo, InvoiceRow, PaymentMethod } from "@ssb/shared";
+import Kerangka from "~/components/Kerangka";
 
 const metodeLabel: Record<PaymentMethod, string> = { tunai: "Tunai", transfer: "Transfer", lainnya: "Lainnya" };
 
@@ -24,7 +25,7 @@ export default function SppOrtu() {
   const menunggak = createMemo(() => aktif().filter((r) => r.overdue).length);
 
   return (
-    <Show when={rows()} fallback={<p>Memuat…</p>}>
+    <Show when={rows()} fallback={<Kerangka />}>
       <Show when={aktif().length > 0} fallback={<p class="kosong">Belum ada tagihan SPP untuk anak Anda.</p>}>
         <section class="statistik uang" aria-label="Ringkasan SPP">
           <div class="ubin" classList={{ perhatian: menunggak() > 0 }}>

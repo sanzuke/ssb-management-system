@@ -5,6 +5,7 @@ import Ikon from "~/components/Ikon";
 import KepalaHalaman from "~/components/KepalaHalaman";
 import { api, getMe, type Me } from "~/lib/api";
 import FotoPemain from "~/components/FotoPemain";
+import Memuat from "~/components/Memuat";
 import { linkWa } from "~/lib/wa";
 import { posisiLabel, statusLabel, usia, tanggal, type AgeGroup, type PlayerSummary } from "~/lib/pemain";
 import type { AttendanceSummary, PlayerOverview } from "@ssb/shared";
@@ -117,7 +118,7 @@ export default function DaftarPemain() {
           : "Belum ada pemain di KU yang ditugaskan kepada Anda. Hubungi admin SSB untuk penugasan KU.";
 
   return (
-    <Show when={me()} fallback={<p class="halaman">Memuat…</p>}>
+    <Show when={me()} fallback={<Memuat halaman />}>
       <Title>Pemain · SSB App</Title>
       <main class="halaman lebar">
         <Show when={players.error}>

@@ -4,6 +4,8 @@ import KepalaHalaman from "~/components/KepalaHalaman";
 import { createSignal, Index, onMount, Show } from "solid-js";
 import RencanaBaca from "~/components/RencanaBaca";
 import SelectField from "~/components/SelectField";
+import Memuat from "~/components/Memuat";
+import Kerangka from "~/components/Kerangka";
 import { api, ApiError, getMe, type Me } from "~/lib/api";
 import { createSubmit } from "~/lib/form";
 import { assessmentAspects, aspectLabel, type AssessmentAspect } from "@ssb/shared/aspects";
@@ -84,7 +86,7 @@ export default function RencanaPemain() {
   });
 
   return (
-    <Show when={me()} fallback={<p class="halaman">Memuat…</p>}>
+    <Show when={me()} fallback={<Memuat halaman />}>
       <main class="halaman nilai">
         <Show
           when={!missing()}
@@ -99,7 +101,7 @@ export default function RencanaPemain() {
             </>
           }
         >
-          <Show when={pl()} fallback={<p>Memuat…</p>}>
+          <Show when={pl()} fallback={<Kerangka />}>
             <Title>Rencana pengembangan {pl()!.fullName} · SSB App</Title>
             <KepalaHalaman
               chip="Rencana pengembangan"

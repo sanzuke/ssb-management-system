@@ -2,6 +2,7 @@ import { useNavigate } from "@solidjs/router";
 import { Title } from "@solidjs/meta";
 import { createSignal, For, onMount, Show } from "solid-js";
 import AuthShell from "~/components/AuthShell";
+import Kerangka from "~/components/Kerangka";
 import { api, getMe, roleLabel, type Me } from "~/lib/api";
 import { createSubmit } from "~/lib/form";
 
@@ -26,7 +27,7 @@ export default function PilihSsb() {
   return (
     <AuthShell gaya="buku">
       <Title>Pilih SSB · SSB App</Title>
-      <Show when={ready()} fallback={<p>Memuat…</p>}>
+      <Show when={ready()} fallback={<Kerangka />}>
         <h1>Pilih SSB</h1>
         <p>Akun {me()!.email} tergabung di lebih dari satu SSB. Anda bisa menggantinya kapan saja.</p>
         <Show when={form.error()}>

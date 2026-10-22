@@ -6,6 +6,8 @@ import GrafikNilai from "~/components/GrafikNilai";
 import HasilNilai from "~/components/HasilNilai";
 import RencanaBaca from "~/components/RencanaBaca";
 import SelectField from "~/components/SelectField";
+import Memuat from "~/components/Memuat";
+import Kerangka from "~/components/Kerangka";
 import { api, ApiError, getMe, type Me } from "~/lib/api";
 import { createSubmit } from "~/lib/form";
 import { assessmentAspects, aspectLabel } from "@ssb/shared/aspects";
@@ -140,7 +142,7 @@ export default function NilaiPemain() {
   };
 
   return (
-    <Show when={me()} fallback={<p class="halaman">Memuat…</p>}>
+    <Show when={me()} fallback={<Memuat halaman />}>
       <main class="halaman nilai">
         <Show
           when={!missing()}
@@ -155,7 +157,7 @@ export default function NilaiPemain() {
             </>
           }
         >
-          <Show when={pl()} fallback={<p>Memuat…</p>}>
+          <Show when={pl()} fallback={<Kerangka />}>
             <Title>Penilaian {pl()!.fullName} · SSB App</Title>
             <KepalaHalaman
               chip="Penilaian"
@@ -379,7 +381,7 @@ export default function NilaiPemain() {
                 <Show when={current() && !parent()}>
                   <details class="riwayat-nilai" onToggle={loadHistory}>
                     <summary>Riwayat perubahan skor</summary>
-                    <Show when={history()} fallback={<p>Memuat…</p>}>
+                    <Show when={history()} fallback={<Kerangka />}>
                       <Show when={history()!.length > 0} fallback={<p class="kosong">Belum ada perubahan.</p>}>
                         <ul class="daftar-butir">
                           <For each={history()!}>

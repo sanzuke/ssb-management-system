@@ -2,6 +2,7 @@ import { A, useNavigate } from "@solidjs/router";
 import { Title } from "@solidjs/meta";
 import { createMemo, createResource, createSignal, For, onMount, Show } from "solid-js";
 import Ikon from "~/components/Ikon";
+import Memuat from "~/components/Memuat";
 import { api, getMe, type Me } from "~/lib/api";
 import { inisial } from "~/lib/pemain";
 import { hariIni } from "~/lib/waktu";
@@ -97,7 +98,7 @@ export default function Kehadiran() {
   };
 
   return (
-    <Show when={me()} fallback={<p class="halaman">Memuat…</p>}>
+    <Show when={me()} fallback={<Memuat halaman />}>
       <Title>Kehadiran · SSB App</Title>
       <main class="halaman lebar">
         <header class="kepala-dashboard">

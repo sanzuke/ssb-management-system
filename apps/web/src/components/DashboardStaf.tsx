@@ -5,6 +5,7 @@ import { inisial, type PlayerSummary } from "~/lib/pemain";
 import { hariIni, tambahHari, tanggalSesi } from "~/lib/waktu";
 import type { AttendanceSummary, PlayerOverview, TrainingSession } from "@ssb/shared";
 import Ikon from "./Ikon";
+import Kerangka from "~/components/Kerangka";
 
 const koma = (n: number) => String(n).replace(".", ",");
 /** Pemain dengan kehadiran di bawah ambang ini (dan cukup banyak catatan) ditandai perlu perhatian. */
@@ -84,7 +85,7 @@ export default function DashboardStaf(props: { me: Me }) {
         <div class="ubin">
           <span class="label-ubin">Pemain aktif</span>
           <span class="angka-ubin">{players() ? aktif() : "–"}</span>
-          <span class="petunjuk">{players() ? `${players()!.length} pemain terdaftar` : "Memuat…"}</span>
+          <span class="petunjuk">{players() ? `${players()!.length} pemain terdaftar` : <Kerangka varian="inline" />}</span>
         </div>
         <div class="ubin">
           <span class="label-ubin">Sesi 7 hari ke depan</span>
@@ -123,7 +124,14 @@ export default function DashboardStaf(props: { me: Me }) {
                 Rekap kehadiran
               </A>
             </header>
-            <Show when={sesi()} fallback={<p class="petunjuk panel-isi">Memuat…</p>}>
+            <Show
+              when={sesi()}
+              fallback={
+                <div class="panel-isi">
+                  <Kerangka />
+                </div>
+              }
+            >
               <Show when={perluAbsen().length > 0} fallback={<p class="kosong panel-isi">Semua sesi sampai hari ini sudah terisi absensinya.</p>}>
                 <ul class="daftar-tugas">
                   <For each={perluAbsen()}>
@@ -152,7 +160,14 @@ export default function DashboardStaf(props: { me: Me }) {
               <h2>Kehadiran rendah</h2>
               <span class="petunjuk">di bawah {AMBANG_HADIR}%</span>
             </header>
-            <Show when={sum()} fallback={<p class="petunjuk panel-isi">Memuat…</p>}>
+            <Show
+              when={sum()}
+              fallback={
+                <div class="panel-isi">
+                  <Kerangka />
+                </div>
+              }
+            >
               <Show when={rendah().length > 0} fallback={<p class="kosong panel-isi">Tidak ada pemain dengan kehadiran rendah. Bagus!</p>}>
                 <ul class="daftar-tugas">
                   <For each={rendah()}>
@@ -186,7 +201,14 @@ export default function DashboardStaf(props: { me: Me }) {
                 Semua jadwal
               </A>
             </header>
-            <Show when={sesi()} fallback={<p class="petunjuk panel-isi">Memuat…</p>}>
+            <Show
+              when={sesi()}
+              fallback={
+                <div class="panel-isi">
+                  <Kerangka />
+                </div>
+              }
+            >
               <Show
                 when={mendatang().length > 0}
                 fallback={<p class="kosong panel-isi">Belum ada jadwal latihan ke depan.{admin() ? " Tambahkan di menu Jadwal." : ""}</p>}

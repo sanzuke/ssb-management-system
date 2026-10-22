@@ -3,6 +3,7 @@ import { api, ApiError } from "~/lib/api";
 import { rupiah } from "~/lib/waktu";
 import type { PlayerFeeOverrideRow, PlayerSummary } from "@ssb/shared";
 import Field from "./Field";
+import Kerangka from "~/components/Kerangka";
 
 /**
  * Tarif SPP khusus per pemain (keringatan, saudara kandung, dan sejenisnya).
@@ -116,7 +117,7 @@ export default function SppTarifKhusus() {
           {sibuk() ? "Menyimpan…" : "Simpan tarif khusus"}
         </button>
       </form>
-      <Show when={daftar()} fallback={<p>Memuat…</p>}>
+      <Show when={daftar()} fallback={<Kerangka />}>
         <Show when={(daftar() ?? []).length > 0} fallback={<p class="kosong">Belum ada tarif khusus. Semua pemain memakai tarif KU.</p>}>
           <ul class="spp-daftar">
             <For each={daftar()}>

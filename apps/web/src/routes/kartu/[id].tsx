@@ -5,6 +5,7 @@ import KepalaHalaman from "~/components/KepalaHalaman";
 import QrCode from "~/components/QrCode";
 import { api, ApiError, getMe, type Me } from "~/lib/api";
 import FotoPemain from "~/components/FotoPemain";
+import Memuat from "~/components/Memuat";
 import { posisiLabel, statusLabel, type PlayerDetail } from "~/lib/pemain";
 
 export default function KartuPemain() {
@@ -33,7 +34,7 @@ export default function KartuPemain() {
   const url = () => `${location.origin}/pemain/${p.id}`;
 
   return (
-    <Show when={me()} fallback={<p class="halaman">Memuat…</p>}>
+    <Show when={me()} fallback={<Memuat halaman />}>
       <Title>Kartu pemain · SSB App</Title>
       <main class="halaman">
         <Show when={error()}>

@@ -4,6 +4,7 @@ import KepalaHalaman from "~/components/KepalaHalaman";
 import { createMemo, createSignal, For, onMount, Show } from "solid-js";
 import Field from "~/components/Field";
 import SelectField from "~/components/SelectField";
+import Memuat from "~/components/Memuat";
 import { api, ApiError, getMe, type Me } from "~/lib/api";
 import { createSubmit } from "~/lib/form";
 import { assessmentAspects, aspectLabel, type AssessmentAspect } from "@ssb/shared/aspects";
@@ -82,7 +83,7 @@ export default function Indikator() {
   );
 
   return (
-    <Show when={me()} fallback={<p class="halaman">Memuat…</p>}>
+    <Show when={me()} fallback={<Memuat halaman />}>
       <Title>Indikator penilaian · SSB App</Title>
       <main class="halaman">
         <KepalaHalaman

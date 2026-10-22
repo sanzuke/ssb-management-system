@@ -4,6 +4,7 @@ import { createSignal, onMount, Show } from "solid-js";
 import DashboardAdmin from "~/components/DashboardAdmin";
 import DashboardStaf from "~/components/DashboardStaf";
 import PortalOrangTua from "~/components/PortalOrangTua";
+import Memuat from "~/components/Memuat";
 import { getMe, roleLabel, type Me } from "~/lib/api";
 
 export default function Beranda() {
@@ -21,7 +22,7 @@ export default function Beranda() {
   const staf = () => !!me()?.active && me()!.active!.role !== "orang_tua";
 
   return (
-    <Show when={me()} fallback={<p class="halaman">Memuat…</p>}>
+    <Show when={me()} fallback={<Memuat halaman />}>
       <Title>Beranda · SSB App</Title>
       <main class="halaman" classList={{ lebar: staf() }}>
         <Show

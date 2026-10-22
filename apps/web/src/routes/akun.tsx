@@ -3,6 +3,7 @@ import { Title } from "@solidjs/meta";
 import KepalaHalaman from "~/components/KepalaHalaman";
 import { createMemo, createSignal, For, onMount, Show } from "solid-js";
 import Field from "~/components/Field";
+import Memuat from "~/components/Memuat";
 import { api, getMe, lupaMe, roleLabel, type Me } from "~/lib/api";
 import { createSubmit } from "~/lib/form";
 
@@ -75,7 +76,7 @@ export default function Akun() {
   });
 
   return (
-    <Show when={me()} fallback={<p class="halaman">Memuat…</p>}>
+    <Show when={me()} fallback={<Memuat halaman />}>
       <Title>Akun · SSB App</Title>
       <main class="halaman">
         <KepalaHalaman chip="Akun" judul={me()!.name} sub={me()!.email} />

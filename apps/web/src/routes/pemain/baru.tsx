@@ -3,6 +3,7 @@ import { Title } from "@solidjs/meta";
 import KepalaHalaman from "~/components/KepalaHalaman";
 import { createSignal, onMount, Show } from "solid-js";
 import PlayerForm from "~/components/PlayerForm";
+import Memuat from "~/components/Memuat";
 import { api, getMe, type Me } from "~/lib/api";
 import type { AgeGroup } from "~/lib/pemain";
 
@@ -20,7 +21,7 @@ export default function PemainBaru() {
   });
 
   return (
-    <Show when={me()} fallback={<p class="halaman">Memuat…</p>}>
+    <Show when={me()} fallback={<Memuat halaman />}>
       <Title>Tambah pemain · SSB App</Title>
       <main class="halaman">
         <KepalaHalaman chip="Data pemain" judul="Tambah pemain" sub="Isi biodata pemain. Nomor induk dibuat otomatis." />

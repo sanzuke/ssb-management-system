@@ -2,6 +2,7 @@ import { createResource, createSignal, Show } from "solid-js";
 import { api, ApiError } from "~/lib/api";
 import type { WhatsappSettings } from "@ssb/shared";
 import Field from "./Field";
+import Kerangka from "~/components/Kerangka";
 
 type ProfilFonnte = { device: string; deviceStatus: string; name: string; quota: string; expired: string; package: string };
 
@@ -93,7 +94,7 @@ export default function WhatsappPengaturan() {
           {pesan()}
         </div>
       </Show>
-      <Show when={pengaturan()} fallback={<p>Memuat…</p>}>
+      <Show when={pengaturan()} fallback={<Kerangka />}>
         {(p) => {
           isi(p());
           return (

@@ -3,6 +3,7 @@ import { Title } from "@solidjs/meta";
 import KepalaHalaman from "~/components/KepalaHalaman";
 import { createSignal, onMount, Show } from "solid-js";
 import MasterSection from "~/components/MasterSection";
+import Memuat from "~/components/Memuat";
 import { getMe, type Me } from "~/lib/api";
 
 const tgl = (s: unknown) => new Date(`${s}T00:00:00`).toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" });
@@ -22,7 +23,7 @@ export default function Master() {
   const canRead = () => role() === "admin_ssb" || role() === "pelatih" || role() === "korlas";
 
   return (
-    <Show when={me()} fallback={<p class="halaman">Memuat…</p>}>
+    <Show when={me()} fallback={<Memuat halaman />}>
       <Title>Data master · SSB App</Title>
       <main class="halaman">
         <KepalaHalaman

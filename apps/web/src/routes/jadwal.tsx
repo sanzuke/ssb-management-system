@@ -3,6 +3,7 @@ import { Title } from "@solidjs/meta";
 import { createMemo, createSignal, For, onMount, Show } from "solid-js";
 import Ikon from "~/components/Ikon";
 import SessionForm from "~/components/SessionForm";
+import Memuat from "~/components/Memuat";
 import { api, ApiError, getMe, type Me } from "~/lib/api";
 import { hariIni, tambahHari, tanggalSesi } from "~/lib/waktu";
 import type { AgeGroup, Location, TrainingSession } from "@ssb/shared";
@@ -86,7 +87,7 @@ export default function Jadwal() {
   const diabsen = (a: TrainingSession["attendance"]) => a.hadir + a.izin + a.sakit + a.alpa;
 
   return (
-    <Show when={me()} fallback={<p class="halaman">Memuat…</p>}>
+    <Show when={me()} fallback={<Memuat halaman />}>
       <Title>Jadwal latihan · SSB App</Title>
       <main class="halaman lebar">
         <header class="kepala-dashboard">

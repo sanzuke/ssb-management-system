@@ -6,6 +6,7 @@ import { namaBulan, rupiah } from "~/lib/waktu";
 import { tanggal } from "~/lib/pemain";
 import { isiTemplat, statusTempo, type FeeSettings, type ReminderRow, type WhatsappSettings } from "@ssb/shared";
 import SelectField from "./SelectField";
+import Kerangka from "~/components/Kerangka";
 
 /** Pengingat tagihan SPP: daftar yang menunggak atau segera jatuh tempo, dengan tombol kirim WhatsApp ke wali. */
 export default function SppPengingat(props: { ssbName: string }) {
@@ -90,7 +91,7 @@ export default function SppPengingat(props: { ssbName: string }) {
           {pesan()}
         </div>
       </Show>
-      <Show when={rows()} fallback={<p>Memuat…</p>}>
+      <Show when={rows()} fallback={<Kerangka />}>
         <Show when={(rows() ?? []).length > 0} fallback={<p class="kosong">Tidak ada tagihan yang perlu diingatkan. Semua yang jatuh tempo sudah lunas.</p>}>
           <ul class="spp-daftar">
             <For each={rows()}>

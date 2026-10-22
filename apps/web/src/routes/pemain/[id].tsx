@@ -6,6 +6,8 @@ import KepalaHalaman from "~/components/KepalaHalaman";
 import { createSignal, For, onMount, Show } from "solid-js";
 import PlayerForm from "~/components/PlayerForm";
 import SelectField from "~/components/SelectField";
+import Memuat from "~/components/Memuat";
+import Kerangka from "~/components/Kerangka";
 import { api, ApiError, getMe, type Me } from "~/lib/api";
 import { createSubmit } from "~/lib/form";
 import { posisiLabel, statusLabel, tanggal, usia, type AgeGroup, type PlayerDetail } from "~/lib/pemain";
@@ -110,7 +112,7 @@ export default function DetailPemain() {
   const available = () => parents().filter((u) => !pl()?.guardians?.some((g) => g.userId === u.id));
 
   return (
-    <Show when={me()} fallback={<p class="halaman">Memuat…</p>}>
+    <Show when={me()} fallback={<Memuat halaman />}>
       <main class="halaman">
         <Show
           when={!missing()}
@@ -125,7 +127,7 @@ export default function DetailPemain() {
             </>
           }
         >
-          <Show when={pl()} fallback={<p>Memuat…</p>}>
+          <Show when={pl()} fallback={<Kerangka />}>
             <Title>{pl()!.fullName} · SSB App</Title>
             <KepalaHalaman
               chip="Profil pemain"

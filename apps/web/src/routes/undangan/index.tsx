@@ -4,6 +4,8 @@ import { createMemo, createSignal, For, onMount, Show } from "solid-js";
 import Field from "~/components/Field";
 import KepalaHalaman from "~/components/KepalaHalaman";
 import SelectField from "~/components/SelectField";
+import Memuat from "~/components/Memuat";
+import Kerangka from "~/components/Kerangka";
 import { api, ApiError, getMe, roleLabel, type Me } from "~/lib/api";
 import { createSubmit } from "~/lib/form";
 import type { InvitationRow, PlayerSummary } from "@ssb/shared";
@@ -92,7 +94,7 @@ export default function KelolaUndangan() {
   };
 
   return (
-    <Show when={me()} fallback={<p class="halaman">Memuat…</p>}>
+    <Show when={me()} fallback={<Memuat halaman />}>
       <Title>Undangan · SSB App</Title>
       <main class="halaman lebar">
         <KepalaHalaman
@@ -190,7 +192,7 @@ export default function KelolaUndangan() {
                 {galat()}
               </div>
             </Show>
-            <Show when={rows()} fallback={<p>Memuat…</p>}>
+            <Show when={rows()} fallback={<Kerangka />}>
               <Show
                 when={tampil().length > 0}
                 fallback={<p class="kosong">{saring() === "menunggu" ? "Tidak ada undangan yang menunggu." : "Tidak ada undangan pada status ini."}</p>}

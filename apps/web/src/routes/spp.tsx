@@ -8,6 +8,7 @@ import SppPengaturan from "~/components/SppPengaturan";
 import SppOrtu from "~/components/SppOrtu";
 import SppTarifKhusus from "~/components/SppTarifKhusus";
 import WhatsappPengaturan from "~/components/WhatsappPengaturan";
+import Memuat from "~/components/Memuat";
 import { getMe, type Me } from "~/lib/api";
 
 type TabSpp = "tagihan" | "pengingat" | "pengaturan";
@@ -32,7 +33,7 @@ export default function Spp() {
   const admin = () => me()?.active?.role === "admin_ssb";
 
   return (
-    <Show when={me()} fallback={<p class="halaman">Memuat…</p>}>
+    <Show when={me()} fallback={<Memuat halaman />}>
       <Title>SPP · SSB App</Title>
       <main class="halaman lebar">
         <KepalaHalaman

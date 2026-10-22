@@ -5,6 +5,7 @@ import { inisial, type AgeGroup, type PlayerSummary } from "~/lib/pemain";
 import { bulanIni, hariIni, namaBulan, rupiah, tambahHari, tanggalSesi } from "~/lib/waktu";
 import type { Assignment, AspectSummary, AttendanceSummary, FeeSummary, Period, PlayerOverview, ReminderRow, TrainingSession } from "@ssb/shared";
 import Ikon from "./Ikon";
+import Kerangka from "~/components/Kerangka";
 import RadarAspek from "./RadarAspek";
 
 const koma = (n: number) => String(n).replace(".", ",");
@@ -211,7 +212,14 @@ export default function DashboardAdmin(props: { me: Me }) {
               </h2>
               <span class="lencana-peringatan">{tindakan().length} tugas tertunda</span>
             </header>
-            <Show when={!memuat()} fallback={<p class="panel-isi">Memuat…</p>}>
+            <Show
+              when={!memuat()}
+              fallback={
+                <div class="panel-isi">
+                  <Kerangka />
+                </div>
+              }
+            >
               <Show when={tindakan().length > 0} fallback={<p class="tindakan-kosong">Semua beres: tidak ada tugas administrasi yang tertunda.</p>}>
                 <ul class="kartu-tindakan">
                   <For each={tindakan()}>
@@ -240,7 +248,9 @@ export default function DashboardAdmin(props: { me: Me }) {
             <div class="ubin">
               <span class="label-ubin">Pemain aktif</span>
               <span class="angka-ubin">{players() ? aktif().length : "–"}</span>
-              <span class="petunjuk">{players() ? `${semua().length} terdaftar, ${semua().length - aktif().length} cuti atau keluar` : "Memuat…"}</span>
+              <span class="petunjuk">
+                {players() ? `${semua().length} terdaftar, ${semua().length - aktif().length} cuti atau keluar` : <Kerangka varian="inline" />}
+              </span>
             </div>
             <div class="ubin" classList={{ perhatian: persenHadir() !== null && persenHadir()! < TARGET_HADIR }}>
               <span class="label-ubin">Kehadiran {kini()?.name ?? "latihan"}</span>
@@ -275,7 +285,14 @@ export default function DashboardAdmin(props: { me: Me }) {
                 Kelola SPP
               </A>
             </header>
-            <Show when={spp()} fallback={<p class="panel-isi petunjuk">Memuat…</p>}>
+            <Show
+              when={spp()}
+              fallback={
+                <div class="panel-isi">
+                  <Kerangka />
+                </div>
+              }
+            >
               {(d) => (
                 <div class="panel-isi">
                   <Show when={d().invoices > 0} fallback={<p class="kosong">Belum ada tagihan bulan ini.</p>}>
@@ -323,7 +340,14 @@ export default function DashboardAdmin(props: { me: Me }) {
               </div>
               <span class="petunjuk">{urutKu().length} kelompok umur</span>
             </header>
-            <Show when={groups()} fallback={<p class="panel-isi petunjuk">Memuat…</p>}>
+            <Show
+              when={groups()}
+              fallback={
+                <div class="panel-isi">
+                  <Kerangka />
+                </div>
+              }
+            >
               <Show when={urutKu().length > 0} fallback={<p class="kosong panel-isi">Belum ada KU. Tambahkan di Data master.</p>}>
                 <div class="tabel-bungkus tanpa-garis">
                   <table class="tabel-pemain tabel-ku">
@@ -462,7 +486,14 @@ export default function DashboardAdmin(props: { me: Me }) {
                 <p class="petunjuk panel-sub">Rata-rata skor enam aspek dari seluruh penilaian, dibanding periode sebelumnya.</p>
               </div>
             </header>
-            <Show when={aspek()} fallback={<p class="panel-isi petunjuk">Memuat…</p>}>
+            <Show
+              when={aspek()}
+              fallback={
+                <div class="panel-isi">
+                  <Kerangka />
+                </div>
+              }
+            >
               <Show when={aspek()!.length > 0} fallback={<p class="kosong panel-isi">Belum ada penilaian untuk ditampilkan.</p>}>
                 <div class="panel-isi radar-samping">
                   <RadarAspek sekarang={aspek()![0]!} sebelumnya={aspek()![1]} />
@@ -483,7 +514,14 @@ export default function DashboardAdmin(props: { me: Me }) {
               </div>
               <span class="lencana-kecil-netral">{hariIniSesi().length} sesi</span>
             </header>
-            <Show when={sesi()} fallback={<p class="panel-isi petunjuk">Memuat…</p>}>
+            <Show
+              when={sesi()}
+              fallback={
+                <div class="panel-isi">
+                  <Kerangka />
+                </div>
+              }
+            >
               <Show when={hariIniSesi().length > 0} fallback={<p class="kosong panel-isi">Tidak ada sesi latihan hari ini.</p>}>
                 <ul class="daftar-tugas">
                   <For each={hariIniSesi()}>
@@ -519,7 +557,14 @@ export default function DashboardAdmin(props: { me: Me }) {
                 Kalender
               </A>
             </header>
-            <Show when={sesi()} fallback={<p class="panel-isi petunjuk">Memuat…</p>}>
+            <Show
+              when={sesi()}
+              fallback={
+                <div class="panel-isi">
+                  <Kerangka />
+                </div>
+              }
+            >
               <Show when={mendatang().length > 0} fallback={<p class="kosong panel-isi">Belum ada jadwal pekan ini.</p>}>
                 <ul class="daftar-tugas">
                   <For each={mendatang().slice(0, 8)}>
@@ -551,7 +596,14 @@ export default function DashboardAdmin(props: { me: Me }) {
             <header class="panel-kepala">
               <h2>Izin dan sakit hari ini</h2>
             </header>
-            <Show when={sesi()} fallback={<p class="panel-isi petunjuk">Memuat…</p>}>
+            <Show
+              when={sesi()}
+              fallback={
+                <div class="panel-isi">
+                  <Kerangka />
+                </div>
+              }
+            >
               <p class="panel-isi">
                 <Show when={dispensasi() > 0} fallback={<span class="kosong">Belum ada izin atau sakit tercatat untuk sesi hari ini.</span>}>
                   <strong>{dispensasi()} pemain</strong> tercatat izin atau sakit pada sesi hari ini.
