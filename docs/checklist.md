@@ -173,3 +173,12 @@ Detail di `docs/email.md`. Server email milik sendiri di zukelabs (`mail.zukelab
 - [ ] Pengaturan SMTP per SSB, supaya tiap akademi bisa mengirim dari domainnya sendiri
 - [ ] Email keluar diuji ke Gmail, Outlook, dan Yahoo (cek folder spam) setelah DNS aktif
 - [ ] Akses mailbox lewat IMAP diuji di satu aplikasi email, untuk memastikan membaca email juga benar
+
+## N. Antarmuka dan deploy
+
+- [x] Tampilan memuat: bola sepak memantul untuk halaman penuh, skeleton untuk panel, daftar, dan formulir; animasi mati bila `prefers-reduced-motion`; dicek di browser dev
+- [x] Deploy ke server zukelabs (`ssb-ms.zukelabs.web.id`) sampai commit `2be7700`: migrasi 0018 dan 0019, build, restart, health dan HTTPS dicek
+- [ ] Deploy commit `4b50669` (tampilan memuat) ke server zukelabs
+- [x] Kata sandi 28 akun di server zukelabs disetel ke kata sandi contoh `ContohSSB-2026` atas permintaan pemilik; sesi lama tidak dicabut
+- [ ] Ganti kata sandi contoh di server zukelabs sebelum data pemain sungguhan masuk (kata sandi itu tertulis di repo)
+- [ ] Terapkan desain dari tim (AI Studio) ke web: terima berkas desain, petakan layar ke API yang ada, terjemahkan token ke CSS, tulis ulang komponen di Solid **(butuh keputusan)**
