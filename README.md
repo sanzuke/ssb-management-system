@@ -181,9 +181,9 @@ Pembaruan berikutnya: `git pull`, `bun install --frozen-lockfile`, `bun run db:m
 
 ### Server yang dipakai
 
-Deploy SSB App berjalan di satu VPS zukelabs: `ubuntu@43.156.92.240` (hostname `mail.zukelabs.web.id`), aplikasi di `/opt/ssb-management-system`, domain publik `https://ssb-ms.zukelabs.web.id`. Nginx meneruskan ke web di port 3111, dan API berjalan di port 3110 sebagai dua service systemd (`ssb-api.service` dan `ssb-web.service`), keduanya membaca `/opt/ssb-management-system/.env`.
+SSB MS berjalan di satu VPS khusus: `ubuntu@124.156.192.17` (alias SSH `fufa`), aplikasi di `/opt/ssb-management-system`, domain publik `https://ssb-ms.zukelabs.web.id` (DNS di Cloudflare). Nginx meneruskan ke web di port 3111, dan API berjalan di port 3110 sebagai dua service systemd (`ssb-api.service` dan `ssb-web.service`), keduanya membaca `/opt/ssb-management-system/.env`. Database PostgreSQL 16 di `localhost:5432`, foto di `/var/lib/ssb/uploads`, Chromium untuk rapor PDF di `/opt/ssb-management-system/.browsers`. Node 24 dan Bun 1.4.2 terpasang.
 
-Host itu juga menjalankan aplikasi lain, jadi jangan mengubah apa pun di luar `/opt/ssb-management-system` dan dua service itu. Email untuk domain akademi dilayani dari host yang sama; detailnya ada di `docs/email.md`.
+Server yang sama menjadi tempat landing page `familyunitedfa.com` (lihat `docs/profil.md`). Email domain akademi dilayani mail server di VPS zukelabs (`43.156.92.240`), yang tidak lagi menjalankan SSB MS; detailnya ada di `docs/email.md`. Cadangan database terakhir dari zukelabs ada di `/var/backups/ssb/` di server SSB MS.
 
 Langkah pembaruan di server:
 

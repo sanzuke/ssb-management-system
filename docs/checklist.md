@@ -168,7 +168,7 @@ Detail di `docs/email.md`. Server email milik sendiri di zukelabs (`mail.zukelab
 - [ ] Record email di DNS `familyunitedfa.com` (dikelola di Domainesia): MX ke `mail.zukelabs.web.id`, SPF, DKIM selektor `family`, DMARC, dan A untuk `mail` yang menunjuk ke mail server (sekarang MX masih bawaan `0 familyunitedfa.com` dan A `mail` menunjuk ke server landing, dicek 23 Oktober 2026)
 - [x] Domain `familyunitedfa.com` sudah mengarah ke server landing `124.156.192.17` dengan sertifikat Let's Encrypt (terbit 23 Oktober 2026); vhost sementara di zukelabs dihapus
 - [ ] Pasang situs landing di server `124.156.192.17` (menggantikan halaman PHP kosong di `/var/www/app`)
-- [x] `SMTP_URL` dan `MAIL_FROM` untuk SSB App di server zukelabs; email uji terkirim, tautan lupa kata sandi berjalan
+- [x] `SMTP_URL` dan `MAIL_FROM` untuk SSB MS memakai mail server di zukelabs; email uji terkirim, tautan lupa kata sandi berjalan
 - [ ] Atur SPF `zukelabs.web.id` agar menyertakan IP server (sekarang masih `include:spf.kirim.email ~all`)
 - [ ] Pengaturan SMTP per SSB, supaya tiap akademi bisa mengirim dari domainnya sendiri
 - [ ] Email keluar diuji ke Gmail, Outlook, dan Yahoo (cek folder spam) setelah DNS aktif
@@ -178,10 +178,11 @@ Detail di `docs/email.md`. Server email milik sendiri di zukelabs (`mail.zukelab
 
 - [x] Tampilan memuat: bola sepak memantul untuk halaman penuh, skeleton untuk panel, daftar, dan formulir; animasi mati bila `prefers-reduced-motion`; dicek di browser dev
 - [x] Deploy ke server zukelabs (`ssb-ms.zukelabs.web.id`) sampai commit `2be7700`: migrasi 0018 dan 0019, build, restart, health dan HTTPS dicek
-- [ ] Deploy commit `4b50669` (tampilan memuat) ke server zukelabs
-- [x] Kata sandi 28 akun di server zukelabs disetel ke kata sandi contoh `ContohSSB-2026` atas permintaan pemilik; sesi lama tidak dicabut
-- [ ] Ganti kata sandi contoh di server zukelabs sebelum data pemain sungguhan masuk (kata sandi itu tertulis di repo)
+- [x] SSB MS dipindah dari zukelabs ke `124.156.192.17` (23 Okt 2026): Node 24, Bun, PostgreSQL 16 dengan role `ssb_owner` dan `ssb_app` berkata sandi baru, migrasi, data disalin (28 akun, 24 pemain, 640 skor, checksum sama), Chromium untuk PDF, systemd, Nginx, HTTPS Let's Encrypt; login, health, dan rapor PDF lolos; tampilan memuat (`4b50669`) ikut terpasang
+- [x] SSB MS dihapus dari zukelabs: service, vhost, sertifikat, `/opt/ssb-management-system`, `/var/lib/ssb`, database `ssb`, role `ssb_owner` dan `ssb_app`; cluster PostgreSQL dan aplikasi lain tidak disentuh
+- [ ] Ganti kata sandi contoh `ContohSSB-2026` di server SSB MS sebelum data pemain sungguhan masuk (28 akun disetel ke kata sandi itu atas permintaan pemilik; tertulis di repo; sesi lama tidak dicabut)
+- [ ] Cadangan `pg_dump` terjadwal di server SSB MS; sekarang baru satu cadangan manual di `/var/backups/ssb/`
 - [x] Desain landing dari tim (`ssb-family-united`) ditinjau: dipakai untuk landing terpisah (bagian K), bukan menggantikan tampilan Garuda Muda di SSB MS
 - [x] Server landing `124.156.192.17` (Ubuntu 24.04, Nginx, PHP 8.5, PostgreSQL 16 kosong, Certbot) bisa diakses lewat alias SSH `fufa` dengan kunci; kredensial ada di `docs/krendensial.txt` yang diabaikan git
 - [ ] Ganti kata sandi pengguna `ubuntu` di server landing dan matikan login sandi SSH (sekarang kata sandi tertulis di berkas teks)
-- [ ] Putuskan apakah SSB MS ikut dipindah ke server landing, atau tetap di zukelabs **(butuh keputusan)**
+- [x] SSB MS ikut dipindah ke server landing (diputuskan pemilik, 23 Okt 2026)
