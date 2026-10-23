@@ -137,7 +137,8 @@ Detail di `docs/profil.md`. Dikerjakan lebih awal dari rencana karena akademi pe
 - [ ] Kotak masuk Pendaftar di SSB MS: daftar, ubah status, hubungi lewat WhatsApp, jadikan undangan orang tua; izin `trial.manage`
 - [ ] Tab Konten situs di SSB MS: editor per bagian, bahasa ID dan EN, pratinjau draf, tombol Terbitkan
 - [ ] Program, pelatih, dan fasilitas diturunkan dari KU, anggota, dan lokasi, bisa ditimpa admin; pelatih hanya tampil setelah setuju
-- [ ] Landing: ambil desain tim (`ssb-family-united`), foto ikut ter-build, data dari API, formulir trial tersambung
+- [x] Landing: desain tim (`ssb-family-united`) dipasang apa adanya di `https://familyunitedfa.com` dengan foto yang ikut ter-build (commit `de1586a` di repo landing); data masih tertulis di kode dan formulir trial belum tersambung
+- [ ] Landing: data dari API dan formulir trial tersambung ke `POST /public/trial`
 - [ ] Landing: build statis otomatis saat Terbitkan (sekitar 10 detik) dan disajikan Nginx
 - [ ] Isi asli dari tim menggantikan data contoh (klaim pemain, beasiswa, lisensi, alamat, email) dan foto milik akademi **(butuh keputusan)**
 - [ ] Putuskan nama pelatih dan biaya SPP tampil publik atau tidak **(butuh keputusan)**
@@ -167,7 +168,8 @@ Detail di `docs/email.md`. Server email milik sendiri di zukelabs (`mail.zukelab
 - [x] Domain `familyunitedfa.com` terdaftar di mail stack: domain, 3 mailbox, dan kunci DKIM selektor `family`; email uji keluar dengan tanda tangan DKIM yang benar
 - [ ] Record email di DNS `familyunitedfa.com` (dikelola di Domainesia): MX ke `mail.zukelabs.web.id`, SPF, DKIM selektor `family`, DMARC, dan A untuk `mail` yang menunjuk ke mail server (sekarang MX masih bawaan `0 familyunitedfa.com` dan A `mail` menunjuk ke server landing, dicek 23 Oktober 2026)
 - [x] Domain `familyunitedfa.com` sudah mengarah ke server landing `124.156.192.17` dengan sertifikat Let's Encrypt (terbit 23 Oktober 2026); vhost sementara di zukelabs dihapus
-- [ ] Pasang situs landing di server `124.156.192.17` (menggantikan halaman PHP kosong di `/var/www/app`)
+- [x] Situs landing terpasang di `124.156.192.17` (`/var/www/landing`, Nginx, HTTPS, www dan http dialihkan); halaman PHP kosong digantikan, konfigurasi lama dicadangkan di `/root/nginx-app.bak`
+- [ ] Pembaruan landing masih manual (build lokal lalu kirim berkas) karena repo `ssb-family-united` privat; perlu deploy key di GitHub agar server bisa menarik sendiri
 - [x] `SMTP_URL` dan `MAIL_FROM` untuk SSB MS memakai mail server di zukelabs; email uji terkirim, tautan lupa kata sandi berjalan
 - [ ] Atur SPF `zukelabs.web.id` agar menyertakan IP server (sekarang masih `include:spf.kirim.email ~all`)
 - [ ] Pengaturan SMTP per SSB, supaya tiap akademi bisa mengirim dari domainnya sendiri
