@@ -67,7 +67,9 @@ Bagian publik tanpa sesi. Kode SSB (`slug`) di alamat menentukan SSB-nya; tidak 
 
 Izin baru: `site.manage` dan `trial.manage` (admin SSB).
 
-CORS: browser landing memanggil API dari origin lain, jadi `/public/*` mengirim header CORS hanya untuk origin di env `LANDING_ORIGINS` (dipisah koma; kosong = tidak ada). Rute admin tidak pernah terbuka lintas origin. Batas laju ada di memori proses; `X-Real-IP` dari Nginx dipakai sebagai alamat pengunjung.
+CORS: browser landing memanggil API dari origin lain, jadi `/public/*` mengirim header CORS hanya untuk origin di env `LANDING_ORIGINS` (dipisah koma; kosong = tidak ada). Rute admin tidak pernah terbuka lintas origin. Batas laju ada di memori proses dan memakai `X-Real-IP` sebagai alamat pengunjung.
+
+Di server, Nginx untuk `app.familyunitedfa.com` meneruskan `/api/public/` langsung ke API (port 3110), tidak lewat proxy `/api` milik web. Alasannya: proxy web tidak meneruskan permintaan `OPTIONS` (preflight CORS gagal) dan tidak meneruskan alamat IP pengunjung, sehingga semua pengunjung akan berbagi satu kunci batas laju. Landing harus memanggil `https://app.familyunitedfa.com/api/public/site/<slug>` dan `.../trial`.
 
 ## Layar di SSB MS
 
