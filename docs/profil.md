@@ -16,7 +16,7 @@ Alasan: tampilan landing (gelap, merah, amber) berbeda dari aplikasi (Garuda Mud
 flowchart LR
   A["Admin SSB<br/>tab Konten situs"] -->|simpan draf, lalu Terbitkan| B[("PostgreSQL<br/>konten situs, galeri")]
   B --> C["GET /public/site/:slug<br/>hanya versi terbit"]
-  C --> D["Landing statis<br/>dibangun ulang saat terbit"]
+  C --> D["Landing statis<br/>baca API saat dibuka"]
   D -->|form trial| E["POST /public/site/:slug/trial<br/>batas laju"]
   E --> F["Kotak masuk Pendaftar<br/>di SSB MS"]
 ```
@@ -79,7 +79,7 @@ Di server, Nginx untuk `app.familyunitedfa.com` meneruskan `/api/public/` langsu
 
 ## Landing dan build
 
-Landing memakai desain tim (`ssb-family-united`). Saat **Terbitkan**, server menjalankan build yang mengambil konten dari API dan menghasilkan HTML statis (sekitar 10 detik), disajikan Nginx. Mengambil data di browser pengunjung tidak dipakai karena mesin pencari tidak membaca konten yang dimuat sesudah halaman terbuka.
+Landing memakai desain tim (`ssb-family-united`) dan membaca konten dari API saat halaman dibuka (`VITE_API_URL`, `VITE_SSB_SLUG`). Bila API 404, offline, atau lebih dari 8 detik, halaman memakai data bawaan di `src/data/academyData.ts`, jadi tidak pernah kosong. Terbitkan di SSB MS langsung terlihat tanpa build ulang (cache 60 detik). Konsekuensinya mesin pencari yang tidak menjalankan JavaScript hanya melihat data bawaan; bila SEO penting, tambahkan prarender saat terbit. Bagian kosong di konten API disembunyikan, bukan diisi data bawaan, supaya data akademi lain tidak bocor ke landing ini.
 
 Perbaikan yang diperlukan pada desain apa adanya: foto ikut ter-build (path sekarang berupa teks `/src/assets/...` sehingga hilang di produksi), formulir trial tersambung ke `POST /public/trial`, data contoh diganti konten asli, dan foto pertandingan berkostum klub lain diganti foto milik akademi.
 

@@ -203,7 +203,7 @@ Aplikasi menjawab pertanyaan orang tua tentang anaknya. Landing page menjawab pe
 Rancangan lengkap ada di `docs/profil.md`. Keputusannya:
 
 - Landing berdiri sendiri di domain akademi (mis. `familyunitedfa.com`), terpisah dari SSB MS. Tampilannya dari desain tim di repo `ssb-family-united`.
-- Isinya diatur di SSB MS (tab **Konten situs**, draf lalu **Terbitkan**) dan dibaca landing lewat API publik. Saat terbit, landing dibangun ulang sebagai halaman statis.
+- Isinya diatur di SSB MS (halaman **Konten situs**, draf lalu **Terbitkan**) dan dibaca landing lewat API publik. Landing membaca versi terbit saat halaman dibuka, jadi terbit langsung terlihat tanpa build ulang.
 - Pendaftaran trial dari landing masuk ke kotak masuk **Pendaftar** di SSB MS.
 - Data pemain tidak pernah tampil publik. Nama pelatih hanya tampil setelah anggota yang bersangkutan menyetujui.
 - Program, pelatih, dan fasilitas diturunkan dari data yang sudah ada (KU, anggota, lokasi), dan admin bisa menimpa teksnya.

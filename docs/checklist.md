@@ -138,8 +138,8 @@ Detail di `docs/profil.md`. Dikerjakan lebih awal dari rencana karena akademi pe
 - [x] Halaman Konten situs di SSB MS (`/situs`): sembilan bagian, kolom ID dan EN, validasi per kolom, simpan draf, Terbitkan dan Tarik dari publik dengan konfirmasi. Pratinjau draf belum ada
 - [ ] Program, pelatih, dan fasilitas diturunkan dari KU, anggota, dan lokasi, bisa ditimpa admin; pelatih hanya tampil setelah setuju
 - [x] Landing: desain tim (`ssb-family-united`) dipasang apa adanya di `https://familyunitedfa.com` dengan foto yang ikut ter-build (commit `de1586a` di repo landing); data masih tertulis di kode dan formulir trial belum tersambung
-- [ ] Landing: data dari API dan formulir trial tersambung ke `POST /public/site/:slug/trial`
-- [ ] Landing: build statis otomatis saat Terbitkan (sekitar 10 detik) dan disajikan Nginx
+- [x] Landing (`ssb-family-united`, commit `e6a51cb`): konten dibaca dari `GET /public/site/:slug` saat halaman dibuka (timeout 8 dtk, cadangan data bawaan bila 404 atau offline); formulir trial terkirim ke `POST /public/site/:slug/trial` dengan kode TRL tampil ke orang tua; lintas origin diuji. Terpasang di familyunitedfa.com
+- [x] Landing: tidak perlu build ulang saat Terbitkan karena konten dibaca saat halaman dibuka (cache 60 detik). Konsekuensi: mesin pencari yang tidak menjalankan JavaScript melihat data bawaan; prarender bisa ditambah nanti bila SEO penting
 - [ ] Isi asli dari tim menggantikan data contoh (klaim pemain, beasiswa, lisensi, alamat, email) dan foto milik akademi **(butuh keputusan)**
 - [ ] Putuskan nama pelatih dan biaya SPP tampil publik atau tidak **(butuh keputusan)**
 
