@@ -136,7 +136,8 @@ a {
   font-weight: 700;
   font-size: 0.95rem;
 }
-.field input {
+.field input,
+.field textarea {
   width: 100%;
   min-height: 48px;
   padding: 10px 12px;
@@ -146,10 +147,17 @@ a {
   border: 1.5px solid var(--kolom);
   border-radius: var(--radius);
 }
-.field input:focus-visible {
+.field textarea {
+  min-height: 96px;
+  resize: vertical;
+  line-height: 1.5;
+}
+.field input:focus-visible,
+.field textarea:focus-visible {
   border-color: var(--tinta);
 }
-.field[data-salah] input {
+.field[data-salah] input,
+.field[data-salah] textarea {
   border-color: var(--merah);
 }
 .petunjuk {

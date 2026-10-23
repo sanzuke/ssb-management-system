@@ -134,8 +134,8 @@ Detail di `docs/profil.md`. Dikerjakan lebih awal dari rencana karena akademi pe
 - [x] Endpoint admin `GET/PUT /site`, `POST /site/publish` dan `/site/unpublish`; izin `site.manage`; penanda `dirty`; test alur dan test per role
 - [ ] Galeri: unggah, hapus, urutkan, tandai terbit; jalur baca publik hanya untuk galeri (foto pemain tetap privat)
 - [x] `POST /public/site/:slug/trial` dengan batas laju (5 per jam per IP, 100 per jam per SSB), kolom jebakan bot, dan CORS hanya untuk origin landing; test
-- [x] API kotak masuk Pendaftar: `GET /trials`, `PATCH /trials/:id`; izin `trial.manage`; test. Layar di SSB MS dan tombol jadikan undangan belum
-- [ ] Tab Konten situs di SSB MS: editor per bagian, bahasa ID dan EN, pratinjau draf, tombol Terbitkan
+- [x] API kotak masuk Pendaftar: `GET /trials`, `PATCH /trials/:id`; izin `trial.manage`; test. Halaman Pendaftar (`/pendaftar`): daftar, saring status, hubungi lewat WhatsApp, ubah status dan catatan. Tombol jadikan undangan orang tua belum
+- [x] Halaman Konten situs di SSB MS (`/situs`): sembilan bagian, kolom ID dan EN, validasi per kolom, simpan draf, Terbitkan dan Tarik dari publik dengan konfirmasi. Pratinjau draf belum ada
 - [ ] Program, pelatih, dan fasilitas diturunkan dari KU, anggota, dan lokasi, bisa ditimpa admin; pelatih hanya tampil setelah setuju
 - [x] Landing: desain tim (`ssb-family-united`) dipasang apa adanya di `https://familyunitedfa.com` dengan foto yang ikut ter-build (commit `de1586a` di repo landing); data masih tertulis di kode dan formulir trial belum tersambung
 - [ ] Landing: data dari API dan formulir trial tersambung ke `POST /public/site/:slug/trial`

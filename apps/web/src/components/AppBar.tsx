@@ -67,6 +67,14 @@ export default function AppBar(props: { me: Me }) {
             <Ikon nama="profil" />
             <span>Anggota</span>
           </A>
+          <A class="tombol tipis menu" href="/situs">
+            <Ikon nama="bola" />
+            <span>Konten situs</span>
+          </A>
+          <A class="tombol tipis menu" href="/pendaftar">
+            <Ikon nama="profil" />
+            <span>Pendaftar</span>
+          </A>
           <A class="tombol tipis menu" href="/undangan">
             <Ikon nama="surat" />
             <span>Undangan</span>

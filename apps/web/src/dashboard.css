@@ -2746,3 +2746,130 @@ button.pengguna[aria-expanded="true"] .panah-menu {
     animation: none;
   }
 }
+
+/* ---- Editor konten situs ---- */
+.sr-saja {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+.status-situs p {
+  margin: 0 0 12px;
+}
+.aksi-situs {
+  margin-top: 12px;
+  gap: 8px;
+}
+.aksi-situs .tombol {
+  width: auto;
+}
+.dua-bahasa {
+  display: grid;
+  gap: 12px;
+}
+@media (min-width: 720px) {
+  .dua-bahasa {
+    grid-template-columns: 1fr 1fr;
+    align-items: start;
+  }
+}
+.butir-situs {
+  margin: 0 0 16px;
+  padding: 14px;
+  border: 1px solid var(--garis);
+  border-radius: var(--radius);
+  background: #fff;
+}
+.butir-situs > legend {
+  padding: 0 6px;
+  font-weight: 700;
+}
+.aksi-butir-situs {
+  justify-content: flex-end;
+  margin-bottom: 8px;
+}
+.sub-daftar h3 {
+  margin: 8px 0;
+  font-size: 1rem;
+}
+.baris-materi {
+  display: grid;
+  gap: 6px;
+  margin-bottom: 12px;
+  padding-bottom: 12px;
+  border-bottom: 1px dashed var(--garis);
+}
+.baris-materi .tombol {
+  width: auto;
+  justify-self: end;
+}
+.centang {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  font-weight: 600;
+}
+.centang input {
+  width: 22px;
+  height: 22px;
+}
+
+/* ---- Kotak masuk pendaftar trial ---- */
+.daftar-pendaftar {
+  display: grid;
+  gap: 16px;
+}
+@media (min-width: 900px) {
+  .daftar-pendaftar {
+    grid-template-columns: 1fr 1fr;
+    align-items: start;
+  }
+}
+.kartu-pendaftar {
+  padding: 16px;
+  border: 1px solid var(--garis);
+  border-radius: var(--radius);
+  background: #fff;
+}
+.kartu-pendaftar header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.kartu-pendaftar h2 {
+  margin: 0;
+  font-size: 1.1rem;
+}
+.status-trial {
+  padding: 2px 10px;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  background: #f1f4ec;
+}
+.status-trial.baru {
+  background: var(--kuning);
+}
+.rincian-pendaftar {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 4px 12px;
+  margin: 12px 0 16px;
+}
+.rincian-pendaftar dt {
+  font-weight: 700;
+}
+.rincian-pendaftar dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+.rincian-pendaftar dd .tombol {
+  display: inline-flex;
+  width: auto;
+  margin-left: 8px;
+}
