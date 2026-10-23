@@ -50,7 +50,7 @@ Domain `familyunitedfa.com` belum aktif di DNS saat dokumen ini ditulis (NXDOMAI
 
 ### Record DNS
 
-Semua di DNS Cloudflare (DNS only, tanpa proxy).
+Semua di panel DNS Domainesia (tanpa proxy).
 
 | Tipe | Nama | Isi | TTL |
 |---|---|---|---|
@@ -60,7 +60,7 @@ Semua di DNS Cloudflare (DNS only, tanpa proxy).
 | TXT | `mail._domainkey.family` | kunci DKIM (lihat di bawah) | 3600 |
 | TXT | `_dmarc.familyunitedfa.com` | `v=DMARC1; p=none; rua=mailto:admin@familyunitedfa.com` | 3600 |
 
-Nama TXT DKIM di Cloudflare diisi `family._domainkey` untuk host `familyunitedfa.com`, jadi label penuhnya `family._domainkey.familyunitedfa.com`. Pemeriksaan:
+Nama TXT DKIM diisi `family._domainkey` untuk host `familyunitedfa.com`, jadi label penuhnya `family._domainkey.familyunitedfa.com`. Pemeriksaan:
 
 ```
 dig +short TXT family._domainkey.familyunitedfa.com
@@ -72,26 +72,19 @@ Kunci publik (dari `/etc/dkimkeys/family.txt`, sudah dipecah jadi satu baris):
 v=DKIM1; h=sha256; k=rsa; s=email; p=MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAzZY7lgslOpXLRklRY/Ylx+9C6WtIjsJ1+rgrSTPndW+SSunl8jObNszF5/V9PH99jXtCO2gqUI0lXGS3WqGxK5Zi6zKMDyvtGhje1FnZnkRCe9MrTsr1d65Cu0YwujtapKQpVARVeZ8ulk0GsRVJCkNVOXXz+mxNLjCphEIR5rW39b9gMV86i71ssNbtKUzGYYYnTZdJwEBDp9Y1nWOwRpteuA3tb3F43WgWYEDVNRdhXjgsAH8VWEC+OAPd7oQiSa4YaI6MFHLE7/zRwlrgUt1+Gmgip6It9Bidgf4KvjjlWIawvnVwBDO9uADKjdWEaBhK9CdGjGAPrK/2N/qDrwIDAQAB
 ```
 
-Catatan: Cloudflare mengubah TXT yang panjang jadi beberapa string yang dipisah spasi, itu normal dan tetap dibaca sebagai satu nilai.
+Catatan: DNS `familyunitedfa.com` dikelola di Domainesia (bukan Cloudflare). Panel Domainesia memecah TXT yang panjang secara otomatis; itu normal dan tetap dibaca sebagai satu nilai.
 
-Record lain yang perlu untuk domain akademi (bukan email, tapi untuk portal profil di `docs/profil.md`):
+Situs landing domain ini ada di server lain (`124.156.192.17`), dan record `@` serta `www` sudah menunjuk ke sana. Jadi yang harus diubah hanya record email:
 
-| Tipe | Nama | Isi |
-|---|---|---|
-| A | `@` | `43.156.92.240` |
-| A | `www` | `43.156.92.240` |
+| Tipe | Nama | Sekarang (23 Okt 2026) | Seharusnya |
+|---|---|---|---|
+| MX | `@` | `0 familyunitedfa.com` (bawaan) | `10 mail.zukelabs.web.id` |
+| A | `mail` | `124.156.192.17` (server landing) | hapus; MX sudah menunjuk ke `mail.zukelabs.web.id` |
+| TXT | `@` | belum ada | SPF, sesuai tabel di atas |
+| TXT | `family._domainkey` | belum ada | kunci DKIM, sesuai di atas |
+| TXT | `_dmarc` | belum ada | DMARC, sesuai di atas |
 
-MX tidak boleh di-proxy (abu-abu di Cloudflare), dan hostname `mail.zukelabs.web.id` juga tidak boleh di-proxy karena MX mengarah ke sana.
-
-Vhost Nginx untuk `familyunitedfa.com` dan `www.familyunitedfa.com` sudah dibuat di server zukelabs (`/etc/nginx/sites-available/familyunitedfa.com.conf`, sudah di-*enable*), dan meneruskan ke web di port 3111 seperti vhost `ssb-ms.zukelabs.web.id`. Vhost itu masih HTTP saja, karena Let's Encrypt belum bisa menerbitkan sertifikat untuk domain yang belum mengarah ke server.
-
-Setelah DNS terpasang, terbitkan sertifikatnya:
-
-```
-sudo certbot --nginx -d familyunitedfa.com -d www.familyunitedfa.com
-```
-
-Lalu tambahkan domain akademi ke `ALLOWED_ORIGINS` di `.env` bila portal profilnya memakai origin sendiri, dan restart `ssb-api.service`.
+Vhost sementara untuk domain ini yang sempat dibuat di server zukelabs sudah dihapus.
 
 ### Verifikasi
 

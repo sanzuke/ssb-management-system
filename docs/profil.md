@@ -1,99 +1,96 @@
-# Portal profil publik SSB (company profile)
+# Landing page akademi (company profile)
 
-Rancangan halaman profil publik untuk sebuah SSB: identitas akademi, lokasi, program, tim, dan cara mendaftar. Berbeda dari portal orang tua (privat, di dalam aplikasi) dan dari dasbor admin.
+Situs publik untuk sebuah SSB: identitas akademi, program, tim, fasilitas, galeri, dan pendaftaran trial. Situs ini **berdiri sendiri**, terpisah dari SSB MS, tetapi seluruh isinya diatur dari SSB MS.
 
-Status: rancangan. Belum ada implementasi.
+Status: rancangan. Desain dari tim ada di https://github.com/sanzuke/ssb-family-united (React + Vite + Tailwind, data masih tertulis di kode).
 
-## Untuk siapa dan masalah apa
+## Keputusan
 
-Orang tua yang sedang mencari "SSB di kota saya" butuh dua hal: memastikan akademi ini benar ada dan punya program yang cocok untuk anaknya, lalu tahu cara mendaftar. Aplikasi SSB App menjawab pertanyaan "bagaimana perkembangan anak saya", bukan "akademi ini bagus atau tidak". Portal profil menjawab pertanyaan kedua, lalu mengarahkannya ke pendaftaran di aplikasi.
+- Landing dan SSB MS dipisah. Landing adalah situs statis di domain akademi (mis. `familyunitedfa.com`); SSB MS tetap di domainnya sendiri.
+- Konten disunting admin SSB di SSB MS (tab **Konten situs**), lalu **Terbitkan**. Landing hanya membaca versi yang terbit lewat API publik.
+- Tiap akademi punya satu landing di satu domain. Banyak akademi berarti banyak landing, dengan pola yang sama.
 
-Catatan desain: profil adalah halaman yang bisa di-index mesin pencari. Data SSB yang tidak ingin dipublikasikan tidak boleh bocor. Jadi yang tampil hanya yang admin SSB pilih untuk terbit.
+Alasan: tampilan landing (gelap, merah, amber) berbeda dari aplikasi (Garuda Muda) dan bisa berubah tanpa menyentuh aplikasi; deploy mandiri sehingga landing tidak bisa menjatuhkan login, absensi, atau SPP; halaman statis lebih cepat dan terbaca mesin pencari. Harganya: dua hal yang di-deploy dan satu kontrak API yang harus stabil, jadi bentuk respons didefinisikan dengan Zod di `packages/shared` dan dipakai kedua sisi.
 
-## Bentuk halaman
+```mermaid
+flowchart LR
+  A["Admin SSB<br/>tab Konten situs"] -->|simpan draf, lalu Terbitkan| B[("PostgreSQL<br/>konten situs, galeri")]
+  B --> C["GET /public/site/:slug<br/>hanya versi terbit"]
+  C --> D["Landing statis<br/>dibangun ulang saat terbit"]
+  D -->|form trial| E["POST /public/trial<br/>batas laju"]
+  E --> F["Kotak masuk Pendaftar<br/>di SSB MS"]
+```
 
-Tiga bentuk yang dipertimbangkan:
+## Batas data
 
-| Bentuk | Contoh alamat | Kelebihan | Kekurangan |
-|---|---|---|---|
-| Sub-path di aplikasi | `ssb-ms.zukelabs.web.id/s/garuda-muda` | Satu deploy, satu sertifikat, murah operasional | Host milik platform, kurang terlihat sebagai brand akademi |
-| Subdomain per SSB | `garuda-muda.ssb-ms.zukelabs.web.id` | Host terlihat milik akademi | Perlu sertifikat wildcard dan DNS per SSB |
-| Domain sendiri | `familyunitedfa.com` | Penuh milik SSB, alamat paling dipercaya | Setup DNS dan TLS per SSB, lebih banyak kerja operasional |
+Landing tidak pernah memuat nama pemain, foto pemain, absensi, nilai, rapor, atau tagihan. Nama pelatih hanya tampil bila anggota yang bersangkutan menyetujui. Yang tampil hanya yang admin tandai terbit; konten yang belum terbit menjawab 404.
 
-Usulan untuk fase pertama: sub-path (`/s/<slug>`) dengan satu domain, supaya tidak menambah beban operasional per SSB. Bentuk domain sendiri dibuka sebagai fase lanjut.
+## Konten dan data
 
-Agar pindah ke domain sendiri tidak mengubah tautan, satu SSB punya `slug` yang stabil, dan `custom_domain` opsional yang mengalihkan ke slug bila diisi. Fase domain sendiri tinggal mengisi satu kolom.
+Satu dokumen JSON per SSB (kolom `jsonb`), dengan dua salinan: draf dan terbit. Bagian landing berubah-ubah, dan dokumen menghindari migrasi tiap ada bagian baru. Bentuknya divalidasi Zod.
 
-## Isi halaman
+| Bagian | Isi | Sumber |
+|---|---|---|
+| Identitas dan kontak | Nama, motto, logo, alamat, telepon, email, WhatsApp | Konten situs |
+| Hero | Judul, teks, tombol, foto | Konten situs |
+| Angka ringkasan | Pemain aktif, alumni, persen beasiswa | Konten situs (pemain aktif bisa dihitung dari data) |
+| Yayasan dan beasiswa | Cerita, syarat | Konten situs |
+| Program | Nama, rentang usia, jadwal, kurikulum, biaya tampil | KU dan jadwal latihan, teks ditimpa admin |
+| Pelatih | Nama, lisensi, pengalaman, foto | Anggota yang setuju tampil |
+| Fasilitas | Lapangan, alamat, foto | Lokasi latihan, teks ditimpa admin |
+| Pertandingan | Jadwal dan hasil | Daftar manual (event masuk fase 2) |
+| Testimoni | Kutipan, nama | Konten situs |
+| Galeri | Foto | Unggahan, satu jalur baca publik khusus galeri |
 
-| Bagian | Isi | Sumber | Publik? |
-|---|---|---|---|
-| Identitas | Nama lengkap, nama singkat, logo, foto sampul | Profil SSB | ya |
-| Lokasi | Kota, provinsi, alamat, peta | Profil SSB | ya |
-| Kontak | WhatsApp, telepon, email domain akademi | Profil SSB | ya |
-| Program | Daftar program (mis. KU-8, KU-10), rentang usia, jadwal latihan | Data KU dan sesi latihan | ya |
-| Fasilitas | Lapangan, alamat latihan, foto | Lokasi dan unggahan | ya |
-| Tim | Nama pelatih dan korlas, foto, lisensi bila ada | Anggota SSB | ya, setelah disetujui anggota |
-| Galeri | Foto latihan dan pemain | Unggahan | ya, hanya yang ditandai terbit |
-| Pendaftaran | Langkah pendaftaran, tombol ke daftar akun | Konten statis | ya |
-| Prestasi | Turnamen, piala, capaian | Konten statis | ya |
-| Jadwal dan SPP | Jadwal latihan, tarif SPP | Data SSB | opsional per SSB |
+Semua teks punya kolom ID dan EN. Tabel baru:
 
-Batas yang jelas: halaman profil tidak memuat nama pemain, foto pemain, absensi, nilai, rapor, atau tagihan. Data pemain tidak pernah tampil publik, apa pun pengaturan SSB. Nama pelatih hanya tampil bila anggota yang bersangkutan menyetujui lewat kolom publik untuk anggota.
-
-## Data
-
-Tabel baru:
-
-- `ssb_profile`: `ssb_id` (PK, FK ke `ssb`), `tagline`, `deskripsi`, `alamat`, `telepon`, `email_publik`, `logo_path`, `cover_path`, `program_summary`, `pendaftaran_url`, `terbit` (boolean), `dibuat_pada`, `diperbarui_pada`.
-- `ssb_domain`: `ssb_id` (PK, FK ke `ssb`), `domain` (unik, huruf kecil), `diverifikasi_at`. Kosong berarti belum ada domain sendiri.
-- `ssb_gallery`: `id`, `ssb_id`, `path`, `keterangan`, `urutan`, `terbit`. Menunjuk berkas pada penyimpanan yang sama dengan foto pemain, dengan aturan privat yang sama.
-
-Penanda `terbit` ada karena admin SSB harus memilih sendiri apa yang layak dipublikasikan. Profil yang belum terbit menjawab 404, bukan halaman kosong, supaya tidak ter-index sebagai akun kosong.
-
-Sumber data yang sudah ada dipakai ulang, bukan disalin: program dari tabel KU dan sesi latihan, tim dari `app_user` dengan peran pelatih dan korlas, fasilitas dari `location`. Yang disimpan di `ssb_profile` hanya isi yang tidak ada di tabel lain, yaitu deskripsi, kontak, dan logo.
+- `site_content`: `ssb_id` (PK, FK ke `ssb`), `draft` (jsonb), `published` (jsonb), `published_at`, `published_by`, `updated_at`. RLS per SSB.
+- `site_gallery`: `id`, `ssb_id`, `path`, `caption`, `sort`, `published`. Foto memakai penyimpanan yang sama dengan foto pemain, tetapi jalur baca publiknya hanya untuk galeri.
+- `site_domain`: `ssb_id`, `domain` (unik), `verified_at`. Memetakan domain ke SSB untuk API publik.
+- `trial_registration`: `id`, `ssb_id`, data anak dan orang tua, program pilihan, ajukan beasiswa, catatan, `status` (baru, dihubungi, diterima, ditolak), `created_at`. RLS per SSB.
 
 ## Endpoint
 
-Bagian publik di bawah `/public`, tanpa sesi, dengan cache pendek dan tanpa data pemain.
+Bagian publik tanpa sesi, dengan cache pendek.
 
 | Endpoint | Izin | Fungsi |
 |---|---|---|
-| `GET /public/ssb/:slug` | publik | Isi profil, program, tim, lokasi |
-| `GET /public/ssb/:slug/galeri` | publik | Daftar foto yang terbit |
-| `GET /public/ssb/:slug/foto/:id` | publik | Berkas foto galeri, dilewatkan lewat API |
-| `GET/PUT /profile` | `profile.manage` | Profil SSB pemanggil; admin SSB menulis |
-| `POST /profile/galeri` | `profile.manage` | Unggah foto galeri (JPG/PNG/WebP, maks 2 MB, sama seperti foto pemain) |
-| `DELETE /profile/galeri/:id` | `profile.manage` | Hapus foto galeri |
-| `POST /profile/terbit` | `profile.manage` | Terbitkan atau tarik profil |
-| `GET /profile/domain` | `profile.manage` | Domain sendiri yang dikaitkan |
+| `GET /public/site/:slug` | publik | Konten terbit, program, pelatih yang setuju, fasilitas |
+| `GET /public/site/:slug/gallery/:id` | publik | Berkas foto galeri |
+| `POST /public/trial` | publik, batas laju | Pendaftaran trial; kolom jebakan bot |
+| `GET/PUT /site` | `site.manage` | Baca dan simpan draf |
+| `POST /site/publish` | `site.manage` | Terbitkan draf, memicu build landing |
+| `POST/DELETE /site/gallery` | `site.manage` | Unggah dan hapus foto galeri |
+| `GET /trials`, `PATCH /trials/:id` | `trial.manage` | Kotak masuk pendaftar dan ubah status |
 
-Izin baru: `profile.manage` untuk admin SSB. Endpoint publik tidak dijaga role karena tidak butuh sesi, tetapi dibatasi isinya: hanya data profil yang sudah ditandai terbit.
+Izin baru: `site.manage` dan `trial.manage` (admin SSB).
 
-## Layar
+## Layar di SSB MS
 
-- Publik: `/s/<slug>`. Satu halaman panjang, mobile-first, bagian demi bagian. Bagian pertama berisi nama, kota, dan tombol **Daftar** yang menuju halaman daftar akun. Nama, logo, dan warna mengikuti desain "Garuda Muda" supaya terasa milik akademi, bukan template platform.
-- Admin SSB: tab **Profil** di menu, berisi editor (teks panjang, tautan, unggah logo dan sampul), pratinjau yang meniru halaman publik, dan tombol terbitkan.
-- Admin SSB: tab **Galeri** untuk mengunggah, mengurutkan, dan menandai foto yang terbit.
+- **Konten situs:** editor per bagian, bahasa ID dan EN, pratinjau draf, tombol Terbitkan, dan penanda perubahan yang belum terbit.
+- **Galeri:** unggah, urutkan, tandai terbit.
+- **Pendaftar:** daftar trial dengan status, tombol hubungi lewat WhatsApp, dan ubah menjadi undangan orang tua.
 
-## Domain dan email
+## Landing dan build
 
-Domain akademi seperti `familyunitedfa.com` punya dua peran: host profil dan domain email. Keduanya tidak butuh kode baru, tapi keduanya butuh DNS dan TLS. Bagian email dijelaskan di `docs/email.md`.
+Landing memakai desain tim (`ssb-family-united`). Saat **Terbitkan**, server menjalankan build yang mengambil konten dari API dan menghasilkan HTML statis (sekitar 10 detik), disajikan Nginx. Mengambil data di browser pengunjung tidak dipakai karena mesin pencari tidak membaca konten yang dimuat sesudah halaman terbuka.
 
-Kalau profil memakai domain sendiri, halamannya tetap dirender aplikasi yang sama: server membaca host, mencari `ssb_domain`, lalu merender SSB itu. Tidak ada blog statis terpisah dan tidak ada CMS yang harus disinkronkan.
+Perbaikan yang diperlukan pada desain apa adanya: foto ikut ter-build (path sekarang berupa teks `/src/assets/...` sehingga hilang di produksi), formulir trial tersambung ke `POST /public/trial`, data contoh diganti konten asli, dan foto pertandingan berkostum klub lain diganti foto milik akademi.
+
+## Domain
+
+`familyunitedfa.com` dikelola di Domainesia dan sudah mengarah ke server landing. Email domain ini dilayani mail server di zukelabs (lihat `docs/email.md`), jadi record MX, SPF, DKIM, dan DMARC di Domainesia harus menunjuk ke sana.
 
 ## Yang belum diputuskan
 
-- [ ] Host profil di sub-path aplikasi, subdomain, atau domain sendiri sebagai bentuk utama
-- [ ] Apakah nama pelatih ditampilkan publik, dan bagaimana cara persetujuannya
-- [ ] Apakah tarif SPP ditampilkan publik, dan seberapa detail
-- [ ] Siapa lagi yang boleh mengedit profil selain admin SSB, misalnya operator platform
-- [ ] Galeri berupa halaman penuh atau cukup strip foto
-- [ ] Program disimpan manual atau diturunkan dari KU dan sesi latihan
+- [ ] Apakah nama pelatih ditampilkan publik, dan bagaimana persetujuannya
+- [ ] Apakah biaya SPP ditampilkan publik
+- [ ] Isi asli untuk klaim di desain (jumlah pemain, persen beasiswa, lisensi pelatih, alamat, email)
+- [ ] Apakah tab Mobile App di desain tim dipertahankan di landing, atau dipindah ke `docs/mobile.md`
+- [ ] Apakah SSB MS ikut dipindah ke server baru, atau tetap di zukelabs
 
 ## Di luar lingkup
 
 - Blog dan artikel
-- Formulir pendaftaran milik sendiri, karena pendaftaran tetap lewat akun supaya data masuk ke satu tempat
-- Ulasan dan testimoni orang tua, karena butuh moderasi dan model datanya belum ada
-- SEO multi-bahasa
+- Ulasan orang tua yang butuh moderasi
+- Banyak akademi dalam satu landing

@@ -123,23 +123,24 @@ Detail di `docs/spp.md`. Dikerjakan lebih awal dari rencana karena SSB percontoh
 - [x] Pengiriman WhatsApp lewat Fonnte: token API disimpan terenkripsi di server, periksa token dan profil perangkat, pesan uji, dan tombol kirim otomatis per tagihan; test (`docs/fonnte.md`)
 - [ ] Pengiriman WhatsApp terjadwal harian tanpa admin menekan tombol
 
-## K. Portal profil publik akademi
+## K. Landing page akademi (situs terpisah, konten dari SSB MS)
 
-Detail di `docs/profil.md`. Fase 3. Bertujuan menjawab pertanyaan calon orang tua: akademi ini ada, program apa yang tersedia, dan cara mendaftar.
+Detail di `docs/profil.md`. Dikerjakan lebih awal dari rencana karena akademi pertama membutuhkannya. Landing berdiri sendiri di domain akademi; isinya disunting di SSB MS lewat API publik.
 
-- [ ] Putuskan bentuk portal profil: sub-path aplikasi, subdomain, atau domain sendiri per SSB **(butuh keputusan)**
-- [ ] Tabel profil SSB: tagline, deskripsi, alamat, kontak, logo, sampul, penanda terbit; RLS dan test
-- [ ] Tabel galeri SSB: foto, keterangan, urutan, penanda terbit; RLS dan test
-- [ ] Endpoint publik profil tanpa sesi: isi profil, program, tim, lokasi; 404 bila belum terbit
-- [ ] Endpoint admin profil: baca dan ubah, unggah logo, sampul, dan galeri; batas ukuran dan tipe berkas sama seperti foto pemain
-- [ ] Halaman publik `/s/<slug>`: identitas, lokasi, kontak, program, tim, galeri, langkah pendaftaran; mobile-first
-- [ ] Data pemain tidak pernah tampil di halaman publik: nama, foto, absensi, nilai, rapor, dan tagihan dikecualikan; test
-- [ ] Nama pelatih hanya tampil setelah anggota menyetujui; kolom persetujuan untuk anggota
-- [ ] Tab Profil di admin SSB: editor, unggah logo dan sampul, pratinjau, tombol terbitkan
-- [ ] Tab Galeri di admin SSB: unggah, urutkan, tandai foto yang terbit
-- [ ] Peta pemetaan domain sendiri ke SSB, dengan verifikasi kepemilikan domain
-- [ ] Aturan penanda terbit berlaku juga pada hasil mesin pencari: profil belum terbit tidak ter-index
-- [ ] Indikator untuk orang tua: berapa persen pengunjung profil yang jadi daftar akun **(butuh keputusan)**
+- [x] Putuskan bentuk: landing terpisah dari SSB MS, konten diatur di SSB MS (diputuskan pemilik, 23 Okt 2026)
+- [ ] Skema Zod untuk konten situs di `packages/shared`, dipakai API, SSB MS, dan landing
+- [ ] Tabel `site_content` (draf dan terbit), `site_gallery`, `site_domain`, `trial_registration`; RLS dan test isolasi
+- [ ] Endpoint publik `GET /public/site/:slug`: hanya versi terbit, 404 bila belum terbit; test bahwa data pemain tidak pernah ikut
+- [ ] Endpoint admin `GET/PUT /site` dan `POST /site/publish`; izin `site.manage`; test per role
+- [ ] Galeri: unggah, hapus, urutkan, tandai terbit; jalur baca publik hanya untuk galeri (foto pemain tetap privat)
+- [ ] `POST /public/trial` dengan batas laju dan kolom jebakan bot; test batas laju
+- [ ] Kotak masuk Pendaftar di SSB MS: daftar, ubah status, hubungi lewat WhatsApp, jadikan undangan orang tua; izin `trial.manage`
+- [ ] Tab Konten situs di SSB MS: editor per bagian, bahasa ID dan EN, pratinjau draf, tombol Terbitkan
+- [ ] Program, pelatih, dan fasilitas diturunkan dari KU, anggota, dan lokasi, bisa ditimpa admin; pelatih hanya tampil setelah setuju
+- [ ] Landing: ambil desain tim (`ssb-family-united`), foto ikut ter-build, data dari API, formulir trial tersambung
+- [ ] Landing: build statis otomatis saat Terbitkan (sekitar 10 detik) dan disajikan Nginx
+- [ ] Isi asli dari tim menggantikan data contoh (klaim pemain, beasiswa, lisensi, alamat, email) dan foto milik akademi **(butuh keputusan)**
+- [ ] Putuskan nama pelatih dan biaya SPP tampil publik atau tidak **(butuh keputusan)**
 
 ## L. PWA dan aplikasi mobile
 
@@ -164,10 +165,9 @@ Detail di `docs/mobile.md`. Fase 2 untuk PWA dan push, fase 3 untuk aplikasi nat
 Detail di `docs/email.md`. Server email milik sendiri di zukelabs (`mail.zukelabs.web.id`) sudah melayani beberapa domain.
 
 - [x] Domain `familyunitedfa.com` terdaftar di mail stack: domain, 3 mailbox, dan kunci DKIM selektor `family`; email uji keluar dengan tanda tangan DKIM yang benar
-- [ ] Record DNS `familyunitedfa.com`: A untuk `mail`, MX, SPF, DKIM, dan DMARC (domain belum aktif di DNS, dicek 21 Oktober 2026)
-- [x] Vhost Nginx untuk `familyunitedfa.com` dan `www.familyunitedfa.com` di server zukelabs, meneruskan ke web port 3111
-- [ ] Terbitkan sertifikat Let's Encrypt untuk `familyunitedfa.com` setelah DNS terpasang (`certbot --nginx`)
-- [ ] Tambahkan domain akademi ke `ALLOWED_ORIGINS` di `.env` server bila portal profil memakai origin sendiri
+- [ ] Record email di DNS `familyunitedfa.com` (dikelola di Domainesia): MX ke `mail.zukelabs.web.id`, SPF, DKIM selektor `family`, DMARC, dan A untuk `mail` yang menunjuk ke mail server (sekarang MX masih bawaan `0 familyunitedfa.com` dan A `mail` menunjuk ke server landing, dicek 23 Oktober 2026)
+- [x] Domain `familyunitedfa.com` sudah mengarah ke server landing `124.156.192.17` dengan sertifikat Let's Encrypt (terbit 23 Oktober 2026); vhost sementara di zukelabs dihapus
+- [ ] Pasang situs landing di server `124.156.192.17` (menggantikan halaman PHP kosong di `/var/www/app`)
 - [x] `SMTP_URL` dan `MAIL_FROM` untuk SSB App di server zukelabs; email uji terkirim, tautan lupa kata sandi berjalan
 - [ ] Atur SPF `zukelabs.web.id` agar menyertakan IP server (sekarang masih `include:spf.kirim.email ~all`)
 - [ ] Pengaturan SMTP per SSB, supaya tiap akademi bisa mengirim dari domainnya sendiri
@@ -181,4 +181,7 @@ Detail di `docs/email.md`. Server email milik sendiri di zukelabs (`mail.zukelab
 - [ ] Deploy commit `4b50669` (tampilan memuat) ke server zukelabs
 - [x] Kata sandi 28 akun di server zukelabs disetel ke kata sandi contoh `ContohSSB-2026` atas permintaan pemilik; sesi lama tidak dicabut
 - [ ] Ganti kata sandi contoh di server zukelabs sebelum data pemain sungguhan masuk (kata sandi itu tertulis di repo)
-- [ ] Terapkan desain dari tim (AI Studio) ke web: terima berkas desain, petakan layar ke API yang ada, terjemahkan token ke CSS, tulis ulang komponen di Solid **(butuh keputusan)**
+- [x] Desain landing dari tim (`ssb-family-united`) ditinjau: dipakai untuk landing terpisah (bagian K), bukan menggantikan tampilan Garuda Muda di SSB MS
+- [x] Server landing `124.156.192.17` (Ubuntu 24.04, Nginx, PHP 8.5, PostgreSQL 16 kosong, Certbot) bisa diakses lewat alias SSH `fufa` dengan kunci; kredensial ada di `docs/krendensial.txt` yang diabaikan git
+- [ ] Ganti kata sandi pengguna `ubuntu` di server landing dan matikan login sandi SSH (sekarang kata sandi tertulis di berkas teks)
+- [ ] Putuskan apakah SSB MS ikut dipindah ke server landing, atau tetap di zukelabs **(butuh keputusan)**

@@ -8,3 +8,6 @@ dist/
 .DS_Store
 coverage/
 uploads/
+
+# Kredensial server, jangan di-commit
+docs/krendensial.txt

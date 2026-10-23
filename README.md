@@ -21,7 +21,7 @@ Dokumen rancangan:
 |---|---|
 | `docs/rancangan.md` | Visi, scope, modul, model data, paket, roadmap, tech stack |
 | `docs/checklist.md` | Daftar kerja terukur per bagian, dengan kriteria selesai |
-| `docs/profil.md` | Portal profil publik akademi (fase 3) |
+| `docs/profil.md` | Landing page akademi: situs terpisah, konten diatur di SSB MS |
 | `docs/mobile.md` | PWA dan aplikasi native untuk pelatih dan orang tua (fase 2-3) |
 | `docs/email.md` | Email domain akademi di server zukelabs, termasuk daftar record DNS |
 | `docs/spp.md` | Modul tagihan SPP dan pembayaran manual |

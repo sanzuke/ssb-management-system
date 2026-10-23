@@ -63,7 +63,7 @@ MVP mencakup semua yang dibutuhkan untuk satu siklus pengembangan pemain: data p
 
 - Tagihan SPP, pembayaran online, gaji pelatih dan kasbon, aplikasi mobile native (fase 2)
 - Event dan pertandingan, termasuk statistik pertandingan (fase 2)
-- Pembukuan, neraca, laba rugi, portal profil publik akademi, multi-cabang (fase 3)
+- Pembukuan, neraca, laba rugi, multi-cabang (fase 3); landing page akademi dikerjakan lebih awal
 - AI dan Computer Vision (fase 4)
 
 ## Modul MVP
@@ -141,11 +141,11 @@ Semua entitas berada di bawah satu SSB (tenant), dan assessment dihubungkan ke p
 
 Paket mengikuti fase pengembangan: tiap fase membuka satu lapisan fitur, dan harga belum ditetapkan.
 
-| Paket (ususan) | Fase | Isi |
+| Paket (usulan) | Fase | Isi |
 | --- | --- | --- |
 | Dasar | 1 | Pemain, pelatih, absensi, assessment, rapor, portal orang tua, kartu pemain |
 | Operasional | 2 | Semua isi Dasar, ditambah SPP, pembayaran online, pengingat WhatsApp, event, gaji pelatih |
-| Akademi | 3 | Semua isi Operasional, ditambah pembukuan, portal profil publik, multi-cabang, staff dan otoritas, analitik lanjutan |
+| Akademi | 3 | Semua isi Operasional, ditambah pembukuan, landing page akademi, multi-cabang, staff dan otoritas, analitik lanjutan |
 
 Sebagai pembanding, [Inscout.id](https://inscout.id/) menjual paket Pro Rp199.000 dan Elite Rp450.000 per bulan, harga tetap per akademi tanpa batas jumlah pemain. Paket Free mereka sudah ditutup karena kuotanya habis (dicek 15 Oktober 2026).
 
@@ -163,7 +163,7 @@ Roadmap dibagi empat fase: MVP berfokus pada pengembangan pemain, dan AI serta C
 | --- | --- | --- | --- |
 | 1 (MVP) | Pengembangan pemain | Akun, role, tenant; pemain dan pelatih; jadwal dan absensi; assessment dan rapor; portal orang tua; kartu pemain QR | Web mobile-first, belum aplikasi native |
 | 2 | Administrasi dasar | Tagihan SPP; pembayaran QRIS/VA; pengingat WhatsApp; event dan pertandingan; gaji pelatih dan kasbon; PWA yang bisa dipasang di layar HP; notifikasi push | PWA terpasang, notifikasi push; aplikasi native menyusul |
-| 3 | Bisnis dan keuangan | Pembukuan dan laporan; portal profil publik akademi; multi-cabang; staff dan otoritas; analitik lanjutan | Mode offline, dashboard admin di HP, aplikasi native di toko |
+| 3 | Bisnis dan keuangan | Pembukuan dan laporan; landing page akademi (dikerjakan lebih awal); multi-cabang; staff dan otoritas; analitik lanjutan | Mode offline, dashboard admin di HP, aplikasi native di toko |
 | 4 | AI dan Computer Vision | Ringkasan rapor oleh AI; visual pemain (CV); butuh dataset video | Unggah video latihan, ringkasan AI di HP |
 
 Urutan fase tidak berskala waktu. Tanggal dan kriteria lanjut antar fase belum ditetapkan.
@@ -196,19 +196,19 @@ Ide lain yang bisa dipertimbangkan setelah fase di atas berjalan: pencatatan sko
 
 Pilihan bentuk aplikasinya, PWA dulu atau langsung native, ada di `docs/mobile.md` dan bagian Tech stack.
 
-## Portal profil publik akademi
+## Landing page akademi
 
-Aplikasi menjawab pertanyaan orang tua tentang anaknya. Portal profil menjawab pertanyaan calon orang tua tentang akademi: apakah akademi ini ada, programnya apa, dan cara mendaftarnya. Dua hal berbeda, dan yang kedua belum ada.
+Aplikasi menjawab pertanyaan orang tua tentang anaknya. Landing page menjawab pertanyaan calon orang tua tentang akademi: apakah akademi ini ada, programnya apa, dan cara mendaftarnya. Dua hal berbeda, dan yang kedua belum ada.
 
-Rancangan lengkap ada di `docs/profil.md`. Bentuk dasarnya:
+Rancangan lengkap ada di `docs/profil.md`. Keputusannya:
 
-- Satu halaman publik per SSB di alamat `/s/<slug>`, mobile-first, dengan identitas, lokasi, kontak, program, tim, galeri, dan langkah pendaftaran.
-- Admin SSB mengisi profil lewat tab **Profil**, mengunggah logo, sampul, dan galeri, lalu menekan terbitkan. Yang belum terbit tidak tampil dan tidak ter-index.
-- Data pemain tidak pernah tampil publik: nama, foto, absensi, nilai, rapor, dan tagihan dikecualikan. Nama pelatih hanya tampil setelah anggota yang bersangkutan menyetujui.
-- Program, tim, dan fasilitas diturunkan dari data yang sudah ada (KU, sesi latihan, anggota, lokasi), bukan disalin.
-- Bentuk akhir bisa memakai domain sendiri per SSB, misalnya `familyunitedfa.com`, lewat tabel pemetaan domain ke SSB. Fase pertama memakai sub-path supaya tidak menambah beban operasional per akademi.
+- Landing berdiri sendiri di domain akademi (mis. `familyunitedfa.com`), terpisah dari SSB MS. Tampilannya dari desain tim di repo `ssb-family-united`.
+- Isinya diatur di SSB MS (tab **Konten situs**, draf lalu **Terbitkan**) dan dibaca landing lewat API publik. Saat terbit, landing dibangun ulang sebagai halaman statis.
+- Pendaftaran trial dari landing masuk ke kotak masuk **Pendaftar** di SSB MS.
+- Data pemain tidak pernah tampil publik. Nama pelatih hanya tampil setelah anggota yang bersangkutan menyetujui.
+- Program, pelatih, dan fasilitas diturunkan dari data yang sudah ada (KU, anggota, lokasi), dan admin bisa menimpa teksnya.
 
-Portal ini masuk fase 3, bersama pembukuan dan multi-cabang.
+Landing dikerjakan lebih awal dari fase 3 karena akademi pertama membutuhkannya sekarang. Fitur lain dari bagian ini (multi-cabang, pembukuan) tetap di fase 3.
 
 ## Kebutuhan non-fungsional
 
@@ -314,7 +314,7 @@ Pertanyaan yang perlu dijawab sebelum membangun:
 - [ ] Kriteria untuk lanjut dari satu fase ke fase berikutnya
 - [ ] Harga dan struktur paket
 - [ ] Bentuk aplikasi mobile: PWA dulu atau langsung native, dan kalau native, Capacitor atau Flutter
-- [ ] Bentuk portal profil: sub-path aplikasi, subdomain, atau domain sendiri per SSB
+- [x] Bentuk landing page: terpisah dari SSB MS, konten diatur di SSB MS (diputuskan 23 Okt 2026)
 - [ ] Apakah nama pelatih ditampilkan di profil publik, dan bagaimana persetujuannya
 - [ ] Apakah tarif SPP ditampilkan di profil publik
 - [ ] Apakah orang tua boleh absen sendiri lewat QR
