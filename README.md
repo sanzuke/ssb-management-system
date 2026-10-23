@@ -110,7 +110,7 @@ bun run db:seed -- --reset   # hapus SSB contoh dan akunnya, lalu buat ulang
 docker compose --profile seed run --rm seed   # lewat Docker Compose
 ```
 
-Akun contoh (domain `garudamuda.test`): `admin@`, `korlas@`, `budi@` (KU-10), `sari@` (KU-12 dan KU-8), `ortu01@` sampai `ortu23@`. Kata sandi semuanya `SEED_PASSWORD`; bawaan lokal ada di `tools/seed.ts`.
+Akun contoh (domain `familyunitedfa.com`; `admin@familyunitedfa.com` juga kotak surat sungguhan, jadi email reset sandi ke alamat itu benar-benar masuk, sedangkan alamat lain tidak punya kotak): `admin@`, `korlas@`, `budi@` (KU-10), `sari@` (KU-12 dan KU-8), `ortu01@` sampai `ortu23@`. Kata sandi semuanya `SEED_PASSWORD`; bawaan lokal ada di `tools/seed.ts`.
 
 Foto contoh (siluet berwarna) ikut dibuat di folder `uploads/` untuk sebagian besar pemain; sisanya sengaja tanpa foto agar avatar inisial terlihat.
 

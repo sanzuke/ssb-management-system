@@ -30,7 +30,7 @@ if (produksi && !process.env.SEED_PASSWORD) {
 }
 const PASSWORD = process.env.SEED_PASSWORD ?? "ContohSSB-2026";
 const SLUG = "garuda-muda";
-const DOMAIN = "garudamuda.test";
+const DOMAIN = "familyunitedfa.com";
 const reset = process.argv.includes("--reset");
 
 // ---- Pembantu ----

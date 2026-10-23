@@ -160,4 +160,4 @@ Setelah `SMTP_URL` diisi, halaman Lupa kata sandi mengirim tautan reset lewat em
 
 - Satu `SMTP_URL` untuk seluruh deployment. Kalau nanti tiap SSB punya domain sendiri dan ingin email dari domainnya masing-masing, perlu pengaturan SMTP per SSB, mirip pengaturan Fonnte yang sudah ada di `docs/fonnte.md`. Itu belum dibuat.
 - Tidak ada otomatisasi penerbitan DKIM ke DNS. Record DKIM ditulis manual, atau lewat API DNS bila perlu berulang.
-- Email keluar dari `garudamuda.test` dan domain lain tanpa MX-nya sendiri ditolak relay. Itu perilaku normal, bukan cacat.
+- Email keluar ke domain uji seperti `garudamuda.test` dan domain lain tanpa MX-nya sendiri ditolak relay. Itu perilaku normal, bukan cacat.
