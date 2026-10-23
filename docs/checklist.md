@@ -166,7 +166,8 @@ Detail di `docs/mobile.md`. Fase 2 untuk PWA dan push, fase 3 untuk aplikasi nat
 Detail di `docs/email.md`. Server email milik sendiri di zukelabs (`mail.zukelabs.web.id`) sudah melayani beberapa domain.
 
 - [x] Domain `familyunitedfa.com` terdaftar di mail stack: domain, 3 mailbox, dan kunci DKIM selektor `family`; email uji keluar dengan tanda tangan DKIM yang benar
-- [ ] Record email di DNS `familyunitedfa.com` (dikelola di Domainesia): MX ke `mail.zukelabs.web.id`, SPF, DKIM selektor `family`, DMARC, dan A untuk `mail` yang menunjuk ke mail server (sekarang MX masih bawaan `0 familyunitedfa.com` dan A `mail` menunjuk ke server landing, dicek 23 Oktober 2026)
+- [x] Mail server `mail.familyunitedfa.com` terpasang di fufa (Postfix, Dovecot, OpenDKIM, sertifikat; uji kirim, IMAP, dan DKIM lolos); kirim keluar lewat relay Brevo
+- [ ] Pemilik: jalankan `sudo brevo-key` di fufa, sahkan domain di Brevo, buka port 25/465/587/993 di firewall konsol VPS, dan isi record DNS di Domainesia (MX, SPF, DKIM `fufa`, DMARC, record Brevo); lalu arahkan `SMTP_URL` SSB ke mail.familyunitedfa.com (daftar di `docs/email.md`)
 - [x] Domain `familyunitedfa.com` sudah mengarah ke server landing `124.156.192.17` dengan sertifikat Let's Encrypt (terbit 23 Oktober 2026); vhost sementara di zukelabs dihapus
 - [x] Situs landing terpasang di `124.156.192.17` (`/var/www/landing`, Nginx, HTTPS, www dan http dialihkan); halaman PHP kosong digantikan, konfigurasi lama dicadangkan di `/root/nginx-app.bak`
 - [ ] Pembaruan landing masih manual (build lokal lalu kirim berkas) karena repo `ssb-family-united` privat; perlu deploy key di GitHub agar server bisa menarik sendiri

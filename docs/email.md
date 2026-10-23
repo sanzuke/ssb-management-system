@@ -1,163 +1,103 @@
 # Email untuk domain akademi
 
-Rancangan dan catatan setup email untuk domain akademi, memakai mail stack yang sudah ada di server zukelabs (`43.156.92.240`, `mail.zukelabs.web.id`).
+Email `familyunitedfa.com` berjalan di server yang sama dengan SSB MS (`fufa`, `124.156.192.17`, hostname `mail.familyunitedfa.com`), tidak lagi bergantung pada server zukelabs. Menerima email dari luar langsung di server ini; mengirim ke luar lewat relay SMTP Brevo.
 
-Status: setup `familyunitedfa.com` sudah jalan di sisi server. Record DNS belum dipasang karena domainnya belum aktif.
+## Kenapa memakai relay untuk kirim keluar
 
-## Satu VPS bisa melayani banyak domain
+Penyedia VPS memblokir koneksi keluar ke port 25 (diuji dari `fufa`: port 25 Gmail tertutup, 465 dan 587 terbuka) dan alamat IP-nya tidak punya reverse DNS yang cocok. Kirim langsung dari server akan ditolak atau masuk spam. Karena itu Postfix meneruskan semua email keluar ke `smtp-relay.brevo.com:587`, sedangkan email masuk tetap diterima langsung di port 25.
 
-Bisa, dan itu cara kerja standar. Satu server email (Postfix + Dovecot + OpenDKIM di sini) menerima dan mengirim email untuk banyak domain sekaligus. Yang berbeda per domain hanya data di database, kunci DKIM, dan record DNS. Yang dipakai bersama: satu IP, satu hostname server, satu reverse DNS, dan satu sertifikat TLS.
+```mermaid
+flowchart LR
+  L[Pengirim luar] -->|SMTP 25| P[Postfix fufa]
+  P -->|LMTP| D[Dovecot: kotak surat]
+  K[Klien email] -->|IMAP 993| D
+  A[SSB MS / klien] -->|587 atau 465 + sandi| P
+  P -->|DKIM ditandatangani| R[Relay Brevo 587]
+  R --> T[Penerima luar]
+```
 
-Yang perlu diingat:
+## Yang terpasang di fufa
 
-- Satu domain per mailbox. Alamat seperti `noreply@familyunitedfa.com` milik domain itu saja.
-- PTR (reverse DNS) cukup satu per IP. Hostname di PTR sebaiknya sama dengan yang diperkenalkan server saat mengirim (HELO). Tidak harus sama dengan domain pengirim.
-- Reputasi IP dibagi antar domain. Kalau satu domain dilaporkan spam, domain lain di IP itu ikut tertahan.
-- Port 25 keluar sering diblokir bawaan VPS. Di server ini port 25 terbuka, jadi email keluar bisa langsung dipakai.
-
-## Mail stack yang ada
-
-| Komponen | Peran | Status |
+| Komponen | Peran | Port |
 |---|---|---|
-| Postfix | Penerima dan pengirim SMTP | aktif, port 25, 465, 587 |
-| Dovecot | POP3 dan IMAP untuk pembacaan mailbox | aktif, port 143, 993, 110, 995 |
-| OpenDKIM | Penandatanganan email keluar | aktif, socket 127.0.0.1:8891 |
-| PostfixAdmin | Manage domain dan mailbox | aktif, `mail-admin.zukelabs.web.id` |
-| MySQL | Penyimpanan domain dan mailbox | aktif, database `postfixadmin` |
-| Certbot | Sertifikat TLS | aktif, Let's Encrypt untuk `mail.zukelabs.web.id` |
+| Postfix | Terima dan kirim SMTP; domain virtual `familyunitedfa.com` | 25 (masuk), 587 STARTTLS dan 465 TLS (kirim, wajib login) |
+| Dovecot | IMAP, pengiriman lokal (LMTP), autentikasi | 993 |
+| OpenDKIM | Tanda tangan email keluar, selektor `fufa`, RSA 2048 | 127.0.0.1:8891 |
+| Certbot | Sertifikat `mail.familyunitedfa.com` (validasi lewat vhost Nginx `mail.familyunitedfa.com`), diperbarui otomatis dan memuat ulang layanan | |
 
-Konfigurasi penting: Postfix memakai `virtual_mailbox_domains = mysql:/etc/postfix/mysql/virtual_domains.cf`, jadi menambah domain cukup dengan satu baris di database. Tidak perlu `postmap` manual.
+Kotak surat: `noreply@` (untuk aplikasi), `admin@`, `info@`. Alias `postmaster@`, `hostmaster@`, `abuse@`, `webmaster@` mengarah ke `admin@`. Kata sandi acak ada di `/root/mail-passwords.txt` di server (hanya root). Data: `/var/mail/vmail/familyunitedfa.com/<nama>/Maildir`.
 
-Kunci DKIM ada di `/etc/dkimkeys`, dua entri di `keytable` dan `signingtable`:
+Berkas konfigurasi: `/etc/postfix/main.cf`, `/etc/postfix/vmailbox` (daftar kotak surat), `/etc/postfix/valias`, `/etc/dovecot/dovecot.conf`, `/etc/dovecot/users`, `/etc/opendkim.conf`.
 
-```
-mail._domainkey.zukelabs.web.id zukelabs.web.id:mail:/etc/dkimkeys/mail.private
-family._domainkey.familyunitedfa.com familyunitedfa.com:family:/etc/dkimkeys/family.private
-```
+## Memasang kunci Brevo (sekali)
 
-## Domain familyunitedfa.com
-
-Sisi server sudah disiapkan pada 21 Oktober 2026.
-
-| Yang dibuat | Nilai |
-|---|---|
-| Domain | `familyunitedfa.com`, deskripsi "Family United Football Academy" |
-| Mailbox | `noreply@familyunitedfa.com` (untuk aplikasi), `admin@`, `info@` |
-| Selektor DKIM | `family`, RSA 2048 bit, kunci privat di `/etc/dkimkeys/family.private` |
-| Tanda tangan | `*@familyunitedfa.com` |
-
-Domain `familyunitedfa.com` belum aktif di DNS saat dokumen ini ditulis (NXDOMAIN, dicek 21 Oktober 2026). Record di bawah harus dipasang lebih dulu, baru email bisa keluar ke internet dan masuk dari luar.
-
-### Record DNS
-
-Semua di panel DNS Domainesia (tanpa proxy).
-
-| Tipe | Nama | Isi | TTL |
-|---|---|---|---|
-| A | `mail` | `43.156.92.240` | 3600 |
-| MX | `@` | `10 mail.zukelabs.web.id` | 3600 |
-| TXT | `@` | `v=spf1 mx ip4:43.156.92.240 -all` | 3600 |
-| TXT | `mail._domainkey.family` | kunci DKIM (lihat di bawah) | 3600 |
-| TXT | `_dmarc.familyunitedfa.com` | `v=DMARC1; p=none; rua=mailto:admin@familyunitedfa.com` | 3600 |
-
-Nama TXT DKIM diisi `family._domainkey` untuk host `familyunitedfa.com`, jadi label penuhnya `family._domainkey.familyunitedfa.com`. Pemeriksaan:
+Kunci SMTP Brevo tidak disimpan di repo atau percakapan. Di server:
 
 ```
-dig +short TXT family._domainkey.familyunitedfa.com
+sudo brevo-key
 ```
 
-Kunci publik (dari `/etc/dkimkeys/family.txt`, sudah dipecah jadi satu baris):
+Perintah itu menanyakan kunci (tidak tampil saat diketik), menyimpannya di `/etc/postfix/sasl_passwd` (0600), mengaktifkan relay, dan mengirim antrean yang tertahan. Login relay: `bf9c1e001@smtp-brevo.com`. Kunci dibuat di Brevo: SMTP & API, tab SMTP, Generate a new SMTP key.
+
+Di Brevo, domain pengirim juga harus disahkan (Senders, Domains & Dedicated IPs, Add a domain `familyunitedfa.com`). Brevo memberi beberapa record DNS (kode `brevo-code` dan DKIM milik Brevo); pasang juga di Domainesia, kalau tidak, Brevo menolak pengirim `@familyunitedfa.com`.
+
+## Record DNS di Domainesia
+
+| Tipe | Nama | Isi |
+|---|---|---|
+| A | `mail` | `124.156.192.17` (sudah ada) |
+| MX | `@` | `10 mail.familyunitedfa.com` (ganti yang lama `0 familyunitedfa.com`) |
+| TXT | `@` | `v=spf1 mx ip4:124.156.192.17 include:spf.brevo.com -all` |
+| TXT | `fufa._domainkey` | kunci DKIM di bawah |
+| TXT | `_dmarc` | `v=DMARC1; p=none; rua=mailto:admin@familyunitedfa.com` |
+| (dari Brevo) | | record pengesahan domain Brevo |
+
+Kunci DKIM (satu baris; kalau panel memecahnya otomatis, itu normal):
 
 ```
-v=DKIM1; h=sha256; k=rsa; s=email; p=MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAzZY7lgslOpXLRklRY/Ylx+9C6WtIjsJ1+rgrSTPndW+SSunl8jObNszF5/V9PH99jXtCO2gqUI0lXGS3WqGxK5Zi6zKMDyvtGhje1FnZnkRCe9MrTsr1d65Cu0YwujtapKQpVARVeZ8ulk0GsRVJCkNVOXXz+mxNLjCphEIR5rW39b9gMV86i71ssNbtKUzGYYYnTZdJwEBDp9Y1nWOwRpteuA3tb3F43WgWYEDVNRdhXjgsAH8VWEC+OAPd7oQiSa4YaI6MFHLE7/zRwlrgUt1+Gmgip6It9Bidgf4KvjjlWIawvnVwBDO9uADKjdWEaBhK9CdGjGAPrK/2N/qDrwIDAQAB
+v=DKIM1;h=sha256;k=rsa;p=MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAwv3cPV/fi2Gf+w/PrYPPu16EvprMmd9Dh4kbz1ZExf2K7ceG2CLutX20YVpaSVJm7eRbM/KxOMqHtFMznseyecqJmBzYqUPXKMkQExtexuj9Jgv7F2YS/nx93+YAQpJV1IvvGK+EgNkE9UlUTRfY+2vxv57fixCRhdtK2LK54cV+BsZ3WPPAOjVuiEYAyF/4bGNRPLrDCsuTnGuj38lLPN1eBlRKKAGTunD9TUYyAg2iQzlB1ImqJ3y/vu2quRTJI0gUQsZjUAPCN32mvtZLIXLeYnPcUylRUBrLJfAZUpkJyQGJJZeG85SXFeRCy65YOyFcTbP0X8ahRvhHiGBHnwIDAQAB
 ```
 
-Catatan: DNS `familyunitedfa.com` dikelola di Domainesia (bukan Cloudflare). Panel Domainesia memecah TXT yang panjang secara otomatis; itu normal dan tetap dibaca sebagai satu nilai.
+Firewall: `ufw` di server sudah membuka 25, 465, 587, 993. Firewall di konsol penyedia VPS juga harus membuka port TCP yang sama; itu hanya bisa diatur dari konsolnya.
 
-Situs landing domain ini ada di server lain (`124.156.192.17`), dan record `@` serta `www` sudah menunjuk ke sana. Jadi yang harus diubah hanya record email:
+Reverse DNS (PTR) `124.156.192.17` → `mail.familyunitedfa.com` diatur dari konsol penyedia. Tidak wajib untuk email keluar karena memakai relay, tetapi membantu bila ada pengirim yang memeriksa server masuk.
 
-| Tipe | Nama | Sekarang (23 Okt 2026) | Seharusnya |
-|---|---|---|---|
-| MX | `@` | `0 familyunitedfa.com` (bawaan) | `10 mail.zukelabs.web.id` |
-| A | `mail` | `124.156.192.17` (server landing) | hapus; MX sudah menunjuk ke `mail.zukelabs.web.id` |
-| TXT | `@` | belum ada | SPF, sesuai tabel di atas |
-| TXT | `family._domainkey` | belum ada | kunci DKIM, sesuai di atas |
-| TXT | `_dmarc` | belum ada | DMARC, sesuai di atas |
+## Klien email
 
-Vhost sementara untuk domain ini yang sempat dibuat di server zukelabs sudah dihapus.
+IMAP `mail.familyunitedfa.com` port 993 (SSL/TLS), SMTP `mail.familyunitedfa.com` port 587 (STARTTLS) atau 465 (SSL/TLS). Nama pengguna adalah alamat lengkap.
 
-### Verifikasi
+## Menghubungkan SSB App
 
-Setelah DNS dipasang:
+Aplikasi memakai satu `SMTP_URL` dan satu `MAIL_FROM` (lihat `apps/api/src/mail.ts`):
 
 ```
-# SPF dan DKIM terbaca
-dig +short TXT familyunitedfa.com
-dig +short TXT family._domainkey.familyunitedfa.com
-
-# email keluar ditandatangani
-echo "uji" | mail -s "uji" -r noreply@familyunitedfa.com info@familyunitedfa.com
-sudo journalctl -u opendkim --since '1 min ago' | grep DKIM-Signature
-```
-
-Tanda tangan yang benar muncul seperti ini:
-
-```
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=familyunitedfa.com;
-	s=family; t=...;
-```
-
-## Menhubungkan SSB App
-
-Aplikasi memakai satu `SMTP_URL` dan satu `MAIL_FROM` untuk seluruh deployment (lihat `apps/api/src/mail.ts`). Isi `.env` di server:
-
-```
-SMTP_URL=smtps://noreply%40familyunitedfa.com:<sandi>@mail.zukelabs.web.id:465
+SMTP_URL=smtps://noreply%40familyunitedfa.com:<sandi>@mail.familyunitedfa.com:465
 MAIL_FROM="Family United FA <noreply@familyunitedfa.com>"
 ```
 
-Bagian `noreply%40familyunitedfa.com` harus di-encode karena tanda `@` memisahkan user dan host. Karakter lain yang perlu di-encode: `@` jadi `%40`, `:` jadi `%3A`, `/` jadi `%2F`, `#` jadi `%23`.
+`@` di nama pengguna ditulis `%40`; karakter lain yang perlu di-encode: `:` `%3A`, `/` `%2F`, `#` `%23`.
 
-Sudah dipasang di server zukelabs pada 21 Oktober 2026, dan email uji terkirim dengan tanda tangan DKIM yang benar.
+## Pemeriksaan
 
-Setelah `SMTP_URL` diisi, halaman Lupa kata sandi mengirim tautan reset lewat email. Tanpa `SMTP_URL`, halaman itu meminta pengguna menghubungi admin SSB.
+Sudah diuji di server pada 23 Oktober 2026: login SMTP 587 dan 465, pengiriman antar kotak surat lokal, pembacaan lewat IMAP 993, dan tanda tangan DKIM (`d=familyunitedfa.com; s=fufa`) pada email keluar.
 
-## Menambah domain lain
+Setelah DNS dan kunci Brevo terpasang:
 
-1. Daftarkan domain di PostfixAdmin:
+```
+dig +short MX familyunitedfa.com
+dig +short TXT familyunitedfa.com
+dig +short TXT fufa._domainkey.familyunitedfa.com
+sudo mailq                      # antrean kosong bila semua terkirim
+sudo journalctl -u postfix --since '5 min ago' | grep -E 'status=(sent|deferred|bounced)'
+```
 
-   ```
-   sudo postfixadmin-cli domain add <domain> --description "<nama>" --aliases 0 --mailboxes 0 --backupmx 0 --active 1
-   ```
+## Menambah kotak surat
 
-2. Buat mailbox:
-
-   ```
-   sudo postfixadmin-cli mailbox add <alamat>@<domain> --password '<sandi>' --password2 '<sandi>' --name "<nama>" --quota 0 --active 1
-   ```
-
-   Syarat kata sandi PostfixAdmin: minimal 5 karakter, mengandung huruf dan angka, dan minimal 2 digit.
-
-3. Buat kunci DKIM:
-
-   ```
-   sudo -u opendkim opendkim-genkey --bits=2048 --domain=<domain> --directory=/etc/dkimkeys --selector=<selektor> --restrict
-   ```
-
-   Folder `/etc/dkimkeys` hanya bisa dibaca pengguna `opendkim`, jadi perintah harus dijalankan sebagai user itu.
-
-4. Daftarkan di `keytable` dan `signingtable`, lalu muat ulang OpenDKIM:
-
-   ```
-   echo 'family._domainkey.familyunitedfa.com familyunitedfa.com:family:/etc/dkimkeys/family.private' | sudo tee -a /etc/dkimkeys/keytable
-   echo '*@familyunitedfa.com family._domainkey.familyunitedfa.com' | sudo tee -a /etc/dkimkeys/signingtable
-   sudo systemctl reload opendkim
-   ```
-
-5. Pasang record DNS MX, SPF, DKIM, dan DMARC seperti di atas.
+Tambah baris di `/etc/postfix/vmailbox` (`alamat domain/nama/Maildir/`), jalankan `sudo postmap /etc/postfix/vmailbox`, tambah baris di `/etc/dovecot/users` dengan hash dari `doveadm pw -s SHA512-CRYPT`, buat folder `/var/mail/vmail/familyunitedfa.com/<nama>` milik `vmail`, lalu `sudo systemctl reload postfix dovecot`.
 
 ## Batasan
 
-- Satu `SMTP_URL` untuk seluruh deployment. Kalau nanti tiap SSB punya domain sendiri dan ingin email dari domainnya masing-masing, perlu pengaturan SMTP per SSB, mirip pengaturan Fonnte yang sudah ada di `docs/fonnte.md`. Itu belum dibuat.
-- Tidak ada otomatisasi penerbitan DKIM ke DNS. Record DKIM ditulis manual, atau lewat API DNS bila perlu berulang.
-- Email keluar ke domain uji seperti `garudamuda.test` dan domain lain tanpa MX-nya sendiri ditolak relay. Itu perilaku normal, bukan cacat.
+- Satu `SMTP_URL` untuk seluruh deployment. Email dari domain tiap SSB yang berbeda butuh pengaturan SMTP per SSB, belum dibuat.
+- Paket gratis Brevo dibatasi jumlah email per hari; cukup untuk reset sandi dan undangan SSB kecil.
+- Tidak ada webmail dan penyaring spam untuk email masuk; cukup untuk beberapa kotak surat, belum untuk lalu lintas besar.
+- Mail server zukelabs (`mail.zukelabs.web.id`) masih mengenal domain ini sampai MX diganti, dan tidak lagi diperlukan setelah itu.
