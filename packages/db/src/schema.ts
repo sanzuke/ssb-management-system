@@ -6,6 +6,7 @@ import {
   foreignKey,
   index,
   integer,
+  jsonb,
   pgEnum,
   pgPolicy,
   pgRole,
@@ -643,5 +644,62 @@ export const developmentPlanItem = pgTable(
     foreignKey({ columns: [t.ssbId, t.periodId], foreignColumns: [period.ssbId, period.id], name: "development_plan_item_period_fk" }),
     foreignKey({ columns: [t.ssbId, t.createdBy], foreignColumns: [appUser.ssbId, appUser.id], name: "development_plan_item_created_by_fk" }),
     tenantPolicy("development_plan_item"),
+  ],
+).enableRLS();
+
+/**
+ * Konten landing page akademi: satu baris per SSB. `draft` disunting admin di SSB MS;
+ * `published` adalah salinan yang dibaca landing lewat API publik (kosong = belum terbit).
+ * Bentuknya didefinisikan oleh `siteContentSchema` di packages/shared.
+ */
+export const siteContent = pgTable(
+  "site_content",
+  {
+    ssbId: ssbId()
+      .primaryKey()
+      .references(() => ssb.id, { onDelete: "cascade" }),
+    draft: jsonb("draft").notNull(),
+    published: jsonb("published"),
+    publishedAt: timestamp("published_at", { withTimezone: true }),
+    publishedBy: uuid("published_by"),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    foreignKey({ columns: [t.ssbId, t.publishedBy], foreignColumns: [appUser.ssbId, appUser.id], name: "site_content_published_by_fk" }).onDelete("set null"),
+    check("site_content_published_pair", sql`(${t.published} is null) = (${t.publishedAt} is null)`),
+    tenantPolicy("site_content"),
+  ],
+).enableRLS();
+
+/** Pendaftaran trial dari landing page, ditulis tanpa sesi (tenant dari kode SSB) dan dibaca admin di kotak masuk Pendaftar. */
+export const trialRegistration = pgTable(
+  "trial_registration",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    ssbId: ssbId().references(() => ssb.id, { onDelete: "cascade" }),
+    /** Kode yang ditunjukkan ke pendaftar, mis. TRL-7K2M9Q; unik per SSB. */
+    code: text("code").notNull(),
+    childName: text("child_name").notNull(),
+    birthDate: date("birth_date").notNull(),
+    gender: text("gender").notNull(),
+    programId: text("program_id"),
+    parentName: text("parent_name").notNull(),
+    phone: text("phone").notNull(),
+    email: text("email"),
+    address: text("address"),
+    preferredSession: text("preferred_session"),
+    applyScholarship: boolean("apply_scholarship").notNull().default(false),
+    notes: text("notes"),
+    status: text("status").notNull().default("baru"),
+    adminNote: text("admin_note"),
+    createdAt: createdAt(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    unique("trial_registration_ssb_code").on(t.ssbId, t.code),
+    index("trial_registration_status_idx").on(t.ssbId, t.status, t.createdAt),
+    check("trial_registration_status", sql`${t.status} in ('baru', 'dihubungi', 'diterima', 'ditolak')`),
+    check("trial_registration_gender", sql`${t.gender} in ('Putra', 'Putri')`),
+    tenantPolicy("trial_registration"),
   ],
 ).enableRLS();

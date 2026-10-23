@@ -17,7 +17,7 @@ flowchart LR
   A["Admin SSB<br/>tab Konten situs"] -->|simpan draf, lalu Terbitkan| B[("PostgreSQL<br/>konten situs, galeri")]
   B --> C["GET /public/site/:slug<br/>hanya versi terbit"]
   C --> D["Landing statis<br/>dibangun ulang saat terbit"]
-  D -->|form trial| E["POST /public/trial<br/>batas laju"]
+  D -->|form trial| E["POST /public/site/:slug/trial<br/>batas laju"]
   E --> F["Kotak masuk Pendaftar<br/>di SSB MS"]
 ```
 
@@ -44,26 +44,30 @@ Satu dokumen JSON per SSB (kolom `jsonb`), dengan dua salinan: draf dan terbit. 
 
 Semua teks punya kolom ID dan EN. Tabel baru:
 
-- `site_content`: `ssb_id` (PK, FK ke `ssb`), `draft` (jsonb), `published` (jsonb), `published_at`, `published_by`, `updated_at`. RLS per SSB.
-- `site_gallery`: `id`, `ssb_id`, `path`, `caption`, `sort`, `published`. Foto memakai penyimpanan yang sama dengan foto pemain, tetapi jalur baca publiknya hanya untuk galeri.
-- `site_domain`: `ssb_id`, `domain` (unik), `verified_at`. Memetakan domain ke SSB untuk API publik.
-- `trial_registration`: `id`, `ssb_id`, data anak dan orang tua, program pilihan, ajukan beasiswa, catatan, `status` (baru, dihubungi, diterima, ditolak), `created_at`. RLS per SSB.
+- `site_content` (sudah ada, migrasi 0020): `ssb_id` (PK, FK ke `ssb`), `draft` (jsonb), `published` (jsonb, kosong = belum terbit), `published_at`, `published_by`, `updated_at`. RLS per SSB.
+- `trial_registration` (sudah ada, migrasi 0020): `id`, `ssb_id`, `code` (TRL-XXXXXX, unik per SSB), data anak dan orang tua, program pilihan, ajukan beasiswa, catatan, `status` (baru, dihubungi, diterima, ditolak), `admin_note`, `created_at`. RLS per SSB.
+- `site_gallery` (belum): `id`, `ssb_id`, `path`, `caption`, `sort`, `published`. Foto memakai penyimpanan yang sama dengan foto pemain, tetapi jalur baca publiknya hanya untuk galeri. Ditunda: landing sekarang memakai foto yang ikut ter-build.
+- `site_domain` (belum): memetakan domain ke SSB. Ditunda: satu landing satu domain, dan landing memakai kode SSB di alamat API.
 
 ## Endpoint
 
-Bagian publik tanpa sesi, dengan cache pendek.
+Bagian publik tanpa sesi. Kode SSB (`slug`) di alamat menentukan SSB-nya; tidak ada input lain yang bisa menunjuk SSB.
 
 | Endpoint | Izin | Fungsi |
 |---|---|---|
-| `GET /public/site/:slug` | publik | Konten terbit, program, pelatih yang setuju, fasilitas |
-| `GET /public/site/:slug/gallery/:id` | publik | Berkas foto galeri |
-| `POST /public/trial` | publik, batas laju | Pendaftaran trial; kolom jebakan bot |
-| `GET/PUT /site` | `site.manage` | Baca dan simpan draf |
-| `POST /site/publish` | `site.manage` | Terbitkan draf, memicu build landing |
-| `POST/DELETE /site/gallery` | `site.manage` | Unggah dan hapus foto galeri |
-| `GET /trials`, `PATCH /trials/:id` | `trial.manage` | Kotak masuk pendaftar dan ubah status |
+| `GET /public/site/:slug` | publik | Konten terbit (`{ slug, ssbName, publishedAt, content }`), cache 60 detik; 404 bila belum terbit |
+| `POST /public/site/:slug/trial` | publik, batas laju | Pendaftaran trial; 201 `{ code }`; hanya diterima bila situs terbit; 5 per jam per IP dan 100 per jam per SSB (429); kolom jebakan `website` terisi dijawab 201 tanpa menyimpan |
+| `GET /site` | `site.manage` | Draf, `dirty` (ada perubahan belum terbit), `published`, `publishedAt` |
+| `PUT /site` | `site.manage` | Simpan draf (divalidasi `siteContentSchema`) |
+| `POST /site/publish` | `site.manage` | Salin draf menjadi versi terbit; 409 bila belum ada draf |
+| `POST /site/unpublish` | `site.manage` | Tarik dari publik; draf tetap |
+| `GET /trials?status=` | `trial.manage` | Kotak masuk pendaftar, terbaru dulu |
+| `PATCH /trials/:id` | `trial.manage` | Ubah status dan catatan admin |
+| `POST/DELETE /site/gallery` | `site.manage` | Unggah dan hapus foto galeri (belum) |
 
 Izin baru: `site.manage` dan `trial.manage` (admin SSB).
+
+CORS: browser landing memanggil API dari origin lain, jadi `/public/*` mengirim header CORS hanya untuk origin di env `LANDING_ORIGINS` (dipisah koma; kosong = tidak ada). Rute admin tidak pernah terbuka lintas origin. Batas laju ada di memori proses; `X-Real-IP` dari Nginx dipakai sebagai alamat pengunjung.
 
 ## Layar di SSB MS
 

@@ -141,6 +141,13 @@
       "when": 1792483790402,
       "tag": "0019_whatsapp_fonnte",
       "breakpoints": true
+    },
+    {
+      "idx": 20,
+      "version": "7",
+      "when": 1792738538232,
+      "tag": "0020_konten_situs",
+      "breakpoints": true
     }
   ]
 }

@@ -128,17 +128,17 @@ Detail di `docs/spp.md`. Dikerjakan lebih awal dari rencana karena SSB percontoh
 Detail di `docs/profil.md`. Dikerjakan lebih awal dari rencana karena akademi pertama membutuhkannya. Landing berdiri sendiri di domain akademi; isinya disunting di SSB MS lewat API publik.
 
 - [x] Putuskan bentuk: landing terpisah dari SSB MS, konten diatur di SSB MS (diputuskan pemilik, 23 Okt 2026)
-- [ ] Skema Zod untuk konten situs di `packages/shared`, dipakai API, SSB MS, dan landing
-- [ ] Tabel `site_content` (draf dan terbit), `site_gallery`, `site_domain`, `trial_registration`; RLS dan test isolasi
-- [ ] Endpoint publik `GET /public/site/:slug`: hanya versi terbit, 404 bila belum terbit; test bahwa data pemain tidak pernah ikut
-- [ ] Endpoint admin `GET/PUT /site` dan `POST /site/publish`; izin `site.manage`; test per role
+- [x] Skema Zod untuk konten situs dan trial di `packages/shared/src/site.ts`, dipakai API (dan nanti SSB MS dan landing); dua bahasa ID dan EN, batas panjang dan jumlah; test validasi per kolom
+- [x] Tabel `site_content` (draf dan terbit) dan `trial_registration` (migrasi 0020, RLS dipaksa); test isolasi antar SSB. `site_gallery` dan `site_domain` ditunda
+- [x] Endpoint publik `GET /public/site/:slug`: hanya versi terbit, 404 bila belum terbit, bentuk respons tetap tanpa data pemain; test
+- [x] Endpoint admin `GET/PUT /site`, `POST /site/publish` dan `/site/unpublish`; izin `site.manage`; penanda `dirty`; test alur dan test per role
 - [ ] Galeri: unggah, hapus, urutkan, tandai terbit; jalur baca publik hanya untuk galeri (foto pemain tetap privat)
-- [ ] `POST /public/trial` dengan batas laju dan kolom jebakan bot; test batas laju
-- [ ] Kotak masuk Pendaftar di SSB MS: daftar, ubah status, hubungi lewat WhatsApp, jadikan undangan orang tua; izin `trial.manage`
+- [x] `POST /public/site/:slug/trial` dengan batas laju (5 per jam per IP, 100 per jam per SSB), kolom jebakan bot, dan CORS hanya untuk origin landing; test
+- [x] API kotak masuk Pendaftar: `GET /trials`, `PATCH /trials/:id`; izin `trial.manage`; test. Layar di SSB MS dan tombol jadikan undangan belum
 - [ ] Tab Konten situs di SSB MS: editor per bagian, bahasa ID dan EN, pratinjau draf, tombol Terbitkan
 - [ ] Program, pelatih, dan fasilitas diturunkan dari KU, anggota, dan lokasi, bisa ditimpa admin; pelatih hanya tampil setelah setuju
 - [x] Landing: desain tim (`ssb-family-united`) dipasang apa adanya di `https://familyunitedfa.com` dengan foto yang ikut ter-build (commit `de1586a` di repo landing); data masih tertulis di kode dan formulir trial belum tersambung
-- [ ] Landing: data dari API dan formulir trial tersambung ke `POST /public/trial`
+- [ ] Landing: data dari API dan formulir trial tersambung ke `POST /public/site/:slug/trial`
 - [ ] Landing: build statis otomatis saat Terbitkan (sekitar 10 detik) dan disajikan Nginx
 - [ ] Isi asli dari tim menggantikan data contoh (klaim pemain, beasiswa, lisensi, alamat, email) dan foto milik akademi **(butuh keputusan)**
 - [ ] Putuskan nama pelatih dan biaya SPP tampil publik atau tidak **(butuh keputusan)**

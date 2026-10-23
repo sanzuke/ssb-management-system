@@ -26,3 +26,5 @@ Endpoint dijaga dengan `requirePermission(<izin>)`. Pembatasan data per baris (p
 | `session.read` | Melihat jadwal sesi latihan (pelatih dan korlas: KU yang ditugaskan) | ya | ya | ya | - |
 | `assignment.manage` | Menugaskan pelatih dan korlas ke KU per periode | ya | - | - | - |
 | `report.publish` | Menerbitkan rapor ke orang tua (wewenang korlas: menunggu keputusan) | ya | - | ya | - |
+| `site.manage` | Menyunting draf konten landing page akademi dan menerbitkannya | ya | - | - | - |
+| `trial.manage` | Melihat pendaftar trial dari landing page dan mengubah statusnya | ya | - | - | - |

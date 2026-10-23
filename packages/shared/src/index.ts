@@ -60,6 +60,8 @@ export const permissions = {
   "session.read": { roles: ["admin_ssb", "pelatih", "korlas"], desc: "Melihat jadwal sesi latihan (pelatih dan korlas: KU yang ditugaskan)" },
   "assignment.manage": { roles: ["admin_ssb"], desc: "Menugaskan pelatih dan korlas ke KU per periode" },
   "report.publish": { roles: ["admin_ssb", "korlas"], desc: "Menerbitkan rapor ke orang tua (wewenang korlas: menunggu keputusan)" },
+  "site.manage": { roles: ["admin_ssb"], desc: "Menyunting draf konten landing page akademi dan menerbitkannya" },
+  "trial.manage": { roles: ["admin_ssb"], desc: "Melihat pendaftar trial dari landing page dan mengubah statusnya" },
 } as const satisfies Record<string, { roles: readonly UserRole[]; desc: string }>;
 export type Permission = keyof typeof permissions;
 export const can = (role: UserRole, p: Permission) => (permissions[p].roles as readonly UserRole[]).includes(role);
@@ -385,6 +387,9 @@ export type GuardianSession = {
   /** Status kehadiran anak pada sesi ini; null bila belum dicatat. */
   status: AttendanceStatus | null;
 };
+
+// ---- Landing page akademi ----
+export * from "./site";
 
 // ---- Assessment (skala 1 sampai 10) ----
 export * from "./aspects";

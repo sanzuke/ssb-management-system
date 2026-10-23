@@ -40,6 +40,9 @@ describe("matriks izin (tanpa database)", () => {
       "POST /auth/reset-password/:token",
       "GET /invitations/:token",
       "POST /invitations/:token/accept",
+      // Landing page: tanpa sesi; hanya konten terbit dan pendaftaran trial (dibatasi laju dan kolom jebakan).
+      "GET /public/site/:slug",
+      "POST /public/site/:slug/trial",
     ]);
     const byRoute = new Map<string, any[]>();
     for (const r of app.routes) {
@@ -116,6 +119,8 @@ run("matriks izin per endpoint (database)", () => {
     { method: "GET", path: "/fees/player-overrides", perm: "fee.manage" },
     { method: "GET", path: "/fees/public-info", perm: "invoice.read" },
     { method: "GET", path: "/whatsapp/settings", perm: "fee.manage" },
+    { method: "GET", path: "/site", perm: "site.manage" },
+    { method: "GET", path: "/trials", perm: "trial.manage" },
   ];
   for (const e of endpoints) {
     test(`${e.method} ${e.path}: hanya role dengan izin ${e.perm} yang lolos`, async () => {

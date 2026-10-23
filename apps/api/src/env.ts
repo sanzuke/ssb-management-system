@@ -7,6 +7,8 @@ const envSchema = z
     NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
     /** Origin web yang boleh mengirim permintaan yang mengubah data, dipisah koma. */
     ALLOWED_ORIGINS: z.string().default("http://localhost:3001"),
+    /** Origin landing page yang boleh memanggil API publik (/public/*) dari browser, dipisah koma. Kosong = tidak ada. */
+    LANDING_ORIGINS: z.string().default(""),
     /** URL web; tujuan pengalihan setelah login Google. */
     WEB_URL: z.string().default("http://localhost:3001"),
     /** URL publik API; dasar redirect URI Google (/auth/google/callback). */
