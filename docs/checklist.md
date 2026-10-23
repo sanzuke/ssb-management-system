@@ -167,7 +167,8 @@ Detail di `docs/email.md`. Server email milik sendiri di zukelabs (`mail.zukelab
 
 - [x] Domain `familyunitedfa.com` terdaftar di mail stack: domain, 3 mailbox, dan kunci DKIM selektor `family`; email uji keluar dengan tanda tangan DKIM yang benar
 - [x] Mail server `mail.familyunitedfa.com` terpasang di fufa (Postfix, Dovecot, OpenDKIM, sertifikat; uji kirim, IMAP, dan DKIM lolos); kirim keluar lewat relay Brevo
-- [ ] Pemilik: jalankan `sudo brevo-key` di fufa, sahkan domain di Brevo, buka port 25/465/587/993 di firewall konsol VPS, dan isi record DNS di Domainesia (MX, SPF, DKIM `fufa`, DMARC, record Brevo); lalu arahkan `SMTP_URL` SSB ke mail.familyunitedfa.com (daftar di `docs/email.md`)
+- [x] Kunci Brevo terpasang, firewall terbuka, DNS MX, SPF, DKIM `fufa`, dan DMARC terbaca; email masuk dari Gmail diterima di `info@`; `SMTP_URL` SSB sudah ke mail.familyunitedfa.com dan reset sandi terkirim lewat relay Brevo
+- [ ] Ganti CNAME `mail` di Domainesia menjadi record A `124.156.192.17`, sahkan domain di Brevo (record Brevo), dan PTR bila penyedia mengizinkan; periksa kotak masuk atau spam penerima untuk email uji
 - [x] Domain `familyunitedfa.com` sudah mengarah ke server landing `124.156.192.17` dengan sertifikat Let's Encrypt (terbit 23 Oktober 2026); vhost sementara di zukelabs dihapus
 - [x] Situs landing terpasang di `124.156.192.17` (`/var/www/landing`, Nginx, HTTPS, www dan http dialihkan); halaman PHP kosong digantikan, konfigurasi lama dicadangkan di `/root/nginx-app.bak`
 - [ ] Pembaruan landing masih manual (build lokal lalu kirim berkas) karena repo `ssb-family-united` privat; perlu deploy key di GitHub agar server bisa menarik sendiri

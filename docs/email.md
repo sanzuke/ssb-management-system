@@ -45,7 +45,7 @@ Di Brevo, domain pengirim juga harus disahkan (Senders, Domains & Dedicated IPs,
 
 | Tipe | Nama | Isi |
 |---|---|---|
-| A | `mail` | `124.156.192.17` (sudah ada) |
+| A | `mail` | `124.156.192.17`. Harus record A, bukan CNAME: target MX tidak boleh berupa CNAME menurut RFC 5321 dan beberapa server menolaknya |
 | MX | `@` | `10 mail.familyunitedfa.com` (ganti yang lama `0 familyunitedfa.com`) |
 | TXT | `@` | `v=spf1 mx ip4:124.156.192.17 include:spf.brevo.com -all` |
 | TXT | `fufa._domainkey` | kunci DKIM di bawah |
@@ -76,6 +76,8 @@ MAIL_FROM="Family United FA <noreply@familyunitedfa.com>"
 ```
 
 `@` di nama pengguna ditulis `%40`; karakter lain yang perlu di-encode: `:` `%3A`, `/` `%2F`, `#` `%23`.
+
+Sudah dipasang di server pada 23 Oktober 2026 (`.env` fufa). Reset sandi ke `hasanudin@qti.co.id` dikirim lewat Postfix lalu relay Brevo dan diterima Brevo (`250 OK`).
 
 ## Pemeriksaan
 
