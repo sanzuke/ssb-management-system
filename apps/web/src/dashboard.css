@@ -2873,3 +2873,40 @@ button.pengguna[aria-expanded="true"] .panah-menu {
   width: auto;
   margin-left: 8px;
 }
+
+/* ---- Logo ---- */
+.bar .merek-bar {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 10px;
+}
+.bar .merek-teks {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 3px;
+  min-width: 0;
+}
+.logo-bar {
+  flex: none;
+  width: auto;
+  height: 38px;
+}
+@media (max-width: 1023.98px) {
+  .logo-bar {
+    height: 32px;
+  }
+}
+.logo-masuk {
+  display: block;
+  width: auto;
+  height: 84px;
+  margin: 0 0 14px;
+}
+.merek .logo-masuk-kecil {
+  width: auto;
+  height: 28px;
+  margin-right: 8px;
+  vertical-align: -7px;
+}

@@ -34,9 +34,7 @@ export default function Masuk() {
     <AuthShell gaya="buku">
       <Title>Masuk · SSB App</Title>
       <header class="kepala-buku">
-        <div class="lencana" aria-hidden="true">
-          <Ikon nama="bola" ukuran={30} />
-        </div>
+        <img class="logo-masuk" src="/logo.png" alt="Family United Football Club" width="84" height="90" />
         <h1>Masuk ke SSB Anda</h1>
         <p>Pelatih, orang tua, dan admin masuk dari sini.</p>
       </header>

@@ -26,12 +26,15 @@ export default function AppBar(props: { me: Me }) {
   return (
     <header class="bar">
       <div class="merek-bar">
-        <div class="nama-ssb" title={props.me.active?.ssbName} attr:data-panjang={panjangNama()}>
-          {props.me.active?.ssbName ?? "SSB App"}
+        <img class="logo-bar" src="/logo.png" alt="" width="36" height="39" />
+        <div class="merek-teks">
+          <div class="nama-ssb" title={props.me.active?.ssbName} attr:data-panjang={panjangNama()}>
+            {props.me.active?.ssbName ?? "SSB App"}
+          </div>
+          <Show when={props.me.active}>
+            <div class="peran">{roleLabel[props.me.active!.role]}</div>
+          </Show>
         </div>
-        <Show when={props.me.active}>
-          <div class="peran">{roleLabel[props.me.active!.role]}</div>
-        </Show>
       </div>
       <nav class="aksi" aria-label="Menu utama" ref={daftarMenu}>
         <Show when={props.me.active}>

@@ -18,7 +18,10 @@ export default function AuthShell(props: { children: JSX.Element; gaya?: "lapang
   ) : (
     <div class="lapangan">
       <Pitch />
-      <div class="merek">SSB App</div>
+      <div class="merek">
+        <img class="logo-masuk-kecil" src="/logo.png" alt="" width="32" height="35" />
+        SSB App
+      </div>
       <main class="kotak">{props.children}</main>
     </div>
   );
