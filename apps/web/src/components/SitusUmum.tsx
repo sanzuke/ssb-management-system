@@ -12,7 +12,8 @@ export function SitusIdentitas(p: { s: Sunting }) {
       <form class="form" onSubmit={(e) => e.preventDefault()}>
         <Field
           id="id-nama"
-          label="Nama lengkap"
+          label="Nama yayasan atau badan"
+          hint="Nama resmi penaung. Tampil di kaki halaman (Inisiatif binaan ...) dan pesan WhatsApp, bukan di judul."
           value={d.identity.name}
           onInput={(v) => ubah((x) => isi(x.identity, "name", v))}
           error={salah("identity.name")}
@@ -20,7 +21,8 @@ export function SitusIdentitas(p: { s: Sunting }) {
         />
         <Field
           id="id-merek"
-          label="Nama merek"
+          label="Nama merek (judul situs)"
+          hint="Nama yang tampil di judul halaman, tab peramban, header, kaki halaman, dan formulir trial."
           value={d.identity.brandName}
           onInput={(v) => ubah((x) => isi(x.identity, "brandName", v))}
           error={salah("identity.brandName")}
