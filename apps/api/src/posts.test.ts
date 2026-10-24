@@ -142,7 +142,7 @@ run("artikel landing page (database)", () => {
     indexPath = join(dir, "index.html");
     await writeFile(
       indexPath,
-      `<!doctype html><html lang="id"><head><meta charset="utf-8"><title>Landing</title><meta name="description" content="x" /><meta property="og:title" content="x" /><meta property="og:description" content="x" /></head><body><div id="root"></div></body></html>`,
+      `<!doctype html><html lang="id"><head><meta charset="utf-8"><title>Landing</title><meta name="description" content="x" /><meta property="og:title" content="x" /><meta property="og:description" content="x" /><meta property="og:type" content="website" /><link rel="canonical" href="https://lama.test/" /></head><body><div id="root"></div></body></html>`,
     );
     app = createApp(
       db,
@@ -330,6 +330,8 @@ run("artikel landing page (database)", () => {
     const html = await res.text();
     expect(html).toContain("<title>Berita &lt;b&gt;&quot;penting&quot;&lt;/b&gt; &amp; baru | ");
     expect(html).toContain(`<link rel="canonical" href="https://landing.test/berita/${p.slug}" />`);
+    expect(html.match(/property="og:type"/g)?.length).toBe(1);
+    expect(html.match(/rel="canonical"/g)?.length).toBe(1);
     expect(html).toContain('<meta property="og:type" content="article" />');
     expect(html).toContain('"@type":"Article"');
     expect(html).toContain("<strong>tebal</strong>");

@@ -90,17 +90,16 @@ type Page = {
 
 /** Suntik judul, meta, data terstruktur, dan isi ke kerangka landing. */
 export function fillTemplate(tpl: string, p: Page): string {
-  const head = [
-    `<link rel="canonical" href="${esc(p.canonical)}" />`,
-    `<meta property="og:type" content="${p.ogType}" />`,
-    `<meta property="og:url" content="${esc(p.canonical)}" />`,
-    ...(p.image
-      ? [`<meta property="og:image" content="${esc(p.image)}" />`, `<meta name="twitter:card" content="summary_large_image" />`]
-      : [`<meta name="twitter:card" content="summary" />`]),
-    ...(p.status === 404 ? [`<meta name="robots" content="noindex" />`] : []),
-    // JSON-LD: karakter "<" di-escape agar teks artikel tidak bisa menutup tag script.
-    ...(p.jsonLd ? [`<script type="application/ld+json">${JSON.stringify(p.jsonLd).replace(/</g, "\\u003c")}</script>`] : []),
-  ].join("\n    ");
+  // Tiap tag menggantikan yang sudah ada di kerangka (bila ada) supaya tidak ganda; JSON-LD selalu ditambahkan.
+  const tags: [RegExp, string][] = [
+    [/<link\s+rel="canonical"[^>]*>/, `<link rel="canonical" href="${esc(p.canonical)}" />`],
+    [/<meta\s+property="og:type"[^>]*>/, `<meta property="og:type" content="${p.ogType}" />`],
+    [/<meta\s+property="og:url"[^>]*>/, `<meta property="og:url" content="${esc(p.canonical)}" />`],
+    [/<meta\s+name="twitter:card"[^>]*>/, `<meta name="twitter:card" content="${p.image ? "summary_large_image" : "summary"}" />`],
+  ];
+  if (p.image) tags.push([/<meta\s+property="og:image"[^>]*>/, `<meta property="og:image" content="${esc(p.image)}" />`]);
+  if (p.status === 404) tags.push([/<meta\s+name="robots"[^>]*>/, `<meta name="robots" content="noindex" />`]);
+  const jsonLd = p.jsonLd ? `<script type="application/ld+json">${JSON.stringify(p.jsonLd).replace(/</g, "\\u003c")}</script>` : "";
   const meta = (re: RegExp, tag: string, src: string) => (re.test(src) ? src.replace(re, () => tag) : src.replace("</head>", () => `${tag}\n  </head>`));
   let out = tpl;
   out = /<title>[\s\S]*?<\/title>/.test(out)
@@ -109,7 +108,8 @@ export function fillTemplate(tpl: string, p: Page): string {
   out = meta(/<meta\s+name="description"[^>]*>/, `<meta name="description" content="${esc(p.description)}" />`, out);
   out = meta(/<meta\s+property="og:title"[^>]*>/, `<meta property="og:title" content="${esc(p.title)}" />`, out);
   out = meta(/<meta\s+property="og:description"[^>]*>/, `<meta property="og:description" content="${esc(p.description)}" />`, out);
-  out = out.replace("</head>", () => `${head}\n  </head>`);
+  for (const [re, tag] of tags) out = meta(re, tag, out);
+  if (jsonLd) out = out.replace("</head>", () => `${jsonLd}\n  </head>`);
   out = /<div id="root"><\/div>/.test(out)
     ? out.replace(/<div id="root"><\/div>/, () => `<div id="root">${p.body}</div>`)
     : out.replace("</body>", () => `<div id="root">${p.body}</div></body>`);
