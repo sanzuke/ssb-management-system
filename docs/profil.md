@@ -76,7 +76,7 @@ Di server, Nginx untuk `app.familyunitedfa.com` meneruskan `/api/public/` langsu
 - **Konten situs:** editor per bagian, bahasa ID dan EN, pratinjau draf, tombol Terbitkan, dan penanda perubahan yang belum terbit.
 - **Galeri:** unggah, urutkan, tandai terbit.
 - **Pendaftar:** daftar trial dengan status, tombol hubungi lewat WhatsApp, dan ubah menjadi undangan orang tua.
-- **Artikel:** daftar, editor Markdown dengan bilah format, unggah sampul dan gambar isi, pratinjau, simpan draf, terbitkan, tarik, dan hapus.
+- **Artikel:** daftar, editor teks visual (Tiptap) dengan tab Markdown dan Pratinjau, tata letak lebar penuh dua kolom, unggah sampul dan gambar isi, simpan draf, terbitkan, tarik, dan hapus.
 
 ## Landing dan build
 
@@ -92,7 +92,9 @@ Artikel disimpan di database SSB MS, bukan di repo landing, supaya penulis tidak
 |---|---|
 | Teks (judul, ringkasan, isi, kategori, status, tanggal terbit, penulis) | tabel `site_post`, per SSB dengan RLS, alamat `slug` unik per SSB |
 | Gambar sampul dan gambar di isi | tabel `site_media` + berkas di `UPLOAD_DIR/<ssb>/artikel/<id>.<ekstensi>` (JPG, PNG, WebP, maks 5 MB, jenis dari isi berkas) |
-| Isi | Markdown sederhana (`packages/shared/src/markdown.ts`): `##`, `###`, paragraf, daftar, kutipan, garis, `![ket](media:<id>`), tebal, miring, tautan. Diurai menjadi blok bertipe; tidak ada HTML mentah |
+| Isi | Markdown sederhana (`packages/shared/src/markdown.ts`): `##`, `###`, paragraf (baris baru atau `\` di akhir baris = pindah baris), daftar, kutipan, garis, `![ket](media:<id>)`, tebal, miring, tautan; `\` meng-escape tanda baca ASCII dan `&amp; &lt; &gt; &quot;` didekode. Diurai menjadi blok bertipe; tidak ada HTML mentah |
+
+Editor artikel (`apps/web/src/components/EditorVisual.tsx`, `apps/web/src/lib/tiptapArtikel.ts`) memakai Tiptap v3 dan dimuat hanya di klien. Tiap bahasa punya tab Visual, Markdown, dan Pratinjau; Markdown di state halaman tetap satu-satunya sumber kebenaran. Visual membaca Markdown dengan `parseMarkdown` (sama dengan pratinjau dan landing) dan menulisnya lewat penulis sendiri yang menjamin hasilnya terbaca kembali sebagai blok yang sama; dokumen dibatasi ke subset di atas (gambar hanya media SSB, tautan hanya http, https, mailto, atau jalur). Bila Markdown memakai format di luar subset (mis. kode atau tabel), editor menampilkannya sebagai teks dan memberi peringatan. Uji: `bun test` di `apps/web` (termasuk uji acak bolak-balik) dan bagian "markdown artikel" di `apps/api/src/posts.test.ts`.
 
 Bahasa: Indonesia wajib, English opsional per artikel (kosong = landing memakai Indonesia).
 

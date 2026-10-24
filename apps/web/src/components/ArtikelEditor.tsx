@@ -68,6 +68,7 @@ export default function ArtikelEditor(props: { awal: PostAdminDetail | null }) {
   const [konfirmasi, setKonfirmasi] = createSignal<"terbit" | "tarik" | "hapus" | null>(null);
   // Awalan alamat gambar untuk pratinjau. Artikel baru belum punya; diambil dari gambar yang pertama diunggah.
   const [mediaBase, setMediaBase] = createSignal(props.awal?.mediaBase ?? "");
+  const [bahasa, setBahasa] = createSignal<"id" | "en">("id");
   const [mengunggah, setMengunggah] = createSignal<Tempat | null>(null);
   const [galatUnggah, setGalatUnggah] = createSignal<{ tempat: Tempat; pesan: string } | null>(null);
   let berkasSampul: HTMLInputElement | undefined;
@@ -76,15 +77,32 @@ export default function ArtikelEditor(props: { awal: PostAdminDetail | null }) {
   const terbit = () => detail()?.status === "published";
   const salah = (jalur: string) => galat()[jalur];
 
+  /** Tandai ada perubahan yang belum disimpan. */
+  const tandai = () => {
+    setBelumSimpan(true);
+    setInfo("");
+    setKonfirmasi(null);
+  };
+
   const isi = <K extends keyof Isian>(k: K, v: Isian[K]) => {
     setF(
       produce((x) => {
         x[k] = v;
       }),
     );
-    setBelumSimpan(true);
-    setInfo("");
-    setKonfirmasi(null);
+    tandai();
+  };
+
+  // Editor visual menyinkronkan Markdown dengan jeda; paksa sebelum simpan agar nilai terbaru yang terkirim.
+  let pembilasId: (() => void) | undefined;
+  let pembilasEn: (() => void) | undefined;
+  const bilasIsi = () => {
+    pembilasId?.();
+    pembilasEn?.();
+  };
+  const ubahBahasa = (b: "id" | "en") => {
+    bilasIsi();
+    setBahasa(b);
   };
 
   const peringatKeluar = (e: BeforeUnloadEvent) => {
@@ -106,6 +124,9 @@ export default function ArtikelEditor(props: { awal: PostAdminDetail | null }) {
     } catch (e) {
       if (e instanceof ApiError) {
         setGalat(e.fields);
+        // Galat isi di bahasa yang sedang tersembunyi: tampilkan agar terlihat.
+        if (e.fields["body.en"] && !e.fields["body.id"]) setBahasa("en");
+        else if (e.fields["body.id"]) setBahasa("id");
         const n = Object.keys(e.fields).length;
         setPesanGalat(e.code === "validation" ? `Ada ${n} isian yang perlu diperbaiki. Kolom bermasalah ditandai merah.` : e.message);
       } else {
@@ -136,12 +157,14 @@ export default function ArtikelEditor(props: { awal: PostAdminDetail | null }) {
   };
 
   const simpan = async () => {
+    bilasIsi();
     if (await jalankan(simpanDraf)) {
       setInfo("Artikel disimpan.");
       keEditor();
     }
   };
   const terbitkan = async () => {
+    bilasIsi();
     const ok = await jalankan(async () => {
       if (belumSimpan() || !detail()) await simpanDraf();
       const d = detail();
@@ -232,99 +255,9 @@ export default function ArtikelEditor(props: { awal: PostAdminDetail | null }) {
   const galatDi = (t: Tempat) => (galatUnggah()?.tempat === t ? galatUnggah()?.pesan : "") ?? "";
 
   return (
-    <>
-      <section class="master status-situs" aria-label="Status artikel">
-        <p>
-          <Show when={detail()} fallback={<strong>Artikel baru, belum disimpan.</strong>}>
-            {(d) => (
-              <>
-                <Show when={d().status === "published"} fallback={<strong>Draf.</strong>}>
-                  <strong>Terbit</strong> sejak {d().publishedAt ? waktu(d().publishedAt as string) : "-"}.
-                </Show>{" "}
-                Penulis {d().authorName}. Terakhir diubah {waktu(d().updatedAt)}.{" "}
-              </>
-            )}
-          </Show>
-          <Show when={belumSimpan()}>Ada perubahan di layar yang belum disimpan.</Show>
-        </p>
-        <Show when={!bisaUbah()}>
-          <div class="info" role="status">
-            Artikel ini ditulis orang lain. Anda hanya bisa membacanya.
-          </div>
-        </Show>
-        <Show when={pesanGalat()}>
-          <div class="peringatan" role="alert">
-            {pesanGalat()}
-          </div>
-        </Show>
-        <Show when={info()}>
-          <div class="info" role="status">
-            {info()}
-          </div>
-        </Show>
-        <Show when={bisaUbah()}>
-          <div class="butir-aksi aksi-situs">
-            <button class="tombol" type="button" disabled={sibuk() || !belumSimpan()} onClick={simpan}>
-              {sibuk() ? "Memproses…" : "Simpan"}
-            </button>
-            <Show when={!terbit()}>
-              <Show
-                when={konfirmasi() === "terbit"}
-                fallback={
-                  <button class="tombol utama" type="button" disabled={sibuk()} onClick={() => setKonfirmasi("terbit")}>
-                    Terbitkan
-                  </button>
-                }
-              >
-                <button class="tombol utama" type="button" disabled={sibuk()} onClick={terbitkan}>
-                  Ya, terbitkan sekarang
-                </button>
-                <button class="tombol tipis" type="button" onClick={() => setKonfirmasi(null)}>
-                  Batal
-                </button>
-              </Show>
-            </Show>
-            <Show when={terbit()}>
-              <Show
-                when={konfirmasi() === "tarik"}
-                fallback={
-                  <button class="tombol tipis" type="button" disabled={sibuk()} onClick={() => setKonfirmasi("tarik")}>
-                    Tarik dari publik
-                  </button>
-                }
-              >
-                <button class="tombol bahaya" type="button" disabled={sibuk()} onClick={tarik}>
-                  Ya, tarik
-                </button>
-                <button class="tombol tipis" type="button" onClick={() => setKonfirmasi(null)}>
-                  Batal
-                </button>
-              </Show>
-            </Show>
-            <Show when={detail()}>
-              <Show
-                when={konfirmasi() === "hapus"}
-                fallback={
-                  <button class="tombol tipis" type="button" disabled={sibuk()} onClick={() => setKonfirmasi("hapus")}>
-                    Hapus
-                  </button>
-                }
-              >
-                <button class="tombol bahaya" type="button" disabled={sibuk()} onClick={hapus}>
-                  Ya, hapus artikel
-                </button>
-                <button class="tombol tipis" type="button" onClick={() => setKonfirmasi(null)}>
-                  Batal
-                </button>
-              </Show>
-            </Show>
-          </div>
-        </Show>
-      </section>
-
-      <section class="master form editor-artikel" aria-label="Isi artikel">
-        <h2>Judul dan alamat</h2>
-        <div class="dua-bahasa">
+    <div class="susunan-artikel">
+      <div class="artikel-utama">
+        <section class="master form judul-artikel" aria-label="Judul artikel">
           <Field
             id="judul-id"
             label="Judul (Indonesia)"
@@ -343,28 +276,176 @@ export default function ArtikelEditor(props: { awal: PostAdminDetail | null }) {
             hint="Opsional. Kosong = pakai Indonesia."
             maxlength={160}
           />
+        </section>
+
+        <section class="master form isi-utama" aria-label="Isi artikel">
+          {/* biome-ignore lint/a11y/useSemanticElements: pilihan bahasa isi */}
+          <div class="tab-periode" role="group" aria-label="Bahasa isi artikel">
+            <button type="button" aria-pressed={bahasa() === "id"} onClick={() => ubahBahasa("id")}>
+              Indonesia
+            </button>
+            <button type="button" aria-pressed={bahasa() === "en"} onClick={() => ubahBahasa("en")}>
+              English
+            </button>
+          </div>
+          <div hidden={bahasa() !== "id"}>
+            <ArtikelIsi
+              id="isi-id"
+              label="Isi (Indonesia)"
+              value={f.bodyId}
+              onInput={(v) => isi("bodyId", v)}
+              onUbah={tandai}
+              error={salah("body.id")}
+              tampil={bahasa() === "id"}
+              mediaUrl={mediaUrl}
+              unggah={(file) => unggah(file, "id")}
+              sedangUnggah={mengunggah() === "id"}
+              galatUnggah={galatDi("id")}
+              bisaUbah={bisaUbah()}
+              onSiap={(k) => {
+                pembilasId = k.flush;
+              }}
+            />
+          </div>
+          <div hidden={bahasa() !== "en"}>
+            <ArtikelIsi
+              id="isi-en"
+              label="Isi (English)"
+              hint="Opsional. Kosong = pakai Indonesia."
+              value={f.bodyEn}
+              onInput={(v) => isi("bodyEn", v)}
+              onUbah={tandai}
+              error={salah("body.en")}
+              tampil={bahasa() === "en"}
+              mediaUrl={mediaUrl}
+              unggah={(file) => unggah(file, "en")}
+              sedangUnggah={mengunggah() === "en"}
+              galatUnggah={galatDi("en")}
+              bisaUbah={bisaUbah()}
+              onSiap={(k) => {
+                pembilasEn = k.flush;
+              }}
+            />
+          </div>
+        </section>
+      </div>
+
+      <aside class="artikel-samping" aria-label="Status dan pengaturan artikel">
+        <section class="master status-situs status-artikel" aria-label="Status artikel">
+          <p>
+            <Show when={detail()} fallback={<strong>Artikel baru, belum disimpan.</strong>}>
+              {(d) => (
+                <>
+                  <Show when={d().status === "published"} fallback={<strong>Draf.</strong>}>
+                    <strong>Terbit</strong> sejak {d().publishedAt ? waktu(d().publishedAt as string) : "-"}.
+                  </Show>{" "}
+                  Penulis {d().authorName}. Terakhir diubah {waktu(d().updatedAt)}.{" "}
+                </>
+              )}
+            </Show>
+            <Show when={belumSimpan()}> Ada perubahan di layar yang belum disimpan.</Show>
+          </p>
+          <Show when={!bisaUbah()}>
+            <div class="info" role="status">
+              Artikel ini ditulis orang lain. Anda hanya bisa membacanya.
+            </div>
+          </Show>
+        </section>
+
+        <div class="master aksi-artikel">
+          <Show when={pesanGalat()}>
+            <div class="peringatan" role="alert">
+              {pesanGalat()}
+            </div>
+          </Show>
+          <Show when={info()}>
+            <div class="info" role="status">
+              {info()}
+            </div>
+          </Show>
+          <Show when={bisaUbah()}>
+            <div class="butir-aksi aksi-situs">
+              <button class="tombol" type="button" disabled={sibuk() || !belumSimpan()} onClick={simpan}>
+                {sibuk() ? "Memproses…" : "Simpan"}
+              </button>
+              <Show when={!terbit()}>
+                <Show
+                  when={konfirmasi() === "terbit"}
+                  fallback={
+                    <button class="tombol utama" type="button" disabled={sibuk()} onClick={() => setKonfirmasi("terbit")}>
+                      Terbitkan
+                    </button>
+                  }
+                >
+                  <button class="tombol utama" type="button" disabled={sibuk()} onClick={terbitkan}>
+                    Ya, terbitkan sekarang
+                  </button>
+                  <button class="tombol tipis" type="button" onClick={() => setKonfirmasi(null)}>
+                    Batal
+                  </button>
+                </Show>
+              </Show>
+              <Show when={terbit()}>
+                <Show
+                  when={konfirmasi() === "tarik"}
+                  fallback={
+                    <button class="tombol tipis" type="button" disabled={sibuk()} onClick={() => setKonfirmasi("tarik")}>
+                      Tarik dari publik
+                    </button>
+                  }
+                >
+                  <button class="tombol bahaya" type="button" disabled={sibuk()} onClick={tarik}>
+                    Ya, tarik
+                  </button>
+                  <button class="tombol tipis" type="button" onClick={() => setKonfirmasi(null)}>
+                    Batal
+                  </button>
+                </Show>
+              </Show>
+              <Show when={detail()}>
+                <Show
+                  when={konfirmasi() === "hapus"}
+                  fallback={
+                    <button class="tombol tipis" type="button" disabled={sibuk()} onClick={() => setKonfirmasi("hapus")}>
+                      Hapus
+                    </button>
+                  }
+                >
+                  <button class="tombol bahaya" type="button" disabled={sibuk()} onClick={hapus}>
+                    Ya, hapus artikel
+                  </button>
+                  <button class="tombol tipis" type="button" onClick={() => setKonfirmasi(null)}>
+                    Batal
+                  </button>
+                </Show>
+              </Show>
+            </div>
+          </Show>
         </div>
-        <Field
-          id="slug"
-          label="Alamat artikel"
-          value={f.slug}
-          onInput={(v) => isi("slug", v.toLowerCase())}
-          error={salah("slug")}
-          hint="Huruf kecil, angka, dan tanda hubung, 3 sampai 80 karakter (contoh: juara-liga-u13). Kosong = dibuat otomatis dari judul. Mengubahnya mengubah tautan artikel."
-          maxlength={80}
-          placeholder="otomatis dari judul"
-        />
-        <Field
-          id="kategori"
-          label="Kategori"
-          value={f.category}
-          onInput={(v) => isi("category", v)}
-          error={salah("category")}
-          hint="Opsional, mis. Berita, Prestasi, Pengumuman."
-          maxlength={40}
-        />
-        <h2>Ringkasan</h2>
-        <div class="dua-bahasa">
+
+        <section class="master form pengaturan-artikel" aria-label="Pengaturan artikel">
+          <h2>Alamat dan kategori</h2>
+          <Field
+            id="slug"
+            label="Alamat artikel"
+            value={f.slug}
+            onInput={(v) => isi("slug", v.toLowerCase())}
+            error={salah("slug")}
+            hint="Huruf kecil, angka, dan tanda hubung, 3 sampai 80 karakter (contoh: juara-liga-u13). Kosong = dibuat otomatis dari judul. Mengubahnya mengubah tautan artikel."
+            maxlength={80}
+            placeholder="otomatis dari judul"
+          />
+          <Field
+            id="kategori"
+            label="Kategori"
+            value={f.category}
+            onInput={(v) => isi("category", v)}
+            error={salah("category")}
+            hint="Opsional, mis. Berita, Prestasi, Pengumuman."
+            maxlength={40}
+          />
+
+          <h2>Ringkasan</h2>
           <ArtikelRingkas
             id="ringkasan-id"
             label="Ringkasan (Indonesia)"
@@ -380,75 +461,45 @@ export default function ArtikelEditor(props: { awal: PostAdminDetail | null }) {
             error={salah("excerpt.en")}
             hint="Opsional. Kosong = pakai Indonesia."
           />
-        </div>
 
-        <h2>Foto sampul</h2>
-        <div class="sampul-artikel">
-          <Show when={f.coverUrl} fallback={<p class="kosong">Belum ada foto sampul.</p>}>
-            {(u) => <img class="sampul-pratinjau" src={u()} alt={f.coverAlt || "Foto sampul"} />}
-          </Show>
-          <div class="butir-aksi">
-            <button class="tombol tipis" type="button" disabled={!bisaUbah() || mengunggah() !== null} onClick={() => berkasSampul?.click()}>
-              {mengunggah() === "sampul" ? "Mengunggah…" : f.coverUrl ? "Ganti foto" : "Unggah foto"}
-            </button>
-            <Show when={f.coverUrl && bisaUbah()}>
-              <button class="tombol tipis" type="button" onClick={hapusSampul}>
-                Hapus sampul
-              </button>
+          <h2>Foto sampul</h2>
+          <div class="sampul-artikel">
+            <Show when={f.coverUrl} fallback={<p class="kosong">Belum ada foto sampul.</p>}>
+              {(u) => <img class="sampul-pratinjau" src={u()} alt={f.coverAlt || "Foto sampul"} />}
             </Show>
-            <input ref={berkasSampul} type="file" accept="image/jpeg,image/png,image/webp" hidden onChange={pilihSampul} />
+            <div class="butir-aksi">
+              <button class="tombol tipis" type="button" disabled={!bisaUbah() || mengunggah() !== null} onClick={() => berkasSampul?.click()}>
+                {mengunggah() === "sampul" ? "Mengunggah…" : f.coverUrl ? "Ganti foto" : "Unggah foto"}
+              </button>
+              <Show when={f.coverUrl && bisaUbah()}>
+                <button class="tombol tipis" type="button" onClick={hapusSampul}>
+                  Hapus sampul
+                </button>
+              </Show>
+              <input ref={berkasSampul} type="file" accept="image/jpeg,image/png,image/webp" hidden onChange={pilihSampul} />
+            </div>
+            <span class="petunjuk">JPG, PNG, atau WebP, maksimal 5 MB.</span>
+            <Show when={galatDi("sampul")}>
+              <span class="pesan-salah" role="alert">
+                {galatDi("sampul")}
+              </span>
+            </Show>
+            <Show when={salah("coverMediaId")}>
+              <span class="pesan-salah">{salah("coverMediaId")}</span>
+            </Show>
           </div>
-          <span class="petunjuk">JPG, PNG, atau WebP, maksimal 5 MB.</span>
-          <Show when={galatDi("sampul")}>
-            <span class="pesan-salah" role="alert">
-              {galatDi("sampul")}
-            </span>
-          </Show>
-          <Show when={salah("coverMediaId")}>
-            <span class="pesan-salah">{salah("coverMediaId")}</span>
-          </Show>
-        </div>
-        <Field
-          id="sampul-alt"
-          label="Teks alternatif sampul"
-          value={f.coverAlt}
-          onInput={(v) => isi("coverAlt", v)}
-          error={salah("coverAlt")}
-          hint="Deskripsi singkat foto untuk pembaca layar dan saat gambar gagal dimuat."
-          maxlength={200}
-        />
-
-        <h2>Isi artikel</h2>
-        <p class="petunjuk">
-          Tulis dengan Markdown sederhana: gunakan tombol di atas kolom isi, atau ketik langsung. Tab Pratinjau menunjukkan tampilan di landing.
-        </p>
-        <ArtikelIsi
-          id="isi-id"
-          label="Isi (Indonesia)"
-          value={f.bodyId}
-          onInput={(v) => isi("bodyId", v)}
-          error={salah("body.id")}
-          mediaUrl={mediaUrl}
-          unggah={(file) => unggah(file, "id")}
-          sedangUnggah={mengunggah() === "id"}
-          galatUnggah={galatDi("id")}
-          bisaUbah={bisaUbah()}
-        />
-        <ArtikelIsi
-          id="isi-en"
-          label="Isi (English)"
-          hint="Opsional. Kosong = pakai Indonesia."
-          value={f.bodyEn}
-          onInput={(v) => isi("bodyEn", v)}
-          error={salah("body.en")}
-          mediaUrl={mediaUrl}
-          unggah={(file) => unggah(file, "en")}
-          sedangUnggah={mengunggah() === "en"}
-          galatUnggah={galatDi("en")}
-          bisaUbah={bisaUbah()}
-        />
-      </section>
-    </>
+          <Field
+            id="sampul-alt"
+            label="Teks alternatif sampul"
+            value={f.coverAlt}
+            onInput={(v) => isi("coverAlt", v)}
+            error={salah("coverAlt")}
+            hint="Deskripsi singkat foto untuk pembaca layar dan saat gambar gagal dimuat."
+            maxlength={200}
+          />
+        </section>
+      </aside>
+    </div>
   );
 }
 

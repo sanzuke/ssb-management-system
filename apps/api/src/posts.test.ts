@@ -66,6 +66,88 @@ describe("markdown artikel", () => {
     expect(slugFromTitle("Pelatih Baru: Café & Teknik")).toBe("pelatih-baru-cafe-teknik");
     expect(slugFromTitle("!!")).toBe("artikel");
   });
+
+  const teks = (md: string) => parseMarkdown(md, url);
+  const plain = (md: string) => blocksToText(teks(md));
+
+  test("escape backslash menjadi karakternya tanpa makna sintaks, entitas dasar didekode", () => {
+    expect(teks("\\*bukan miring\\* dan \\_bukan\\_ \\[x\\](https://a.id) \\\\ \\# \\- 1\\. \\>")).toEqual([
+      { t: "p", c: [{ t: "text", v: "*bukan miring* dan _bukan_ [x](https://a.id) \\ # - 1. >" }] },
+    ]);
+    // Awal baris yang di-escape tidak menjadi judul, daftar, kutipan, atau garis.
+    expect(teks("\\## bukan judul\n\n\\- bukan daftar\n\n1\\. bukan\n\n\\> bukan\n\n\\---").map((b) => b.t)).toEqual(["p", "p", "p", "p", "p"]);
+    expect(plain("A &amp; B &lt;c&gt; &quot;d&quot; &amp;amp; &copy;")).toBe('A & B <c> "d" &amp; &copy;');
+    // Garis miring tanpa tanda baca sesudahnya dibiarkan, tautan tetap disaring walau penandanya di-escape.
+    expect(plain("a \\b c")).toBe("a \\b c");
+    expect(JSON.stringify(teks("\\[x](javascript:alert(1)) [y\\]z](javascript:alert(1))"))).not.toContain('"link"');
+    expect(teks("[a\\]b](https://a.id)")).toEqual([{ t: "p", c: [{ t: "link", href: "https://a.id", c: [{ t: "text", v: "a]b" }] }] }]);
+  });
+
+  test("backslash di akhir baris = jeda baris; genap = garis miring biasa", () => {
+    expect(teks("satu\\\ndua")).toEqual([{ t: "p", c: [{ t: "text", v: "satu" }, { t: "br" }, { t: "text", v: "dua" }] }]);
+    expect(teks("satu\\\\\ndua")).toEqual([{ t: "p", c: [{ t: "text", v: "satu\\" }, { t: "br" }, { t: "text", v: "dua" }] }]);
+    expect(teks("satu  \ndua")).toEqual(teks("satu\ndua"));
+    // Backslash di ujung paragraf tetap teks.
+    expect(plain("akhir\\")).toBe("akhir\\");
+  });
+
+  test("penanda tebal dan miring boleh bersarang; yang tak berpasangan tetap teks", () => {
+    expect(teks("**a *b* c**")).toEqual([
+      {
+        t: "p",
+        c: [
+          {
+            t: "bold",
+            c: [
+              { t: "text", v: "a " },
+              { t: "italic", c: [{ t: "text", v: "b" }] },
+              { t: "text", v: " c" },
+            ],
+          },
+        ],
+      },
+    ]);
+    expect(teks("***x***")).toEqual([{ t: "p", c: [{ t: "bold", c: [{ t: "italic", c: [{ t: "text", v: "x" }] }] }] }]);
+    expect(teks("*a **b** c*")).toEqual([
+      {
+        t: "p",
+        c: [
+          {
+            t: "italic",
+            c: [
+              { t: "text", v: "a " },
+              { t: "bold", c: [{ t: "text", v: "b" }] },
+              { t: "text", v: " c" },
+            ],
+          },
+        ],
+      },
+    ]);
+    expect(teks("_i_ dan __b__ dan snake_case_name")).toMatchObject([
+      { t: "p", c: [{ t: "italic" }, { t: "text", v: " dan " }, { t: "bold" }, { t: "text", v: " dan snake_case_name" }] },
+    ]);
+    expect(plain("2 * 3 * 4 dan **buka tanpa tutup dan *sendiri")).toBe("2 * 3 * 4 dan **buka tanpa tutup dan *sendiri");
+  });
+
+  test("heading, garis, kutipan, daftar, dan gambar memutus paragraf; baris biasa menyambung daftar dan kutipan", () => {
+    expect(teks(`Daftar:\n- a\n- b\nsambung\n## Judul\nisi\n---\n> q1\nlazy\n1. satu\n2. dua\n![f](media:${ID})`).map((b) => b.t)).toEqual([
+      "p",
+      "ul",
+      "h2",
+      "p",
+      "hr",
+      "quote",
+      "ol",
+      "img",
+    ]);
+    const ul = teks("- a\n  lanjut\n- b")[0];
+    expect(ul).toMatchObject({ t: "ul", items: [[{ t: "text", v: "a" }, { t: "br" }, { t: "text", v: "lanjut" }], [{ t: "text", v: "b" }]] });
+    // Daftar sejenis yang dipisah baris kosong adalah satu daftar; kutipan kosong dilewati; "2024." bukan awal daftar di tengah paragraf.
+    expect(teks("- a\n\n- b").map((b) => b.t)).toEqual(["ul"]);
+    expect(teks(">\n\nsetelah").map((b) => b.t)).toEqual(["p"]);
+    expect(teks("Tahun\n2024. Juara").map((b) => b.t)).toEqual(["p"]);
+    expect(teks("Daftar\n1. satu").map((b) => b.t)).toEqual(["p", "ol"]);
+  });
 });
 
 const dbUrl = process.env.DATABASE_URL;

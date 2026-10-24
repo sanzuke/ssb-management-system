@@ -1,6 +1,7 @@
-import { createMemo, createSignal, Show } from "solid-js";
+import { createMemo, createSignal, For, Show } from "solid-js";
 import { type PostMedia, parseMarkdown } from "@ssb/shared";
 import BlokArtikel from "./BlokArtikel";
+import EditorVisual, { type KendaliVisual } from "./EditorVisual";
 
 type Props = {
   id: string;
@@ -8,8 +9,11 @@ type Props = {
   hint?: string;
   value: string;
   onInput: (v: string) => void;
+  /** Dipanggil segera saat isi diubah di editor visual (sebelum Markdown-nya tersinkron). */
+  onUbah: () => void;
   error?: string | undefined;
-  baris?: number;
+  /** Editor ini sedang ditampilkan; editor visual baru dimuat saat pertama kali tampil. */
+  tampil: boolean;
   /** Alamat gambar dari id media; null bila belum diketahui (gambar dilewati di pratinjau). */
   mediaUrl: (id: string) => string | null;
   /** Unggah gambar; mengembalikan null bila gagal (pesan galat ditampilkan induk). */
@@ -17,19 +21,35 @@ type Props = {
   sedangUnggah: boolean;
   galatUnggah: string;
   bisaUbah: boolean;
+  /** Menyerahkan kendali ke induk agar perubahan visual yang belum tersinkron bisa dipaksa sebelum simpan. */
+  onSiap: (k: KendaliVisual) => void;
 };
+
+type Tab = "visual" | "markdown" | "pratinjau";
+const TABS: { id: Tab; label: string }[] = [
+  { id: "visual", label: "Visual" },
+  { id: "markdown", label: "Markdown" },
+  { id: "pratinjau", label: "Pratinjau" },
+];
 
 /** Blok baru harus dipisah baris kosong dari teks di sekitarnya. */
 const pemisahAwal = (sebelum: string) => (sebelum === "" || sebelum.endsWith("\n\n") ? "" : sebelum.endsWith("\n") ? "\n" : "\n\n");
 const pemisahAkhir = (sesudah: string) => (sesudah === "" || sesudah.startsWith("\n\n") ? "" : sesudah.startsWith("\n") ? "\n" : "\n\n");
 
-/** Textarea isi artikel (Markdown) dengan bilah format, sisip gambar, dan tab pratinjau. */
+/** Isi artikel: editor visual (utama), textarea Markdown, dan pratinjau tampilan landing. Nilai sumbernya string Markdown. */
 export default function ArtikelIsi(p: Props) {
-  const [tab, setTab] = createSignal<"tulis" | "pratinjau">("tulis");
+  const [tab, setTab] = createSignal<Tab>("visual");
   let area: HTMLTextAreaElement | undefined;
   let berkas: HTMLInputElement | undefined;
+  let visual: KendaliVisual | undefined;
 
-  const blok = createMemo(() => parseMarkdown(p.value, p.mediaUrl));
+  const blok = createMemo(() => (tab() === "pratinjau" ? parseMarkdown(p.value, p.mediaUrl) : []));
+
+  const pilihTab = (t: Tab) => {
+    // Perubahan visual yang belum tersinkron harus masuk ke Markdown sebelum tampilan lain dibuka.
+    visual?.flush();
+    setTab(t);
+  };
 
   /** Ganti [s, e) dengan teks baru lalu pilih bagian `dari`..`sampai` (relatif ke awal teks baru). */
   const ganti = (s: number, e: number, teks: string, dari: number, sampai: number) => {
@@ -91,19 +111,41 @@ export default function ArtikelIsi(p: Props) {
   return (
     <div class="field isi-artikel" attr:data-salah={p.error ? "" : undefined}>
       <div class="isi-kepala">
-        <label for={p.id}>{p.label}</label>
+        <span class="isi-judul">{p.label}</span>
         {/* biome-ignore lint/a11y/useSemanticElements: pilihan tampilan */}
         <div class="tab-periode" role="group" aria-label={`Tampilan ${p.label}`}>
-          <button type="button" aria-pressed={tab() === "tulis"} onClick={() => setTab("tulis")}>
-            Tulis
-          </button>
-          <button type="button" aria-pressed={tab() === "pratinjau"} onClick={() => setTab("pratinjau")}>
-            Pratinjau
-          </button>
+          <For each={TABS}>
+            {(t) => (
+              <button type="button" aria-pressed={tab() === t.id} onClick={() => pilihTab(t.id)}>
+                {t.label}
+              </button>
+            )}
+          </For>
         </div>
       </div>
-      <div hidden={tab() !== "tulis"}>
-        <div class="bilah-format" role="toolbar" aria-label="Format teks">
+
+      <div hidden={tab() !== "visual"}>
+        <EditorVisual
+          id={p.id}
+          label={p.label}
+          value={p.value}
+          onChange={p.onInput}
+          onUbah={p.onUbah}
+          mediaUrl={p.mediaUrl}
+          unggah={p.unggah}
+          sedangUnggah={p.sedangUnggah}
+          bisaUbah={p.bisaUbah}
+          tampil={p.tampil}
+          invalid={!!p.error}
+          onSiap={(k) => {
+            visual = k;
+            p.onSiap(k);
+          }}
+        />
+      </div>
+
+      <div hidden={tab() !== "markdown"}>
+        <div class="bilah-format" role="toolbar" aria-label="Format teks Markdown">
           <Alat label="H2" judul="Subjudul" onClick={() => sisipBlok((b) => `## ${b}`, "Subjudul")} />
           <Alat label="H3" judul="Sub-subjudul" onClick={() => sisipBlok((b) => `### ${b}`, "Sub-subjudul")} />
           <Alat label="B" judul="Tebal" onClick={() => bungkus("**", "**", "teks tebal")} />
@@ -120,10 +162,11 @@ export default function ArtikelIsi(p: Props) {
         </div>
         <textarea
           ref={area}
-          id={p.id}
-          name={p.id}
+          id={`${p.id}-md`}
+          name={`${p.id}-md`}
           class="area-isi"
-          rows={p.baris ?? 16}
+          rows={16}
+          aria-label={`${p.label} (Markdown)`}
           value={p.value}
           readOnly={!p.bisaUbah}
           onInput={(e) => p.onInput(e.currentTarget.value)}
@@ -131,6 +174,7 @@ export default function ArtikelIsi(p: Props) {
           aria-describedby={`${p.id}-hint`}
         />
       </div>
+
       <Show when={tab() === "pratinjau"}>
         <div class="pratinjau-artikel">
           <Show when={blok().length > 0} fallback={<p class="kosong">Belum ada isi untuk dipratinjau.</p>}>
