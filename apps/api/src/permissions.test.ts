@@ -43,6 +43,13 @@ describe("matriks izin (tanpa database)", () => {
       // Landing page: tanpa sesi; hanya konten terbit dan pendaftaran trial (dibatasi laju dan kolom jebakan).
       "GET /public/site/:slug",
       "POST /public/site/:slug/trial",
+      // Artikel di landing: hanya yang terbit; gambar artikel; halaman SEO dan sitemap untuk mesin pencari.
+      "GET /public/site/:slug/posts",
+      "GET /public/site/:slug/posts/:postSlug",
+      "GET /public/site/:slug/media/:id",
+      "GET /public/seo/:slug/berita",
+      "GET /public/seo/:slug/berita/:postSlug",
+      "GET /public/seo/:slug/sitemap.xml",
     ]);
     const byRoute = new Map<string, any[]>();
     for (const r of app.routes) {
@@ -121,6 +128,7 @@ run("matriks izin per endpoint (database)", () => {
     { method: "GET", path: "/whatsapp/settings", perm: "fee.manage" },
     { method: "GET", path: "/site", perm: "site.manage" },
     { method: "GET", path: "/trials", perm: "trial.manage" },
+    { method: "GET", path: "/posts", perm: "post.write" },
   ];
   for (const e of endpoints) {
     test(`${e.method} ${e.path}: hanya role dengan izin ${e.perm} yang lolos`, async () => {

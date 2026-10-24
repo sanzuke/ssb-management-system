@@ -9,6 +9,8 @@ export class HttpError extends Error {
     public status: ContentfulStatusCode,
     public code: string,
     message: string,
+    /** Pesan per kolom (kunci berupa jalur titik), sama bentuknya dengan galat validasi. */
+    public fields?: Record<string, string>,
   ) {
     super(message);
   }
@@ -22,7 +24,10 @@ export function errorBody(code: string, message: string): ApiError {
 }
 
 export function onError(err: Error, c: Context) {
-  if (err instanceof HttpError) return c.json(errorBody(err.code, err.message), err.status);
+  if (err instanceof HttpError) {
+    const body = errorBody(err.code, err.message);
+    return c.json(err.fields ? { error: { ...body.error, fields: err.fields } } : body, err.status);
+  }
   // Penolakan dari middleware Hono, misalnya CSRF.
   if (err instanceof HTTPException) {
     return c.json(

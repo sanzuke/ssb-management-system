@@ -9,6 +9,10 @@ const envSchema = z
     ALLOWED_ORIGINS: z.string().default("http://localhost:3001"),
     /** Origin landing page yang boleh memanggil API publik (/public/*) dari browser, dipisah koma. Kosong = tidak ada. */
     LANDING_ORIGINS: z.string().default(""),
+    /** Alamat situs landing (tanpa garis miring akhir); dasar alamat kanonik dan sitemap halaman berita. */
+    LANDING_URL: z.string().default("http://localhost:5173"),
+    /** index.html hasil build landing; kerangka halaman berita untuk mesin pencari. Di server: /var/www/landing/index.html. */
+    LANDING_INDEX_PATH: z.string().default("./landing-index.html"),
     /** URL web; tujuan pengalihan setelah login Google. */
     WEB_URL: z.string().default("http://localhost:3001"),
     /** URL publik API; dasar redirect URI Google (/auth/google/callback). */

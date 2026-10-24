@@ -703,3 +703,59 @@ export const trialRegistration = pgTable(
     tenantPolicy("trial_registration"),
   ],
 ).enableRLS();
+
+/** Gambar artikel (sampul dan gambar di dalam isi). Berkas ada di penyimpanan upload; dibaca publik lewat kode SSB. */
+export const siteMedia = pgTable(
+  "site_media",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    ssbId: ssbId().references(() => ssb.id, { onDelete: "cascade" }),
+    /** Kunci berkas di penyimpanan upload: <ssb>/artikel/<id>.<ekstensi>. */
+    fileKey: text("file_key").notNull(),
+    mime: text("mime").notNull(),
+    bytes: integer("bytes").notNull(),
+    createdBy: uuid("created_by"),
+    createdAt: createdAt(),
+  },
+  (t) => [
+    unique("site_media_ssb_id").on(t.ssbId, t.id),
+    foreignKey({ columns: [t.ssbId, t.createdBy], foreignColumns: [appUser.ssbId, appUser.id], name: "site_media_created_by_fk" }).onDelete("set null"),
+    tenantPolicy("site_media"),
+  ],
+).enableRLS();
+
+/** Artikel atau berita di landing page. Teks dua bahasa (Indonesia wajib, English opsional); isi berupa Markdown sederhana. */
+export const sitePost = pgTable(
+  "site_post",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    ssbId: ssbId().references(() => ssb.id, { onDelete: "cascade" }),
+    /** Alamat artikel (/berita/<slug>), unik per SSB. */
+    slug: text("slug").notNull(),
+    titleId: text("title_id").notNull(),
+    titleEn: text("title_en"),
+    excerptId: text("excerpt_id").notNull().default(""),
+    excerptEn: text("excerpt_en"),
+    bodyId: text("body_id").notNull(),
+    bodyEn: text("body_en"),
+    category: text("category").notNull().default(""),
+    coverMediaId: uuid("cover_media_id"),
+    coverAlt: text("cover_alt").notNull().default(""),
+    status: text("status").notNull().default("draft"),
+    publishedAt: timestamp("published_at", { withTimezone: true }),
+    authorId: uuid("author_id"),
+    /** Nama penulis saat artikel dibuat, supaya tetap tampil walau anggotanya kemudian dikeluarkan. */
+    authorName: text("author_name").notNull(),
+    createdAt: createdAt(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    unique("site_post_ssb_slug").on(t.ssbId, t.slug),
+    index("site_post_list_idx").on(t.ssbId, t.status, t.publishedAt),
+    foreignKey({ columns: [t.ssbId, t.coverMediaId], foreignColumns: [siteMedia.ssbId, siteMedia.id], name: "site_post_cover_fk" }).onDelete("set null"),
+    foreignKey({ columns: [t.ssbId, t.authorId], foreignColumns: [appUser.ssbId, appUser.id], name: "site_post_author_fk" }).onDelete("set null"),
+    check("site_post_status", sql`${t.status} in ('draft', 'published')`),
+    check("site_post_published_pair", sql`(${t.status} = 'published') = (${t.publishedAt} is not null)`),
+    tenantPolicy("site_post"),
+  ],
+).enableRLS();

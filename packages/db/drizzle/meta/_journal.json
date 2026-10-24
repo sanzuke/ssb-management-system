@@ -148,6 +148,13 @@
       "when": 1792738538232,
       "tag": "0020_konten_situs",
       "breakpoints": true
+    },
+    {
+      "idx": 21,
+      "version": "7",
+      "when": 1792843382604,
+      "tag": "0021_artikel",
+      "breakpoints": true
     }
   ]
 }

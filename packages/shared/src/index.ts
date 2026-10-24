@@ -61,6 +61,10 @@ export const permissions = {
   "assignment.manage": { roles: ["admin_ssb"], desc: "Menugaskan pelatih dan korlas ke KU per periode" },
   "report.publish": { roles: ["admin_ssb", "korlas"], desc: "Menerbitkan rapor ke orang tua (wewenang korlas: menunggu keputusan)" },
   "site.manage": { roles: ["admin_ssb"], desc: "Menyunting draf konten landing page akademi dan menerbitkannya" },
+  "post.write": {
+    roles: ["admin_ssb", "pelatih", "korlas"],
+    desc: "Menulis artikel untuk landing page, mengunggah gambarnya, dan menerbitkan artikel sendiri (admin SSB: semua artikel)",
+  },
   "trial.manage": { roles: ["admin_ssb"], desc: "Melihat pendaftar trial dari landing page dan mengubah statusnya" },
 } as const satisfies Record<string, { roles: readonly UserRole[]; desc: string }>;
 export type Permission = keyof typeof permissions;
@@ -390,6 +394,8 @@ export type GuardianSession = {
 
 // ---- Landing page akademi ----
 export * from "./site";
+export * from "./post";
+export * from "./markdown";
 
 // ---- Assessment (skala 1 sampai 10) ----
 export * from "./aspects";

@@ -11,6 +11,8 @@ import { createGoogleProvider, type GoogleProvider } from "./auth/google";
 import { feeRoutes } from "./fees";
 import { feeSettingRoutes } from "./fee-settings";
 import { whatsappSettingRoutes } from "./whatsapp";
+import { postRoutes, publicPostRoutes } from "./posts";
+import { seoRoutes } from "./seo";
 import { publicSiteRoutes, siteRoutes } from "./site";
 import { memberRoutes } from "./members";
 import { invitationRoutes } from "./invitations";
@@ -31,7 +33,16 @@ export function createApp(
     Partial<
       Pick<
         Env,
-        "WEB_URL" | "PUBLIC_API_URL" | "SESSION_SECRET" | "TOKEN_SECRET" | "GOOGLE_CLIENT_ID" | "GOOGLE_CLIENT_SECRET" | "UPLOAD_DIR" | "LANDING_ORIGINS"
+        | "WEB_URL"
+        | "PUBLIC_API_URL"
+        | "SESSION_SECRET"
+        | "TOKEN_SECRET"
+        | "GOOGLE_CLIENT_ID"
+        | "GOOGLE_CLIENT_SECRET"
+        | "UPLOAD_DIR"
+        | "LANDING_ORIGINS"
+        | "LANDING_URL"
+        | "LANDING_INDEX_PATH"
       >
     >,
   deps: AppDeps = {},
@@ -83,6 +94,24 @@ export function createApp(
             .split(",")
             .map((s) => s.trim())
             .filter(Boolean),
+        }),
+      )
+      .route("/", postRoutes(db, { uploadDir: env.UPLOAD_DIR ?? "./uploads", publicApiUrl: env.PUBLIC_API_URL ?? "http://localhost:3000" }))
+      .route(
+        "/",
+        publicPostRoutes(db, {
+          uploadDir: env.UPLOAD_DIR ?? "./uploads",
+          publicApiUrl: env.PUBLIC_API_URL ?? "http://localhost:3000",
+          landingUrl: env.LANDING_URL ?? "http://localhost:5173",
+          landingIndexPath: env.LANDING_INDEX_PATH ?? "./landing-index.html",
+        }),
+      )
+      .route(
+        "/",
+        seoRoutes(db, {
+          publicApiUrl: env.PUBLIC_API_URL ?? "http://localhost:3000",
+          landingUrl: env.LANDING_URL ?? "http://localhost:5173",
+          landingIndexPath: env.LANDING_INDEX_PATH ?? "./landing-index.html",
         }),
       )
       .route("/", memberRoutes(db))

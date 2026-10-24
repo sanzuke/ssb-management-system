@@ -56,6 +56,10 @@ export default function AppBar(props: { me: Me }) {
             <Ikon nama="kalender" />
             <span>Jadwal</span>
           </A>
+          <A class="tombol tipis menu" href="/artikel">
+            <Ikon nama="daftar" />
+            <span>Artikel</span>
+          </A>
           <A class="tombol tipis menu" href="/master">
             <Ikon nama="master" />
             <span>Data master</span>

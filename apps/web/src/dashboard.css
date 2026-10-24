@@ -2910,3 +2910,156 @@ button.pengguna[aria-expanded="true"] .panah-menu {
   margin-right: 8px;
   vertical-align: -7px;
 }
+
+/* ---- Artikel (daftar, editor, pratinjau) ---- */
+.daftar-artikel {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.baris-artikel {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border: 1px solid var(--garis);
+  border-radius: var(--radius);
+  background: #fff;
+}
+.baris-artikel .teks-artikel {
+  display: grid;
+  flex: 1;
+  gap: 2px;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.baris-artikel a {
+  color: var(--tinta);
+  text-decoration: none;
+}
+.baris-artikel a:hover strong {
+  text-decoration: underline;
+}
+.mini-sampul {
+  flex: none;
+  width: 64px;
+  height: 48px;
+  border-radius: 4px;
+  background: #edf1e7;
+  object-fit: cover;
+}
+.editor-artikel h2 {
+  margin: 8px 0 0;
+  font-size: 1.1rem;
+}
+.sampul-artikel {
+  display: grid;
+  gap: 8px;
+}
+.sampul-pratinjau {
+  width: 100%;
+  max-width: 420px;
+  max-height: 260px;
+  border-radius: var(--radius);
+  object-fit: cover;
+}
+.isi-kepala {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.isi-kepala .tab-periode {
+  margin: 0;
+}
+.bilah-format {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+.bilah-format .tombol {
+  width: auto;
+  min-height: 40px;
+  padding: 6px 12px;
+}
+.field textarea.area-isi {
+  min-height: 320px;
+  font-family: ui-monospace, "Cascadia Mono", Consolas, monospace;
+  font-size: 0.95rem;
+}
+.pratinjau-artikel {
+  min-height: 200px;
+  padding: 16px;
+  border: 1.5px dashed var(--kolom);
+  border-radius: var(--radius);
+  background: #fff;
+}
+.blok-artikel {
+  max-width: 68ch;
+  line-height: 1.7;
+  overflow-wrap: anywhere;
+}
+.blok-artikel h2 {
+  margin: 1.6em 0 0.5em;
+  font-size: 1.5rem;
+  line-height: 1.25;
+}
+.blok-artikel h3 {
+  margin: 1.4em 0 0.4em;
+  font-size: 1.2rem;
+  line-height: 1.3;
+}
+.blok-artikel > :first-child {
+  margin-top: 0;
+}
+.blok-artikel p,
+.blok-artikel ul,
+.blok-artikel ol {
+  margin: 0 0 1em;
+}
+.blok-artikel ul,
+.blok-artikel ol {
+  padding-left: 1.4em;
+}
+.blok-artikel li + li {
+  margin-top: 0.25em;
+}
+.blok-artikel blockquote {
+  margin: 1.2em 0;
+  padding: 4px 0 4px 16px;
+  border-left: 4px solid var(--kuning);
+  color: var(--redup);
+  font-style: italic;
+}
+.blok-artikel img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin: 1.2em 0;
+  border-radius: var(--radius);
+}
+.blok-artikel hr {
+  margin: 2em 0;
+  border: 0;
+  border-top: 1px solid var(--garis);
+}
+.blok-artikel a {
+  color: var(--rumput);
+  text-decoration: underline;
+}
+@media (max-width: 719.98px) {
+  .baris-artikel {
+    flex-wrap: wrap;
+  }
+  .mini-sampul {
+    width: 56px;
+    height: 42px;
+  }
+  .field textarea.area-isi {
+    min-height: 260px;
+  }
+}

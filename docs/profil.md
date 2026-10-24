@@ -76,12 +76,51 @@ Di server, Nginx untuk `app.familyunitedfa.com` meneruskan `/api/public/` langsu
 - **Konten situs:** editor per bagian, bahasa ID dan EN, pratinjau draf, tombol Terbitkan, dan penanda perubahan yang belum terbit.
 - **Galeri:** unggah, urutkan, tandai terbit.
 - **Pendaftar:** daftar trial dengan status, tombol hubungi lewat WhatsApp, dan ubah menjadi undangan orang tua.
+- **Artikel:** daftar, editor Markdown dengan bilah format, unggah sampul dan gambar isi, pratinjau, simpan draf, terbitkan, tarik, dan hapus.
 
 ## Landing dan build
 
 Landing memakai desain tim (`ssb-family-united`) dan membaca konten dari API saat halaman dibuka (`VITE_API_URL`, `VITE_SSB_SLUG`). Bila API 404, offline, atau lebih dari 8 detik, halaman memakai data bawaan di `src/data/academyData.ts`, jadi tidak pernah kosong. Terbitkan di SSB MS langsung terlihat tanpa build ulang (cache 60 detik). Konsekuensinya mesin pencari yang tidak menjalankan JavaScript hanya melihat data bawaan; bila SEO penting, tambahkan prarender saat terbit. Bagian kosong di konten API disembunyikan, bukan diisi data bawaan, supaya data akademi lain tidak bocor ke landing ini.
 
 Perbaikan yang diperlukan pada desain apa adanya: foto ikut ter-build (path sekarang berupa teks `/src/assets/...` sehingga hilang di produksi), formulir trial tersambung ke `POST /public/trial`, data contoh diganti konten asli, dan foto pertandingan berkostum klub lain diganti foto milik akademi.
+
+## Artikel dan berita
+
+Artikel disimpan di database SSB MS, bukan di repo landing, supaya penulis tidak perlu menyentuh kode dan tiap artikel terbit sendiri-sendiri.
+
+| Bagian | Tempat |
+|---|---|
+| Teks (judul, ringkasan, isi, kategori, status, tanggal terbit, penulis) | tabel `site_post`, per SSB dengan RLS, alamat `slug` unik per SSB |
+| Gambar sampul dan gambar di isi | tabel `site_media` + berkas di `UPLOAD_DIR/<ssb>/artikel/<id>.<ekstensi>` (JPG, PNG, WebP, maks 5 MB, jenis dari isi berkas) |
+| Isi | Markdown sederhana (`packages/shared/src/markdown.ts`): `##`, `###`, paragraf, daftar, kutipan, garis, `![ket](media:<id>`), tebal, miring, tautan. Diurai menjadi blok bertipe; tidak ada HTML mentah |
+
+Bahasa: Indonesia wajib, English opsional per artikel (kosong = landing memakai Indonesia).
+
+Izin `post.write`: admin SSB, pelatih, dan korlas boleh menulis, mengunggah gambar, dan menerbitkan artikel sendiri. Penulis hanya menyunting atau menghapus artikelnya; admin SSB semuanya. Orang tua tidak punya akses.
+
+| Endpoint | Izin | Fungsi |
+|---|---|---|
+| `GET/POST /posts`, `GET/PUT/DELETE /posts/:id` | `post.write` | Daftar, buat, baca, ubah, hapus (artikel orang lain: 403) |
+| `POST /posts/:id/publish`, `/unpublish` | `post.write` | Terbitkan atau tarik |
+| `POST /posts/media` | `post.write` | Unggah gambar (multipart, kolom `file`) |
+| `GET /public/site/:slug/posts`, `/posts/:postSlug` | publik | Artikel terbit saja, dengan blok aman; cache 60 detik |
+| `GET /public/site/:slug/media/:id` | publik | Berkas gambar, cache setahun |
+| `GET /public/seo/:slug/berita`, `/berita/:postSlug`, `/sitemap.xml` | publik | HTML untuk mesin pencari dan sitemap |
+
+### SEO
+
+Landing adalah aplikasi satu halaman, jadi mesin pencari tidak melihat isi artikel dari HTML awalnya. Untuk `/berita` dan `/berita/<slug>`, Nginx di vhost landing meneruskan permintaan ke API (`/public/seo/<ssb>/...`). API mengambil `index.html` hasil build landing (`LANDING_INDEX_PATH`) lalu mengisi `<title>`, meta description, Open Graph, tautan kanonik, data terstruktur Article (JSON-LD), dan isi artikel (semua teks di-escape) ke dalamnya. Di browser, React mengambil alih dan menampilkan halaman berita. Artikel yang baru terbit langsung terlihat oleh perayap tanpa build ulang. `/sitemap.xml` juga dilayani API; `robots.txt` menunjuk ke sana.
+
+Env API: `LANDING_URL` (mis. `https://familyunitedfa.com`) dan `LANDING_INDEX_PATH` (`/var/www/landing/index.html`).
+
+Nginx (vhost landing):
+
+```
+location ~ ^/berita(/.*)?$ { proxy_pass http://127.0.0.1:3110/public/seo/garuda-muda/berita$1$is_args$args; }
+location = /sitemap.xml    { proxy_pass http://127.0.0.1:3110/public/seo/garuda-muda/sitemap.xml; }
+```
+
+Halaman beranda masih memuat kontennya lewat JavaScript. Bila perlu, pendekatan yang sama bisa dipakai untuk beranda.
 
 ## Domain
 
