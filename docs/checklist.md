@@ -141,7 +141,9 @@ Detail di `docs/profil.md`. Dikerjakan lebih awal dari rencana karena akademi pe
 - [x] Landing (`ssb-family-united`, commit `e6a51cb`): konten dibaca dari `GET /public/site/:slug` saat halaman dibuka (timeout 8 dtk, cadangan data bawaan bila 404 atau offline); formulir trial terkirim ke `POST /public/site/:slug/trial` dengan kode TRL tampil ke orang tua; lintas origin diuji. Terpasang di familyunitedfa.com
 - [x] Landing: tidak perlu build ulang saat Terbitkan karena konten dibaca saat halaman dibuka (cache 60 detik). Konsekuensi: mesin pencari yang tidak menjalankan JavaScript melihat data bawaan; prarender bisa ditambah nanti bila SEO penting
 - [x] Artikel dan berita: tabel `site_post` dan `site_media` (migrasi 0021, RLS dipaksa), izin `post.write`, API admin dan publik, unggah gambar, halaman Artikel di SSB MS (daftar, editor Markdown, pratinjau, terbit), bagian Berita di landing, dan HTML SEO untuk /berita dan sitemap dari API; test per role, kepemilikan, isolasi, gambar, dan escape HTML
-- [ ] Artikel: pasang di server (env LANDING_URL dan LANDING_INDEX_PATH, lokasi Nginx /berita dan /sitemap.xml) dan daftarkan sitemap di Google Search Console
+- [x] Artikel: dipasang di server (env LANDING_URL dan LANDING_INDEX_PATH, lokasi Nginx /berita dan /sitemap.xml), diuji di produksi
+- [ ] Daftarkan sitemap `https://familyunitedfa.com/sitemap.xml` di Google Search Console (tindakan pemilik)
+- [x] Editor visual artikel (Tiptap) dengan mode Markdown dan pratinjau; dideploy ke fufa
 - [ ] Isi asli dari tim menggantikan data contoh (klaim pemain, beasiswa, lisensi, alamat, email) dan foto milik akademi **(butuh keputusan)**
 - [ ] Putuskan nama pelatih dan biaya SPP tampil publik atau tidak **(butuh keputusan)**
 
