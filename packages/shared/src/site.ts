@@ -90,6 +90,17 @@ export const siteMatchSchema = z.object({
 
 export const siteTestimonialSchema = z.object({ name: short, role: localizedSchema.optional(), quote: localizedSchema });
 
+/** Header sebuah bagian di landing. Kolom kosong membuat landing memakai teks bawaannya. */
+export const siteSectionHeadSchema = z.object({
+  eyebrow: localizedSchema.optional(),
+  title: localizedSchema.optional(),
+  intro: localizedSchema.optional(),
+});
+export type SiteSectionHead = z.infer<typeof siteSectionHeadSchema>;
+
+export const SITE_SECTION_KEYS = ["programs", "coaches", "facilities", "matches", "testimonials"] as const;
+export type SiteSectionKey = (typeof SITE_SECTION_KEYS)[number];
+
 export const siteContentSchema = z.object({
   identity: siteIdentitySchema,
   hero: siteHeroSchema,
@@ -100,6 +111,17 @@ export const siteContentSchema = z.object({
   facilities: z.array(siteFacilitySchema).max(12),
   matches: z.array(siteMatchSchema).max(60),
   testimonials: z.array(siteTestimonialSchema).max(12),
+  /** Label kecil, judul, dan pengantar tiap bagian; bagian yang tidak diisi memakai teks bawaan landing. */
+  sections: z
+    .object({
+      programs: siteSectionHeadSchema,
+      coaches: siteSectionHeadSchema,
+      facilities: siteSectionHeadSchema,
+      matches: siteSectionHeadSchema,
+      testimonials: siteSectionHeadSchema,
+    })
+    .partial()
+    .optional(),
   /** Tautan media sosial yang ditampilkan di footer. */
   social: z.object({ instagram: url, youtube: url, facebook: url, tiktok: url }).partial().optional(),
 });

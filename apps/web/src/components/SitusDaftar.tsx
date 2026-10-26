@@ -3,7 +3,7 @@ import { hariIni } from "~/lib/waktu";
 import { angka, geser, idProgramBaru, isi, type Sunting, ubahDi } from "~/lib/situs";
 import Field from "./Field";
 import SelectField from "./SelectField";
-import { Butir, Lokal } from "./SitusKolom";
+import { Butir, HeaderBagian, Lokal } from "./SitusKolom";
 
 /** Tombol tambah dengan batas jumlah yang sama seperti skema di API. */
 function Tambah(p: { teks: string; jumlah: number; maks: number; onClick: () => void }) {
@@ -21,6 +21,7 @@ export function SitusProgram(p: { s: Sunting }) {
   return (
     <section class="master" aria-label="Program">
       <h2>Program latihan</h2>
+      <HeaderBagian s={p.s} kunci="programs" />
       <p class="petunjuk">
         Tiap program tampil sebagai tab di halaman. Biaya ditulis apa adanya, mis. "Rp 250.000 / bulan"; kosongkan bila tidak ingin dipajang.
       </p>
@@ -190,6 +191,7 @@ export function SitusPelatih(p: { s: Sunting }) {
   return (
     <section class="master" aria-label="Pelatih">
       <h2>Pelatih</h2>
+      <HeaderBagian s={p.s} kunci="coaches" />
       <p class="petunjuk">Tampilkan hanya pelatih yang sudah setuju nama, lisensi, dan riwayatnya dipajang di situs publik.</p>
       <Index each={d.coaches}>
         {(_, i) => {
@@ -260,6 +262,7 @@ export function SitusFasilitas(p: { s: Sunting }) {
   return (
     <section class="master" aria-label="Fasilitas">
       <h2>Fasilitas</h2>
+      <HeaderBagian s={p.s} kunci="facilities" />
       <Index each={d.facilities}>
         {(_, i) => {
           const j = `facilities.${i}`;
@@ -310,6 +313,7 @@ export function SitusLaga(p: { s: Sunting }) {
   return (
     <section class="master" aria-label="Pertandingan">
       <h2>Pertandingan</h2>
+      <HeaderBagian s={p.s} kunci="matches" />
       <p class="petunjuk">Jadwal dan hasil laga. Skor hanya diisi untuk laga yang sudah selesai.</p>
       <Index each={d.matches}>
         {(_, i) => {
@@ -451,6 +455,7 @@ export function SitusTestimoni(p: { s: Sunting }) {
   return (
     <section class="master" aria-label="Testimoni">
       <h2>Testimoni</h2>
+      <HeaderBagian s={p.s} kunci="testimonials" />
       <p class="petunjuk">Cantumkan hanya kutipan nyata yang sudah diizinkan oleh orang yang bersangkutan.</p>
       <Index each={d.testimonials}>
         {(_, i) => {

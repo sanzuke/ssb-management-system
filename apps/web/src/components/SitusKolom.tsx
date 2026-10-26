@@ -1,6 +1,6 @@
 import { type JSX, Show } from "solid-js";
-import type { Localized } from "@ssb/shared";
-import { buatLokal } from "~/lib/situs";
+import type { Localized, SiteSectionHead, SiteSectionKey } from "@ssb/shared";
+import { buatLokal, type Sunting } from "~/lib/situs";
 import AreaField from "./AreaField";
 import Field from "./Field";
 
@@ -70,6 +70,57 @@ export function Butir(p: { judul: string; i: number; jumlah: number; geser: (ara
         </button>
       </div>
       {p.children}
+    </fieldset>
+  );
+}
+
+const NAMA_BAGIAN: Record<SiteSectionKey, string> = {
+  programs: "Program",
+  coaches: "Pelatih",
+  facilities: "Fasilitas",
+  matches: "Pertandingan",
+  testimonials: "Testimoni",
+};
+
+/** Isian header sebuah bagian di landing: label kecil, judul, dan pengantar. Kosong = teks bawaan landing. */
+export function HeaderBagian(p: { s: Sunting; kunci: SiteSectionKey }) {
+  const { d, ubah, salah } = p.s;
+  const ubahBagian = (kolom: keyof SiteSectionHead) => (v: Localized) =>
+    ubah((x) => {
+      const sections = x.sections ?? {};
+      const h = sections[p.kunci] ?? {};
+      h[kolom] = v;
+      sections[p.kunci] = h;
+      x.sections = sections;
+    });
+  const nilai = (kolom: keyof SiteSectionHead) => d.sections?.[p.kunci]?.[kolom];
+  const jalur = (kolom: string) => `sections.${p.kunci}.${kolom}`;
+  return (
+    <fieldset class="butir-situs">
+      <legend>Header bagian {NAMA_BAGIAN[p.kunci]}</legend>
+      <p class="petunjuk">
+        Teks di atas daftar pada halaman landing. Kosongkan kolom Indonesia untuk memakai teks bawaan landing. Label kecil diikuti tahun berdiri otomatis.
+      </p>
+      <div class="form">
+        <Lokal
+          id={`head-${p.kunci}-label`}
+          label="Label kecil"
+          value={nilai("eyebrow")}
+          onChange={ubahBagian("eyebrow")}
+          jalur={jalur("eyebrow")}
+          salah={salah}
+        />
+        <Lokal id={`head-${p.kunci}-judul`} label="Judul" value={nilai("title")} onChange={ubahBagian("title")} jalur={jalur("title")} salah={salah} />
+        <Lokal
+          id={`head-${p.kunci}-pengantar`}
+          label="Pengantar"
+          panjang
+          value={nilai("intro")}
+          onChange={ubahBagian("intro")}
+          jalur={jalur("intro")}
+          salah={salah}
+        />
+      </div>
     </fieldset>
   );
 }
