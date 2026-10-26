@@ -3,7 +3,7 @@ import { hariIni } from "~/lib/waktu";
 import { angka, geser, idProgramBaru, isi, type Sunting, ubahDi } from "~/lib/situs";
 import Field from "./Field";
 import SelectField from "./SelectField";
-import { Butir, HeaderBagian, Lokal } from "./SitusKolom";
+import { Butir, FotoSitus, HeaderBagian, Lokal } from "./SitusKolom";
 
 /** Tombol tambah dengan batas jumlah yang sama seperti skema di API. */
 function Tambah(p: { teks: string; jumlah: number; maks: number; onClick: () => void }) {
@@ -117,6 +117,19 @@ export function SitusProgram(p: { s: Sunting }) {
                   onInput={(v) => ubahProgram((b) => isi(b, "fee", v))}
                   error={salah(`${j}.fee`)}
                   maxlength={200}
+                />
+                <FotoSitus
+                  id={`prog-${i}-foto`}
+                  label="Foto program"
+                  value={d.programs[i]?.image || undefined}
+                  onChange={(u) =>
+                    ubahProgram((b) => {
+                      if (u) b.image = u;
+                      else delete b.image;
+                    })
+                  }
+                  error={salah(`${j}.image`)}
+                  bawaan="Memakai foto latihan bawaan landing."
                 />
                 <label class="centang">
                   <input
@@ -314,6 +327,19 @@ export function SitusLaga(p: { s: Sunting }) {
     <section class="master" aria-label="Pertandingan">
       <h2>Pertandingan</h2>
       <HeaderBagian s={p.s} kunci="matches" />
+      <FotoSitus
+        id="laga-foto"
+        label="Foto bagian pertandingan"
+        value={d.images?.matches || undefined}
+        onChange={(u) =>
+          ubah((x) => {
+            if (u) x.images = { ...x.images, matches: u };
+            else if (x.images) delete x.images.matches;
+          })
+        }
+        error={salah("images.matches")}
+        bawaan="Memakai foto pertandingan bawaan landing."
+      />
       <p class="petunjuk">Jadwal dan hasil laga. Skor hanya diisi untuk laga yang sudah selesai.</p>
       <Index each={d.matches}>
         {(_, i) => {

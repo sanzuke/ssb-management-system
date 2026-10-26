@@ -60,6 +60,8 @@ export const siteProgramSchema = z.object({
   /** Biaya bulanan sebagai teks bebas ("IDR 250.000 / bulan") karena dipajang apa adanya. */
   fee: short.optional(),
   hasScholarship: z.boolean().default(false),
+  /** Foto program (URL gambar yang sudah diunggah); kosong = foto bawaan landing. */
+  image: url.optional(),
 });
 
 export const siteCoachSchema = z.object({
@@ -122,6 +124,8 @@ export const siteContentSchema = z.object({
     })
     .partial()
     .optional(),
+  /** Foto bagian di landing (URL gambar yang sudah diunggah); kosong = foto bawaan. */
+  images: z.object({ hero: url, matches: url }).partial().optional(),
   /** Tautan media sosial yang ditampilkan di footer. */
   social: z.object({ instagram: url, youtube: url, facebook: url, tiktok: url }).partial().optional(),
 });

@@ -1,7 +1,7 @@
 import { Index, Show } from "solid-js";
 import { angka, geser, isi, type Sunting, ubahDi } from "~/lib/situs";
 import Field from "./Field";
-import { Butir, Lokal } from "./SitusKolom";
+import { Butir, Lokal, FotoSitus } from "./SitusKolom";
 
 export function SitusIdentitas(p: { s: Sunting }) {
   const { d, ubah, salah } = p.s;
@@ -125,6 +125,19 @@ export function SitusBeranda(p: { s: Sunting }) {
       <section class="master" aria-label="Sorotan utama">
         <h2>Sorotan utama</h2>
         <p class="petunjuk">Bagian paling atas halaman: judul besar, kalimat pendukung, dan tombol ajakan mendaftar.</p>
+        <FotoSitus
+          id="hero-foto"
+          label="Foto beranda"
+          value={d.images?.hero || undefined}
+          onChange={(u) =>
+            ubah((x) => {
+              if (u) x.images = { ...x.images, hero: u };
+              else if (x.images) delete x.images.hero;
+            })
+          }
+          error={salah("images.hero")}
+          bawaan="Memakai foto beranda bawaan landing."
+        />
         <div class="form">
           <Lokal
             id="hero-eyebrow"

@@ -1,5 +1,5 @@
-import { type JSX, Show } from "solid-js";
-import type { Localized, SiteSectionHead, SiteSectionKey } from "@ssb/shared";
+import { createSignal, type JSX, Show } from "solid-js";
+import { POST_MEDIA_MAX_BYTES, type Localized, type SiteSectionHead, type SiteSectionKey } from "@ssb/shared";
 import { buatLokal, type Sunting } from "~/lib/situs";
 import AreaField from "./AreaField";
 import Field from "./Field";
@@ -122,5 +122,68 @@ export function HeaderBagian(p: { s: Sunting; kunci: SiteSectionKey }) {
         />
       </div>
     </fieldset>
+  );
+}
+
+const TIPE_FOTO = ["image/jpeg", "image/png", "image/webp"];
+
+/** Foto bagian situs: unggah lewat media artikel, lalu simpan URL-nya di konten. Kosong = foto bawaan landing. */
+export function FotoSitus(p: {
+  id: string;
+  label: string;
+  value: string | undefined;
+  onChange: (url: string | undefined) => void;
+  error?: string;
+  bawaan: string;
+}) {
+  let berkas: HTMLInputElement | undefined;
+  const [sibuk, setSibuk] = createSignal(false);
+  const [galat, setGalat] = createSignal("");
+  const pilih = async (e: Event) => {
+    const input = e.currentTarget as HTMLInputElement;
+    const file = input.files?.[0];
+    input.value = "";
+    if (!file) return;
+    setGalat("");
+    if (!TIPE_FOTO.includes(file.type)) return setGalat("Gambar harus berformat JPG, PNG, atau WebP.");
+    if (file.size > POST_MEDIA_MAX_BYTES) return setGalat(`Gambar terlalu besar. Maksimal ${POST_MEDIA_MAX_BYTES / 1024 / 1024} MB.`);
+    setSibuk(true);
+    try {
+      const body = new FormData();
+      body.set("file", file);
+      const res = await fetch("/api/posts/media", { method: "POST", credentials: "same-origin", body });
+      const data = await res.json().catch(() => null);
+      if (!res.ok) throw new Error(data?.error?.message ?? "Gambar tidak bisa diunggah. Coba lagi.");
+      p.onChange((data as { url: string }).url);
+    } catch (err) {
+      setGalat(err instanceof Error && err.message ? err.message : "Tidak bisa terhubung ke server. Coba lagi.");
+    } finally {
+      setSibuk(false);
+    }
+  };
+  return (
+    <div class="sampul-artikel" id={p.id}>
+      <strong>{p.label}</strong>
+      <Show when={p.value} fallback={<p class="kosong">{p.bawaan}</p>}>
+        {(u) => <img class="sampul-pratinjau" src={u()} alt={p.label} />}
+      </Show>
+      <div class="butir-aksi">
+        <button class="tombol tipis" type="button" disabled={sibuk()} onClick={() => berkas?.click()}>
+          {sibuk() ? "Mengunggah…" : p.value ? "Ganti foto" : "Unggah foto"}
+        </button>
+        <Show when={p.value}>
+          <button class="tombol tipis" type="button" onClick={() => p.onChange(undefined)}>
+            Pakai foto bawaan
+          </button>
+        </Show>
+        <input ref={berkas} type="file" accept="image/jpeg,image/png,image/webp" hidden onChange={pilih} />
+      </div>
+      <span class="petunjuk">JPG, PNG, atau WebP, maksimal 5 MB.</span>
+      <Show when={galat() || p.error}>
+        <span class="pesan-salah" role="alert">
+          {galat() || p.error}
+        </span>
+      </Show>
+    </div>
   );
 }

@@ -9,12 +9,12 @@ import { SitusBeranda, SitusCerita, SitusIdentitas, SitusTautan } from "./SitusU
 
 const TAB = [
   { kunci: "identitas", label: "Identitas", awalan: ["identity"] },
-  { kunci: "beranda", label: "Beranda", awalan: ["hero", "stats"] },
+  { kunci: "beranda", label: "Beranda", awalan: ["hero", "stats", "images.hero"] },
   { kunci: "cerita", label: "Cerita", awalan: ["story"] },
   { kunci: "program", label: "Program", awalan: ["programs", "sections.programs"] },
   { kunci: "pelatih", label: "Pelatih", awalan: ["coaches", "sections.coaches"] },
   { kunci: "fasilitas", label: "Fasilitas", awalan: ["facilities", "sections.facilities"] },
-  { kunci: "laga", label: "Pertandingan", awalan: ["matches", "sections.matches"] },
+  { kunci: "laga", label: "Pertandingan", awalan: ["matches", "sections.matches", "images.matches"] },
   { kunci: "testimoni", label: "Testimoni", awalan: ["testimonials", "sections.testimonials"] },
   { kunci: "sosial", label: "Media sosial", awalan: ["social"] },
 ] as const;
