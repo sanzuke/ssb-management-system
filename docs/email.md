@@ -107,3 +107,10 @@ Tambah baris di `/etc/postfix/vmailbox` (`alamat domain/nama/Maildir/`), jalanka
 ## Alternatif relay: Sumopod (menggantikan Brevo)
 
 Server zukelabs memakai `smtp.sumopod.com:465` (SASL, TLS wajib, `smtp_tls_wrappermode = yes`; SPF `include:spf.kirim.email`). Di `fufa` skrip `sudo sumopod-key` memasang relay yang sama (menanyakan login dan kunci, tidak disimpan di repo). Sebelum dijalankan: tambahkan domain `familyunitedfa.com` di dashboard Sumopod, pasang record DNS yang diminta (TXT `sumo-verification`, DKIM bila ada), dan ubah SPF `include:spf.brevo.com` menjadi `include:spf.kirim.email`. Port 25 keluar tertutup di kedua server, jadi kirim mandiri tanpa relay tidak mungkin.
+
+### Hasil uji 27 Oktober 2026 (relay Sumopod)
+
+- Relay Sumopod aktif di `fufa`; pengiriman ke Gmail diterima (`250 OK`). Sempat `450 Insufficient credits` sampai kredit Sumopod diisi.
+- DKIM `fufa._domainkey` sempat hilang dari DNS saat SPF diubah; dipulihkan (`opendkim-testkey`: key OK). `mail.familyunitedfa.com` harus tetap record A ke `124.156.192.17` (jangan CNAME ke Brevo; MX menunjuk ke nama ini).
+- Header Gmail: SPF PASS (IP Sumopod), DKIM PASS dengan domain `*.kirimemail.co`, DMARC FAIL (tidak selaras dengan `familyunitedfa.com`). Dua email pertama masuk spam; setelah ditandai "Bukan spam", email pukul 22:51 masuk inbox.
+- Belum ada record DKIM/return-path dari Sumopod untuk domain ini, jadi DMARC tetap FAIL. Masih perlu diuji ke Outlook dan Yahoo, dan dicari opsi DKIM domain di dashboard Sumopod.
