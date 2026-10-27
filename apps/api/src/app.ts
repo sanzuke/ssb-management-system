@@ -11,6 +11,7 @@ import { createGoogleProvider, type GoogleProvider } from "./auth/google";
 import { feeRoutes } from "./fees";
 import { feeSettingRoutes } from "./fee-settings";
 import { whatsappSettingRoutes } from "./whatsapp";
+import { mailboxRoutes, type MailboxAdmin } from "./mailboxes";
 import { postRoutes, publicPostRoutes } from "./posts";
 import { seoRoutes } from "./seo";
 import { publicSiteRoutes, siteRoutes } from "./site";
@@ -25,7 +26,7 @@ import { assessmentRoutes } from "./assessments";
 import type { Env } from "./env";
 import { createLogger, requestLogger, type Logger } from "./logger";
 
-export type AppDeps = { google?: GoogleProvider | null; logger?: Logger; mailer?: Mailer | null };
+export type AppDeps = { google?: GoogleProvider | null; logger?: Logger; mailer?: Mailer | null; mailboxes?: MailboxAdmin | null };
 
 export function createApp(
   db: Db,
@@ -96,6 +97,7 @@ export function createApp(
             .filter(Boolean),
         }),
       )
+      .route("/", mailboxRoutes(deps.mailboxes ?? null))
       .route("/", postRoutes(db, { uploadDir: env.UPLOAD_DIR ?? "./uploads", publicApiUrl: env.PUBLIC_API_URL ?? "http://localhost:3000" }))
       .route(
         "/",

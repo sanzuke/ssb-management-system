@@ -65,6 +65,7 @@ export const permissions = {
     roles: ["admin_ssb", "pelatih", "korlas"],
     desc: "Menulis artikel untuk landing page, mengunggah gambarnya, dan menerbitkan artikel sendiri (admin SSB: semua artikel)",
   },
+  "mailbox.manage": { roles: ["admin_ssb"], desc: "Membuat, mereset sandi, dan menghapus kotak surat email akademi di server" },
   "trial.manage": { roles: ["admin_ssb"], desc: "Melihat pendaftar trial dari landing page dan mengubah statusnya" },
 } as const satisfies Record<string, { roles: readonly UserRole[]; desc: string }>;
 export type Permission = keyof typeof permissions;
@@ -395,6 +396,7 @@ export type GuardianSession = {
 // ---- Landing page akademi ----
 export * from "./site";
 export * from "./post";
+export * from "./mailbox";
 export * from "./markdown";
 
 // ---- Assessment (skala 1 sampai 10) ----

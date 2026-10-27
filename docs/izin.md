@@ -28,4 +28,5 @@ Endpoint dijaga dengan `requirePermission(<izin>)`. Pembatasan data per baris (p
 | `report.publish` | Menerbitkan rapor ke orang tua (wewenang korlas: menunggu keputusan) | ya | - | ya | - |
 | `site.manage` | Menyunting draf konten landing page akademi dan menerbitkannya | ya | - | - | - |
 | `post.write` | Menulis artikel untuk landing page, mengunggah gambarnya, dan menerbitkan artikel sendiri (admin SSB: semua artikel) | ya | ya | ya | - |
+| `mailbox.manage` | Membuat, mereset sandi, dan menghapus kotak surat email akademi di server | ya | - | - | - |
 | `trial.manage` | Melihat pendaftar trial dari landing page dan mengubah statusnya | ya | - | - | - |
