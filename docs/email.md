@@ -103,3 +103,7 @@ Tambah baris di `/etc/postfix/vmailbox` (`alamat domain/nama/Maildir/`), jalanka
 - Paket gratis Brevo dibatasi jumlah email per hari; cukup untuk reset sandi dan undangan SSB kecil.
 - Tidak ada webmail dan penyaring spam untuk email masuk; cukup untuk beberapa kotak surat, belum untuk lalu lintas besar.
 - Mail server zukelabs (`mail.zukelabs.web.id`) masih mengenal domain ini sampai MX diganti, dan tidak lagi diperlukan setelah itu.
+
+## Alternatif relay: Sumopod (menggantikan Brevo)
+
+Server zukelabs memakai `smtp.sumopod.com:465` (SASL, TLS wajib, `smtp_tls_wrappermode = yes`; SPF `include:spf.kirim.email`). Di `fufa` skrip `sudo sumopod-key` memasang relay yang sama (menanyakan login dan kunci, tidak disimpan di repo). Sebelum dijalankan: tambahkan domain `familyunitedfa.com` di dashboard Sumopod, pasang record DNS yang diminta (TXT `sumo-verification`, DKIM bila ada), dan ubah SPF `include:spf.brevo.com` menjadi `include:spf.kirim.email`. Port 25 keluar tertutup di kedua server, jadi kirim mandiri tanpa relay tidak mungkin.
