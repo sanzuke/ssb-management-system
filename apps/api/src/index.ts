@@ -8,7 +8,7 @@ const env = loadEnv();
 const { db } = createDb(env.DATABASE_URL);
 const app = createApp(db, env, {
   mailer: createMailer(env),
-  mailboxes: env.MAILBOX_CMD && env.MAILBOX_DOMAIN ? createMailboxAdmin({ command: env.MAILBOX_CMD, domain: env.MAILBOX_DOMAIN }) : null,
+  mailboxes: env.MAILBOX_SOCKET && env.MAILBOX_DOMAIN ? createMailboxAdmin({ socketPath: env.MAILBOX_SOCKET, domain: env.MAILBOX_DOMAIN }) : null,
 });
 
 export default { port: env.PORT, fetch: app.fetch };

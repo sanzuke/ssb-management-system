@@ -1,4 +1,4 @@
-import { execFile } from "node:child_process";
+import { createConnection } from "node:net";
 import { Hono } from "hono";
 import {
   mailboxCreateSchema,
@@ -24,11 +24,28 @@ export type MailboxAdmin = {
   remove(name: string): Promise<void>;
 };
 
-const run = (file: string, args: string[]): Promise<string> =>
+/** Satu perintah ke soket pengelola email: kirim satu baris, baca sampai server menutup sambungan. Baris terakhir "SELESAI <kode>". */
+const KODE = /^SELESAI (\d+)$/m;
+const ask = (socketPath: string, line: string): Promise<string> =>
   new Promise((resolve, reject) => {
-    execFile(file, args, { timeout: 20_000, maxBuffer: 64 * 1024 }, (err, stdout) => {
-      if (err) reject(err);
-      else resolve(stdout);
+    const sock = createConnection({ path: socketPath });
+    let out = "";
+    const timer = setTimeout(() => sock.destroy(new Error("pengelola email tidak menjawab")), 20_000);
+    sock.setEncoding("utf8");
+    sock.on("connect", () => sock.write(`${line}\n`));
+    sock.on("data", (d: string) => {
+      out += d;
+      if (out.length > 64 * 1024) sock.destroy(new Error("jawaban terlalu besar"));
+    });
+    sock.on("error", (e) => {
+      clearTimeout(timer);
+      reject(e);
+    });
+    sock.on("close", () => {
+      clearTimeout(timer);
+      const kode = KODE.exec(out)?.[1];
+      if (kode === "0") resolve(out);
+      else reject(new Error(`pengelola email gagal (kode ${kode ?? "tidak ada"})`));
     });
   });
 
@@ -40,13 +57,11 @@ const parseCredential = (out: string): MailboxCredential => {
 };
 
 /**
- * Pengelola yang memanggil skrip server `buat-email` (lihat docs/email.md). `command` berisi perintah beserta awalan
- * `sudo -n`, dipisah spasi; argumennya divalidasi dulu dan diberikan sebagai larik, bukan lewat shell.
+ * Pengelola yang berbicara ke soket unix server (`buat-email.socket`, lihat docs/email.md). Soket itu hanya menerima empat
+ * perintah (daftar, tambah, sandi, hapus) dan menjalankannya sebagai root; API tidak punya akses root sendiri.
  */
-export function createMailboxAdmin(opts: { command: string; domain: string }): MailboxAdmin {
-  const [file, ...base] = opts.command.trim().split(/\s+/);
-  if (!file) throw new Error("MAILBOX_CMD kosong");
-  const call = (...args: string[]) => run(file, [...base, ...args]);
+export function createMailboxAdmin(opts: { socketPath: string; domain: string }): MailboxAdmin {
+  const call = (...args: string[]) => ask(opts.socketPath, args.join(" "));
   return {
     domain: opts.domain,
     webmailUrl: `https://mail.${opts.domain}`,

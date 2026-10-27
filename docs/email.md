@@ -114,3 +114,10 @@ Server zukelabs memakai `smtp.sumopod.com:465` (SASL, TLS wajib, `smtp_tls_wrapp
 - DKIM `fufa._domainkey` sempat hilang dari DNS saat SPF diubah; dipulihkan (`opendkim-testkey`: key OK). `mail.familyunitedfa.com` harus tetap record A ke `124.156.192.17` (jangan CNAME ke Brevo; MX menunjuk ke nama ini).
 - Header Gmail: SPF PASS (IP Sumopod), DKIM PASS dengan domain `*.kirimemail.co`, DMARC FAIL (tidak selaras dengan `familyunitedfa.com`). Dua email pertama masuk spam; setelah ditandai "Bukan spam", email pukul 22:51 masuk inbox.
 - Belum ada record DKIM/return-path dari Sumopod untuk domain ini, jadi DMARC tetap FAIL. Masih perlu diuji ke Outlook dan Yahoo, dan dicari opsi DKIM domain di dashboard Sumopod.
+
+## Webmail dan kelola akun (27 Oktober 2026)
+
+- **Webmail:** Roundcube 1.7.5 di `https://mail.familyunitedfa.com` (`/var/www/roundcube`, basis data PostgreSQL `roundcube`, vhost `/etc/nginx/sites-available/webmail`). Login dengan alamat lengkap. Ganti sandi sendiri: Pengaturan, Password (plugin `password`, driver `chpasswd` memanggil `sudo /usr/local/sbin/rc-chpasswd`; unit `php8.5-fpm` diberi `ReadWritePaths=/etc/dovecot` lewat drop-in karena `ProtectSystem=full`).
+- **Kelola akun dari SSB App:** menu Email (admin SSB), izin `mailbox.manage`. API (`apps/api/src/mailboxes.ts`) berbicara ke soket unix `/run/buat-email.sock` (`buat-email.socket`, mode 0660 root:ubuntu). Pengendali root `buat-email-socket` menerima satu baris yang cocok pola ketat (`daftar`, `tambah|sandi|hapus <nama>`) dan meneruskannya ke `buat-email`; tidak memakai sudo sehingga `NoNewPrivileges` pada `ssb-api` tetap menyala. Env: `MAILBOX_SOCKET=/run/buat-email.sock`, `MAILBOX_DOMAIN=familyunitedfa.com`. Kosong = menu menampilkan "tidak aktif".
+- **Dari terminal server:** `sudo buat-email tambah|sandi|hapus <nama>` dan `sudo buat-email daftar`. Akun `admin` dan `noreply` tidak bisa dihapus; sandi `noreply` tidak bisa direset (dipakai SSB App untuk SMTP).
+- Sandi hanya tampil sekali saat dibuat atau direset; salinannya ada di `/root/mail-passwords.txt`.

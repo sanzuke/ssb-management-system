@@ -1,6 +1,7 @@
 import { afterAll, describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
-import { mkdtemp, rm, writeFile } from "node:fs/promises";
+import { mkdtemp, rm } from "node:fs/promises";
+import { createServer } from "node:net";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { like } from "drizzle-orm";
@@ -39,26 +40,41 @@ function fake(): MailboxAdmin & { names: Set<string>; calls: string[] } {
   };
 }
 
-describe("pengelola email (skrip server tiruan)", () => {
-  test("memanggil skrip dengan argumen terpisah dan membaca keluarannya", async () => {
+describe("pengelola email (soket server tiruan)", () => {
+  test("mengirim satu baris perintah per koneksi dan membaca keluarannya; kode gagal menjadi galat", async () => {
     const dir = await mkdtemp(join(tmpdir(), "ssb-mbx-"));
+    const path = process.platform === "win32" ? `\\\\.\\pipe\\ssb-mbx-${randomUUID()}` : join(dir, "m.sock");
+    const diterima: string[] = [];
+    const server = createServer({ allowHalfOpen: true }, (sock) => {
+      let buf = "";
+      sock.on("error", () => {});
+      sock.setEncoding("utf8");
+      sock.on("data", (d: string) => {
+        buf += d;
+      });
+      sock.on("data", () => {
+        if (!buf.endsWith("\n")) return;
+        const [c, n] = buf.trim().split(" ");
+        diterima.push(buf.trim());
+        if (c === "daftar") sock.end(`noreply@${DOM}\nadmin@${DOM}\nlain@domain-lain.test\nbudi@${DOM}\nSELESAI 0\n`);
+        else if (c === "tambah" || c === "sandi") sock.end(`Akun: ${n}@${DOM}\nSandi: abc123XYZ\nWebmail: x\nSELESAI 0\n`);
+        else if (c === "hapus") sock.end(n === "budi" ? "dihapus\nSELESAI 0\n" : "tidak ada\nSELESAI 1\n");
+        else sock.end("SELESAI 2\n");
+      });
+    });
+    await new Promise<void>((ok) => server.listen(path, ok));
     try {
-      const script = join(dir, "buat-email.ts");
-      await writeFile(
-        script,
-        `const [c, n] = process.argv.slice(2);
-if (c === "daftar") console.log("noreply@${DOM}\\nadmin@${DOM}\\nlain@domain-lain.test\\nbudi@${DOM}");
-else if (c === "tambah" || c === "sandi") console.log("Akun: " + n + "@${DOM}\\nSandi: abc123XYZ\\nWebmail: https://mail.${DOM}");
-else if (c === "hapus") { if (n !== "budi") process.exit(1); console.log("dihapus"); }
-else process.exit(2);`,
-      );
-      const a = createMailboxAdmin({ command: `${process.execPath} ${script}`, domain: DOM });
+      const a = createMailboxAdmin({ socketPath: path, domain: DOM });
       expect(await a.list()).toEqual(["admin", "budi", "noreply"]);
       expect(await a.create("budi")).toEqual({ address: `budi@${DOM}`, password: "abc123XYZ" });
       expect(await a.resetPassword("budi")).toEqual({ address: `budi@${DOM}`, password: "abc123XYZ" });
       await a.remove("budi");
-      await expect(a.remove("orang")).rejects.toThrow();
+      await expect(a.remove("orang")).rejects.toThrow("kode 1");
+      expect(diterima).toEqual(["daftar", "tambah budi", "sandi budi", "hapus budi", "hapus orang"]);
+      server.close();
+      await expect(a.list()).rejects.toThrow();
     } finally {
+      server.close();
       await rm(dir, { recursive: true, force: true });
     }
   });

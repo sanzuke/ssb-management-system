@@ -31,15 +31,15 @@ const envSchema = z
     /** Pengirim email, mis. "SSB App <no-reply@contoh.id>". Wajib bila SMTP_URL diisi. */
     MAIL_FROM: z.string().optional(),
     CHROMIUM_PATH: z.string().optional(),
-    /** Perintah pengelola kotak surat di server, mis. "sudo -n /usr/local/sbin/buat-email". Kosong = menu Email tidak aktif. */
-    MAILBOX_CMD: z.string().optional(),
-    /** Domain email akademi yang dikelola, mis. familyunitedfa.com. Wajib bila MAILBOX_CMD diisi. */
+    /** Jalur soket unix pengelola kotak surat, mis. /run/buat-email.sock. Kosong = menu Email tidak aktif. */
+    MAILBOX_SOCKET: z.string().optional(),
+    /** Domain email akademi yang dikelola, mis. familyunitedfa.com. Wajib bila MAILBOX_SOCKET diisi. */
     MAILBOX_DOMAIN: z.string().optional(),
   })
   .superRefine((v, ctx) => {
     const g = [v.GOOGLE_CLIENT_ID, v.GOOGLE_CLIENT_SECRET].filter(Boolean).length;
     if (v.SMTP_URL && !v.MAIL_FROM) ctx.addIssue({ code: "custom", path: ["MAIL_FROM"], message: "wajib diisi bila SMTP_URL diisi" });
-    if (v.MAILBOX_CMD && !v.MAILBOX_DOMAIN) ctx.addIssue({ code: "custom", path: ["MAILBOX_DOMAIN"], message: "wajib diisi bila MAILBOX_CMD diisi" });
+    if (v.MAILBOX_SOCKET && !v.MAILBOX_DOMAIN) ctx.addIssue({ code: "custom", path: ["MAILBOX_DOMAIN"], message: "wajib diisi bila MAILBOX_SOCKET diisi" });
     if (g === 1) ctx.addIssue({ code: "custom", path: ["GOOGLE_CLIENT_SECRET"], message: "GOOGLE_CLIENT_ID dan GOOGLE_CLIENT_SECRET harus diisi berpasangan" });
     if (g === 2 && !v.SESSION_SECRET) ctx.addIssue({ code: "custom", path: ["SESSION_SECRET"], message: "wajib diisi bila login Google aktif" });
   });

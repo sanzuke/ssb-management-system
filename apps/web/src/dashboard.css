@@ -3338,3 +3338,33 @@ button.pengguna[aria-expanded="true"] .panah-menu {
     min-height: 50vh;
   }
 }
+
+.email-rahasia {
+  margin: 0 0 16px;
+  padding: 14px 16px;
+  border: 1.5px solid var(--garis);
+  border-radius: 12px;
+  background: #fffbe6;
+}
+.email-rahasia p {
+  margin: 0 0 8px;
+}
+.email-rahasia code,
+.email-alamat {
+  overflow-wrap: anywhere;
+  user-select: all;
+}
+.email-nama {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.email-nama .field {
+  flex: 1 1 10rem;
+}
+.email-domain {
+  align-self: center;
+  padding-top: 22px;
+  overflow-wrap: anywhere;
+}
