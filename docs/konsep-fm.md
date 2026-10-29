@@ -83,7 +83,7 @@ FM menghitung rating per posisi dari atribut yang berbobot untuk posisi itu. Di 
 
 - Posisi: kiper, bek, gelandang, penyerang (sayap dan tengah belum dibedakan).
 - Tiap posisi punya tabel bobot per indikator, nilai 0 (tidak dihitung) sampai 5, dengan bobot awal untuk 16 indikator bawaan. Indikator buatan SSB bobotnya 0 sampai admin mengaturnya.
-- Kecocokan = rata-rata berbobot skor indikator posisi itu pada periode yang tampil, dibagi ke tiga zona: cocok (>= 7), bisa (5 sampai < 7), belum (< 5). Bila indikator yang dinilai mencakup kurang dari separuh jumlah bobot posisi itu, hasilnya "belum cukup data".
+- Kecocokan = rata-rata berbobot skor indikator posisi itu pada periode yang tampil, dibagi ke tiga zona dengan warna yang sama seperti skor: cocok (>= 7, hijau), bisa (5 sampai < 7, kuning), belum (< 5, merah). Bila indikator yang dinilai mencakup kurang dari separuh jumlah bobot posisi itu, hasilnya "belum cukup data" (abu-abu putus-putus).
 - Bobot disimpan per SSB hanya bila berbeda dari bawaan; admin mengubahnya di halaman Bobot posisi (dari halaman Indikator), pelatih dan korlas membaca.
 - Posisi utama di profil tetap dipilih manusia. Kecocokan hanya saran. Pemain di bawah usia 10 tahun (menurut tanggal lahir, bukan nama KU) tidak diberi zona; profilnya menampilkan "coba semua posisi" agar anak tidak dikunci terlalu dini.
 

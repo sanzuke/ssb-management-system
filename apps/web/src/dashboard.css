@@ -3635,7 +3635,7 @@ button.pengguna[aria-expanded="true"] .panah-menu {
   stroke-width: 2;
 }
 .lapangan-mini .pos-band {
-  fill: #d6dccf;
+  fill: #b3372a;
 }
 .lapangan-mini .pos-band[data-zona="cocok"] {
   fill: #3f8f5a;
@@ -3659,7 +3659,9 @@ button.pengguna[aria-expanded="true"] .panah-menu {
   font-weight: 700;
 }
 .lapangan-mini .pos-band[data-zona="cocok"] ~ .pos-nama,
-.lapangan-mini .pos-band[data-zona="cocok"] ~ .pos-skor {
+.lapangan-mini .pos-band[data-zona="cocok"] ~ .pos-skor,
+.lapangan-mini .pos-band[data-zona="belum"] ~ .pos-nama,
+.lapangan-mini .pos-band[data-zona="belum"] ~ .pos-skor {
   fill: #fff;
 }
 /* Teks setara lapangan mini untuk pembaca layar; tampilannya cukup lapangan. */
