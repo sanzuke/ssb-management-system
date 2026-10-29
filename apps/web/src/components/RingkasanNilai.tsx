@@ -1,7 +1,7 @@
 import { A } from "@solidjs/router";
 import { aspectLabel, pitaDari } from "@ssb/shared/aspects";
 import type { AssessmentView, AspectSummary, DevelopmentPlanItem } from "@ssb/shared";
-import { createMemo, createResource, For, Show } from "solid-js";
+import { createMemo, createResource, For, type JSX, Show } from "solid-js";
 import { api } from "~/lib/api";
 import RadarAspek from "./RadarAspek";
 
@@ -13,8 +13,18 @@ const ringkas = (a: AssessmentView): AspectSummary => ({
   aspects: a.aspects,
 });
 
-/** Radar, rincian skor per aspek, dan rencana pengembangan untuk satu periode (tab periode bila lebih dari satu). */
-export default function RingkasanNilai(props: { playerId: string; list: AssessmentView[]; selectedId: string; onSelect: (id: string) => void; staf: boolean }) {
+/**
+ * Radar, rincian skor per aspek, dan rencana pengembangan untuk satu periode (tab periode bila lebih dari satu).
+ * `sisiRadar` (mis. panel lencana) ditaruh berdampingan dengan radar bila lebarnya cukup, jadi radar tidak berdiri sendiri.
+ */
+export default function RingkasanNilai(props: {
+  playerId: string;
+  list: AssessmentView[];
+  selectedId: string;
+  onSelect: (id: string) => void;
+  staf: boolean;
+  sisiRadar?: JSX.Element;
+}) {
   const urut = createMemo(() => [...props.list].sort((a, b) => b.period.startDate.localeCompare(a.period.startDate)));
   const cur = createMemo(() => urut().find((a) => a.period.id === props.selectedId) ?? urut()[0] ?? null);
   const prev = createMemo(() => {
@@ -39,14 +49,17 @@ export default function RingkasanNilai(props: { playerId: string; list: Assessme
     <Show
       when={cur()}
       fallback={
-        <section class="panel-nilai">
-          <p class="kosong">Belum ada penilaian untuk pemain ini{props.staf ? "." : ", atau belum diterbitkan oleh SSB."}</p>
-          <Show when={props.staf}>
-            <A class="tombol utama" href={`/nilai/${props.playerId}`}>
-              Isi penilaian
-            </A>
-          </Show>
-        </section>
+        <>
+          <section class="panel-nilai">
+            <p class="kosong">Belum ada penilaian untuk pemain ini{props.staf ? "." : ", atau belum diterbitkan oleh SSB."}</p>
+            <Show when={props.staf}>
+              <A class="tombol utama" href={`/nilai/${props.playerId}`}>
+                Isi penilaian
+              </A>
+            </Show>
+          </section>
+          {props.sisiRadar}
+        </>
       }
     >
       {(a) => (
@@ -64,24 +77,27 @@ export default function RingkasanNilai(props: { playerId: string; list: Assessme
             </div>
           </Show>
 
-          <section class="panel-nilai profil-radar" id="radar" aria-label="Radar performa">
-            <div class="panel-kepala">
-              <div>
-                <h3>Radar performa</h3>
-                <p class="petunjuk">
-                  {a().period.name}
-                  {prev() ? `, dibanding ${prev()!.period.name}` : ""}
-                </p>
+          <div class="radar-baris">
+            <section class="panel-nilai profil-radar" id="radar" aria-label="Radar performa">
+              <div class="panel-kepala">
+                <div>
+                  <h3>Radar performa</h3>
+                  <p class="petunjuk">
+                    {a().period.name}
+                    {prev() ? `, dibanding ${prev()!.period.name}` : ""}
+                  </p>
+                </div>
+                <Show when={delta() !== null}>
+                  <span class="delta" data-turun={delta()! < 0 ? "" : undefined}>
+                    {delta()! > 0 ? "▲ +" : delta()! < 0 ? "▼ " : "= "}
+                    {koma(delta()!)} rata-rata
+                  </span>
+                </Show>
               </div>
-              <Show when={delta() !== null}>
-                <span class="delta" data-turun={delta()! < 0 ? "" : undefined}>
-                  {delta()! > 0 ? "▲ +" : delta()! < 0 ? "▼ " : "= "}
-                  {koma(delta()!)} rata-rata
-                </span>
-              </Show>
-            </div>
-            <RadarAspek sekarang={ringkas(a())} sebelumnya={prev() ? ringkas(prev()!) : undefined} />
-          </section>
+              <RadarAspek sekarang={ringkas(a())} sebelumnya={prev() ? ringkas(prev()!) : undefined} />
+            </section>
+            {props.sisiRadar}
+          </div>
 
           <section id="atribut" aria-label="Rincian skor">
             <div class="panel-kepala">

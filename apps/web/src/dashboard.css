@@ -1728,6 +1728,21 @@
 .profil-radar .radar-tabel {
   display: none;
 }
+/* Radar dan panel samping (lencana) berdampingan bila cukup lebar, bertumpuk bila sempit. */
+.radar-baris {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  align-items: flex-start;
+}
+.radar-baris > .profil-radar {
+  flex: 1 1 18rem;
+  min-width: 0;
+}
+.radar-baris > .panel-lencana {
+  flex: 1 1 14rem;
+  min-width: 0;
+}
 .butir[data-pita] {
   --pita: #1b4d36;
 }

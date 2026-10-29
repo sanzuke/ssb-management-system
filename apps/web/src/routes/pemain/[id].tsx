@@ -192,8 +192,8 @@ export default function DetailPemain() {
                   <a href="#atribut">Atribut</a>
                   <a href="#data">Data</a>
                 </div>
-                <LencanaPemain playerId={pl()!.id} bisaUbah={["admin_ssb", "pelatih"].includes(me()!.active!.role)} />
                 <RingkasanNilai
+                  sisiRadar={<LencanaPemain playerId={pl()!.id} bisaUbah={["admin_ssb", "pelatih"].includes(me()!.active!.role)} />}
                   playerId={pl()!.id}
                   list={nilai()}
                   selectedId={terpilih()?.period.id ?? ""}
