@@ -24,7 +24,11 @@ export default function PemainBaru() {
     <Show when={me()} fallback={<Memuat halaman />}>
       <Title>Tambah pemain · SSB App</Title>
       <main class="halaman">
-        <KepalaHalaman chip="Data pemain" judul="Tambah pemain" sub="Isi biodata pemain. Nomor induk dibuat otomatis." />
+        <KepalaHalaman
+          chip="Data pemain"
+          judul="Tambah pemain"
+          sub="Isi data siswa. ID siswa boleh diisi sendiri (mis. SSB-001) atau dikosongkan agar dibuat otomatis."
+        />
         <Show when={groups().length === 0}>
           <p class="info">
             Belum ada KU. Pemain tetap bisa ditambahkan sekarang, KU diisi nanti setelah dibuat di <A href="/master">Data master</A>.

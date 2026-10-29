@@ -18,7 +18,7 @@ type Props = {
   minlength?: number;
   maxlength?: number;
   pattern?: string;
-  inputmode?: "text" | "email" | "numeric" | "tel";
+  inputmode?: "text" | "email" | "numeric" | "decimal" | "tel";
   placeholder?: string;
 };
 

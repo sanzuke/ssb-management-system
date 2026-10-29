@@ -48,8 +48,8 @@ export default function KartuProfil(props: { pl: PlayerDetail; nilai: Assessment
         </div>
         <div class="kartu-pro-foto">
           <FotoPemain id={props.pl.id} nama={props.pl.fullName} photoV={props.pl.photoV} ukuran="potret" />
-          <Show when={props.pl.memberNo}>
-            <span class="kartu-pro-nomor">{props.pl.memberNo}</span>
+          <Show when={props.pl.jerseyNo ?? props.pl.memberNo}>
+            <span class="kartu-pro-nomor">{props.pl.jerseyNo !== null ? `#${props.pl.jerseyNo}` : props.pl.memberNo}</span>
           </Show>
         </div>
         <div class="kartu-pro-nama">
@@ -83,7 +83,7 @@ export default function KartuProfil(props: { pl: PlayerDetail; nilai: Assessment
         </ul>
       </div>
       <div class="kartu-pro-kaki">
-        <span>No. induk: {props.pl.memberNo ?? "-"}</span>
+        <span>ID siswa: {props.pl.memberNo ?? "-"}</span>
         <span class="status-pil">{statusLabel[props.pl.status]}</span>
       </div>
       {props.children}

@@ -283,16 +283,75 @@ export type PlayerStatus = z.infer<typeof playerStatusSchema>;
 const uuidStr = z.string().regex(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i, "id tidak valid");
 const today = () => new Date().toISOString().slice(0, 10);
 
-/** Biodata pemain. Dipakai untuk membuat dan mengubah (ubah mengirim seluruh isian). */
+export const documentStatusSchema = z.enum(["lengkap", "sebagian", "belum"]);
+export type DocumentStatus = z.infer<typeof documentStatusSchema>;
+export const documentStatusLabel: Record<DocumentStatus, string> = { lengkap: "Lengkap", sebagian: "Sebagian", belum: "Belum" };
+
+const optText = (max: number) => z.preprocess(emptyToNull, z.string().trim().max(max, `maksimal ${max} karakter`).nullable().optional());
+const optInt = (min: number, max: number) =>
+  z.number().int("harus bilangan bulat").min(min, `minimal ${min}`).max(max, `maksimal ${max}`).nullable().optional();
+const optNum = (min: number, max: number) => z.number().min(min, `minimal ${min}`).max(max, `maksimal ${max}`).nullable().optional();
+
+/**
+ * Biodata pemain. Dipakai untuk membuat dan mengubah (ubah mengirim seluruh isian).
+ * `memberNo` (ID siswa) kosong berarti otomatis pada pemain baru dan tetap pada perubahan.
+ * WhatsApp orang tua: awalan 8 (nol hilang karena lembar sebar) dilengkapi menjadi 08.
+ */
 export const playerFormSchema = z.object({
+  memberNo: z.preprocess(
+    emptyToNull,
+    z
+      .string()
+      .trim()
+      .max(30, "maksimal 30 karakter")
+      .regex(/^[A-Za-z0-9][A-Za-z0-9._/-]*$/, "hanya huruf, angka, titik, strip, dan garis miring")
+      .nullable()
+      .optional(),
+  ),
+  nisn: z.preprocess(
+    emptyToNull,
+    z
+      .string()
+      .trim()
+      .regex(/^\d{10}$/, "NISN terdiri dari 10 angka")
+      .nullable()
+      .optional(),
+  ),
   fullName: z.string().trim().min(2, "minimal 2 karakter").max(120, "maksimal 120 karakter"),
+  birthPlace: optText(80),
   birthDate: isoDate.refine((d) => d <= today(), "tidak boleh di masa depan").refine((d) => d >= "1990-01-01", "terlalu lama"),
   position: positionSchema.nullable().optional(),
   school: z.string().trim().max(120, "maksimal 120 karakter").nullable().optional(),
   ageGroupId: uuidStr.nullable().optional(),
   status: playerStatusSchema.default("aktif"),
+  guardianName: optText(120),
+  guardianWhatsapp: z.preprocess(
+    emptyToNull,
+    whatsappSchema
+      .transform((s) => (s.startsWith("8") ? `0${s}` : s))
+      .nullable()
+      .optional(),
+  ),
+  documentStatus: documentStatusSchema.default("belum"),
+  heightCm: optInt(50, 230),
+  weightKg: optNum(10, 200),
+  medicalNote: optText(500),
+  jerseyNo: optInt(0, 99),
+  jerseySize: z.preprocess(
+    emptyToNull,
+    z
+      .string()
+      .trim()
+      .max(10, "maksimal 10 karakter")
+      .transform((s) => s.toUpperCase())
+      .nullable()
+      .optional(),
+  ),
+  shoeSize: optNum(15, 50),
 });
 export type PlayerForm = z.input<typeof playerFormSchema>;
+/** Isi formulir setelah validasi (nilai bawaan terisi, nomor WhatsApp dinormalkan). */
+export type PlayerFormData = z.output<typeof playerFormSchema>;
 
 export const guardianInputSchema = z.object({ userId: uuidStr, relationship: z.string().trim().max(40).optional() });
 export const assignmentInputSchema = z.object({ userId: uuidStr, ageGroupId: uuidStr, periodId: uuidStr });
@@ -309,11 +368,26 @@ export type PlayerSummary = {
   /** Versi foto; null bila belum ada. Dipakai untuk URL `/players/:id/photo?v=<versi>`. */
   photoV: string | null;
 };
-export type PlayerDetail = PlayerSummary & {
-  history: { field: "age_group" | "status"; from: string | null; to: string | null; at: string }[];
-  /** Hanya untuk admin SSB. */
-  guardians?: { userId: string; name: string; relationship: string | null }[];
+/** Data lengkap pemain selain ringkasan; hanya ada di detail pemain. */
+export type PlayerExtra = {
+  nisn: string | null;
+  birthPlace: string | null;
+  guardianName: string | null;
+  guardianWhatsapp: string | null;
+  documentStatus: DocumentStatus;
+  heightCm: number | null;
+  weightKg: number | null;
+  medicalNote: string | null;
+  jerseyNo: number | null;
+  jerseySize: string | null;
+  shoeSize: number | null;
 };
+export type PlayerDetail = PlayerSummary &
+  PlayerExtra & {
+    history: { field: "age_group" | "status"; from: string | null; to: string | null; at: string }[];
+    /** Hanya untuk admin SSB. */
+    guardians?: { userId: string; name: string; relationship: string | null }[];
+  };
 /** Ringkasan per pemain untuk tabel pemain: wali utama (hanya admin SSB) dan penilaian terakhir. */
 export type PlayerOverview = {
   playerId: string;

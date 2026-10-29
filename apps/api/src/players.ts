@@ -8,6 +8,8 @@ import {
   playerFormSchema,
   playerStatusSchema,
   type PlayerDetail,
+  type PlayerFormData,
+  type PlayerExtra,
   type PlayerOverview,
   type PlayerSummary,
 } from "@ssb/shared";
@@ -24,6 +26,20 @@ const uuidOr404 = (v: string, what: string) => {
   return v;
 };
 const isFk = (e: unknown) => (e as { code?: string })?.code === "23503" || (e as { cause?: { code?: string } })?.cause?.code === "23503";
+
+/** Nama constraint dari galat Postgres (langsung atau di `cause` galat Drizzle). */
+function pgConstraint(e: unknown): string | undefined {
+  const err = e && typeof e === "object" && "cause" in e && e.cause && typeof e.cause === "object" ? e.cause : e;
+  return err && typeof err === "object" && "constraint_name" in err && typeof err.constraint_name === "string" ? err.constraint_name : undefined;
+}
+/** Pelanggaran keunikan ID siswa atau NISN menjadi 409 dengan pesan di kolomnya. */
+function duplicateOf(e: unknown): HttpError | null {
+  const c = pgConstraint(e);
+  if (c === "player_ssb_member_no")
+    return new HttpError(409, "member_no_taken", "ID siswa sudah dipakai pemain lain", { memberNo: "sudah dipakai pemain lain" });
+  if (c === "player_ssb_nisn") return new HttpError(409, "nisn_taken", "NISN sudah dipakai pemain lain", { nisn: "sudah dipakai pemain lain" });
+  return null;
+}
 
 /**
  * Batas data pemain per role. Admin melihat semua; pelatih dan korlas hanya pemain di KU yang
@@ -50,7 +66,60 @@ const playerCols = {
   ageGroupId: schema.ageGroup.id,
   ageGroupName: schema.ageGroup.name,
   photoKey: schema.player.photoKey,
+  nisn: schema.player.nisn,
+  birthPlace: schema.player.birthPlace,
+  guardianName: schema.player.guardianName,
+  guardianWhatsapp: schema.player.guardianWhatsapp,
+  documentStatus: schema.player.documentStatus,
+  heightCm: schema.player.heightCm,
+  weightKg: schema.player.weightKg,
+  medicalNote: schema.player.medicalNote,
+  jerseyNo: schema.player.jerseyNo,
+  jerseySize: schema.player.jerseySize,
+  shoeSize: schema.player.shoeSize,
 };
+const toExtra = (r: Omit<PlayerExtra, "documentStatus"> & { documentStatus: string }): PlayerExtra => ({
+  nisn: r.nisn,
+  birthPlace: r.birthPlace,
+  guardianName: r.guardianName,
+  guardianWhatsapp: r.guardianWhatsapp,
+  documentStatus: r.documentStatus as PlayerExtra["documentStatus"],
+  heightCm: r.heightCm,
+  weightKg: r.weightKg,
+  medicalNote: r.medicalNote,
+  jerseyNo: r.jerseyNo,
+  jerseySize: r.jerseySize,
+  shoeSize: r.shoeSize,
+});
+
+/** Nomor anggota otomatis: penghitung per SSB dinaikkan atomik; nomor yang sudah dipakai ID buatan sendiri dilewati. */
+async function nextMemberNo(tx: Tx, ssbId: string): Promise<string> {
+  for (let i = 0; i < 200; i++) {
+    const [seq] = await tx
+      .update(schema.ssb)
+      .set({ memberSeq: sql`${schema.ssb.memberSeq} + 1` })
+      .where(eq(schema.ssb.id, ssbId))
+      .returning({ n: schema.ssb.memberSeq });
+    const no = `P${String(seq!.n).padStart(4, "0")}`;
+    const [dup] = await tx.select({ id: schema.player.id }).from(schema.player).where(eq(schema.player.memberNo, no)).limit(1);
+    if (!dup) return no;
+  }
+  throw new HttpError(500, "member_no_exhausted", "Tidak bisa membuat nomor anggota otomatis");
+}
+/** Kolom data siswa dari formulir; isian kosong menjadi null. */
+const extraColumns = (b: PlayerFormData) => ({
+  nisn: b.nisn ?? null,
+  birthPlace: b.birthPlace || null,
+  guardianName: b.guardianName || null,
+  guardianWhatsapp: b.guardianWhatsapp ?? null,
+  documentStatus: b.documentStatus,
+  heightCm: b.heightCm ?? null,
+  weightKg: b.weightKg ?? null,
+  medicalNote: b.medicalNote || null,
+  jerseyNo: b.jerseyNo ?? null,
+  jerseySize: b.jerseySize ?? null,
+  shoeSize: b.shoeSize ?? null,
+});
 const toSummary = (r: {
   id: string;
   memberNo: string | null;
@@ -168,6 +237,14 @@ export function playerRoutes(db: Db, opts: { uploadDir: string }) {
               else wali.set(r.playerId, { name: r.name, whatsapp: r.whatsapp, relationship: r.relationship, total: 1 });
             }
           }
+          // Pemain yang belum punya akun wali memakai kontak orang tua dari data siswa.
+          if (m.role === "admin_ssb") {
+            const kontak = await tx
+              .select({ id: schema.player.id, name: schema.player.guardianName, whatsapp: schema.player.guardianWhatsapp })
+              .from(schema.player)
+              .where(and(inArray(schema.player.id, ids), isNotNull(schema.player.guardianName)));
+            for (const k of kontak) if (!wali.has(k.id)) wali.set(k.id, { name: k.name!, whatsapp: k.whatsapp, relationship: null, total: 1 });
+          }
 
           return ids.map((playerId) => {
             const a = terbaru.get(playerId);
@@ -191,7 +268,7 @@ export function playerRoutes(db: Db, opts: { uploadDir: string }) {
             .where(and(eq(schema.player.id, id), visibleTo(m)))
             .limit(1);
           if (!row) return null;
-          const out: PlayerDetail = { ...toSummary(row), history: [] };
+          const out: PlayerDetail = { ...toSummary(row), ...toExtra(row), history: [] };
           if (m.role !== "orang_tua") {
             const h = await tx.select().from(schema.playerHistory).where(eq(schema.playerHistory.playerId, id)).orderBy(desc(schema.playerHistory.changedAt));
             out.history = h.map((x) => ({ field: x.field as "age_group" | "status", from: x.fromValue, to: x.toValue, at: x.changedAt.toISOString() }));
@@ -215,23 +292,20 @@ export function playerRoutes(db: Db, opts: { uploadDir: string }) {
         const b = c.req.valid("json");
         try {
           const id = await withTenant(db, m.ssbId, async (tx) => {
-            // Nomor anggota: penghitung per SSB dinaikkan atomik, jadi unik walau dua pemain dibuat bersamaan.
-            const [seq] = await tx
-              .update(schema.ssb)
-              .set({ memberSeq: sql`${schema.ssb.memberSeq} + 1` })
-              .where(eq(schema.ssb.id, m.ssbId))
-              .returning({ n: schema.ssb.memberSeq });
+            // ID siswa: yang diisi admin dipakai apa adanya; kosong diberi nomor otomatis (unik walau dua pemain dibuat bersamaan).
+            const memberNo = b.memberNo ?? (await nextMemberNo(tx, m.ssbId));
             const [p] = await tx
               .insert(schema.player)
               .values({
                 ssbId: m.ssbId,
-                memberNo: `P${String(seq!.n).padStart(4, "0")}`,
+                memberNo,
                 fullName: b.fullName,
                 birthDate: b.birthDate,
                 position: b.position ?? null,
                 school: b.school || null,
                 ageGroupId: b.ageGroupId ?? null,
                 status: b.status,
+                ...extraColumns(b),
               })
               .returning({ id: schema.player.id });
             return p!.id;
@@ -240,7 +314,7 @@ export function playerRoutes(db: Db, opts: { uploadDir: string }) {
           return c.json(toSummary(row!), 201);
         } catch (e) {
           if (isFk(e)) throw new HttpError(422, "age_group_invalid", "KU tidak ditemukan di SSB ini");
-          throw e;
+          throw duplicateOf(e) ?? e;
         }
       })
 
@@ -267,6 +341,8 @@ export function playerRoutes(db: Db, opts: { uploadDir: string }) {
                 school: b.school || null,
                 ageGroupId: nextKu,
                 status: b.status,
+                ...(b.memberNo ? { memberNo: b.memberNo } : {}),
+                ...extraColumns(b),
               })
               .where(eq(schema.player.id, id));
             for (const l of log)
@@ -278,7 +354,7 @@ export function playerRoutes(db: Db, opts: { uploadDir: string }) {
           if (!found) throw notFound("Pemain");
         } catch (e) {
           if (isFk(e)) throw new HttpError(422, "age_group_invalid", "KU tidak ditemukan di SSB ini");
-          throw e;
+          throw duplicateOf(e) ?? e;
         }
         const [row] = await withTenant(db, m.ssbId, (tx) => selectPlayers(tx).where(eq(schema.player.id, id)).limit(1));
         return c.json(toSummary(row!));

@@ -14,7 +14,8 @@ import Kerangka from "~/components/Kerangka";
 import { api, ApiError, getMe, type Me } from "~/lib/api";
 import { createSubmit } from "~/lib/form";
 import { posisiLabel, statusLabel, tanggal, usia, type AgeGroup, type PlayerDetail } from "~/lib/pemain";
-import type { AssessmentView } from "@ssb/shared";
+import { linkWa } from "~/lib/wa";
+import { documentStatusLabel, type AssessmentView } from "@ssb/shared";
 
 type Member = { id: string; name: string; email: string; role: string };
 
@@ -229,16 +230,47 @@ export default function DetailPemain() {
                       </div>
                     </Show>
                     <dl class="rincian">
-                      <dt>Nomor anggota</dt>
+                      <dt>ID siswa</dt>
                       <dd>{pl()!.memberNo ?? "-"}</dd>
-                      <dt>Tanggal lahir</dt>
+                      <dt>NISN</dt>
+                      <dd>{pl()!.nisn ?? "-"}</dd>
+                      <dt>Tempat, tanggal lahir</dt>
                       <dd>
+                        {pl()!.birthPlace ? `${pl()!.birthPlace}, ` : ""}
                         {tanggal(pl()!.birthDate)}, {usia(pl()!.birthDate)} tahun
                       </dd>
                       <dt>KU</dt>
                       <dd>{pl()!.ageGroup?.name ?? "Belum ditentukan"}</dd>
                       <dt>Posisi</dt>
                       <dd>{pl()!.position ? posisiLabel[pl()!.position!] : "Belum ditentukan"}</dd>
+                      <dt>No. punggung</dt>
+                      <dd>{pl()!.jerseyNo ?? "-"}</dd>
+                      <dt>Ukuran jersey</dt>
+                      <dd>{pl()!.jerseySize ?? "-"}</dd>
+                      <dt>Ukuran sepatu</dt>
+                      <dd>{pl()!.shoeSize ?? "-"}</dd>
+                      <dt>Tinggi badan</dt>
+                      <dd>{pl()!.heightCm ? `${pl()!.heightCm} cm` : "-"}</dd>
+                      <dt>Berat badan</dt>
+                      <dd>{pl()!.weightKg ? `${String(pl()!.weightKg).replace(".", ",")} kg` : "-"}</dd>
+                      <dt>Orang tua</dt>
+                      <dd>
+                        {pl()!.guardianName ?? "-"}
+                        <Show when={linkWa(pl()!.guardianWhatsapp)}>
+                          {(href) => (
+                            <>
+                              {" "}
+                              <a class="tautan-wa" href={href()} target="_blank" rel="noopener noreferrer">
+                                {pl()!.guardianWhatsapp}
+                              </a>
+                            </>
+                          )}
+                        </Show>
+                      </dd>
+                      <dt>Status berkas</dt>
+                      <dd>{documentStatusLabel[pl()!.documentStatus]} (KK dan akta)</dd>
+                      <dt>Catatan medis</dt>
+                      <dd>{pl()!.medicalNote ?? "-"}</dd>
                       <dt>Sekolah</dt>
                       <dd>{pl()!.school ?? "-"}</dd>
                       <dt>Status</dt>

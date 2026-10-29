@@ -215,18 +215,32 @@ await withTenant(db, ssbId, async (tx) => {
   await tx.insert(schema.location).values(lokasi.map((l) => ({ ...l, ssbId })));
 
   await tx.insert(schema.player).values(
-    players.map((p) => ({
-      id: p.id,
-      ssbId,
-      memberNo: p.memberNo,
-      fullName: p.nama,
-      birthDate: p.lahir,
-      position: p.pos,
-      school: p.sekolah,
-      status: "aktif" as const,
-      ageGroupId: kuId(p.ku),
-      photoKey: fotoKey(p),
-    })),
+    players.map((p, i) => {
+      const umur = new Date().getFullYear() - Number(p.lahir.slice(0, 4));
+      return {
+        id: p.id,
+        ssbId,
+        memberNo: p.memberNo,
+        nisn: `31421${String(86000 + i * 37).padStart(5, "0")}`,
+        fullName: p.nama,
+        birthPlace: ["Jakarta", "Depok", "Bogor", "Bandung", "Garut", "Tangerang"][i % 6]!,
+        birthDate: p.lahir,
+        position: p.pos,
+        school: p.sekolah,
+        status: "aktif" as const,
+        ageGroupId: kuId(p.ku),
+        guardianName: ortu[p.ortu]!.nama,
+        guardianWhatsapp: ortu[p.ortu]!.wa,
+        documentStatus: i % 11 === 0 ? "belum" : i % 5 === 0 ? "sebagian" : "lengkap",
+        heightCm: 100 + umur * 4 + (i % 7),
+        weightKg: 16 + umur * 2 + (i % 5) + (i % 2 ? 0.5 : 0),
+        medicalNote: i % 6 === 0 ? "Alergi debu" : null,
+        jerseyNo: i + 1,
+        jerseySize: umur <= 9 ? "S" : umur <= 11 ? "M" : "L",
+        shoeSize: 26 + umur,
+        photoKey: fotoKey(p),
+      };
+    }),
   );
   await tx
     .insert(schema.playerGuardian)

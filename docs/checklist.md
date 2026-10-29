@@ -49,6 +49,7 @@ Butir bertanda **(butuh keputusan)** terhambat oleh pertanyaan terbuka di `docs/
 ## D. Pemain dan pelatih
 
 - [x] CRUD pemain: biodata, posisi, sekolah, status; nomor anggota otomatis dan unik per SSB (penghitung atomik per SSB; test serentak)
+- [x] Data siswa mengikuti lembar data SSB: ID siswa (boleh diisi sendiri), NISN, tempat lahir, nama orang tua dan WhatsApp, status berkas KK dan akta, tinggi, berat, catatan medis, no. punggung, ukuran jersey dan sepatu (migrasi 0024); validasi rentang, keunikan ID dan NISN per SSB; test API; formulir dibagi bagian dan dicoba di 390 px. Kolom Kelompok Usia dan Posisi memakai KU dan posisi yang sudah ada
 - [x] Riwayat perubahan KU dan status tersimpan (tabel riwayat + test)
 - [x] Unggah, ganti, dan hapus foto pemain: disimpan di folder lokal (`UPLOAD_DIR`), JPG/PNG/WebP maksimal 2 MB, tipe dicek dari isi berkas, dibaca hanya lewat API dengan batas data per role (test); tampil di tabel, profil, kartu, dan portal orang tua
 - [ ] Unggah dokumen pemain dan pindah penyimpanan ke S3-compatible bila SSB banyak (foto saat ini di folder lokal)

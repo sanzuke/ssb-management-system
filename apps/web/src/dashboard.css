@@ -3724,3 +3724,21 @@ button.pengguna[aria-expanded="true"] .panah-menu {
 .tabel-bungkus ~ .aksi-baris {
   margin-top: 12px;
 }
+
+/* ---- Bagian pada formulir data siswa ---- */
+.bagian-form {
+  display: grid;
+  gap: 12px;
+  margin: 0 0 8px;
+  padding: 12px;
+  border: 1px solid var(--garis);
+  border-radius: 12px;
+}
+.bagian-form > legend {
+  padding: 0 6px;
+  color: var(--redup);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
