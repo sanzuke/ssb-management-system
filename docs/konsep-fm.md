@@ -54,12 +54,12 @@ Pelatih dan admin melihat semua bagian. Orang tua tidak melihat bagian Proyeksi 
 
 ## Warna atribut
 
-Skor 1-10 dipetakan ke lima pita, supaya anak dan orang tua membaca tanpa angka.
+Skor 1-10 dipetakan ke lima tahap dengan kata, tetapi hanya tiga warna: merah untuk yang masih kurang, kuning untuk pertengahan, hijau untuk yang sudah baik dan menonjol. Batasnya sama dengan zona kecocokan posisi (5 dan 7).
 
-| Skor | Pita | Kata |
+| Skor | Warna | Kata |
 | --- | --- | --- |
 | 1-2 | merah | Baru mulai |
-| 3-4 | oranye | Berkembang |
+| 3-4 | merah | Berkembang |
 | 5-6 | kuning | Cukup |
 | 7-8 | hijau | Baik |
 | 9-10 | hijau tua | Menonjol |

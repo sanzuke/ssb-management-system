@@ -1752,7 +1752,7 @@
 }
 .butir[data-pita="2"],
 .kartu-pro-atribut li[data-pita="2"] {
-  --pita: #d9732b;
+  --pita: #b3372a;
 }
 .butir[data-pita="3"],
 .kartu-pro-atribut li[data-pita="3"] {
@@ -3506,7 +3506,7 @@ button.pengguna[aria-expanded="true"] .panah-menu {
   --pita: #b3372a;
 }
 .sel-nilai[data-pita="2"] {
-  --pita: #d9732b;
+  --pita: #b3372a;
 }
 .sel-nilai[data-pita="3"] {
   --pita: #dcab1c;
