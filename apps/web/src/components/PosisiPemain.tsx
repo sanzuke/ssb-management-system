@@ -70,7 +70,11 @@ export default function PosisiPemain(props: { nilai: AssessmentView | null; usia
                         <rect x="8" y={8 + i() * TINGGI} width="204" height={TINGGI - 6} rx="6" class="pos-band" data-zona={h()[p]?.zona ?? "kosong"} />
                         <text x="110" y={8 + i() * TINGGI + (TINGGI - 6) / 2 - 3} class="pos-nama" text-anchor="middle">
                           {positionLabel[p]}
-                          {props.utama === p ? " ★" : ""}
+                          <Show when={props.utama === p}>
+                            <tspan class="pos-bintang" dx="4">
+                              ★
+                            </tspan>
+                          </Show>
                         </text>
                         <text x="110" y={8 + i() * TINGGI + (TINGGI - 6) / 2 + 15} class="pos-skor" text-anchor="middle">
                           {h()[p] ? `${koma(h()[p]!.skor)} · ${zonaLabel[h()[p]!.zona]}` : "belum cukup data"}

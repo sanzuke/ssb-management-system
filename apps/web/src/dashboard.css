@@ -3664,6 +3664,13 @@ button.pengguna[aria-expanded="true"] .panah-menu {
 .lapangan-mini .pos-band[data-zona="belum"] ~ .pos-skor {
   fill: #fff;
 }
+/* Bintang posisi utama: kuning gelap, dengan tepi putih agar tetap terlihat di pita kuning. */
+.lapangan-mini .pos-nama .pos-bintang {
+  fill: #8a6400;
+  stroke: #fff;
+  stroke-width: 2px;
+  paint-order: stroke;
+}
 /* Teks setara lapangan mini untuk pembaca layar; tampilannya cukup lapangan. */
 .posisi-daftar {
   position: absolute;
