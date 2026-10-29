@@ -5,6 +5,7 @@ import {
   assessmentAspects,
   assessmentInputSchema,
   defaultIndicators,
+  hitungTren,
   indicatorDefaultsSchema,
   indicatorInputSchema,
   indicatorPatchSchema,
@@ -15,6 +16,7 @@ import {
   type AssessmentView,
   developmentPlanInputSchema,
   type DevelopmentPlanItem,
+  type SquadRow,
 } from "@ssb/shared";
 import { HttpError } from "./errors";
 import { requirePermission, type AppEnv, type Member } from "./auth/middleware";
@@ -222,6 +224,63 @@ export function assessmentRoutes(db: Db) {
           if (isFk(e)) throw new HttpError(409, "in_use", "Indikator sudah dipakai penilaian. Nonaktifkan saja agar riwayat tetap utuh.");
           throw e;
         }
+      })
+
+      // Tabel skuad untuk staf: penilaian terbaru yang punya skor (termasuk draf) dan tren tiap pemain yang boleh dilihat
+      // peran ini. Pelatih dan korlas hanya mendapat pemain di KU yang ditugaskan (aturan yang sama dengan daftar pemain).
+      .get("/squad", requirePermission("squad.read"), async (c) => {
+        const m = member(c);
+        const out = await withTenant(db, m.ssbId, async (tx): Promise<SquadRow[]> => {
+          const ids = (await tx.select({ id: schema.player.id }).from(schema.player).where(playersVisibleTo(m)).limit(500)).map((r) => r.id);
+          if (ids.length === 0) return [];
+          const penilaian = await tx
+            .select({ id: A.id, playerId: A.playerId, publishedAt: A.publishedAt, periodName: schema.period.name })
+            .from(A)
+            .innerJoin(schema.period, and(eq(schema.period.ssbId, A.ssbId), eq(schema.period.id, A.periodId)))
+            .where(inArray(A.playerId, ids))
+            .orderBy(asc(schema.period.startDate), asc(A.assessedOn));
+          const skor =
+            penilaian.length === 0
+              ? []
+              : await tx
+                  .select({ assessmentId: S.assessmentId, aspect: I.aspect, score: S.score })
+                  .from(S)
+                  .innerJoin(I, and(eq(I.ssbId, S.ssbId), eq(I.id, S.indicatorId)))
+                  .where(
+                    inArray(
+                      S.assessmentId,
+                      penilaian.map((r) => r.id),
+                    ),
+                  );
+          const perPenilaian = new Map<string, { aspect: string; score: number }[]>();
+          for (const r of skor) perPenilaian.set(r.assessmentId, [...(perPenilaian.get(r.assessmentId) ?? []), r]);
+          // Per pemain, dari periode tertua: hanya penilaian yang punya skor.
+          const perPemain = new Map<string, { periodName: string; published: boolean; overall: number; aspects: SquadRow["aspects"] }[]>();
+          for (const p of penilaian) {
+            const s = perPenilaian.get(p.id);
+            if (!s?.length) continue;
+            const aspects = assessmentAspects
+              .map((a) => ({ aspect: a, list: s.filter((x) => x.aspect === a) }))
+              .filter((x) => x.list.length > 0)
+              .map((x) => ({ aspect: x.aspect, average: round1(x.list.reduce((t, y) => t + y.score, 0) / x.list.length) }));
+            const ada = perPemain.get(p.playerId) ?? [];
+            ada.push({ periodName: p.periodName, published: p.publishedAt !== null, overall: round1(s.reduce((t, y) => t + y.score, 0) / s.length), aspects });
+            perPemain.set(p.playerId, ada);
+          }
+          return ids.map((playerId) => {
+            const list = perPemain.get(playerId) ?? [];
+            const terbaru = list[list.length - 1];
+            return {
+              playerId,
+              periodName: terbaru?.periodName ?? null,
+              overall: terbaru?.overall ?? null,
+              aspects: terbaru?.aspects ?? [],
+              published: terbaru?.published ?? false,
+              tren: hitungTren(list.map((x) => x.overall)),
+            };
+          });
+        });
+        return c.json(out);
       })
 
       // Rata-rata skor per aspek untuk dua periode terbaru yang punya penilaian (radar di dasbor).

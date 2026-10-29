@@ -50,6 +50,12 @@ export default function AppBar(props: { me: Me }) {
             <Ikon nama="absen" />
             <span>Kehadiran</span>
           </A>
+          <Show when={staf()}>
+            <A class="tombol tipis menu" href="/skuad">
+              <Ikon nama="indikator" />
+              <span>Skuad</span>
+            </A>
+          </Show>
         </Show>
         <Show when={staf()}>
           <A class="tombol tipis menu" href="/jadwal">

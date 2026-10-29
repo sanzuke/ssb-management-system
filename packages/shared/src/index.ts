@@ -52,6 +52,10 @@ export const permissions = {
     roles: ["admin_ssb", "pelatih", "korlas", "orang_tua"],
     desc: "Melihat penilaian dan rencana pengembangan (orang tua: anaknya, setelah terbit)",
   },
+  "squad.read": {
+    roles: ["admin_ssb", "pelatih", "korlas"],
+    desc: "Melihat tabel skuad: rating, enam aspek, dan tren seluruh pemain yang boleh dilihat (pelatih dan korlas: KU yang ditugaskan), termasuk penilaian yang belum terbit",
+  },
   "session.manage": { roles: ["admin_ssb"], desc: "Menjadwalkan, mengubah, dan menghapus sesi latihan" },
   "guardian.sessions": {
     roles: ["admin_ssb", "orang_tua"],
@@ -402,7 +406,7 @@ export * from "./markdown";
 // ---- Assessment (skala 1 sampai 10) ----
 export * from "./aspects";
 
-import { assessmentAspects as _aspects, SCORE_MIN, SCORE_MAX, type AssessmentAspect } from "./aspects";
+import { assessmentAspects as _aspects, SCORE_MIN, SCORE_MAX, type AssessmentAspect, type Tren } from "./aspects";
 export const aspectSchema = z.enum(_aspects);
 export const indicatorInputSchema = z.object({ ageGroupId: uuidStr, aspect: aspectSchema, name: nameField });
 export const indicatorPatchSchema = z.object({ name: nameField, active: z.boolean(), sortOrder: z.number().int().min(0).max(999).optional() });
@@ -440,6 +444,16 @@ export type AssessmentView = {
   aspects: { aspect: AssessmentAspect; average: number }[];
   /** Rata-rata semua skor (satu desimal); null bila belum ada skor. */
   overall: number | null;
+};
+/** Satu baris tabel skuad: penilaian terbaru yang punya skor (termasuk draf) dan tren dari seluruh periode bernilai. Identitas pemain diambil dari `/players`. */
+export type SquadRow = {
+  playerId: string;
+  /** Periode penilaian yang dipakai; null bila pemain belum punya penilaian bernilai. */
+  periodName: string | null;
+  overall: number | null;
+  aspects: { aspect: AssessmentAspect; average: number }[];
+  published: boolean;
+  tren: Tren;
 };
 /** Rata-rata skor per aspek untuk satu periode, dari seluruh penilaian yang boleh dilihat peran pemanggil. */
 export type AspectSummary = {

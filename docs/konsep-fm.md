@@ -156,8 +156,8 @@ Rating, tren, kecocokan posisi, dan proyeksi **tidak disimpan**; dihitung dari s
 
 ## Tahap pengerjaan (usulan)
 
-1. Warna pita, Rating Umum, dan tren di profil dan daftar pemain (tanpa tabel baru).
-2. Tabel skuad per KU yang bisa diurutkan (pelatih dan admin).
+1. (selesai) Warna pita, kata tahap, dan tren di profil pemain (tanpa tabel baru).
+2. (selesai) Tabel skuad yang bisa diurutkan dan disaring per KU (`/skuad`, endpoint `GET /squad`, izin `squad.read`; pelatih dan korlas hanya KU yang ditugaskan).
 3. Lencana.
 4. Kecocokan posisi dan tabel bobot.
 5. Cedera.

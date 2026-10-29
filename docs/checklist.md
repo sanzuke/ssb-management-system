@@ -195,3 +195,16 @@ Detail di `docs/email.md`. Server email milik sendiri di zukelabs (`mail.zukelab
 - [x] Server landing `124.156.192.17` (Ubuntu 24.04, Nginx, PHP 8.5, PostgreSQL 16 kosong, Certbot) bisa diakses lewat alias SSH `fufa` dengan kunci; kredensial ada di `docs/krendensial.txt` yang diabaikan git
 - [ ] Ganti kata sandi pengguna `ubuntu` di server landing dan matikan login sandi SSH (sekarang kata sandi tertulis di berkas teks)
 - [x] SSB MS ikut dipindah ke server landing (diputuskan pemilik, 23 Okt 2026)
+
+## O. Profil pemain ala Football Manager
+
+Detail di `docs/konsep-fm.md`. Dikerjakan di cabang `feat/profil-ala-fm`.
+
+- [x] Pita warna skor (lima tahap, kata dan warna) dan tren (naik, tetap, turun, baru) di kartu dan rincian skor profil pemain; test batas pita dan ambang tren
+- [x] Tabel skuad (`/skuad`) untuk admin, pelatih, dan korlas: rating, enam aspek berpita, tren; urut per kolom, saring KU dan nama; pelatih dan korlas hanya KU-nya, orang tua ditolak (test API); dicoba di 390 px dan 1200 px
+- [ ] Lencana yang diberikan pelatih
+- [ ] Kecocokan posisi dan tabel bobot per SSB
+- [ ] Catatan cedera (akses terbatas)
+- [ ] Proyeksi perkembangan khusus pelatih
+- [ ] Laporan seleksi untuk pendaftar trial
+- [ ] Putuskan: orang tua melihat Rating Umum sebagai angka atau hanya pita dan kata **(butuh keputusan)**

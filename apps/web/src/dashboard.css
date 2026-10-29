@@ -3427,3 +3427,93 @@ button.pengguna[aria-expanded="true"] .panah-menu {
   padding-top: 22px;
   overflow-wrap: anywhere;
 }
+
+/* ---- Tabel skuad ---- */
+.tabel-skuad {
+  width: 100%;
+  min-width: 640px;
+  border-collapse: separate;
+  border-spacing: 0;
+  text-align: center;
+}
+.tabel-skuad thead th {
+  padding: 6px 4px;
+  background: #edf1e7;
+  color: var(--redup);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  white-space: nowrap;
+}
+.tabel-skuad .urut-kolom {
+  padding: 6px 4px;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  letter-spacing: inherit;
+  text-transform: uppercase;
+  cursor: pointer;
+  min-height: 36px;
+}
+.tabel-skuad tbody th,
+.tabel-skuad tbody td {
+  padding: 6px 4px;
+  border-top: 1px solid var(--garis);
+  vertical-align: middle;
+  font-weight: 400;
+}
+.tabel-skuad .kolom-nama {
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  min-width: 11rem;
+  padding-inline: 10px;
+  background: #fff;
+  text-align: left;
+}
+.tabel-skuad thead .kolom-nama {
+  background: #edf1e7;
+}
+.tabel-skuad tbody tr:hover > * {
+  background: #f6f8f2;
+}
+.tabel-skuad .profil-baris .petunjuk {
+  white-space: nowrap;
+}
+.sel-nilai {
+  --pita: transparent;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  box-shadow: inset 0 -3px 0 var(--pita);
+}
+.sel-nilai[data-pita="1"] {
+  --pita: #b3372a;
+}
+.sel-nilai[data-pita="2"] {
+  --pita: #d9732b;
+}
+.sel-nilai[data-pita="3"] {
+  --pita: #dcab1c;
+}
+.sel-nilai[data-pita="4"] {
+  --pita: #3f8f5a;
+}
+.sel-nilai[data-pita="5"] {
+  --pita: #1b4d36;
+}
+.sel-rating {
+  font-size: 1.05rem;
+}
+.sel-tren {
+  white-space: nowrap;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--redup);
+}
+.sel-tren[data-arah="naik"] {
+  color: #2d7a49;
+}
+.sel-tren[data-arah="turun"] {
+  color: #b45a17;
+}
