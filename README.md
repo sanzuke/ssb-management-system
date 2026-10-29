@@ -29,6 +29,7 @@ Dokumen rancangan:
 | `docs/izin.md` | Matriks izin, dibuat otomatis dari kode |
 | `docs/database.md` | Skema database, RLS, dan migrasi |
 | `docs/auth.md` | Autentikasi, sesi, Google OIDC, dan reset kata sandi |
+| `docs/konsep-fm.md` | Konsep profil pemain ala Football Manager: rating, warna, posisi, lencana, tren |
 
 ## Instalasi
 
