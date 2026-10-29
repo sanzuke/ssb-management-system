@@ -1,13 +1,12 @@
 import { A } from "@solidjs/router";
-import { aspectLabel } from "@ssb/shared/aspects";
+import { aspectLabel, pitaDari } from "@ssb/shared/aspects";
 import type { AssessmentView, AspectSummary, DevelopmentPlanItem } from "@ssb/shared";
 import { createMemo, createResource, For, Show } from "solid-js";
 import { api } from "~/lib/api";
 import RadarAspek from "./RadarAspek";
 
 const koma = (n: number) => String(n).replace(".", ",");
-/** Skor di bawah ini ditandai kuning sebagai area yang perlu dikembangkan. */
-const AMBANG = 6;
+
 const ringkas = (a: AssessmentView): AspectSummary => ({
   period: { id: a.period.id, name: a.period.name, startDate: a.period.startDate },
   assessments: 1,
@@ -87,7 +86,7 @@ export default function RingkasanNilai(props: { playerId: string; list: Assessme
           <section id="atribut" aria-label="Rincian skor">
             <div class="panel-kepala">
               <h3>Rincian skor</h3>
-              <span class="petunjuk">skala 1 sampai 10; kuning = perlu dikembangkan</span>
+              <span class="petunjuk">skala 1 sampai 10; warna dan kata menunjukkan tahap</span>
             </div>
             <div class="grid-aspek">
               <For each={a().aspects}>
@@ -102,11 +101,12 @@ export default function RingkasanNilai(props: { playerId: string; list: Assessme
                     <ul class="daftar-butir">
                       <For each={rows(a(), x.aspect)}>
                         {(s) => (
-                          <li class="butir" data-rendah={s.score < AMBANG ? "" : undefined}>
+                          <li class="butir" data-pita={String(pitaDari(s.score).kode)}>
                             <span class="isi">{s.name}</span>
-                            <span class="skor" role="img" aria-label={`${s.name}: ${s.score} dari 10`}>
+                            <span class="skor" role="img" aria-label={`${s.name}: ${s.score} dari 10, ${pitaDari(s.score).kata}`}>
                               {s.score}
                             </span>
+                            <span class="kata-pita">{pitaDari(s.score).kata}</span>
                             <span class="batang" aria-hidden="true">
                               <span style={{ width: `${s.score * 10}%` }} />
                             </span>

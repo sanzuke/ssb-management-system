@@ -1728,11 +1728,70 @@
 .profil-radar .radar-tabel {
   display: none;
 }
-.butir[data-rendah] .batang > span {
-  background: var(--kuning-tua);
+.butir[data-pita] {
+  --pita: #1b4d36;
 }
-.butir[data-rendah] .skor {
+.butir[data-pita="1"],
+.kartu-pro-atribut li[data-pita="1"] {
+  --pita: #b3372a;
+}
+.butir[data-pita="2"],
+.kartu-pro-atribut li[data-pita="2"] {
+  --pita: #d9732b;
+}
+.butir[data-pita="3"],
+.kartu-pro-atribut li[data-pita="3"] {
+  --pita: #dcab1c;
+}
+.butir[data-pita="4"],
+.kartu-pro-atribut li[data-pita="4"] {
+  --pita: #3f8f5a;
+}
+.butir[data-pita="5"],
+.kartu-pro-atribut li[data-pita="5"] {
+  --pita: #1b4d36;
+}
+.butir[data-pita] .batang > span {
+  background: var(--pita);
+}
+.butir[data-pita="1"] .skor,
+.butir[data-pita="2"] .skor {
+  color: var(--pita);
+}
+.butir[data-pita="3"] .skor {
   color: #8a6400;
+}
+.kata-pita {
+  grid-column: 1 / -1;
+  font-size: 0.75rem;
+  color: var(--redup);
+}
+.kartu-pro-atribut li[data-pita] {
+  border-bottom: 3px solid var(--pita);
+  padding-bottom: 3px;
+}
+.kartu-pro-atribut small {
+  font-size: 0.62rem;
+  line-height: 1.1;
+  color: #cfe0d4;
+}
+.tren {
+  display: inline-block;
+  margin-top: 6px;
+  padding: 2px 10px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.16);
+  color: #fbeeb8;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+.tren[data-arah="naik"] {
+  background: #3f8f5a;
+  color: #fff;
+}
+.tren[data-arah="turun"] {
+  background: #d9732b;
+  color: #14201a;
 }
 .misi-daftar {
   display: grid;

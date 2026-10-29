@@ -1,4 +1,5 @@
 import { A, useNavigate, useParams } from "@solidjs/router";
+import { hitungTren } from "@ssb/shared/aspects";
 import { Title } from "@solidjs/meta";
 import KartuProfil from "~/components/KartuProfil";
 import RingkasanNilai from "~/components/RingkasanNilai";
@@ -72,6 +73,15 @@ export default function DetailPemain() {
   // Periode yang tampil: pilihan pengguna, atau yang terbaru (yang punya skor lebih dulu).
   const terbaru = () => [...nilai()].sort((a, b) => b.period.startDate.localeCompare(a.period.startDate));
   const terpilih = () => nilai().find((a) => a.period.id === periodeId()) ?? terbaru().find((a) => a.overall !== null) ?? terbaru()[0] ?? null;
+  // Tren sampai periode yang tampil: rating tiap periode bernilai, dari tertua.
+  const tren = () => {
+    const batas = terpilih()?.period.startDate;
+    const rating = [...terbaru()]
+      .reverse()
+      .filter((a) => a.overall !== null && (batas === undefined || a.period.startDate <= batas))
+      .map((a) => a.overall as number);
+    return hitungTren(rating);
+  };
 
   const load = async () => {
     try {
@@ -150,7 +160,7 @@ export default function DetailPemain() {
             </KepalaHalaman>
             <div class="profil-grid">
               <div class="profil-kiri">
-                <KartuProfil pl={pl()!} nilai={terpilih()}>
+                <KartuProfil pl={pl()!} nilai={terpilih()} tren={tren()}>
                   <div class="foto-kelola">
                     <Show when={bisaFoto()}>
                       {/* biome-ignore lint/a11y/noLabelWithoutControl: input berkas tersembunyi ada di dalam label */}
