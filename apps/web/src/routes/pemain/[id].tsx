@@ -2,6 +2,7 @@ import { A, useNavigate, useParams } from "@solidjs/router";
 import { hitungTren } from "@ssb/shared/aspects";
 import { Title } from "@solidjs/meta";
 import KartuProfil from "~/components/KartuProfil";
+import LencanaPemain from "~/components/LencanaPemain";
 import RingkasanNilai from "~/components/RingkasanNilai";
 import KepalaHalaman from "~/components/KepalaHalaman";
 import { createSignal, For, onMount, Show } from "solid-js";
@@ -190,6 +191,7 @@ export default function DetailPemain() {
                   <a href="#atribut">Atribut</a>
                   <a href="#data">Data</a>
                 </div>
+                <LencanaPemain playerId={pl()!.id} bisaUbah={["admin_ssb", "pelatih"].includes(me()!.active!.role)} />
                 <RingkasanNilai
                   playerId={pl()!.id}
                   list={nilai()}

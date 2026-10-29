@@ -3517,3 +3517,88 @@ button.pengguna[aria-expanded="true"] .panah-menu {
 .sel-tren[data-arah="turun"] {
   color: #b45a17;
 }
+
+/* ---- Lencana pemain ---- */
+.lencana-daftar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.lencana-chip {
+  --lc-bg: #e3ece4;
+  --lc-fg: #1b4d36;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 0;
+  padding: 4px 12px;
+  border: 1px solid var(--lc-fg);
+  border-radius: 999px;
+  background: var(--lc-bg);
+  color: var(--lc-fg);
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+.lencana-chip[data-kelompok="fisik"] {
+  --lc-bg: #fbf0d0;
+  --lc-fg: #6e4800;
+}
+.lencana-chip[data-kelompok="mental"] {
+  --lc-bg: #e8ebf7;
+  --lc-fg: #34417c;
+}
+.lencana-chip[data-kelompok="sikap"] {
+  --lc-bg: #f3e6f3;
+  --lc-fg: #5e2f5e;
+}
+.lencana-chip.pilih {
+  cursor: pointer;
+  font-family: inherit;
+  min-height: 40px;
+}
+.lencana-chip.pilih:disabled:not([aria-pressed="true"]) {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+.lencana-chip.pilih[aria-pressed="true"] {
+  background: var(--lc-fg);
+  color: #fff;
+}
+.lencana-cabut {
+  min-width: 28px;
+  min-height: 28px;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: inherit;
+  font-size: 1.1rem;
+  line-height: 1;
+  cursor: pointer;
+}
+.lencana-cabut:hover,
+.lencana-cabut:focus-visible {
+  background: rgba(0, 0, 0, 0.12);
+}
+.lencana-pilih {
+  display: grid;
+  gap: 10px;
+  margin-top: 12px;
+}
+.lencana-pilih fieldset {
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+.lencana-pilih legend {
+  margin-bottom: 4px;
+  padding: 0;
+  color: var(--redup);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}

@@ -56,6 +56,8 @@ export const permissions = {
     roles: ["admin_ssb", "pelatih", "korlas"],
     desc: "Melihat tabel skuad: rating, enam aspek, dan tren seluruh pemain yang boleh dilihat (pelatih dan korlas: KU yang ditugaskan), termasuk penilaian yang belum terbit",
   },
+  "badge.read": { roles: ["admin_ssb", "pelatih", "korlas", "orang_tua"], desc: "Melihat lencana pemain (orang tua: anaknya)" },
+  "badge.write": { roles: ["admin_ssb", "pelatih"], desc: "Memberi dan mencabut lencana pemain (pelatih: KU yang ditugaskan)" },
   "session.manage": { roles: ["admin_ssb"], desc: "Menjadwalkan, mengubah, dan menghapus sesi latihan" },
   "guardian.sessions": {
     roles: ["admin_ssb", "orang_tua"],
@@ -445,6 +447,12 @@ export type AssessmentView = {
   /** Rata-rata semua skor (satu desimal); null bila belum ada skor. */
   overall: number | null;
 };
+// ---- Lencana ----
+export * from "./badges";
+import { badgeCodes, type BadgeCode } from "./badges";
+export const badgeInputSchema = z.object({ badge: z.enum(badgeCodes) });
+export type PlayerBadge = { id: string; badge: BadgeCode; awardedAt: string; awardedBy: string | null };
+
 /** Satu baris tabel skuad: penilaian terbaru yang punya skor (termasuk draf) dan tren dari seluruh periode bernilai. Identitas pemain diambil dari `/players`. */
 export type SquadRow = {
   playerId: string;

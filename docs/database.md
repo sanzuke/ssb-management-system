@@ -100,3 +100,11 @@ Tidak ada tabel baru. `GET /players/:playerId/assessments/:periodId/report` (izi
 Tabel `development_plan_item`: satu baris per butir rencana untuk satu pemain pada satu periode (`area`, `aspect` opsional, `target`, `note`, `sort_order`). RLS dipaksa; FK komposit ke pemain (hapus pemain menghapus rencananya) dan periode; `created_by` memakai `ON DELETE SET NULL (created_by)` (manual, jangan dikembalikan oleh `db:generate`).
 
 API: `GET` dan `PUT /players/:playerId/development-plan/:periodId`. `PUT` mengganti seluruh daftar (maksimal 8 butir, daftar kosong menghapus) dalam satu transaksi. Menulis: `assessment.write` (admin, pelatih KU-nya). Membaca: `assessment.read`; orang tua hanya bila penilaian pemain itu pada periode tersebut sudah terbit (selain itu 404), sehingga menarik penerbitan juga menutup rencananya. Rencana tidak punya status terbit sendiri.
+
+## Lencana pemain (migrasi 0022)
+
+Tabel `player_badge`: satu baris per lencana yang diberikan (`badge` = kode dari `badgeCatalog` di `packages/shared/src/badges.ts`, `awarded_by`, `awarded_at`, `revoked_by`, `revoked_at`). RLS dipaksa; FK komposit ke pemain (hapus pemain menghapus lencananya); `awarded_by` dan `revoked_by` memakai `ON DELETE SET NULL (kolom)` yang ditulis manual di migrasi. Mencabut hanya mengisi `revoked_at`, jadi riwayat tetap ada; indeks unik parsial `player_badge_active` (pemain + kode, hanya baris yang belum dicabut) mencegah lencana aktif ganda, dan lencana yang pernah dicabut boleh diberikan lagi.
+
+Katalog ada di kode, bukan tabel master, dan kodenya tidak dikunci di database (kode di luar katalog ditolak API dengan 400). Mengubah daftar tidak butuh migrasi; kode yang dihapus dari katalog meninggalkan baris lama yang tidak dikenal, jadi cabut dulu atau pertahankan kodenya.
+
+API: `GET /players/:playerId/badges` (izin `badge.read`; lencana aktif, urut waktu), `POST` `{ badge }` (izin `badge.write`: admin dan pelatih KU-nya; 409 `badge_exists` atau 409 `badge_limit` bila sudah ada 5 aktif), `DELETE /players/:playerId/badges/:badgeId` (mencabut, 204). Batas `BADGE_MAX` = 5 dijaga di transaksi dengan `pg_advisory_xact_lock` per pemain, sehingga pemberian serentak tidak melewatinya. Pemain di luar batas peran dijawab 404; orang tua hanya membaca lencana anaknya.

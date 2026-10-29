@@ -648,6 +648,34 @@ export const developmentPlanItem = pgTable(
 ).enableRLS();
 
 /**
+ * Lencana pemain: label perilaku positif dari katalog di packages/shared (`badgeCatalog`), diberikan pelatih dan bisa dicabut.
+ * Pencabutan hanya menandai `revoked_at` supaya riwayat tetap ada; satu lencana aktif per pemain dijaga indeks unik parsial.
+ * Batas lencana aktif per pemain (BADGE_MAX) ditegakkan di API. `awarded_by` dan `revoked_by` memakai
+ * `ON DELETE SET NULL (kolom)` yang ditulis manual di migrasi (lihat 0013).
+ */
+export const playerBadge = pgTable(
+  "player_badge",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    ssbId: ssbId().references(() => ssb.id, { onDelete: "cascade" }),
+    playerId: uuid("player_id").notNull(),
+    badge: text("badge").notNull(),
+    awardedBy: uuid("awarded_by"),
+    awardedAt: timestamp("awarded_at", { withTimezone: true }).notNull().defaultNow(),
+    revokedBy: uuid("revoked_by"),
+    revokedAt: timestamp("revoked_at", { withTimezone: true }),
+  },
+  (t) => [
+    unique("player_badge_ssb_id").on(t.ssbId, t.id),
+    uniqueIndex("player_badge_active").on(t.ssbId, t.playerId, t.badge).where(sql`revoked_at is null`),
+    foreignKey({ columns: [t.ssbId, t.playerId], foreignColumns: [player.ssbId, player.id], name: "player_badge_player_fk" }).onDelete("cascade"),
+    foreignKey({ columns: [t.ssbId, t.awardedBy], foreignColumns: [appUser.ssbId, appUser.id], name: "player_badge_awarded_by_fk" }),
+    foreignKey({ columns: [t.ssbId, t.revokedBy], foreignColumns: [appUser.ssbId, appUser.id], name: "player_badge_revoked_by_fk" }),
+    tenantPolicy("player_badge"),
+  ],
+).enableRLS();
+
+/**
  * Konten landing page akademi: satu baris per SSB. `draft` disunting admin di SSB MS;
  * `published` adalah salinan yang dibaca landing lewat API publik (kosong = belum terbit).
  * Bentuknya didefinisikan oleh `siteContentSchema` di packages/shared.
