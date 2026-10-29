@@ -676,6 +676,26 @@ export const playerBadge = pgTable(
 ).enableRLS();
 
 /**
+ * Bobot indikator per posisi buatan SSB untuk kecocokan posisi. Hanya menyimpan yang berbeda dari bobot awal di
+ * packages/shared (`defaultPositionWeights`); baris yang tidak ada berarti memakai bobot awal. Bobot 0 berarti indikator tidak dihitung.
+ */
+export const positionWeight = pgTable(
+  "position_weight",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    ssbId: ssbId().references(() => ssb.id, { onDelete: "cascade" }),
+    position: playerPosition("position").notNull(),
+    indicator: text("indicator").notNull(),
+    weight: smallint("weight").notNull(),
+  },
+  (t) => [
+    unique("position_weight_unique").on(t.ssbId, t.position, t.indicator),
+    check("position_weight_range", sql`${t.weight} between 0 and 5`),
+    tenantPolicy("position_weight"),
+  ],
+).enableRLS();
+
+/**
  * Konten landing page akademi: satu baris per SSB. `draft` disunting admin di SSB MS;
  * `published` adalah salinan yang dibaca landing lewat API publik (kosong = belum terbit).
  * Bentuknya didefinisikan oleh `siteContentSchema` di packages/shared.

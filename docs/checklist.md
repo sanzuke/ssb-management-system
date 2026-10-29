@@ -203,7 +203,7 @@ Detail di `docs/konsep-fm.md`. Dikerjakan di cabang `feat/profil-ala-fm`.
 - [x] Pita warna skor (lima tahap, kata dan warna) dan tren (naik, tetap, turun, baru) di kartu dan rincian skor profil pemain; test batas pita dan ambang tren
 - [x] Tabel skuad (`/skuad`) untuk admin, pelatih, dan korlas: rating, enam aspek berpita, tren; urut per kolom, saring KU dan nama; pelatih dan korlas hanya KU-nya, orang tua ditolak (test API); dicoba di 390 px dan 1200 px
 - [x] Lencana yang diberikan pelatih: katalog 17 lencana dalam empat kelompok, maksimal 5 aktif per pemain (dijaga serentak), tabel `player_badge` dengan RLS (migrasi 0022), izin `badge.read` dan `badge.write`; test akses, duplikat, batas serentak, dan cabut; dicoba di 390 px. Daftar awal perlu divalidasi pelatih berlisensi
-- [ ] Kecocokan posisi dan tabel bobot per SSB
+- [x] Kecocokan posisi: bobot awal 16 indikator x 4 posisi, zona cocok, bisa, belum, lapangan mini di profil (pemain 10 tahun ke atas; di bawahnya "coba semua posisi"), halaman Bobot posisi untuk admin, tabel `position_weight` dengan RLS (migrasi 0023); test perhitungan dan API; dicoba di 390 px. Bobot awal perlu divalidasi pelatih berlisensi
 - [ ] Catatan cedera (akses terbatas)
 - [ ] Proyeksi perkembangan khusus pelatih
 - [ ] Laporan seleksi untuk pendaftar trial

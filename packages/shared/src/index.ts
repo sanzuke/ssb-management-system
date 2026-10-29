@@ -453,6 +453,18 @@ import { badgeCodes, type BadgeCode } from "./badges";
 export const badgeInputSchema = z.object({ badge: z.enum(badgeCodes) });
 export type PlayerBadge = { id: string; badge: BadgeCode; awardedAt: string; awardedBy: string | null };
 
+// ---- Kecocokan posisi ----
+export * from "./posisi";
+import { WEIGHT_MAX } from "./posisi";
+/** Mengganti seluruh bobot buatan SSB. Posisi atau indikator yang tidak dikirim kembali ke bobot awal. */
+export const positionWeightsInputSchema = z.object({
+  weights: z.partialRecord(
+    positionSchema,
+    z.record(nameField, z.number().int("harus bilangan bulat").min(0, "minimal 0").max(WEIGHT_MAX, `maksimal ${WEIGHT_MAX}`)),
+  ),
+});
+export type PositionWeightsInput = z.infer<typeof positionWeightsInputSchema>;
+
 /** Satu baris tabel skuad: penilaian terbaru yang punya skor (termasuk draf) dan tren dari seluruh periode bernilai. Identitas pemain diambil dari `/players`. */
 export type SquadRow = {
   playerId: string;

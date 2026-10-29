@@ -3602,3 +3602,101 @@ button.pengguna[aria-expanded="true"] .panah-menu {
   letter-spacing: 0.06em;
   text-transform: uppercase;
 }
+
+/* ---- Kecocokan posisi ---- */
+.posisi-isi {
+  display: grid;
+  gap: 12px;
+  justify-items: center;
+}
+.lapangan-mini {
+  width: 100%;
+  max-width: 280px;
+  height: auto;
+}
+.lapangan-mini .pos-garis {
+  fill: #f0f4ea;
+  stroke: var(--garis);
+  stroke-width: 2;
+}
+.lapangan-mini .pos-band {
+  fill: #d6dccf;
+}
+.lapangan-mini .pos-band[data-zona="cocok"] {
+  fill: #3f8f5a;
+}
+.lapangan-mini .pos-band[data-zona="bisa"] {
+  fill: #dcab1c;
+}
+.lapangan-mini .pos-band[data-zona="kosong"] {
+  fill: #f0f4ea;
+  stroke: var(--garis);
+  stroke-dasharray: 4 3;
+}
+.lapangan-mini .pos-nama {
+  fill: var(--tinta);
+  font-size: 15px;
+  font-weight: 800;
+}
+.lapangan-mini .pos-skor {
+  fill: var(--tinta);
+  font-size: 13px;
+  font-weight: 700;
+}
+.lapangan-mini .pos-band[data-zona="cocok"] ~ .pos-nama,
+.lapangan-mini .pos-band[data-zona="cocok"] ~ .pos-skor {
+  fill: #fff;
+}
+/* Teks setara lapangan mini untuk pembaca layar; tampilannya cukup lapangan. */
+.posisi-daftar {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  list-style: none;
+}
+
+/* ---- Tabel bobot posisi ---- */
+.tabel-bobot {
+  width: 100%;
+  min-width: 340px;
+  border-collapse: separate;
+  border-spacing: 0;
+  text-align: center;
+}
+.tabel-bobot th,
+.tabel-bobot td {
+  padding: 6px 4px;
+  border-top: 1px solid var(--garis);
+}
+.tabel-bobot thead th {
+  border-top: 0;
+  background: #edf1e7;
+  color: var(--redup);
+  font-size: 0.66rem;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+.tabel-bobot .kolom-nama {
+  max-width: 7rem;
+  text-align: left;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+.tabel-bobot tfoot th,
+.tabel-bobot tfoot td {
+  background: #f6f8f2;
+  font-weight: 700;
+}
+.tabel-bobot select {
+  min-height: 40px;
+  min-width: 44px;
+  padding-inline: 2px;
+}
+.tabel-bungkus ~ .aksi-baris {
+  margin-top: 12px;
+}

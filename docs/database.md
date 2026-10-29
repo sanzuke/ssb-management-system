@@ -108,3 +108,9 @@ Tabel `player_badge`: satu baris per lencana yang diberikan (`badge` = kode dari
 Katalog ada di kode, bukan tabel master, dan kodenya tidak dikunci di database (kode di luar katalog ditolak API dengan 400). Mengubah daftar tidak butuh migrasi; kode yang dihapus dari katalog meninggalkan baris lama yang tidak dikenal, jadi cabut dulu atau pertahankan kodenya.
 
 API: `GET /players/:playerId/badges` (izin `badge.read`; lencana aktif, urut waktu), `POST` `{ badge }` (izin `badge.write`: admin dan pelatih KU-nya; 409 `badge_exists` atau 409 `badge_limit` bila sudah ada 5 aktif), `DELETE /players/:playerId/badges/:badgeId` (mencabut, 204). Batas `BADGE_MAX` = 5 dijaga di transaksi dengan `pg_advisory_xact_lock` per pemain, sehingga pemberian serentak tidak melewatinya. Pemain di luar batas peran dijawab 404; orang tua hanya membaca lencana anaknya.
+
+## Bobot posisi (migrasi 0023)
+
+Tabel `position_weight`: bobot indikator per posisi buatan SSB (`position`, `indicator` = nama indikator, `weight` 0 sampai 5 dijaga CHECK; unik per SSB, posisi, dan indikator). RLS dipaksa. Hanya baris yang berbeda dari bobot awal (`defaultPositionWeights` di `packages/shared/src/posisi.ts`) yang disimpan; tanpa baris berarti memakai bobot awal, dan indikator yang tidak ada di bobot awal berbobot 0. Nama indikator dicocokkan sebagai teks, jadi mengganti nama indikator membuat bobotnya tidak berlaku lagi.
+
+API: `GET /position-weights` (izin `assessment.read`; bobot yang berlaku, bawaan ditimpa baris SSB), `PUT` (izin `master.write`; `{ weights }` mengganti seluruh bobot buatan SSB, posisi atau indikator yang tidak dikirim kembali ke bawaan), `DELETE` (kembali ke bawaan, 204). Kecocokan dihitung di sisi klien dengan `hitungKecocokan` dari skor periode yang tampil; tidak ada angka yang disimpan.

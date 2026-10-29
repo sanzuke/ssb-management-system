@@ -91,6 +91,9 @@ export default function Indikator() {
           judul="Indikator penilaian"
           sub={`Indikator yang dinilai pelatih untuk tiap KU, dikelompokkan dalam enam aspek. Skalanya 1 sampai 10.${admin() ? "" : " Hanya admin SSB yang bisa mengubahnya."}`}
         />
+        <p>
+          <A href="/bobot-posisi">Bobot posisi →</A>
+        </p>
         <Show when={groups().length === 0}>
           <p class="kosong">
             Belum ada KU. Buat KU di <A href="/master">Data master</A> dulu.

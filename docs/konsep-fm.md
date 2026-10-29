@@ -81,11 +81,11 @@ Rating dibandingkan **terhadap periode sebelumnya milik pemain yang sama**. Perb
 
 FM menghitung rating per posisi dari atribut yang berbobot untuk posisi itu. Di sini sama, tetapi sederhana dan bisa diatur.
 
-- Posisi: kiper, bek, gelandang, penyerang (sayap dan tengah dibedakan bila KU sudah usia 12 ke atas).
-- Tiap posisi punya tabel bobot per indikator (mis. kiper: refleks, penempatan, distribusi bola; gelandang: passing, penempatan posisi, membaca permainan).
-- Kecocokan = rata-rata berbobot indikator posisi itu, dibagi ke tiga zona: cocok (>= 7), bisa (5 sampai < 7), belum (< 5).
-- Tabel bobot disimpan sebagai data per SSB, dengan bawaan; admin dan pelatih bisa menyesuaikan, seperti template indikator.
-- Posisi utama di profil tetap dipilih manusia. Kecocokan hanya saran, dan untuk KU di bawah 10 tahun sengaja ditampilkan sebagai "coba semua posisi" agar anak tidak dikunci terlalu dini.
+- Posisi: kiper, bek, gelandang, penyerang (sayap dan tengah belum dibedakan).
+- Tiap posisi punya tabel bobot per indikator, nilai 0 (tidak dihitung) sampai 5, dengan bobot awal untuk 16 indikator bawaan. Indikator buatan SSB bobotnya 0 sampai admin mengaturnya.
+- Kecocokan = rata-rata berbobot skor indikator posisi itu pada periode yang tampil, dibagi ke tiga zona: cocok (>= 7), bisa (5 sampai < 7), belum (< 5). Bila indikator yang dinilai mencakup kurang dari separuh jumlah bobot posisi itu, hasilnya "belum cukup data".
+- Bobot disimpan per SSB hanya bila berbeda dari bawaan; admin mengubahnya di halaman Bobot posisi (dari halaman Indikator), pelatih dan korlas membaca.
+- Posisi utama di profil tetap dipilih manusia. Kecocokan hanya saran. Pemain di bawah usia 10 tahun (menurut tanggal lahir, bukan nama KU) tidak diberi zona; profilnya menampilkan "coba semua posisi" agar anak tidak dikunci terlalu dini.
 
 ## Lencana (adaptasi player traits)
 
@@ -159,7 +159,7 @@ Rating, tren, kecocokan posisi, dan proyeksi **tidak disimpan**; dihitung dari s
 1. (selesai) Warna pita, kata tahap, dan tren di profil pemain (tanpa tabel baru).
 2. (selesai) Tabel skuad yang bisa diurutkan dan disaring per KU (`/skuad`, endpoint `GET /squad`, izin `squad.read`; pelatih dan korlas hanya KU yang ditugaskan).
 3. (selesai) Lencana: katalog 17 lencana di kode, tabel `player_badge`, panel di profil pemain (admin dan pelatih memberi dan mencabut, orang tua membaca).
-4. Kecocokan posisi dan tabel bobot.
+4. (selesai) Kecocokan posisi dan tabel bobot per SSB: lapangan mini di profil, halaman `/bobot-posisi`, tabel `position_weight` (migrasi 0023), endpoint `/position-weights`.
 5. Cedera.
 6. Proyeksi (khusus pelatih).
 7. Laporan seleksi untuk pendaftar.

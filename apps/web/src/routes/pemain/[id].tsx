@@ -3,6 +3,7 @@ import { hitungTren } from "@ssb/shared/aspects";
 import { Title } from "@solidjs/meta";
 import KartuProfil from "~/components/KartuProfil";
 import LencanaPemain from "~/components/LencanaPemain";
+import PosisiPemain from "~/components/PosisiPemain";
 import RingkasanNilai from "~/components/RingkasanNilai";
 import KepalaHalaman from "~/components/KepalaHalaman";
 import { createSignal, For, onMount, Show } from "solid-js";
@@ -199,6 +200,7 @@ export default function DetailPemain() {
                   onSelect={setPeriodeId}
                   staf={me()!.active!.role !== "orang_tua"}
                 />
+                <PosisiPemain nilai={terpilih()} usia={usia(pl()!.birthDate)} utama={pl()!.position} />
                 <div id="data">
                   <Show
                     when={!editing()}
