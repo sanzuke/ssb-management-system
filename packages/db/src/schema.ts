@@ -695,6 +695,38 @@ export const playerBadge = pgTable(
 ).enableRLS();
 
 /**
+ * Catatan cedera siswa (data kesehatan anak). `recovered_on` kosong berarti masih berjalan. Mengisi pulih tidak menghapus
+ * baris, jadi riwayat tetap ada. `recorded_by` dan `recovered_by` memakai `ON DELETE SET NULL (kolom)` yang ditulis manual di migrasi.
+ */
+export const playerInjury = pgTable(
+  "player_injury",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    ssbId: ssbId().references(() => ssb.id, { onDelete: "cascade" }),
+    playerId: uuid("player_id").notNull(),
+    bodyPart: text("body_part").notNull(),
+    startedOn: date("started_on").notNull(),
+    expectedReturnOn: date("expected_return_on"),
+    recoveredOn: date("recovered_on"),
+    note: text("note"),
+    recordedBy: uuid("recorded_by"),
+    recoveredBy: uuid("recovered_by"),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    unique("player_injury_ssb_id").on(t.ssbId, t.id),
+    check("player_injury_expected", sql`${t.expectedReturnOn} is null or ${t.expectedReturnOn} >= ${t.startedOn}`),
+    check("player_injury_recovered", sql`${t.recoveredOn} is null or ${t.recoveredOn} >= ${t.startedOn}`),
+    check("player_injury_note", sql`${t.note} is null or char_length(${t.note}) <= 500`),
+    index("player_injury_player").on(t.ssbId, t.playerId, t.startedOn),
+    foreignKey({ columns: [t.ssbId, t.playerId], foreignColumns: [player.ssbId, player.id], name: "player_injury_player_fk" }).onDelete("cascade"),
+    foreignKey({ columns: [t.ssbId, t.recordedBy], foreignColumns: [appUser.ssbId, appUser.id], name: "player_injury_recorded_by_fk" }),
+    foreignKey({ columns: [t.ssbId, t.recoveredBy], foreignColumns: [appUser.ssbId, appUser.id], name: "player_injury_recovered_by_fk" }),
+    tenantPolicy("player_injury"),
+  ],
+).enableRLS();
+
+/**
  * Bobot indikator per posisi buatan SSB untuk kecocokan posisi. Hanya menyimpan yang berbeda dari bobot awal di
  * packages/shared (`defaultPositionWeights`); baris yang tidak ada berarti memakai bobot awal. Bobot 0 berarti indikator tidak dihitung.
  */

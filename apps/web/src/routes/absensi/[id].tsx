@@ -1,3 +1,4 @@
+import { bodyPartLabel } from "@ssb/shared/injuries";
 import { A, useNavigate, useParams } from "@solidjs/router";
 import { Title } from "@solidjs/meta";
 import { createMemo, createSignal, For, onMount, Show } from "solid-js";
@@ -6,7 +7,7 @@ import Memuat from "~/components/Memuat";
 import Kerangka from "~/components/Kerangka";
 import { api, ApiError, getMe, type Me } from "~/lib/api";
 import { createSubmit } from "~/lib/form";
-import { inisial } from "~/lib/pemain";
+import { inisial, tanggal } from "~/lib/pemain";
 import type { AttendanceRoster, AttendanceStatus } from "@ssb/shared";
 
 const hari = (s: string) => new Date(`${s}T00:00:00`).toLocaleDateString("id-ID", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
@@ -143,6 +144,16 @@ export default function Absensi() {
                         <div class="ortu-teks">
                           <span class="nama">{pl.fullName}</span>
                           <span class="petunjuk">{pl.memberNo ?? "Belum ada nomor"}</span>
+                          <Show when={pl.injury}>
+                            {(c) => (
+                              <span
+                                class="tanda-cedera"
+                                title={c().expectedReturnOn ? `Perkiraan pulih ${tanggal(c().expectedReturnOn!)}` : "Perkiraan pulih belum ditentukan"}
+                              >
+                                Cedera: {bodyPartLabel(c().bodyPart)}
+                              </span>
+                            )}
+                          </Show>
                         </div>
                         <span class="status-ortu" data-status={marks()[pl.playerId] ?? "belum"}>
                           {labelStatus(marks()[pl.playerId])}

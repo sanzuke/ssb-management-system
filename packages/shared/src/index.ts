@@ -58,6 +58,14 @@ export const permissions = {
   },
   "badge.read": { roles: ["admin_ssb", "pelatih", "korlas", "orang_tua"], desc: "Melihat lencana siswa (orang tua: anaknya)" },
   "badge.write": { roles: ["admin_ssb", "pelatih"], desc: "Memberi dan mencabut lencana siswa (pelatih: KU yang ditugaskan)" },
+  "injury.read": {
+    roles: ["admin_ssb", "pelatih", "korlas", "orang_tua"],
+    desc: "Melihat catatan cedera siswa (pelatih dan korlas: KU yang ditugaskan; orang tua: anaknya). Data kesehatan anak",
+  },
+  "injury.write": {
+    roles: ["admin_ssb", "pelatih"],
+    desc: "Mencatat cedera, mengubah perkiraan pulih dan catatannya, dan menandai pulih (pelatih: KU yang ditugaskan)",
+  },
   "session.manage": { roles: ["admin_ssb"], desc: "Menjadwalkan, mengubah, dan menghapus sesi latihan" },
   "guardian.sessions": {
     roles: ["admin_ssb", "orang_tua"],
@@ -435,7 +443,15 @@ export type TrainingSession = {
 };
 export type AttendanceRoster = {
   session: TrainingSession;
-  players: { playerId: string; fullName: string; memberNo: string | null; status: AttendanceStatus | null; note: string | null }[];
+  players: {
+    playerId: string;
+    fullName: string;
+    memberNo: string | null;
+    status: AttendanceStatus | null;
+    note: string | null;
+    /** Cedera yang sedang berjalan (tanpa catatan); null bila tidak ada. */
+    injury: InjuryMark | null;
+  }[];
 };
 
 export type AttendanceSummaryRow = {
@@ -527,6 +543,39 @@ import { badgeCodes, type BadgeCode } from "./badges";
 export const badgeInputSchema = z.object({ badge: z.enum(badgeCodes) });
 export type PlayerBadge = { id: string; badge: BadgeCode; awardedAt: string; awardedBy: string | null };
 
+// ---- Cedera ----
+export * from "./injuries";
+import { bodyPartCodes, INJURY_NOTE_MAX, type BodyPartCode } from "./injuries";
+/** Batas tanggal "hari ini" yang longgar sehari: server memakai UTC sedangkan SSB di WIB (pagi hari WIB masih tanggal kemarin di UTC). */
+const sampaiHariIni = (d: string) => d <= new Date(Date.now() + 86400000).toISOString().slice(0, 10);
+const injuryNote = z.preprocess(emptyToNull, z.string().trim().max(INJURY_NOTE_MAX, `maksimal ${INJURY_NOTE_MAX} karakter`).nullable().optional());
+export const injuryInputSchema = z
+  .object({
+    bodyPart: z.enum(bodyPartCodes),
+    startedOn: isoDate.refine(sampaiHariIni, "tidak boleh di masa depan").refine((d) => d >= "2000-01-01", "terlalu lama"),
+    expectedReturnOn: z.preprocess(emptyToNull, isoDate.nullable().optional()),
+    note: injuryNote,
+  })
+  .refine((b) => !b.expectedReturnOn || b.expectedReturnOn >= b.startedOn, { path: ["expectedReturnOn"], message: "tidak boleh sebelum tanggal mulai" });
+/** Mengubah perkiraan pulih dan catatan; keduanya boleh dikosongkan. Bagian tubuh dan tanggal mulai tetap. */
+export const injuryUpdateSchema = z
+  .object({
+    expectedReturnOn: z.preprocess(emptyToNull, isoDate.nullable().optional()),
+    note: injuryNote,
+  })
+  .refine((b) => b.expectedReturnOn !== undefined || b.note !== undefined, { message: "Tidak ada yang diubah" });
+export const injuryRecoverSchema = z.object({ recoveredOn: isoDate.refine(sampaiHariIni, "tidak boleh di masa depan").optional() });
+export type InjuryMark = { bodyPart: BodyPartCode; expectedReturnOn: string | null };
+export type PlayerInjury = {
+  id: string;
+  bodyPart: BodyPartCode;
+  startedOn: string;
+  expectedReturnOn: string | null;
+  recoveredOn: string | null;
+  note: string | null;
+  recordedBy: string | null;
+};
+
 // ---- Kecocokan posisi ----
 export * from "./posisi";
 import { WEIGHT_MAX } from "./posisi";
@@ -548,6 +597,8 @@ export type SquadRow = {
   aspects: { aspect: AssessmentAspect; average: number }[];
   published: boolean;
   tren: Tren;
+  /** Cedera yang sedang berjalan (tanpa catatan); null bila tidak ada. */
+  injury: InjuryMark | null;
 };
 /** Rata-rata skor per aspek untuk satu periode, dari seluruh penilaian yang boleh dilihat peran pemanggil. */
 export type AspectSummary = {

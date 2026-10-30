@@ -3756,3 +3756,63 @@ button.pengguna[aria-expanded="true"] .panah-menu {
   color: var(--merah);
   font-size: 0.9rem;
 }
+
+/* ---- Cedera ---- */
+.tanda-cedera {
+  display: inline-block;
+  align-self: flex-start;
+  margin-top: 2px;
+  padding: 1px 8px;
+  border-radius: 999px;
+  border: 1px solid #b3372a;
+  background: #fbe9e6;
+  color: #8f2a20;
+  font-size: 0.75rem;
+  font-weight: 700;
+  line-height: 1.5;
+  white-space: nowrap;
+}
+.kartu-pro-nama .tanda-cedera {
+  margin-top: 6px;
+}
+.cedera-daftar {
+  display: grid;
+  gap: 8px;
+  margin: 8px 0 0;
+  padding: 0;
+  list-style: none;
+}
+.cedera-butir {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 12px;
+  padding: 10px 12px;
+  border: 1px solid var(--garis);
+  border-radius: 12px;
+  background: #fff;
+}
+.cedera-catatan {
+  margin: 4px 0 0;
+  font-size: 0.9rem;
+  white-space: pre-line;
+}
+.cedera-form {
+  display: grid;
+  gap: 4px;
+  margin-top: 12px;
+  padding: 12px;
+  border: 1px dashed var(--garis);
+  border-radius: 12px;
+}
+.cedera-form h4 {
+  margin: 0;
+}
+.cedera-riwayat {
+  margin-top: 12px;
+}
+.cedera-riwayat summary {
+  cursor: pointer;
+  font-weight: 700;
+}

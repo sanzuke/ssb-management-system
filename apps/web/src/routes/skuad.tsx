@@ -1,3 +1,4 @@
+import { bodyPartLabel } from "@ssb/shared/injuries";
 import { A, useNavigate } from "@solidjs/router";
 import { Title } from "@solidjs/meta";
 import { assessmentAspects, type AssessmentAspect, aspectLabel, pitaDari } from "@ssb/shared/aspects";
@@ -6,7 +7,7 @@ import { createMemo, createResource, createSignal, For, onMount, Show } from "so
 import Ikon from "~/components/Ikon";
 import Memuat from "~/components/Memuat";
 import { api, getMe, type Me } from "~/lib/api";
-import { inisial, posisiLabel } from "~/lib/pemain";
+import { inisial, posisiLabel, tanggal } from "~/lib/pemain";
 
 const koma = (n: number) => String(n).replace(".", ",");
 const singkat: Record<AssessmentAspect, string> = {
@@ -187,6 +188,16 @@ export default function Skuad() {
                                 {b.p.ageGroup?.name ?? "Tanpa KU"}
                                 {b.s?.periodName ? ` • ${b.s.periodName}` : ""}
                               </span>
+                              <Show when={b.s?.injury}>
+                                {(c) => (
+                                  <span
+                                    class="tanda-cedera"
+                                    title={c().expectedReturnOn ? `Perkiraan pulih ${tanggal(c().expectedReturnOn!)}` : "Perkiraan pulih belum ditentukan"}
+                                  >
+                                    Cedera: {bodyPartLabel(c().bodyPart)}
+                                  </span>
+                                )}
+                              </Show>
                             </span>
                           </A>
                         </th>

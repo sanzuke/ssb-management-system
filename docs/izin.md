@@ -24,6 +24,8 @@ Endpoint dijaga dengan `requirePermission(<izin>)`. Pembatasan data per baris (p
 | `squad.read` | Melihat tabel skuad: rating, enam aspek, dan tren seluruh siswa yang boleh dilihat (pelatih dan korlas: KU yang ditugaskan), termasuk penilaian yang belum terbit | ya | ya | ya | - |
 | `badge.read` | Melihat lencana siswa (orang tua: anaknya) | ya | ya | ya | ya |
 | `badge.write` | Memberi dan mencabut lencana siswa (pelatih: KU yang ditugaskan) | ya | ya | - | - |
+| `injury.read` | Melihat catatan cedera siswa (pelatih dan korlas: KU yang ditugaskan; orang tua: anaknya). Data kesehatan anak | ya | ya | ya | ya |
+| `injury.write` | Mencatat cedera, mengubah perkiraan pulih dan catatannya, dan menandai pulih (pelatih: KU yang ditugaskan) | ya | ya | - | - |
 | `session.manage` | Menjadwalkan, mengubah, dan menghapus sesi latihan | ya | - | - | - |
 | `guardian.sessions` | Portal orang tua: jadwal KU anak sendiri beserta status kehadiran anak, tanpa daftar siswa lain (admin tidak punya anak, jadi daftarnya kosong) | ya | - | - | ya |
 | `session.read` | Melihat jadwal sesi latihan (pelatih dan korlas: KU yang ditugaskan) | ya | ya | ya | - |

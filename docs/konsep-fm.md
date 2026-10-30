@@ -160,7 +160,7 @@ Rating, tren, kecocokan posisi, dan proyeksi **tidak disimpan**; dihitung dari s
 2. (selesai) Tabel skuad yang bisa diurutkan dan disaring per KU (`/skuad`, endpoint `GET /squad`, izin `squad.read`; pelatih dan korlas hanya KU yang ditugaskan).
 3. (selesai) Lencana: katalog 17 lencana di kode, tabel `player_badge`, panel di profil pemain (admin dan pelatih memberi dan mencabut, orang tua membaca).
 4. (selesai) Kecocokan posisi dan tabel bobot per SSB: lapangan mini di profil, halaman `/bobot-posisi`, tabel `position_weight` (migrasi 0023), endpoint `/position-weights`.
-5. Cedera.
+5. (selesai) Cedera: tabel `player_injury` (migrasi 0025), panel di profil (admin dan pelatih mencatat, mengubah perkiraan pulih, dan menandai pulih; orang tua membaca), tanda di kartu, absensi, dan skuad.
 6. Proyeksi (khusus pelatih).
 7. Laporan seleksi untuk pendaftar.
 

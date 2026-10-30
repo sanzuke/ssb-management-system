@@ -1,3 +1,4 @@
+import { bodyPartLabel } from "@ssb/shared/injuries";
 import { assessmentAspects, type AssessmentAspect, pitaDari, type Tren } from "@ssb/shared/aspects";
 import type { AssessmentView, PlayerDetail } from "@ssb/shared";
 import { For, type JSX, Show } from "solid-js";
@@ -18,7 +19,7 @@ const koma = (n: number) => String(n).replace(".", ",");
  * Kartu siswa bergaya kartu koleksi (desain Stitch "Statistik Siswa Interaktif"): rata-rata keseluruhan,
  * posisi, KU, foto, nama, dan enam aspek penilaian pada periode yang dipilih.
  */
-export default function KartuProfil(props: { pl: PlayerDetail; nilai: AssessmentView | null; tren?: Tren; children?: JSX.Element }) {
+export default function KartuProfil(props: { pl: PlayerDetail; nilai: AssessmentView | null; tren?: Tren; cedera?: string | null; children?: JSX.Element }) {
   const rata = (a: AssessmentAspect) => props.nilai?.aspects.find((x) => x.aspect === a)?.average ?? null;
   return (
     <section class="kartu-pro" aria-label={`Kartu ${props.pl.fullName}`}>
@@ -67,6 +68,7 @@ export default function KartuProfil(props: { pl: PlayerDetail; nilai: Assessment
               </span>
             )}
           </Show>
+          <Show when={props.cedera}>{(c) => <span class="tanda-cedera">Cedera: {bodyPartLabel(c())}</span>}</Show>
         </div>
         <ul class="kartu-pro-atribut" aria-label="Rata-rata enam aspek">
           <For each={assessmentAspects}>

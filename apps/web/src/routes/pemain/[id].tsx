@@ -2,6 +2,7 @@ import { A, useNavigate, useParams } from "@solidjs/router";
 import { hitungTren } from "@ssb/shared/aspects";
 import { Title } from "@solidjs/meta";
 import KartuProfil from "~/components/KartuProfil";
+import CederaPemain from "~/components/CederaPemain";
 import LencanaPemain from "~/components/LencanaPemain";
 import PosisiPemain from "~/components/PosisiPemain";
 import RingkasanNilai from "~/components/RingkasanNilai";
@@ -15,7 +16,7 @@ import { api, ApiError, getMe, type Me } from "~/lib/api";
 import { createSubmit } from "~/lib/form";
 import { posisiLabel, statusLabel, tanggal, usia, type AgeGroup, type PlayerDetail } from "~/lib/pemain";
 import { linkWa } from "~/lib/wa";
-import { documentStatusLabel, type AssessmentView } from "@ssb/shared";
+import { documentStatusLabel, type AssessmentView, type PlayerInjury } from "@ssb/shared";
 
 type Member = { id: string; name: string; email: string; role: string };
 
@@ -71,6 +72,7 @@ export default function DetailPemain() {
     }
   };
 
+  const [cedera, setCedera] = createSignal<PlayerInjury[]>([]);
   const [nilai, setNilai] = createSignal<AssessmentView[]>([]);
   const [periodeId, setPeriodeId] = createSignal("");
   // Periode yang tampil: pilihan pengguna, atau yang terbaru (yang punya skor lebih dulu).
@@ -90,6 +92,7 @@ export default function DetailPemain() {
     try {
       setPl(await api<PlayerDetail>(`/players/${encodeURIComponent(p.id)}`));
       setNilai(await api<AssessmentView[]>(`/players/${encodeURIComponent(p.id)}/assessments`).catch(() => []));
+      setCedera(await api<PlayerInjury[]>(`/players/${encodeURIComponent(p.id)}/injuries`).catch(() => []));
     } catch (e) {
       if (e instanceof ApiError && e.status === 404) setMissing(true);
     }
@@ -163,7 +166,7 @@ export default function DetailPemain() {
             </KepalaHalaman>
             <div class="profil-grid">
               <div class="profil-kiri">
-                <KartuProfil pl={pl()!} nilai={terpilih()} tren={tren()}>
+                <KartuProfil pl={pl()!} nilai={terpilih()} tren={tren()} cedera={cedera().find((c) => !c.recoveredOn)?.bodyPart ?? null}>
                   <div class="foto-kelola">
                     <Show when={bisaFoto()}>
                       {/* biome-ignore lint/a11y/noLabelWithoutControl: input berkas tersembunyi ada di dalam label */}
@@ -202,6 +205,7 @@ export default function DetailPemain() {
                   staf={me()!.active!.role !== "orang_tua"}
                 />
                 <PosisiPemain nilai={terpilih()} usia={usia(pl()!.birthDate)} utama={pl()!.position} />
+                <CederaPemain playerId={pl()!.id} daftar={cedera()} onUbah={setCedera} bisaUbah={["admin_ssb", "pelatih"].includes(me()!.active!.role)} />
                 <div id="data">
                   <Show
                     when={!editing()}

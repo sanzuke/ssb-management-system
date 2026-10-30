@@ -205,7 +205,7 @@ Detail di `docs/konsep-fm.md`. Dikerjakan di cabang `feat/profil-ala-fm`.
 - [x] Tabel skuad (`/skuad`) untuk admin, pelatih, dan korlas: rating, enam aspek berpita, tren; urut per kolom, saring KU dan nama; pelatih dan korlas hanya KU-nya, orang tua ditolak (test API); dicoba di 390 px dan 1200 px
 - [x] Lencana yang diberikan pelatih: katalog 17 lencana dalam empat kelompok, maksimal 5 aktif per pemain (dijaga serentak), tabel `player_badge` dengan RLS (migrasi 0022), izin `badge.read` dan `badge.write`; test akses, duplikat, batas serentak, dan cabut; dicoba di 390 px. Daftar awal perlu divalidasi pelatih berlisensi
 - [x] Kecocokan posisi: bobot awal 16 indikator x 4 posisi, zona cocok, bisa, belum, lapangan mini di profil (pemain 10 tahun ke atas; di bawahnya "coba semua posisi"), halaman Bobot posisi untuk admin, tabel `position_weight` dengan RLS (migrasi 0023); test perhitungan dan API; dicoba di 390 px. Bobot awal perlu divalidasi pelatih berlisensi
-- [ ] Catatan cedera (akses terbatas)
+- [x] Catatan cedera: tabel `player_injury` dengan RLS (migrasi 0025), izin `injury.read` dan `injury.write`, bagian tubuh dari daftar pilihan, perkiraan pulih, catatan, tandai pulih (riwayat tetap); tanda cedera di kartu profil, absensi, dan skuad tanpa catatannya; test akses per peran, validasi, dan isolasi SSB; dicoba di 390 px. Persetujuan orang tua (UU PDP) masih terbuka
 - [ ] Proyeksi perkembangan khusus pelatih
 - [ ] Laporan seleksi untuk pendaftar trial
 - [ ] Putuskan: orang tua melihat Rating Umum sebagai angka atau hanya pita dan kata **(butuh keputusan)**

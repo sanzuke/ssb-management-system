@@ -22,6 +22,7 @@ import { HttpError } from "./errors";
 import { requirePermission, type AppEnv, type Member } from "./auth/middleware";
 import { isUniqueViolation } from "./auth/service";
 import { visibleTo as playersVisibleTo } from "./players";
+import { activeInjuries } from "./injuries";
 import { zv } from "./validator";
 import { reportHtml } from "./report/html";
 import { renderPdf, reportUnavailable } from "./report/pdf";
@@ -233,6 +234,7 @@ export function assessmentRoutes(db: Db) {
         const out = await withTenant(db, m.ssbId, async (tx): Promise<SquadRow[]> => {
           const ids = (await tx.select({ id: schema.player.id }).from(schema.player).where(playersVisibleTo(m)).limit(500)).map((r) => r.id);
           if (ids.length === 0) return [];
+          const cedera = await activeInjuries(tx, ids);
           const penilaian = await tx
             .select({ id: A.id, playerId: A.playerId, publishedAt: A.publishedAt, periodName: schema.period.name })
             .from(A)
@@ -277,6 +279,7 @@ export function assessmentRoutes(db: Db) {
               aspects: terbaru?.aspects ?? [],
               published: terbaru?.published ?? false,
               tren: hitungTren(list.map((x) => x.overall)),
+              injury: cedera.get(playerId) ?? null,
             };
           });
         });

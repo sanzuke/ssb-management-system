@@ -106,6 +106,7 @@ run("tabel skuad: rating, aspek, dan tren", () => {
       aspects: [],
       published: false,
       tren: { arah: "baru", selisih: null },
+      injury: null,
     });
   });
 

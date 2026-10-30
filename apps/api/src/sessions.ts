@@ -14,6 +14,7 @@ import { HttpError } from "./errors";
 import { requirePermission, type AppEnv, type Member } from "./auth/middleware";
 import { zv } from "./validator";
 import { visibleTo as playersVisibleTo } from "./players";
+import { activeInjuries } from "./injuries";
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const ISO = /^\d{4}-\d{2}-\d{2}$/;
@@ -129,7 +130,16 @@ export function sessionRoutes(db: Db) {
       .where(eq(schema.player.ageGroupId, s.ageGroup.id))
       .orderBy(asc(schema.player.fullName));
     // Siswa tidak aktif hanya tampil bila sudah punya catatan absensi di sesi ini.
-    return { session: s, players: players.filter((p) => p.playerStatus === "aktif" || p.status).map(({ playerStatus: _x, ...p }) => p) };
+    const marks = await activeInjuries(
+      tx,
+      players.map((p) => p.playerId),
+    );
+    return {
+      session: s,
+      players: players
+        .filter((p) => p.playerStatus === "aktif" || p.status)
+        .map(({ playerStatus: _x, ...p }) => ({ ...p, injury: marks.get(p.playerId) ?? null })),
+    };
   };
 
   return (
