@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "private": true,
   "type": "module",
-  "exports": { ".": "./src/index.ts", "./aspects": "./src/aspects.ts" },
+  "exports": { ".": "./src/index.ts", "./aspects": "./src/aspects.ts", "./impor": "./src/impor.ts" },
   "scripts": { "typecheck": "tsc -p .", "test": "bun test" },
   "dependencies": { "zod": "^4.0.0" }
 }

@@ -371,7 +371,7 @@ export default function DetailPemain() {
               </div>
             </div>
             <p class="tautan-bawah">
-              <A href="/pemain">Kembali ke daftar pemain</A>
+              <A href="/pemain">Kembali ke daftar siswa</A>
             </p>
           </Show>
         </Show>

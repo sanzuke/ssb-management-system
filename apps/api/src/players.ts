@@ -14,6 +14,7 @@ import {
   type PlayerSummary,
 } from "@ssb/shared";
 import { HttpError } from "./errors";
+import { importRequestSchema, labelKolom, type ImportFailure, type ImportReport } from "@ssb/shared/impor";
 import { requirePermission, type AppEnv, type Member } from "./auth/middleware";
 import { isUniqueViolation } from "./auth/service";
 import { zv } from "./validator";
@@ -119,6 +120,25 @@ const extraColumns = (b: PlayerFormData) => ({
   jerseySize: b.jerseySize ?? null,
   shoeSize: b.shoeSize ?? null,
 });
+/** Menyimpan satu siswa baru. ID siswa yang diisi dipakai apa adanya; kosong diberi nomor otomatis (unik walau dua siswa dibuat bersamaan). */
+async function insertPlayer(tx: Tx, ssbId: string, b: PlayerFormData): Promise<string> {
+  const memberNo = b.memberNo ?? (await nextMemberNo(tx, ssbId));
+  const [p] = await tx
+    .insert(schema.player)
+    .values({
+      ssbId,
+      memberNo,
+      fullName: b.fullName,
+      birthDate: b.birthDate,
+      position: b.position ?? null,
+      school: b.school || null,
+      ageGroupId: b.ageGroupId ?? null,
+      status: b.status,
+      ...extraColumns(b),
+    })
+    .returning({ id: schema.player.id });
+  return p!.id;
+}
 const toSummary = (r: {
   id: string;
   memberNo: string | null;
@@ -290,31 +310,48 @@ export function playerRoutes(db: Db, opts: { uploadDir: string }) {
         const m = ctx(c);
         const b = c.req.valid("json");
         try {
-          const id = await withTenant(db, m.ssbId, async (tx) => {
-            // ID siswa: yang diisi admin dipakai apa adanya; kosong diberi nomor otomatis (unik walau dua siswa dibuat bersamaan).
-            const memberNo = b.memberNo ?? (await nextMemberNo(tx, m.ssbId));
-            const [p] = await tx
-              .insert(schema.player)
-              .values({
-                ssbId: m.ssbId,
-                memberNo,
-                fullName: b.fullName,
-                birthDate: b.birthDate,
-                position: b.position ?? null,
-                school: b.school || null,
-                ageGroupId: b.ageGroupId ?? null,
-                status: b.status,
-                ...extraColumns(b),
-              })
-              .returning({ id: schema.player.id });
-            return p!.id;
-          });
+          const id = await withTenant(db, m.ssbId, (tx) => insertPlayer(tx, m.ssbId, b));
           const [row] = await withTenant(db, m.ssbId, (tx) => selectPlayers(tx).where(eq(schema.player.id, id)).limit(1));
           return c.json(toSummary(row!), 201);
         } catch (e) {
           if (isFk(e)) throw new HttpError(422, "age_group_invalid", "KU tidak ditemukan di SSB ini");
           throw duplicateOf(e) ?? e;
         }
+      })
+
+      // Impor dari lembar: tiap baris divalidasi dengan skema formulir dan disimpan terpisah (savepoint), jadi baris
+      // yang gagal tidak menggagalkan yang lain. `dryRun` menjalankan semuanya lalu membatalkan seluruh transaksi.
+      .post("/players/import", requirePermission("player.write"), zv("json", importRequestSchema), async (c) => {
+        const m = ctx(c);
+        const { rows, dryRun } = c.req.valid("json");
+        const gagal: ImportFailure[] = [];
+        let created = 0;
+        const batal = new Error("dry-run");
+        try {
+          await withTenant(db, m.ssbId, async (tx) => {
+            for (const r of rows) {
+              const nama = typeof r.data.fullName === "string" ? r.data.fullName : "";
+              const parsed = playerFormSchema.safeParse(r.data);
+              if (!parsed.success) {
+                gagal.push({ nomor: r.nomor, nama, galat: parsed.error.issues.map((i) => `${labelKolom(String(i.path[0] ?? ""))}: ${i.message}`) });
+                continue;
+              }
+              try {
+                await tx.transaction((sp) => insertPlayer(sp, m.ssbId, parsed.data));
+                created++;
+              } catch (e) {
+                const dup = duplicateOf(e);
+                if (dup) gagal.push({ nomor: r.nomor, nama, galat: Object.entries(dup.fields ?? {}).map(([k, v]) => `${labelKolom(k)}: ${v}`) });
+                else if (isFk(e)) gagal.push({ nomor: r.nomor, nama, galat: ["Kelompok usia: KU tidak ditemukan di SSB ini"] });
+                else throw e;
+              }
+            }
+            if (dryRun) throw batal;
+          });
+        } catch (e) {
+          if (e !== batal) throw e;
+        }
+        return c.json({ dryRun, created, gagal } satisfies ImportReport);
       })
 
       .patch("/players/:id", requirePermission("player.write"), zv("json", playerFormSchema), async (c) => {

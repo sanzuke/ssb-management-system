@@ -182,10 +182,15 @@ export default function DaftarPemain() {
               </Show>
             </div>
             <Show when={role() === "admin_ssb"}>
-              <A class="tombol utama tambah" href="/pemain/baru">
-                <Ikon nama="tambah" ukuran={18} />
-                Tambah siswa baru
-              </A>
+              <div class="aksi-kepala">
+                <A class="tombol tipis tambah" href="/pemain/impor">
+                  Impor dari lembar
+                </A>
+                <A class="tombol utama tambah" href="/pemain/baru">
+                  <Ikon nama="tambah" ukuran={18} />
+                  Tambah siswa baru
+                </A>
+              </div>
             </Show>
           </header>
 
@@ -370,7 +375,7 @@ export default function DaftarPemain() {
                               <A class="ikon-aksi" href={`/nilai/${pl.id}`} aria-label={`Penilaian ${pl.fullName}`} title="Penilaian">
                                 <Ikon nama="buku" ukuran={18} />
                               </A>
-                              <A class="ikon-aksi" href={`/kartu/${pl.id}`} aria-label={`Kartu ${pl.fullName}`} title="Kartu pemain">
+                              <A class="ikon-aksi" href={`/kartu/${pl.id}`} aria-label={`Kartu ${pl.fullName}`} title="Kartu siswa">
                                 <Ikon nama="kartu" ukuran={18} />
                               </A>
                             </div>

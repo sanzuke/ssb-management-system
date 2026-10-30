@@ -58,7 +58,7 @@ Butir bertanda **(butuh keputusan)** terhambat oleh pertanyaan terbuka di `docs/
 - [x] Penugasan pelatih dan korlas ke KU per periode, API dan layar admin (profil pelatih memakai nama anggota; kontak dan lisensi menyusul bila dibutuhkan)
 - [x] Pelatih hanya melihat pemain di KU yang ditugaskan pada periode berjalan (test: KU lain 404, daftar kosong tanpa penugasan; korlas sama, orang tua hanya anaknya)
 - [x] Layar daftar, detail, dan formulir pemain di web; pencarian dan filter KU (dicoba di 360 px, termasuk tampilan pelatih)
-- [ ] Impor pemain dari CSV dengan laporan baris gagal
+- [x] Impor siswa dari CSV (`/pemain/impor`, `POST /players/import`): judul kolom lembar SSB dikenali (urutan bebas), tanggal `21-Jan-14`, KU `U-12`, posisi bahasa Indonesia, WhatsApp tanpa nol; diperiksa dulu (dry run), baris gagal dilaporkan dengan nomor baris, baris sah tetap tersimpan; maksimal 500 baris; test pemetaan dan API; dicoba di browser
 
 ## E. Latihan dan absensi
 
