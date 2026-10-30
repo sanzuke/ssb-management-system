@@ -94,6 +94,10 @@ run("manajemen anggota: daftar, ubah, keluarkan, dan hapus akun", () => {
     expect((await call("PATCH", `/members/${budi.userId}`, admin, {})).status).toBe(400);
     expect((await call("PATCH", `/members/${budi.userId}`, admin, { whatsapp: "abc" })).status).toBe(400);
     expect((await call("PATCH", `/members/${randomUUID()}`, admin, { name: "X Y" })).status).toBe(404);
+    // Mengubah nama diri sendiri lewat Anggota juga mengubah nama di /auth/me (dipakai header).
+    expect((await call("PATCH", `/members/${adminId}`, admin, { name: "Nama Baru Admin" })).status).toBe(200);
+    expect((await json(await call("GET", "/auth/me", admin))).name).toBe("Nama Baru Admin");
+    expect((await call("PATCH", `/members/${adminId}`, admin, { name: "Admin Utama" })).status).toBe(200);
 
     // peran: pelatih menjadi korlas (penugasan tetap); aturan penjaga
     const korlasBaru = await json(await call("PATCH", `/members/${budi.userId}`, admin, { role: "korlas" }));

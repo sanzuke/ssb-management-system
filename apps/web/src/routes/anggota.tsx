@@ -87,6 +87,7 @@ export default function Anggota() {
       }
       await api(`/members/${r.userId}`, { method: "PATCH", body });
       setUbah(null);
+      if (r.isSelf) await getMe().catch(() => null);
       setPesan(`Data ${body.name ?? r.name} disimpan.`);
       await muat();
     });

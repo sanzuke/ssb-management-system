@@ -57,13 +57,26 @@ export function authRoutes(db: Db, opts: { secureCookie: boolean }) {
         const memberships = await listMemberships(db, a.accountId);
         const active = a.member ? (memberships.find((m) => m.userId === a.member!.userId) ?? null) : null;
         const [acc] = await db.select({ hasPassword: schema.account.passwordHash }).from(schema.account).where(eq(schema.account.id, a.accountId)).limit(1);
-        const whatsapp = a.member
+        const member = a.member
           ? await withTenant(db, a.member.ssbId, async (tx) => {
-              const [u] = await tx.select({ whatsapp: schema.appUser.whatsapp }).from(schema.appUser).where(eq(schema.appUser.id, a.member!.userId)).limit(1);
-              return u?.whatsapp ?? null;
+              const [u] = await tx
+                .select({ name: schema.appUser.name, whatsapp: schema.appUser.whatsapp })
+                .from(schema.appUser)
+                .where(eq(schema.appUser.id, a.member!.userId))
+                .limit(1);
+              return u ?? null;
             })
           : null;
-        const me: Me = { accountId: a.accountId, name: a.accountName, email: a.email, hasPassword: acc?.hasPassword != null, whatsapp, active, memberships };
+        // Nama yang tampil adalah nama anggota di SSB aktif (yang diubah lewat Anggota); nama akun hanya cadangan.
+        const me: Me = {
+          accountId: a.accountId,
+          name: member?.name ?? a.accountName,
+          email: a.email,
+          hasPassword: acc?.hasPassword != null,
+          whatsapp: member?.whatsapp ?? null,
+          active,
+          memberships,
+        };
         return c.json(me);
       })
 
