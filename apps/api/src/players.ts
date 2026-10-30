@@ -35,14 +35,13 @@ function pgConstraint(e: unknown): string | undefined {
 /** Pelanggaran keunikan ID siswa atau NISN menjadi 409 dengan pesan di kolomnya. */
 function duplicateOf(e: unknown): HttpError | null {
   const c = pgConstraint(e);
-  if (c === "player_ssb_member_no")
-    return new HttpError(409, "member_no_taken", "ID siswa sudah dipakai pemain lain", { memberNo: "sudah dipakai pemain lain" });
-  if (c === "player_ssb_nisn") return new HttpError(409, "nisn_taken", "NISN sudah dipakai pemain lain", { nisn: "sudah dipakai pemain lain" });
+  if (c === "player_ssb_member_no") return new HttpError(409, "member_no_taken", "ID siswa sudah dipakai siswa lain", { memberNo: "sudah dipakai siswa lain" });
+  if (c === "player_ssb_nisn") return new HttpError(409, "nisn_taken", "NISN sudah dipakai siswa lain", { nisn: "sudah dipakai siswa lain" });
   return null;
 }
 
 /**
- * Batas data pemain per role. Admin melihat semua; pelatih dan korlas hanya pemain di KU yang
+ * Batas data siswa per role. Admin melihat semua; pelatih dan korlas hanya siswa di KU yang
  * ditugaskan pada periode yang sedang berjalan; orang tua hanya anaknya. Selain ini, RLS membatasi ke SSB.
  */
 export function visibleTo(m: Member): SQL | undefined {
@@ -183,8 +182,8 @@ export function playerRoutes(db: Db, opts: { uploadDir: string }) {
         return c.json(rows.map(toSummary));
       })
 
-      // Ringkasan untuk tabel pemain dalam satu permintaan: wali utama dan penilaian terakhir tiap pemain
-      // yang boleh dilihat role ini. Data wali (nama, WhatsApp) hanya untuk admin SSB, sama seperti daftar wali di detail pemain.
+      // Ringkasan untuk tabel siswa dalam satu permintaan: wali utama dan penilaian terakhir tiap siswa
+      // yang boleh dilihat role ini. Data wali (nama, WhatsApp) hanya untuk admin SSB, sama seperti daftar wali di detail siswa.
       .get("/players-overview", requirePermission("player.read"), async (c) => {
         const m = ctx(c);
         const out = await withTenant(db, m.ssbId, async (tx): Promise<PlayerOverview[]> => {
@@ -237,7 +236,7 @@ export function playerRoutes(db: Db, opts: { uploadDir: string }) {
               else wali.set(r.playerId, { name: r.name, whatsapp: r.whatsapp, relationship: r.relationship, total: 1 });
             }
           }
-          // Pemain yang belum punya akun wali memakai kontak orang tua dari data siswa.
+          // Siswa yang belum punya akun wali memakai kontak orang tua dari data siswa.
           if (m.role === "admin_ssb") {
             const kontak = await tx
               .select({ id: schema.player.id, name: schema.player.guardianName, whatsapp: schema.player.guardianWhatsapp })
@@ -262,7 +261,7 @@ export function playerRoutes(db: Db, opts: { uploadDir: string }) {
 
       .get("/players/:id", requirePermission("player.read"), async (c) => {
         const m = ctx(c);
-        const id = uuidOr404(c.req.param("id"), "Pemain");
+        const id = uuidOr404(c.req.param("id"), "Siswa");
         const detail = await withTenant(db, m.ssbId, async (tx): Promise<PlayerDetail | null> => {
           const [row] = await selectPlayers(tx)
             .where(and(eq(schema.player.id, id), visibleTo(m)))
@@ -283,7 +282,7 @@ export function playerRoutes(db: Db, opts: { uploadDir: string }) {
           }
           return out;
         });
-        if (!detail) throw notFound("Pemain"); // di luar batas role dijawab sama dengan tidak ada
+        if (!detail) throw notFound("Siswa"); // di luar batas role dijawab sama dengan tidak ada
         return c.json(detail);
       })
 
@@ -292,7 +291,7 @@ export function playerRoutes(db: Db, opts: { uploadDir: string }) {
         const b = c.req.valid("json");
         try {
           const id = await withTenant(db, m.ssbId, async (tx) => {
-            // ID siswa: yang diisi admin dipakai apa adanya; kosong diberi nomor otomatis (unik walau dua pemain dibuat bersamaan).
+            // ID siswa: yang diisi admin dipakai apa adanya; kosong diberi nomor otomatis (unik walau dua siswa dibuat bersamaan).
             const memberNo = b.memberNo ?? (await nextMemberNo(tx, m.ssbId));
             const [p] = await tx
               .insert(schema.player)
@@ -320,7 +319,7 @@ export function playerRoutes(db: Db, opts: { uploadDir: string }) {
 
       .patch("/players/:id", requirePermission("player.write"), zv("json", playerFormSchema), async (c) => {
         const m = ctx(c);
-        const id = uuidOr404(c.req.param("id"), "Pemain");
+        const id = uuidOr404(c.req.param("id"), "Siswa");
         const b = c.req.valid("json");
         try {
           const found = await withTenant(db, m.ssbId, async (tx) => {
@@ -351,7 +350,7 @@ export function playerRoutes(db: Db, opts: { uploadDir: string }) {
                 .values({ ssbId: m.ssbId, playerId: id, field: l.field, fromValue: l.from, toValue: l.to, changedBy: m.userId });
             return true;
           });
-          if (!found) throw notFound("Pemain");
+          if (!found) throw notFound("Siswa");
         } catch (e) {
           if (isFk(e)) throw new HttpError(422, "age_group_invalid", "KU tidak ditemukan di SSB ini");
           throw duplicateOf(e) ?? e;
@@ -360,21 +359,21 @@ export function playerRoutes(db: Db, opts: { uploadDir: string }) {
         return c.json(toSummary(row!));
       })
 
-      // ---- Orang tua pemain ----
+      // ---- Orang tua siswa ----
       .post("/players/:id/guardians", requirePermission("player.write"), zv("json", guardianInputSchema), async (c) => {
         const m = ctx(c);
-        const id = uuidOr404(c.req.param("id"), "Pemain");
+        const id = uuidOr404(c.req.param("id"), "Siswa");
         const b = c.req.valid("json");
         await withTenant(db, m.ssbId, async (tx) => {
           const [p] = await tx.select({ id: schema.player.id }).from(schema.player).where(eq(schema.player.id, id)).limit(1);
-          if (!p) throw notFound("Pemain");
+          if (!p) throw notFound("Siswa");
           const [u] = await tx.select({ role: schema.appUser.role }).from(schema.appUser).where(eq(schema.appUser.id, b.userId)).limit(1);
           if (!u) throw new HttpError(422, "member_invalid", "Anggota tidak ditemukan di SSB ini");
-          if (u.role !== "orang_tua") throw new HttpError(422, "member_not_parent", "Hanya anggota ber-role orang tua yang bisa dihubungkan ke pemain");
+          if (u.role !== "orang_tua") throw new HttpError(422, "member_not_parent", "Hanya anggota ber-role orang tua yang bisa dihubungkan ke siswa");
           try {
             await tx.insert(schema.playerGuardian).values({ ssbId: m.ssbId, playerId: id, userId: b.userId, relationship: b.relationship ?? null });
           } catch (e) {
-            if (isUniqueViolation(e)) throw new HttpError(409, "duplicate", "Orang tua ini sudah terhubung ke pemain");
+            if (isUniqueViolation(e)) throw new HttpError(409, "duplicate", "Orang tua ini sudah terhubung ke siswa");
             throw e;
           }
         });
@@ -382,7 +381,7 @@ export function playerRoutes(db: Db, opts: { uploadDir: string }) {
       })
       .delete("/players/:id/guardians/:userId", requirePermission("player.write"), async (c) => {
         const m = ctx(c);
-        const id = uuidOr404(c.req.param("id"), "Pemain");
+        const id = uuidOr404(c.req.param("id"), "Siswa");
         const userId = uuidOr404(c.req.param("userId"), "Orang tua");
         const rows = await withTenant(db, m.ssbId, (tx) =>
           tx
@@ -395,7 +394,7 @@ export function playerRoutes(db: Db, opts: { uploadDir: string }) {
       })
 
       // ---- Penugasan pelatih dan korlas ke KU per periode ----
-      // Foto pemain. Berkas disimpan di folder lokal dan hanya bisa dibaca lewat endpoint ini (dengan login dan batas data per role).
+      // Foto siswa. Berkas disimpan di folder lokal dan hanya bisa dibaca lewat endpoint ini (dengan login dan batas data per role).
       .put(
         "/players/:id/photo",
         requirePermission("player.photo"),
@@ -407,7 +406,7 @@ export function playerRoutes(db: Db, opts: { uploadDir: string }) {
         }),
         async (c) => {
           const m = ctx(c);
-          const id = uuidOr404(c.req.param("id"), "Pemain");
+          const id = uuidOr404(c.req.param("id"), "Siswa");
           const body = await c.req.parseBody().catch(() => ({}) as Record<string, unknown>);
           const file = body.file;
           if (!(file instanceof File)) throw new HttpError(400, "bad_request", 'Kirim berkas foto pada kolom "file"');
@@ -427,7 +426,7 @@ export function playerRoutes(db: Db, opts: { uploadDir: string }) {
             await tx.update(schema.player).set({ photoKey: key }).where(eq(schema.player.id, id));
             return cur.key;
           });
-          if (old === undefined) throw notFound("Pemain");
+          if (old === undefined) throw notFound("Siswa");
           if (old) await store.remove(old);
           return c.json({ photoV: photoVersion(key) });
         },
@@ -435,7 +434,7 @@ export function playerRoutes(db: Db, opts: { uploadDir: string }) {
 
       .get("/players/:id/photo", requirePermission("player.read"), async (c) => {
         const m = ctx(c);
-        const id = uuidOr404(c.req.param("id"), "Pemain");
+        const id = uuidOr404(c.req.param("id"), "Siswa");
         const [row] = await withTenant(db, m.ssbId, (tx) =>
           tx
             .select({ key: schema.player.photoKey })
@@ -455,7 +454,7 @@ export function playerRoutes(db: Db, opts: { uploadDir: string }) {
 
       .delete("/players/:id/photo", requirePermission("player.photo"), async (c) => {
         const m = ctx(c);
-        const id = uuidOr404(c.req.param("id"), "Pemain");
+        const id = uuidOr404(c.req.param("id"), "Siswa");
         const old = await withTenant(db, m.ssbId, async (tx) => {
           const [cur] = await tx
             .select({ key: schema.player.photoKey })
@@ -466,7 +465,7 @@ export function playerRoutes(db: Db, opts: { uploadDir: string }) {
           await tx.update(schema.player).set({ photoKey: null }).where(eq(schema.player.id, id));
           return cur.key;
         });
-        if (old === undefined) throw notFound("Pemain");
+        if (old === undefined) throw notFound("Siswa");
         if (old) await store.remove(old);
         return c.body(null, 204);
       })

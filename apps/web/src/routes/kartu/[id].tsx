@@ -35,7 +35,7 @@ export default function KartuPemain() {
 
   return (
     <Show when={me()} fallback={<Memuat halaman />}>
-      <Title>Kartu pemain · SSB App</Title>
+      <Title>Kartu siswa · SSB App</Title>
       <main class="halaman">
         <Show when={error()}>
           <div class="peringatan" role="alert">
@@ -44,16 +44,16 @@ export default function KartuPemain() {
         </Show>
         <Show when={missing()}>
           <h1>Kartu tidak ditemukan</h1>
-          <p>Pemain ini tidak ada, atau bukan bagian dari KU atau anak yang bisa Anda akses.</p>
+          <p>Siswa ini tidak ada, atau bukan bagian dari KU atau anak yang bisa Anda akses.</p>
           <A class="tombol" href="/pemain">
-            Ke daftar pemain
+            Ke daftar siswa
           </A>
         </Show>
         <Show when={pl()}>
           {(d) => (
             <>
-              <KepalaHalaman chip="Kartu pemain" judul={`Kartu ${d().fullName}`} sub="Tunjukkan kode QR ke pelatih saat tiba di lapangan." />
-              <article class="kartu" aria-label={`Kartu pemain ${d().fullName}`}>
+              <KepalaHalaman chip="Kartu siswa" judul={`Kartu ${d().fullName}`} sub="Tunjukkan kode QR ke pelatih saat tiba di lapangan." />
+              <article class="kartu" aria-label={`Kartu siswa ${d().fullName}`}>
                 <header>
                   <div>
                     <span class="kartu-ssb">{me()!.active!.ssbName}</span>
@@ -77,7 +77,7 @@ export default function KartuPemain() {
                   </div>
                   <div class="kartu-qr">
                     <QrCode value={url()} label={`Kode QR ${d().fullName}, nomor anggota ${d().memberNo ?? "belum ada"}`} />
-                    <p>Tunjukkan kode ini ke pelatih. Kode membuka profil pemain, dan hanya akun yang berhak yang bisa melihat isinya.</p>
+                    <p>Tunjukkan kode ini ke pelatih. Kode membuka profil siswa, dan hanya akun yang berhak yang bisa melihat isinya.</p>
                     <Show when={d().memberNo}>
                       <p class="kartu-kode">
                         Kode unik: <strong>{d().memberNo}</strong>

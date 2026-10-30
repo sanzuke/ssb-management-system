@@ -89,7 +89,7 @@ export default function SppAdmin() {
     aksi("buat", async () => {
       const r = await api<GenerateInvoicesResult>("/invoices/generate", { method: "POST", body: { month: bulan(), dueDay: Number(jatuhTempo()) } });
       setPesan(
-        `${r.created} tagihan dibuat untuk ${namaBulan(bulan())}${r.existing ? `, ${r.existing} sudah ada sebelumnya` : ""}${r.withoutRate ? `. ${r.withoutRate} pemain aktif dilewati karena KU-nya belum bertarif atau belum punya KU` : ""}.`,
+        `${r.created} tagihan dibuat untuk ${namaBulan(bulan())}${r.existing ? `, ${r.existing} sudah ada sebelumnya` : ""}${r.withoutRate ? `. ${r.withoutRate} siswa aktif dilewati karena KU-nya belum bertarif atau belum punya KU` : ""}.`,
       );
       await muatUlang();
     });
@@ -374,7 +374,7 @@ export default function SppAdmin() {
                 {(r) => (
                   <Field
                     id={`tarif-${r.ageGroupId}`}
-                    label={`${r.name} (${r.activePlayers} pemain aktif)`}
+                    label={`${r.name} (${r.activePlayers} siswa aktif)`}
                     type="number"
                     inputmode="numeric"
                     value={tarif()[r.ageGroupId] ?? ""}

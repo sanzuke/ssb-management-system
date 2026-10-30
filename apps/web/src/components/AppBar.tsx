@@ -6,7 +6,7 @@ import Ikon from "./Ikon";
 
 /**
  * Navigasi akun. Di HP berupa bilah atas; di layar lebar (dashboard.css) menjadi sidebar kiri
- * seperti desain Stitch "Data Pemain - Admin".
+ * seperti desain Stitch "Data Siswa - Admin".
  */
 export default function AppBar(props: { me: Me }) {
   const lokasi = useLocation();
@@ -44,7 +44,7 @@ export default function AppBar(props: { me: Me }) {
           </A>
           <A class="tombol tipis menu" href="/pemain">
             <Ikon nama="pemain" />
-            <span>{props.me.active!.role === "orang_tua" ? "Anak" : "Pemain"}</span>
+            <span>{props.me.active!.role === "orang_tua" ? "Anak" : "Siswa"}</span>
           </A>
           <A class="tombol tipis menu" href="/kehadiran">
             <Ikon nama="absen" />

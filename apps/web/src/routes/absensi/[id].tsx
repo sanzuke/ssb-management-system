@@ -125,7 +125,7 @@ export default function Absensi() {
                 Absensi disimpan. Anda masih bisa mengoreksinya.
               </div>
             </Show>
-            <Show when={roster()!.players.length > 0} fallback={<p class="kosong">Belum ada pemain aktif di KU ini. Tambahkan pemain di menu Pemain.</p>}>
+            <Show when={roster()!.players.length > 0} fallback={<p class="kosong">Belum ada siswa aktif di KU ini. Tambahkan siswa di menu Siswa.</p>}>
               <p>
                 <button class="tombol utama-rumput" type="button" onClick={allPresent}>
                   <Ikon nama="centang" ukuran={18} />
@@ -176,7 +176,7 @@ export default function Absensi() {
               </ul>
               <div class="bar-simpan">
                 <span aria-live="polite">
-                  {terdata()} dari {roster()!.players.length} pemain terdata
+                  {terdata()} dari {roster()!.players.length} siswa terdata
                   <Show when={count().belum > 0}>, {count().belum} belum</Show>
                 </span>
                 <span class="batang" aria-hidden="true">

@@ -8,7 +8,7 @@ import Ikon from "./Ikon";
 import Kerangka from "~/components/Kerangka";
 
 const koma = (n: number) => String(n).replace(".", ",");
-/** Pemain dengan kehadiran di bawah ambang ini (dan cukup banyak catatan) ditandai perlu perhatian. */
+/** Siswa dengan kehadiran di bawah ambang ini (dan cukup banyak catatan) ditandai perlu perhatian. */
 const AMBANG_HADIR = 70;
 const MIN_CATATAN = 5;
 
@@ -65,12 +65,12 @@ export default function DashboardStaf(props: { me: Me }) {
             <span class="ortu-chip kuning">{roleLabel[role()]}</span>
           </p>
           <h1>Halo, {props.me.name}</h1>
-          <p class="petunjuk">Ringkasan hari ini: absensi yang perlu diisi, jadwal terdekat, dan pemain yang perlu diperhatikan.</p>
+          <p class="petunjuk">Ringkasan hari ini: absensi yang perlu diisi, jadwal terdekat, dan siswa yang perlu diperhatikan.</p>
         </div>
         <Show when={admin()}>
           <A class="tombol utama tambah" href="/pemain/baru">
             <Ikon nama="tambah" ukuran={18} />
-            Tambah pemain baru
+            Tambah siswa baru
           </A>
         </Show>
       </header>
@@ -83,9 +83,9 @@ export default function DashboardStaf(props: { me: Me }) {
 
       <section class="statistik" aria-label="Ringkasan">
         <div class="ubin">
-          <span class="label-ubin">Pemain aktif</span>
+          <span class="label-ubin">Siswa aktif</span>
           <span class="angka-ubin">{players() ? aktif() : "–"}</span>
-          <span class="petunjuk">{players() ? `${players()!.length} pemain terdaftar` : <Kerangka varian="inline" />}</span>
+          <span class="petunjuk">{players() ? `${players()!.length} siswa terdaftar` : <Kerangka varian="inline" />}</span>
         </div>
         <div class="ubin">
           <span class="label-ubin">Sesi 7 hari ke depan</span>
@@ -103,7 +103,7 @@ export default function DashboardStaf(props: { me: Me }) {
             <div class="ubin" classList={{ perhatian: belumDinilai() > 0 }}>
               <span class="label-ubin">Belum dinilai</span>
               <span class="angka-ubin">{ringkas() ? belumDinilai() : "–"}</span>
-              <span class="petunjuk">Pemain yang belum punya penilaian</span>
+              <span class="petunjuk">Siswa yang belum punya penilaian</span>
             </div>
           }
         >
@@ -155,7 +155,7 @@ export default function DashboardStaf(props: { me: Me }) {
             </Show>
           </section>
 
-          <section class="panel" aria-label="Pemain yang perlu diperhatikan">
+          <section class="panel" aria-label="Siswa yang perlu diperhatikan">
             <header class="panel-kepala">
               <h2>Kehadiran rendah</h2>
               <span class="petunjuk">di bawah {AMBANG_HADIR}%</span>
@@ -168,7 +168,7 @@ export default function DashboardStaf(props: { me: Me }) {
                 </div>
               }
             >
-              <Show when={rendah().length > 0} fallback={<p class="kosong panel-isi">Tidak ada pemain dengan kehadiran rendah. Bagus!</p>}>
+              <Show when={rendah().length > 0} fallback={<p class="kosong panel-isi">Tidak ada siswa dengan kehadiran rendah. Bagus!</p>}>
                 <ul class="daftar-tugas">
                   <For each={rendah()}>
                     {(p) => (
@@ -239,7 +239,7 @@ export default function DashboardStaf(props: { me: Me }) {
             <div class="pintasan">
               <A class="pintasan-item" href="/pemain">
                 <Ikon nama="pemain" />
-                <span>Data pemain</span>
+                <span>Data siswa</span>
               </A>
               <A class="pintasan-item" href="/jadwal">
                 <Ikon nama="kalender" />
@@ -256,7 +256,7 @@ export default function DashboardStaf(props: { me: Me }) {
                 </A>
                 <A class="pintasan-item" href="/pemain/baru">
                   <Ikon nama="tambah" />
-                  <span>Tambah pemain</span>
+                  <span>Tambah siswa</span>
                 </A>
               </Show>
               <Show when={!admin()}>

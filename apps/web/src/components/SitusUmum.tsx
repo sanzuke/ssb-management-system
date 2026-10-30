@@ -170,7 +170,7 @@ export function SitusBeranda(p: { s: Sunting }) {
 
       <section class="master" aria-label="Angka sorotan">
         <h2>Angka sorotan</h2>
-        <p class="petunjuk">Deretan angka singkat, mis. jumlah pemain aktif. Isi hanya angka yang benar dan bisa dipertanggungjawabkan. Maksimal 8.</p>
+        <p class="petunjuk">Deretan angka singkat, mis. jumlah siswa aktif. Isi hanya angka yang benar dan bisa dipertanggungjawabkan. Maksimal 8.</p>
         <Index each={d.stats}>
           {(_, i) => (
             <Butir

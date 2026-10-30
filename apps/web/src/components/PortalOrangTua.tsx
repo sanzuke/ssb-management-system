@@ -124,7 +124,7 @@ export default function PortalOrangTua() {
                 </A>
                 <A class="tombol sekunder" href={`/kartu/${k.id}`}>
                   <Ikon nama="kartu" ukuran={18} />
-                  Kartu pemain
+                  Kartu siswa
                 </A>
               </div>
             </article>

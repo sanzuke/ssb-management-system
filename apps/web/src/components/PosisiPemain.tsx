@@ -21,7 +21,7 @@ const TINGGI = 66;
 
 /**
  * Kecocokan posisi dari skor indikator periode yang tampil dan bobot posisi SSB. Hanya saran: posisi utama tetap dipilih manusia.
- * Pemain di bawah usia 10 tahun tidak diberi zona; mereka diajak mencoba semua posisi.
+ * Siswa di bawah usia 10 tahun tidak diberi zona; mereka diajak mencoba semua posisi.
  */
 export default function PosisiPemain(props: { nilai: AssessmentView | null; usia: number; utama: Position | null }) {
   const [bobot] = createResource(() => api<PositionWeights>("/position-weights").catch(() => null));

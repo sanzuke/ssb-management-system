@@ -28,7 +28,7 @@ export const defaultPositionWeights: PositionWeights = {
   FW: bobot("4,2,5,5,5,4,2,3,2,3,2,1,3,3,4,3"),
 };
 
-/** Pemain di bawah usia ini diajak mencoba semua posisi, jadi kecocokan posisi tidak ditampilkan. */
+/** Siswa di bawah usia ini diajak mencoba semua posisi, jadi kecocokan posisi tidak ditampilkan. */
 export const USIA_MIN_POSISI = 10;
 /** Bagian bobot posisi yang harus punya skor; di bawahnya hasilnya "belum cukup data". */
 export const MIN_BOBOT_TERISI = 0.5;

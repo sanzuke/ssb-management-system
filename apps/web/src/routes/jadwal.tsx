@@ -172,7 +172,7 @@ export default function Jadwal() {
               <span class="label-ubin">Absensi belum lengkap</span>
               <span class="angka-ubin">{belumLengkap()}</span>
               <span class="petunjuk">
-                {past() ? "Sesi sampai hari ini yang masih punya pemain belum diabsen" : "Tampilkan sesi lalu untuk melihat yang tertinggal"}
+                {past() ? "Sesi sampai hari ini yang masih punya siswa belum diabsen" : "Tampilkan sesi lalu untuk melihat yang tertinggal"}
               </span>
             </div>
           </section>
@@ -309,7 +309,7 @@ export default function Jadwal() {
                                     when={s.attendance.belum > 0}
                                     fallback={
                                       <Show when={diabsen(s.attendance) === 0}>
-                                        <span class="petunjuk">Tidak ada pemain aktif</span>
+                                        <span class="petunjuk">Tidak ada siswa aktif</span>
                                       </Show>
                                     }
                                   >

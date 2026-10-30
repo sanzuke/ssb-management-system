@@ -8,7 +8,7 @@ import { mintaKeluar } from "./DialogKeluar";
 import Ikon from "./Ikon";
 
 /**
- * Header atas di layar lebar (desain Stitch "Data Pemain - Admin"): pencarian pemain di kiri,
+ * Header atas di layar lebar (desain Stitch "Data Siswa - Admin"): pencarian siswa di kiri,
  * periode berjalan, dan menu profil di kanan (info akun, Akun saya, Ganti SSB, Keluar).
  * Di HP tidak tampil; menu atas yang dipakai.
  */
@@ -84,9 +84,9 @@ export default function HeaderAtas(props: { me: Me }) {
     <header class="header-atas">
       <div class="header-kiri">
         <Show when={staf()}>
-          <form class="cari-global" aria-label="Cari pemain" onSubmit={cari}>
+          <form class="cari-global" aria-label="Cari siswa" onSubmit={cari}>
             <Ikon nama="cari" ukuran={18} />
-            <input ref={kolom} type="search" placeholder="Cari pemain: nama atau nomor induk" aria-label="Cari pemain" />
+            <input ref={kolom} type="search" placeholder="Cari siswa: nama atau nomor induk" aria-label="Cari siswa" />
             <span class="pintasan-cari">Ctrl K</span>
           </form>
         </Show>

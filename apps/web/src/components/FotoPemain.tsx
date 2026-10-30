@@ -1,12 +1,12 @@
 import { createSignal, Show } from "solid-js";
 import { inisial } from "~/lib/pemain";
 
-/** Alamat foto pemain; `v` (versi) membuat foto baru langsung tampil tanpa tersangkut cache. */
+/** Alamat foto siswa; `v` (versi) membuat foto baru langsung tampil tanpa tersangkut cache. */
 export const fotoUrl = (id: string, v: string) => `/api/players/${encodeURIComponent(id)}/photo?v=${v}`;
 
 /**
- * Foto pemain dalam kotak membulat; bila belum ada (atau gagal dimuat) tampil dua huruf inisial.
- * Dekoratif: nama pemain selalu ada di teks sebelahnya.
+ * Foto siswa dalam kotak membulat; bila belum ada (atau gagal dimuat) tampil dua huruf inisial.
+ * Dekoratif: nama siswa selalu ada di teks sebelahnya.
  */
 export default function FotoPemain(props: { id: string; nama: string; photoV: string | null; ukuran?: "kecil" | "besar" | "potret" }) {
   const [gagal, setGagal] = createSignal<string | null>(null);

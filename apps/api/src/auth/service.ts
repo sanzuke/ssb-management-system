@@ -101,7 +101,7 @@ export async function createInvitation(
 }
 
 /**
- * Membuat ulang tautan undangan yang belum diterima: undangan baru (role, catatan, dan pemain sama,
+ * Membuat ulang tautan undangan yang belum diterima: undangan baru (role, catatan, dan siswa sama,
  * masa berlaku baru) menggantikan yang lama dalam satu transaksi, sehingga tautan lama langsung tidak berlaku.
  */
 export async function renewInvitation(db: Db, by: { ssbId: string; userId: string }, id: string) {

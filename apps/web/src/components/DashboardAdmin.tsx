@@ -43,7 +43,7 @@ export default function DashboardAdmin(props: { me: Me }) {
   const semua = () => players() ?? [];
   const aktif = () => semua().filter((p) => p.status === "aktif");
   const info = (id: string) => ringkas()?.find((r) => r.playerId === id);
-  /** Penilaian pemain pada periode berjalan (bukan periode lama). */
+  /** Penilaian siswa pada periode berjalan (bukan periode lama). */
   const nilaiKini = (id: string) => {
     const a = info(id)?.latestAssessment;
     return a && a.periodName === kini()?.name ? a : null;
@@ -109,7 +109,7 @@ export default function DashboardAdmin(props: { me: Me }) {
     const tanpaKu = semua().filter((p) => !p.ageGroup);
     if (tanpaKu.length > 0) {
       out.push({
-        judul: "Pemain belum masuk KU",
+        judul: "Siswa belum masuk KU",
         badge: `${tanpaKu.length} siswa`,
         isi: `${tanpaKu
           .slice(0, 2)
@@ -124,7 +124,7 @@ export default function DashboardAdmin(props: { me: Me }) {
       out.push({
         judul: "Absensi belum lengkap",
         badge: `${perluAbsen().length} sesi`,
-        isi: `Sesi ${s.ageGroup.name} ${tanggalSesi(s.sessionDate).toLowerCase()} masih ${s.attendance.belum} pemain belum diabsen.`,
+        isi: `Sesi ${s.ageGroup.name} ${tanggalSesi(s.sessionDate).toLowerCase()} masih ${s.attendance.belum} siswa belum diabsen.`,
         tombol: "Isi absensi",
         href: `/absensi/${s.id}`,
       });
@@ -246,7 +246,7 @@ export default function DashboardAdmin(props: { me: Me }) {
           {/* Ubin ringkasan */}
           <section class="statistik" aria-label="Ringkasan">
             <div class="ubin">
-              <span class="label-ubin">Pemain aktif</span>
+              <span class="label-ubin">Siswa aktif</span>
               <span class="angka-ubin">{players() ? aktif().length : "–"}</span>
               <span class="petunjuk">
                 {players() ? `${semua().length} terdaftar, ${semua().length - aktif().length} cuti atau keluar` : <Kerangka varian="inline" />}
@@ -354,7 +354,7 @@ export default function DashboardAdmin(props: { me: Me }) {
                     <thead>
                       <tr>
                         <th>Kelompok umur</th>
-                        <th class="tengah">Pemain</th>
+                        <th class="tengah">Siswa</th>
                         <th>Pelatih</th>
                         <th class="tengah">Kehadiran</th>
                         <th class="tengah">Penilaian</th>
@@ -372,7 +372,7 @@ export default function DashboardAdmin(props: { me: Me }) {
                                 Usia {b.g.minAge} sampai {b.g.maxAge} tahun
                               </span>
                             </td>
-                            <td class="tengah" data-label="Pemain">
+                            <td class="tengah" data-label="Siswa">
                               {b.pemain}
                             </td>
                             <td data-label="Pelatih">
@@ -429,7 +429,7 @@ export default function DashboardAdmin(props: { me: Me }) {
               <A class="pintasan-item" href="/pemain/baru">
                 <Ikon nama="tambah" />
                 <span>
-                  <strong>Tambah pemain</strong>
+                  <strong>Tambah siswa</strong>
                   <small>Isi biodata, KU, dan posisi</small>
                 </span>
               </A>
@@ -472,7 +472,7 @@ export default function DashboardAdmin(props: { me: Me }) {
                 <Ikon nama="absen" />
                 <span>
                   <strong>Rekap kehadiran</strong>
-                  <small>Persentase hadir per pemain</small>
+                  <small>Persentase hadir per siswa</small>
                 </span>
               </A>
             </div>
@@ -606,7 +606,7 @@ export default function DashboardAdmin(props: { me: Me }) {
             >
               <p class="panel-isi">
                 <Show when={dispensasi() > 0} fallback={<span class="kosong">Belum ada izin atau sakit tercatat untuk sesi hari ini.</span>}>
-                  <strong>{dispensasi()} pemain</strong> tercatat izin atau sakit pada sesi hari ini.
+                  <strong>{dispensasi()} siswa</strong> tercatat izin atau sakit pada sesi hari ini.
                   <A class="tautan-kecil blok" href="/kehadiran">
                     Lihat rekap kehadiran
                   </A>

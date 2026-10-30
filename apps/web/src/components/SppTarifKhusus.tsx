@@ -6,8 +6,8 @@ import Field from "./Field";
 import Kerangka from "~/components/Kerangka";
 
 /**
- * Tarif SPP khusus per pemain (keringatan, saudara kandung, dan sejenisnya).
- * Tarif khusus menggantikan tarif KU; 0 berarti pemain itu tidak ikut ditagih.
+ * Tarif SPP khusus per siswa (keringatan, saudara kandung, dan sejenisnya).
+ * Tarif khusus menggantikan tarif KU; 0 berarti siswa itu tidak ikut ditagih.
  */
 export default function SppTarifKhusus() {
   const [daftar, { refetch: muatDaftar }] = createResource(async () =>
@@ -46,7 +46,7 @@ export default function SppTarifKhusus() {
     e.preventDefault();
     const id = dipilih();
     if (!id) {
-      setGalat("Pilih pemain dulu.");
+      setGalat("Pilih siswa dulu.");
       return;
     }
     const nilai = Number(nominal());
@@ -72,11 +72,11 @@ export default function SppTarifKhusus() {
     });
 
   return (
-    <section class="master" aria-label="Tarif khusus pemain">
-      <h2>Tarif khusus per pemain</h2>
+    <section class="master" aria-label="Tarif khusus siswa">
+      <h2>Tarif khusus per siswa</h2>
       <p class="petunjuk">
-        Untuk keringatan, saudara kandung, atau keadaan lain. Tarif khusus menggantikan tarif KU. Isi 0 bila pemain itu tidak ikut ditagih. Berlaku untuk
-        tagihan yang dibuat sesudahnya; tagihan lama tidak berubah.
+        Untuk keringatan, saudara kandung, atau keadaan lain. Tarif khusus menggantikan tarif KU. Isi 0 bila siswa itu tidak ikut ditagih. Berlaku untuk tagihan
+        yang dibuat sesudahnya; tagihan lama tidak berubah.
       </p>
       <Show when={galat()}>
         <div class="peringatan" role="alert">
@@ -90,9 +90,9 @@ export default function SppTarifKhusus() {
       </Show>
       <form class="form" onSubmit={simpan}>
         <div class="field">
-          <label for="pemain-khusus">Pemain</label>
+          <label for="pemain-khusus">Siswa</label>
           <select id="pemain-khusus" value={dipilih()} onChange={(e) => setDipilih(e.currentTarget.value)}>
-            <option value="">Pilih pemain…</option>
+            <option value="">Pilih siswa…</option>
             <For each={kandidat()}>
               {(p) => (
                 <option value={p.id}>
@@ -101,7 +101,7 @@ export default function SppTarifKhusus() {
               )}
             </For>
           </select>
-          <span class="petunjuk">Hanya pemain aktif yang belum punya tarif khusus.</span>
+          <span class="petunjuk">Hanya siswa aktif yang belum punya tarif khusus.</span>
         </div>
         <Field
           id="nominal-khusus"
@@ -118,7 +118,7 @@ export default function SppTarifKhusus() {
         </button>
       </form>
       <Show when={daftar()} fallback={<Kerangka />}>
-        <Show when={(daftar() ?? []).length > 0} fallback={<p class="kosong">Belum ada tarif khusus. Semua pemain memakai tarif KU.</p>}>
+        <Show when={(daftar() ?? []).length > 0} fallback={<p class="kosong">Belum ada tarif khusus. Semua siswa memakai tarif KU.</p>}>
           <ul class="spp-daftar">
             <For each={daftar()}>
               {(r) => (

@@ -24,7 +24,7 @@ const envSchema = z
     GOOGLE_CLIENT_ID: z.string().optional(),
     GOOGLE_CLIENT_SECRET: z.string().optional(),
     /** Jalur Chromium untuk membuat rapor PDF; kosong = memakai Chromium bawaan Playwright. */
-    /** Folder penyimpanan foto pemain; di server arahkan ke volume yang ikut dicadangkan. */
+    /** Folder penyimpanan foto siswa; di server arahkan ke volume yang ikut dicadangkan. */
     UPLOAD_DIR: z.string().default("./uploads"),
     /** Server SMTP untuk email reset kata sandi, mis. smtps://user:sandi@smtp.contoh.id:465. Kosong = email reset tidak aktif. */
     SMTP_URL: z.string().optional(),

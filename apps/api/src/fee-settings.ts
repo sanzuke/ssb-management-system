@@ -39,7 +39,7 @@ export async function bacaPengaturan(db: Db, ssbId: string): Promise<FeeSettings
 }
 
 /**
- * Pengaturan SPP dan tarif khusus per pemain.
+ * Pengaturan SPP dan tarif khusus per siswa.
  * Pengaturan disimpan di server, jadi semua admin SSB memakai nilai yang sama.
  */
 export function feeSettingRoutes(db: Db) {
@@ -85,7 +85,7 @@ export function feeSettingRoutes(db: Db) {
         return c.json({ bankInfo: pengaturan.bankInfo } satisfies FeePublicInfo);
       })
 
-      // Daftar pemain yang tarifnya khusus (menggantikan tarif KU).
+      // Daftar siswa yang tarifnya khusus (menggantikan tarif KU).
       .get("/fees/player-overrides", requirePermission("fee.manage"), async (c) => {
         const m = c.get("auth")!.member!;
         const rows = await withTenant(db, m.ssbId, async (tx) => {
@@ -106,11 +106,11 @@ export function feeSettingRoutes(db: Db) {
         return c.json(rows satisfies PlayerFeeOverrideRow[]);
       })
 
-      // Simpan tarif khusus satu pemain. Menghapus baris (nilai 0 dengan hapus) mengembalikan tarif KU.
+      // Simpan tarif khusus satu siswa. Menghapus baris (nilai 0 dengan hapus) mengembalikan tarif KU.
       .put("/fees/player-overrides/:playerId", requirePermission("fee.manage"), zv("json", playerFeeOverrideSchema.omit({ playerId: true })), async (c) => {
         const m = c.get("auth")!.member!;
         const playerId = c.req.param("playerId");
-        if (!UUID.test(playerId)) throw notFound("Pemain");
+        if (!UUID.test(playerId)) throw notFound("Siswa");
         const b = c.req.valid("json");
         const ok = await withTenant(db, m.ssbId, async (tx) => {
           const [p] = await tx
@@ -128,11 +128,11 @@ export function feeSettingRoutes(db: Db) {
             });
           return true;
         });
-        if (!ok) throw notFound("Pemain");
+        if (!ok) throw notFound("Siswa");
         return c.json({ ok: true });
       })
 
-      // Buang tarif khusus; pemain kembali memakai tarif KU.
+      // Buang tarif khusus; siswa kembali memakai tarif KU.
       .delete("/fees/player-overrides/:playerId", requirePermission("fee.manage"), async (c) => {
         const m = c.get("auth")!.member!;
         const playerId = c.req.param("playerId");

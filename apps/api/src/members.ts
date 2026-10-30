@@ -82,7 +82,7 @@ export function memberRoutes(db: Db) {
           if (target.isSelf) throw new HttpError(409, "self_role", "Peran Anda sendiri tidak bisa diubah. Minta admin lain melakukannya");
           if (target.role === "admin_ssb" && !(await adaAdminLain(m.ssbId, id))) throw new HttpError(409, "last_admin", "SSB harus punya minimal satu admin");
           if (target.role === "orang_tua" && target.children > 0)
-            throw new HttpError(409, "has_children", "Orang tua ini masih terhubung ke anak. Lepaskan dulu di profil pemain");
+            throw new HttpError(409, "has_children", "Orang tua ini masih terhubung ke anak. Lepaskan dulu di profil siswa");
           if (body.role === "orang_tua" && target.assignments > 0)
             throw new HttpError(409, "has_assignments", "Anggota ini masih punya penugasan KU. Hapus dulu di halaman Penugasan");
         }

@@ -2,7 +2,7 @@ import { randomBytes } from "node:crypto";
 import { mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import { dirname, resolve, sep } from "node:path";
 
-/** Batas ukuran foto pemain. */
+/** Batas ukuran foto siswa. */
 export const PHOTO_MAX_BYTES = 2 * 1024 * 1024;
 
 const TYPES = {
@@ -22,7 +22,7 @@ export function sniffImage(b: Uint8Array): PhotoExt | null {
   return null;
 }
 
-/** Kunci berkas: <ssb>/<pemain>-<versi>.<ekstensi>. Versi acak membuat URL foto baru tidak tertahan cache lama. */
+/** Kunci berkas: <ssb>/<siswa>-<versi>.<ekstensi>. Versi acak membuat URL foto baru tidak tertahan cache lama. */
 export const newPhotoKey = (ssbId: string, playerId: string, ext: PhotoExt) => `${ssbId}/${playerId}-${randomBytes(4).toString("hex")}.${ext}`;
 export const photoVersion = (key: string | null) => key?.match(/-([0-9a-f]{8})\.[a-z]+$/)?.[1] ?? null;
 export const photoExt = (key: string) => key.slice(key.lastIndexOf(".") + 1);

@@ -22,11 +22,11 @@ export default function PemainBaru() {
 
   return (
     <Show when={me()} fallback={<Memuat halaman />}>
-      <Title>Tambah pemain · SSB App</Title>
+      <Title>Tambah siswa · SSB App</Title>
       <main class="halaman">
         <KepalaHalaman
-          chip="Data pemain"
-          judul="Tambah pemain"
+          chip="Data siswa"
+          judul="Tambah siswa"
           sub="Isi data siswa. ID siswa boleh diisi sendiri (mis. SSB-001) atau dikosongkan agar dibuat otomatis."
         />
         <Show when={groups().length === 0}>

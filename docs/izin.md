@@ -14,18 +14,18 @@ Endpoint dijaga dengan `requirePermission(<izin>)`. Pembatasan data per baris (p
 | `invitation.manage` | Melihat daftar undangan, mencabut, dan membuat ulang tautan yang belum diterima | ya | - | - | - |
 | `master.read` | Melihat KU, periode, dan lokasi | ya | ya | ya | - |
 | `master.write` | Mengubah KU, periode, dan lokasi | ya | - | - | - |
-| `player.read` | Melihat pemain (pelatih dan korlas: KU yang ditugaskan; orang tua: anaknya) | ya | ya | ya | ya |
-| `player.write` | Menambah dan mengubah pemain | ya | - | - | - |
-| `player.photo` | Mengunggah dan menghapus foto pemain (pelatih dan korlas: KU yang ditugaskan) | ya | ya | ya | - |
+| `player.read` | Melihat siswa (pelatih dan korlas: KU yang ditugaskan; orang tua: anaknya) | ya | ya | ya | ya |
+| `player.write` | Menambah dan mengubah siswa | ya | - | - | - |
+| `player.photo` | Mengunggah dan menghapus foto siswa (pelatih dan korlas: KU yang ditugaskan) | ya | ya | ya | - |
 | `attendance.record` | Mencatat absensi latihan | ya | ya | ya | - |
 | `attendance.read` | Melihat absensi (orang tua: anaknya) | ya | ya | ya | ya |
-| `assessment.write` | Mengisi penilaian pemain dan rencana pengembangannya | ya | ya | - | - |
+| `assessment.write` | Mengisi penilaian siswa dan rencana pengembangannya | ya | ya | - | - |
 | `assessment.read` | Melihat penilaian dan rencana pengembangan (orang tua: anaknya, setelah terbit) | ya | ya | ya | ya |
-| `squad.read` | Melihat tabel skuad: rating, enam aspek, dan tren seluruh pemain yang boleh dilihat (pelatih dan korlas: KU yang ditugaskan), termasuk penilaian yang belum terbit | ya | ya | ya | - |
-| `badge.read` | Melihat lencana pemain (orang tua: anaknya) | ya | ya | ya | ya |
-| `badge.write` | Memberi dan mencabut lencana pemain (pelatih: KU yang ditugaskan) | ya | ya | - | - |
+| `squad.read` | Melihat tabel skuad: rating, enam aspek, dan tren seluruh siswa yang boleh dilihat (pelatih dan korlas: KU yang ditugaskan), termasuk penilaian yang belum terbit | ya | ya | ya | - |
+| `badge.read` | Melihat lencana siswa (orang tua: anaknya) | ya | ya | ya | ya |
+| `badge.write` | Memberi dan mencabut lencana siswa (pelatih: KU yang ditugaskan) | ya | ya | - | - |
 | `session.manage` | Menjadwalkan, mengubah, dan menghapus sesi latihan | ya | - | - | - |
-| `guardian.sessions` | Portal orang tua: jadwal KU anak sendiri beserta status kehadiran anak, tanpa daftar pemain lain (admin tidak punya anak, jadi daftarnya kosong) | ya | - | - | ya |
+| `guardian.sessions` | Portal orang tua: jadwal KU anak sendiri beserta status kehadiran anak, tanpa daftar siswa lain (admin tidak punya anak, jadi daftarnya kosong) | ya | - | - | ya |
 | `session.read` | Melihat jadwal sesi latihan (pelatih dan korlas: KU yang ditugaskan) | ya | ya | ya | - |
 | `assignment.manage` | Menugaskan pelatih dan korlas ke KU per periode | ya | - | - | - |
 | `report.publish` | Menerbitkan rapor ke orang tua (wewenang korlas: menunggu keputusan) | ya | - | ya | - |

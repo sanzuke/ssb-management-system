@@ -92,11 +92,11 @@ export default function RencanaPemain() {
           when={!missing()}
           fallback={
             <>
-              <Title>Pemain tidak ditemukan · SSB App</Title>
-              <h1>Pemain tidak ditemukan</h1>
-              <p>Pemain ini tidak ada, atau bukan bagian dari KU yang bisa Anda akses.</p>
+              <Title>Siswa tidak ditemukan · SSB App</Title>
+              <h1>Siswa tidak ditemukan</h1>
+              <p>Siswa ini tidak ada, atau bukan bagian dari KU yang bisa Anda akses.</p>
               <A class="tombol" href="/pemain">
-                Ke daftar pemain
+                Ke daftar siswa
               </A>
             </>
           }

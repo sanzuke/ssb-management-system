@@ -130,7 +130,7 @@ export function feeRoutes(db: Db, opts: { secret: string }) {
 
   return (
     new Hono<AppEnv>()
-      // Tarif SPP tiap KU beserta jumlah pemain aktifnya.
+      // Tarif SPP tiap KU beserta jumlah siswa aktifnya.
       .get("/fees/rates", requirePermission("fee.manage"), async (c) => {
         const m = c.get("auth")!.member!;
         const rows = await withTenant(db, m.ssbId, (tx) =>
@@ -164,8 +164,8 @@ export function feeRoutes(db: Db, opts: { secret: string }) {
         return c.json({ ok: true });
       })
 
-      // Buat tagihan satu bulan untuk semua pemain aktif di KU bertarif. Aman dijalankan ulang: yang sudah ditagih dilewati.
-      // Tarif khusus pemain menggantikan tarif KU; tarif 0 berarti pemain itu tidak ikut ditagih.
+      // Buat tagihan satu bulan untuk semua siswa aktif di KU bertarif. Aman dijalankan ulang: yang sudah ditagih dilewati.
+      // Tarif khusus siswa menggantikan tarif KU; tarif 0 berarti siswa itu tidak ikut ditagih.
       .post("/invoices/generate", requirePermission("fee.manage"), zv("json", generateInvoicesSchema), async (c) => {
         const m = c.get("auth")!.member!;
         const { month, dueDay } = c.req.valid("json");
@@ -203,13 +203,13 @@ export function feeRoutes(db: Db, opts: { secret: string }) {
         return c.json(out, 201);
       })
 
-      // Daftar tagihan. Admin melihat semua (bisa disaring bulan dan pemain); orang tua hanya tagihan anaknya.
+      // Daftar tagihan. Admin melihat semua (bisa disaring bulan dan siswa); orang tua hanya tagihan anaknya.
       .get("/invoices", requirePermission("invoice.read"), async (c) => {
         const m = c.get("auth")!.member!;
         const month = c.req.query("month");
         if (month && !MONTH.test(month)) throw new HttpError(400, "bad_request", "Bulan harus berformat YYYY-MM");
         const playerId = c.req.query("playerId");
-        if (playerId && !UUID.test(playerId)) throw new HttpError(400, "bad_request", "Pemain tidak valid");
+        if (playerId && !UUID.test(playerId)) throw new HttpError(400, "bad_request", "Siswa tidak valid");
         return c.json(await loadInvoices(m.ssbId, m, { month, playerId }));
       })
 
@@ -312,7 +312,7 @@ export function feeRoutes(db: Db, opts: { secret: string }) {
             .where(eq(schema.playerGuardian.playerId, tagihan.player.id)),
         );
         const punyaNomor = wali.filter((w) => w.whatsapp);
-        if (punyaNomor.length === 0) throw new HttpError(409, "no_whatsapp", "Belum ada wali dengan nomor WhatsApp untuk pemain ini");
+        if (punyaNomor.length === 0) throw new HttpError(409, "no_whatsapp", "Belum ada wali dengan nomor WhatsApp untuk siswa ini");
 
         const hariIni = todayWib();
         const hariKeJatuhTempo = Math.round((Date.parse(`${tagihan.dueOn}T00:00:00Z`) - Date.parse(`${hariIni}T00:00:00Z`)) / 86400000);
@@ -467,7 +467,7 @@ export function feeRoutes(db: Db, opts: { secret: string }) {
         if (res === "none") throw notFound("Tagihan");
         if (res === "aktif") throw new HttpError(409, "invoice_active", "Tagihan ini belum dibatalkan, tidak perlu dibuat ulang");
         if (res === "paid") throw new HttpError(409, "has_payments", "Tagihan lama masih punya catatan pembayaran. Hapus pembayarannya dulu");
-        if (res === "tanpaTarif") throw new HttpError(409, "no_rate", "Pemain ini belum punya tarif. Atur tarif KU atau tarif khusus pemain dulu");
+        if (res === "tanpaTarif") throw new HttpError(409, "no_rate", "Siswa ini belum punya tarif. Atur tarif KU atau tarif khusus siswa dulu");
         return c.json((await loadInvoices(m.ssbId, m, { id: res.id }))[0], 201);
       })
 

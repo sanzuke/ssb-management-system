@@ -106,14 +106,14 @@ async function planItems(tx: Tx, playerId: string, periodId: string): Promise<De
 export function assessmentRoutes(db: Db) {
   const member = (c: { get: (k: "auth") => any }) => c.get("auth")!.member as Member;
 
-  /** Pemain yang boleh dilihat peran ini (sama dengan daftar pemain); di luar batas dijawab 404. */
+  /** Siswa yang boleh dilihat peran ini (sama dengan daftar siswa); di luar batas dijawab 404. */
   const visiblePlayer = async (tx: Tx, m: Member, id: string) => {
     const [p] = await tx
       .select({ id: schema.player.id, ageGroupId: schema.player.ageGroupId })
       .from(schema.player)
       .where(and(eq(schema.player.id, id), playersVisibleTo(m)))
       .limit(1);
-    if (!p) throw notFound("Pemain");
+    if (!p) throw notFound("Siswa");
     return p;
   };
   const indicatorRow = (r: typeof I.$inferSelect): AssessmentIndicator => ({
@@ -226,8 +226,8 @@ export function assessmentRoutes(db: Db) {
         }
       })
 
-      // Tabel skuad untuk staf: penilaian terbaru yang punya skor (termasuk draf) dan tren tiap pemain yang boleh dilihat
-      // peran ini. Pelatih dan korlas hanya mendapat pemain di KU yang ditugaskan (aturan yang sama dengan daftar pemain).
+      // Tabel skuad untuk staf: penilaian terbaru yang punya skor (termasuk draf) dan tren tiap siswa yang boleh dilihat
+      // peran ini. Pelatih dan korlas hanya mendapat siswa di KU yang ditugaskan (aturan yang sama dengan daftar siswa).
       .get("/squad", requirePermission("squad.read"), async (c) => {
         const m = member(c);
         const out = await withTenant(db, m.ssbId, async (tx): Promise<SquadRow[]> => {
@@ -284,7 +284,7 @@ export function assessmentRoutes(db: Db) {
       })
 
       // Rata-rata skor per aspek untuk dua periode terbaru yang punya penilaian (radar di dasbor).
-      // Dihitung dari pemain yang boleh dilihat peran pemanggil; orang tua hanya penilaian yang sudah terbit.
+      // Dihitung dari siswa yang boleh dilihat peran pemanggil; orang tua hanya penilaian yang sudah terbit.
       .get("/assessment-aspects", requirePermission("assessment.read"), async (c) => {
         const m = member(c);
         const out = await withTenant(db, m.ssbId, async (tx): Promise<AspectSummary[]> => {
@@ -321,10 +321,10 @@ export function assessmentRoutes(db: Db) {
         return c.json(out);
       })
 
-      // ---- Penilaian per pemain per periode ----
+      // ---- Penilaian per siswa per periode ----
       .get("/players/:playerId/assessments", requirePermission("assessment.read"), async (c) => {
         const m = member(c);
-        const playerId = idOf(c.req.param("playerId"), "Pemain");
+        const playerId = idOf(c.req.param("playerId"), "Siswa");
         const out = await withTenant(db, m.ssbId, async (tx) => {
           await visiblePlayer(tx, m, playerId);
           // Orang tua hanya melihat penilaian yang sudah diterbitkan.
@@ -336,7 +336,7 @@ export function assessmentRoutes(db: Db) {
       // Rapor PDF satu periode. Akses sama dengan membaca penilaian: orang tua hanya yang sudah terbit dan hanya anaknya.
       .get("/players/:playerId/assessments/:periodId/report", requirePermission("assessment.read"), async (c) => {
         const m = member(c);
-        const playerId = idOf(c.req.param("playerId"), "Pemain");
+        const playerId = idOf(c.req.param("playerId"), "Siswa");
         const periodId = idOf(c.req.param("periodId"), "Periode");
         const data = await withTenant(db, m.ssbId, async (tx) => {
           await visiblePlayer(tx, m, playerId);
@@ -385,11 +385,11 @@ export function assessmentRoutes(db: Db) {
         });
       })
 
-      // ---- Rencana pengembangan per pemain per periode ----
+      // ---- Rencana pengembangan per siswa per periode ----
       // Orang tua hanya melihatnya bila penilaian periode itu sudah terbit (rencana ikut dalam rapor periode itu).
       .get("/players/:playerId/development-plan/:periodId", requirePermission("assessment.read"), async (c) => {
         const m = member(c);
-        const playerId = idOf(c.req.param("playerId"), "Pemain");
+        const playerId = idOf(c.req.param("playerId"), "Siswa");
         const periodId = idOf(c.req.param("periodId"), "Periode");
         const items = await withTenant(db, m.ssbId, async (tx) => {
           await visiblePlayer(tx, m, playerId);
@@ -407,7 +407,7 @@ export function assessmentRoutes(db: Db) {
       })
       .put("/players/:playerId/development-plan/:periodId", requirePermission("assessment.write"), zv("json", developmentPlanInputSchema), async (c) => {
         const m = member(c);
-        const playerId = idOf(c.req.param("playerId"), "Pemain");
+        const playerId = idOf(c.req.param("playerId"), "Siswa");
         const periodId = idOf(c.req.param("periodId"), "Periode");
         const b = c.req.valid("json");
         const items = await withTenant(db, m.ssbId, async (tx) => {
@@ -436,14 +436,14 @@ export function assessmentRoutes(db: Db) {
 
       .put("/players/:playerId/assessments/:periodId", requirePermission("assessment.write"), zv("json", assessmentInputSchema), async (c) => {
         const m = member(c);
-        const playerId = idOf(c.req.param("playerId"), "Pemain");
+        const playerId = idOf(c.req.param("playerId"), "Siswa");
         const periodId = idOf(c.req.param("periodId"), "Periode");
         const b = c.req.valid("json");
         const ids = b.scores.map((x) => x.indicatorId);
         if (new Set(ids).size !== ids.length) throw new HttpError(422, "duplicate_indicator", "Satu indikator hanya boleh muncul sekali");
         const out = await withTenant(db, m.ssbId, async (tx) => {
           const player = await visiblePlayer(tx, m, playerId);
-          if (!player.ageGroupId) throw new HttpError(422, "no_age_group", "Pemain belum punya KU, jadi belum bisa dinilai");
+          if (!player.ageGroupId) throw new HttpError(422, "no_age_group", "Siswa belum punya KU, jadi belum bisa dinilai");
           const [period] = await tx.select({ id: schema.period.id }).from(schema.period).where(eq(schema.period.id, periodId)).limit(1);
           if (!period) throw notFound("Periode");
           const valid = await tx
@@ -451,7 +451,7 @@ export function assessmentRoutes(db: Db) {
             .from(I)
             .where(and(eq(I.ageGroupId, player.ageGroupId), eq(I.active, true), inArray(I.id, ids)));
           if (valid.length !== ids.length)
-            throw new HttpError(422, "indicator_invalid", "Ada indikator yang bukan milik KU pemain ini atau sudah dinonaktifkan");
+            throw new HttpError(422, "indicator_invalid", "Ada indikator yang bukan milik KU siswa ini atau sudah dinonaktifkan");
 
           const [a] = await tx
             .insert(A)
@@ -504,7 +504,7 @@ export function assessmentRoutes(db: Db) {
       .get("/players/:playerId/assessments/:periodId/history", requirePermission("assessment.read"), async (c) => {
         const m = member(c);
         if (m.role === "orang_tua") throw new HttpError(403, "forbidden", "Anda tidak punya izin untuk tindakan ini");
-        const playerId = idOf(c.req.param("playerId"), "Pemain");
+        const playerId = idOf(c.req.param("playerId"), "Siswa");
         const periodId = idOf(c.req.param("periodId"), "Periode");
         const out = await withTenant(db, m.ssbId, async (tx): Promise<AssessmentHistoryRow[]> => {
           await visiblePlayer(tx, m, playerId);
@@ -539,7 +539,7 @@ export function assessmentRoutes(db: Db) {
 
   async function publish(c: any, on: boolean) {
     const m = member(c);
-    const playerId = idOf(c.req.param("playerId"), "Pemain");
+    const playerId = idOf(c.req.param("playerId"), "Siswa");
     const periodId = idOf(c.req.param("periodId"), "Periode");
     const out = await withTenant(db, m.ssbId, async (tx) => {
       await visiblePlayer(tx, m, playerId);

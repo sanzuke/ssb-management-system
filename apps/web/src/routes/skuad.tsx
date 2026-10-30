@@ -109,7 +109,7 @@ export default function Skuad() {
             </p>
             <h1>Skuad</h1>
             <p class="petunjuk">
-              Penilaian terbaru tiap pemain, termasuk yang belum terbit (ditandai *). Warna menunjukkan tahap, bukan peringkat. Tren membandingkan penilaian
+              Penilaian terbaru tiap siswa, termasuk yang belum terbit (ditandai *). Warna menunjukkan tahap, bukan peringkat. Tren membandingkan penilaian
               terbaru dengan rata-rata dua periode sebelumnya.
             </p>
           </div>
@@ -129,7 +129,7 @@ export default function Skuad() {
           </select>
           <div class="kolom-cari">
             <Ikon nama="cari" ukuran={18} />
-            <input type="search" placeholder="Cari nama pemain" aria-label="Cari pemain" value={q()} onInput={(e) => setQ(e.currentTarget.value)} />
+            <input type="search" placeholder="Cari nama siswa" aria-label="Cari siswa" value={q()} onInput={(e) => setQ(e.currentTarget.value)} />
           </div>
           <select
             aria-label="Urutkan"
@@ -157,15 +157,15 @@ export default function Skuad() {
         </Show>
 
         <Show when={data()}>
-          <Show when={baris().length > 0} fallback={<p class="kosong">Tidak ada pemain pada pilihan ini.</p>}>
+          <Show when={baris().length > 0} fallback={<p class="kosong">Tidak ada siswa pada pilihan ini.</p>}>
             <p class="petunjuk" aria-live="polite">
-              {baris().length} pemain
+              {baris().length} siswa
             </p>
             <div class="tabel-bungkus">
               <table class="tabel-skuad">
                 <thead>
                   <tr>
-                    <Judul k="nama" label="Pemain" kelas="kolom-nama" />
+                    <Judul k="nama" label="Siswa" kelas="kolom-nama" />
                     <th>Pos</th>
                     <Judul k="rating" label="Rating" />
                     <For each={assessmentAspects}>{(a) => <Judul k={a} label={singkat[a]} judul={aspectLabel[a]} />}</For>

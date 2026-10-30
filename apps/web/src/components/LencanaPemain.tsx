@@ -6,7 +6,7 @@ import { tanggal } from "~/lib/pemain";
 const kelompokDari = (kode: BadgeCode) => badgeCatalog.find((b) => b.code === kode)!.group;
 
 /**
- * Lencana: label perilaku positif yang diamati pelatih (maksimal {BADGE_MAX} aktif). Semua peran yang boleh melihat pemain
+ * Lencana: label perilaku positif yang diamati pelatih (maksimal {BADGE_MAX} aktif). Semua peran yang boleh melihat siswa
  * membacanya; admin dan pelatih bisa memberi dan mencabut.
  */
 export default function LencanaPemain(props: { playerId: string; bisaUbah: boolean }) {

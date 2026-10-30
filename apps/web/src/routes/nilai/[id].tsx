@@ -148,11 +148,11 @@ export default function NilaiPemain() {
           when={!missing()}
           fallback={
             <>
-              <Title>Pemain tidak ditemukan · SSB App</Title>
-              <h1>Pemain tidak ditemukan</h1>
-              <p>Pemain ini tidak ada, atau bukan bagian dari KU atau anak yang bisa Anda akses.</p>
+              <Title>Siswa tidak ditemukan · SSB App</Title>
+              <h1>Siswa tidak ditemukan</h1>
+              <p>Siswa ini tidak ada, atau bukan bagian dari KU atau anak yang bisa Anda akses.</p>
               <A class="tombol" href="/pemain">
-                Ke daftar pemain
+                Ke daftar siswa
               </A>
             </>
           }
@@ -285,7 +285,7 @@ export default function NilaiPemain() {
                     when={indicators().length > 0}
                     fallback={
                       <p class="kosong">
-                        {pl()!.ageGroup ? `KU ${pl()!.ageGroup!.name} belum punya indikator penilaian.` : "Pemain ini belum punya KU, jadi belum bisa dinilai."}
+                        {pl()!.ageGroup ? `KU ${pl()!.ageGroup!.name} belum punya indikator penilaian.` : "Siswa ini belum punya KU, jadi belum bisa dinilai."}
                         {role() === "admin_ssb" ? " " : " Minta admin SSB menyiapkannya."}
                         <Show when={role() === "admin_ssb"}>
                           <A href="/indikator">Siapkan indikator</A>

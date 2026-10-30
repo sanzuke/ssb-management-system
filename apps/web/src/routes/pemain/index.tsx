@@ -110,20 +110,20 @@ export default function DaftarPemain() {
 
   const kosong = () =>
     sedangDisaring()
-      ? "Tidak ada pemain yang cocok dengan pencarian ini."
+      ? "Tidak ada siswa yang cocok dengan pencarian ini."
       : role() === "admin_ssb"
-        ? "Belum ada pemain. Tambahkan pemain pertama."
+        ? "Belum ada siswa. Tambahkan siswa pertama."
         : orangTua()
           ? "Belum ada anak yang terhubung ke akun Anda. Hubungi admin SSB."
-          : "Belum ada pemain di KU yang ditugaskan kepada Anda. Hubungi admin SSB untuk penugasan KU.";
+          : "Belum ada siswa di KU yang ditugaskan kepada Anda. Hubungi admin SSB untuk penugasan KU.";
 
   return (
     <Show when={me()} fallback={<Memuat halaman />}>
-      <Title>Pemain · SSB App</Title>
+      <Title>Siswa · SSB App</Title>
       <main class="halaman lebar">
         <Show when={players.error}>
           <div class="peringatan" role="alert">
-            Daftar pemain tidak bisa dimuat. Muat ulang halaman.
+            Daftar siswa tidak bisa dimuat. Muat ulang halaman.
           </div>
         </Show>
 
@@ -156,7 +156,7 @@ export default function DaftarPemain() {
                     </A>
                     <A class="tombol sekunder" href={`/kartu/${pl.id}`}>
                       <Ikon nama="kartu" ukuran={18} />
-                      Kartu pemain
+                      Kartu siswa
                     </A>
                   </div>
                 </article>
@@ -174,7 +174,7 @@ export default function DaftarPemain() {
                 <span aria-hidden="true">/</span>
                 <span>{me()!.active!.ssbName}</span>
               </p>
-              <h1>Data pemain</h1>
+              <h1>Data siswa</h1>
               <Show when={players()}>
                 <p class="petunjuk">
                   Total <strong>{ringkasan().total} siswa</strong> terdaftar di {ringkasan().jumlahKu} kelompok umur
@@ -184,7 +184,7 @@ export default function DaftarPemain() {
             <Show when={role() === "admin_ssb"}>
               <A class="tombol utama tambah" href="/pemain/baru">
                 <Ikon nama="tambah" ukuran={18} />
-                Tambah pemain baru
+                Tambah siswa baru
               </A>
             </Show>
           </header>
@@ -223,7 +223,7 @@ export default function DaftarPemain() {
               <div class="ubin" classList={{ perhatian: ringkasan().tanpaKu > 0 }}>
                 <span class="label-ubin">Belum punya KU</span>
                 <span class="angka-ubin">{ringkasan().tanpaKu}</span>
-                <span class="petunjuk">{ringkasan().tanpaKu > 0 ? "Perlu ditentukan KU-nya" : "Semua pemain sudah punya KU"}</span>
+                <span class="petunjuk">{ringkasan().tanpaKu > 0 ? "Perlu ditentukan KU-nya" : "Semua siswa sudah punya KU"}</span>
               </div>
             </section>
           </Show>
@@ -274,7 +274,7 @@ export default function DaftarPemain() {
           <Show when={players()}>
             <Show when={disaring().length > 0} fallback={<p class="kosong">{kosong()}</p>}>
               <p class="petunjuk" aria-live="polite">
-                Menampilkan {disaring().length} pemain
+                Menampilkan {disaring().length} siswa
                 <Show when={sedangDisaring()}> dari {ringkasan().total}</Show>
               </p>
               <div class="tabel-bungkus">
@@ -385,7 +385,7 @@ export default function DaftarPemain() {
                 <nav class="paging" aria-label="Halaman">
                   <span class="petunjuk">
                     Menampilkan {(halamanKini() - 1) * PER_HALAMAN + 1} sampai {Math.min(halamanKini() * PER_HALAMAN, disaring().length)} dari{" "}
-                    {disaring().length} pemain
+                    {disaring().length} siswa
                   </span>
                   <div class="paging-tombol">
                     <button type="button" class="tombol" disabled={halamanKini() === 1} onClick={() => setHalaman(halamanKini() - 1)}>

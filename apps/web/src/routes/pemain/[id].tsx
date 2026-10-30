@@ -131,11 +131,11 @@ export default function DetailPemain() {
           when={!missing()}
           fallback={
             <>
-              <Title>Pemain tidak ditemukan · SSB App</Title>
-              <h1>Pemain tidak ditemukan</h1>
-              <p>Pemain ini tidak ada, atau bukan bagian dari KU atau anak yang bisa Anda akses.</p>
+              <Title>Siswa tidak ditemukan · SSB App</Title>
+              <h1>Siswa tidak ditemukan</h1>
+              <p>Siswa ini tidak ada, atau bukan bagian dari KU atau anak yang bisa Anda akses.</p>
               <A class="tombol" href="/pemain">
-                Ke daftar pemain
+                Ke daftar siswa
               </A>
             </>
           }
@@ -143,7 +143,7 @@ export default function DetailPemain() {
           <Show when={pl()} fallback={<Kerangka />}>
             <Title>{pl()!.fullName} · SSB App</Title>
             <KepalaHalaman
-              chip="Profil pemain"
+              chip="Profil siswa"
               judul={pl()!.fullName}
               sub={[pl()!.memberNo, pl()!.ageGroup?.name ?? "Belum ada KU"].filter(Boolean).join(" • ")}
             >
@@ -285,7 +285,7 @@ export default function DetailPemain() {
                           setEditing(true);
                         }}
                       >
-                        Ubah data pemain
+                        Ubah data siswa
                       </button>
                     </Show>
                   </Show>

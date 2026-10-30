@@ -9,7 +9,7 @@ import { api, ApiError, getMe, type Me } from "~/lib/api";
 
 const pilihan = Array.from({ length: WEIGHT_MAX + 1 }, (_, i) => i);
 
-/** Bobot tiap indikator untuk tiap posisi, dipakai menghitung kecocokan posisi di profil pemain. Admin mengubah; staf lain membaca. */
+/** Bobot tiap indikator untuk tiap posisi, dipakai menghitung kecocokan posisi di profil siswa. Admin mengubah; staf lain membaca. */
 export default function BobotPosisi() {
   const nav = useNavigate();
   const [me, setMe] = createSignal<Me | null>(null);
@@ -83,7 +83,7 @@ export default function BobotPosisi() {
         <KepalaHalaman
           chip="Penilaian"
           judul="Bobot posisi"
-          sub={`Seberapa berpengaruh tiap indikator pada kecocokan posisi di profil pemain. Skala 0 (tidak dihitung) sampai ${WEIGHT_MAX}. Hasilnya hanya saran, dan hanya tampil untuk pemain usia 10 tahun ke atas.${admin() ? "" : " Hanya admin SSB yang bisa mengubahnya."}`}
+          sub={`Seberapa berpengaruh tiap indikator pada kecocokan posisi di profil siswa. Skala 0 (tidak dihitung) sampai ${WEIGHT_MAX}. Hasilnya hanya saran, dan hanya tampil untuk siswa usia 10 tahun ke atas.${admin() ? "" : " Hanya admin SSB yang bisa mengubahnya."}`}
         />
         <p>
           <A href="/indikator">← Indikator penilaian</A>

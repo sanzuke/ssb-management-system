@@ -9,7 +9,7 @@ import { hariIni } from "~/lib/waktu";
 import type { AgeGroup, AttendanceSummary, AttendanceSummaryRow, Period } from "@ssb/shared";
 
 const PER_HALAMAN = 15;
-/** Di bawah ambang ini (dengan cukup catatan) pemain ditandai perlu perhatian; target akademi 80%. */
+/** Di bawah ambang ini (dengan cukup catatan) siswa ditandai perlu perhatian; target akademi 80%. */
 const AMBANG = 70;
 const TARGET = 80;
 const MIN_CATATAN = 5;
@@ -113,7 +113,7 @@ export default function Kehadiran() {
               {(d) => (
                 <p class="petunjuk" role="status">
                   {d().sessionsHeld} sesi latihan tercatat{d().period ? ` pada ${d().period!.name}` : ""}
-                  {d().ageGroup ? ` untuk ${d().ageGroup!.name}` : ""}. Persentase = hadir dibagi sesi yang tercatat untuk pemain itu.
+                  {d().ageGroup ? ` untuk ${d().ageGroup!.name}` : ""}. Persentase = hadir dibagi sesi yang tercatat untuk siswa itu.
                 </p>
               )}
             </Show>
@@ -148,7 +148,7 @@ export default function Kehadiran() {
                 <span class="label-ubin">Perlu perhatian</span>
                 <span class="angka-ubin">{total().perhatian}</span>
                 <span class="petunjuk">
-                  Pemain di bawah {AMBANG}% (min. {MIN_CATATAN} catatan)
+                  Siswa di bawah {AMBANG}% (min. {MIN_CATATAN} catatan)
                 </span>
               </div>
             </Show>
@@ -183,7 +183,7 @@ export default function Kehadiran() {
             <input
               type="search"
               placeholder="Cari nama atau nomor induk"
-              aria-label="Cari pemain"
+              aria-label="Cari siswa"
               value={q()}
               onInput={(e) => ubah(setQ)(e.currentTarget.value)}
             />
@@ -212,20 +212,20 @@ export default function Kehadiran() {
                 {semua().length === 0
                   ? parent()
                     ? "Belum ada data kehadiran untuk anak Anda."
-                    : "Tidak ada pemain pada pilihan ini."
-                  : "Tidak ada pemain yang cocok dengan filter ini."}
+                    : "Tidak ada siswa pada pilihan ini."
+                  : "Tidak ada siswa yang cocok dengan filter ini."}
               </p>
             }
           >
             <p class="petunjuk" aria-live="polite">
-              Menampilkan {disaring().length} pemain
+              Menampilkan {disaring().length} siswa
               <Show when={disaring().length !== semua().length}> dari {semua().length}</Show>
             </p>
             <div class="tabel-bungkus">
               <table class="tabel-pemain tabel-hadir">
                 <thead>
                   <tr>
-                    <th>Pemain</th>
+                    <th>Siswa</th>
                     <th>Rincian sesi</th>
                     <th class="lebar-batang">Kehadiran</th>
                   </tr>
@@ -293,7 +293,7 @@ export default function Kehadiran() {
               <nav class="paging" aria-label="Halaman">
                 <span class="petunjuk">
                   Menampilkan {(halamanKini() - 1) * PER_HALAMAN + 1} sampai {Math.min(halamanKini() * PER_HALAMAN, disaring().length)} dari {disaring().length}{" "}
-                  pemain
+                  siswa
                 </span>
                 <div class="paging-tombol">
                   <button type="button" class="tombol" disabled={halamanKini() === 1} onClick={() => setHalaman(halamanKini() - 1)}>

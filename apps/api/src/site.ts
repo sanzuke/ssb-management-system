@@ -153,7 +153,7 @@ export type PublicSiteOptions = { landingOrigins: string[]; trialLimit?: { perIp
 
 /**
  * API publik untuk landing page, tanpa sesi. SSB dikenali dari kode SSB di alamat, bukan dari input lain.
- * Hanya konten yang sudah diterbitkan yang keluar; data pemain tidak pernah terlibat.
+ * Hanya konten yang sudah diterbitkan yang keluar; data siswa tidak pernah terlibat.
  */
 export function publicSiteRoutes(db: Db, opts: PublicSiteOptions) {
   const lim = opts.trialLimit ?? { perIp: 5, perSsb: 100, windowMs: 60 * 60 * 1000 };

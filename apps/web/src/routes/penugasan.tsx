@@ -62,7 +62,7 @@ export default function Penugasan() {
         <KepalaHalaman
           chip="Pengaturan"
           judul="Penugasan pelatih"
-          sub="Pelatih dan koordinator hanya melihat pemain di KU yang ditugaskan kepada mereka pada periode yang sedang berjalan."
+          sub="Pelatih dan koordinator hanya melihat siswa di KU yang ditugaskan kepada mereka pada periode yang sedang berjalan."
         />
 
         <Show when={rowError()}>

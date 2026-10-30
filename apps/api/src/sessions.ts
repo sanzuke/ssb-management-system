@@ -128,7 +128,7 @@ export function sessionRoutes(db: Db) {
       .leftJoin(schema.attendance, and(eq(schema.attendance.playerId, schema.player.id), eq(schema.attendance.sessionId, id)))
       .where(eq(schema.player.ageGroupId, s.ageGroup.id))
       .orderBy(asc(schema.player.fullName));
-    // Pemain tidak aktif hanya tampil bila sudah punya catatan absensi di sesi ini.
+    // Siswa tidak aktif hanya tampil bila sudah punya catatan absensi di sesi ini.
     return { session: s, players: players.filter((p) => p.playerStatus === "aktif" || p.status).map(({ playerStatus: _x, ...p }) => p) };
   };
 
@@ -242,7 +242,7 @@ export function sessionRoutes(db: Db) {
         return c.body(null, 204);
       })
 
-      // Rekap kehadiran per pemain. Pemain yang terlihat mengikuti aturan daftar pemain
+      // Rekap kehadiran per siswa. Siswa yang terlihat mengikuti aturan daftar siswa
       // (pelatih/korlas: KU ditugaskan; orang tua: anaknya). Persentase = hadir / sesi tercatat.
       .get("/attendance/summary", requirePermission("attendance.read"), async (c) => {
         const m = member(c);
@@ -309,14 +309,14 @@ export function sessionRoutes(db: Db) {
                 percent: recorded ? Math.round((t.hadir / recorded) * 1000) / 10 : null,
               };
             })
-            // Pemain tidak aktif hanya tampil bila punya catatan pada rentang ini.
+            // Siswa tidak aktif hanya tampil bila punya catatan pada rentang ini.
             .filter((r) => r.status === "aktif" || r.recorded > 0);
           return { period: period ?? null, ageGroup: group ?? null, sessionsHeld: held?.n ?? 0, players: rows };
         });
         return c.json(out);
       })
 
-      // Portal orang tua: jadwal KU anak sendiri + status anak. Tidak membuka daftar pemain lain.
+      // Portal orang tua: jadwal KU anak sendiri + status anak. Tidak membuka daftar siswa lain.
       .get("/guardian/sessions", requirePermission("guardian.sessions"), async (c) => {
         const m = member(c);
         const from = c.req.query("from") ?? addDays(new Date().toISOString().slice(0, 10), -30);
@@ -378,12 +378,12 @@ export function sessionRoutes(db: Db) {
           if (!cur) throw notFound();
           if (!notFuture(cur.session.sessionDate)) throw new HttpError(422, "session_not_started", "Sesi ini belum berlangsung, absensi belum bisa diisi");
           const ids = entries.map((e) => e.playerId);
-          if (new Set(ids).size !== ids.length) throw new HttpError(422, "duplicate_player", "Satu pemain hanya boleh muncul sekali");
+          if (new Set(ids).size !== ids.length) throw new HttpError(422, "duplicate_player", "Satu siswa hanya boleh muncul sekali");
           const inGroup = await tx
             .select({ id: schema.player.id })
             .from(schema.player)
             .where(and(eq(schema.player.ageGroupId, cur.session.ageGroup.id), inArray(schema.player.id, ids)));
-          if (inGroup.length !== ids.length) throw new HttpError(422, "player_not_in_group", "Ada pemain yang bukan anggota KU sesi ini");
+          if (inGroup.length !== ids.length) throw new HttpError(422, "player_not_in_group", "Ada siswa yang bukan anggota KU sesi ini");
           for (const e of entries) {
             await tx
               .insert(schema.attendance)

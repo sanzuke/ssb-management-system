@@ -29,7 +29,7 @@ export default function Master() {
         <KepalaHalaman
           chip="Pengaturan"
           judul="Data master"
-          sub={`Kelompok usia, periode, dan lokasi latihan dipakai di data pemain dan jadwal.${role() === "admin_ssb" ? "" : " Hanya admin SSB yang bisa mengubahnya."}`}
+          sub={`Kelompok usia, periode, dan lokasi latihan dipakai di data siswa dan jadwal.${role() === "admin_ssb" ? "" : " Hanya admin SSB yang bisa mengubahnya."}`}
         />
         <Show when={canRead()} fallback={<p>Halaman ini hanya untuk admin, pelatih, dan koordinator.</p>}>
           <MasterSection

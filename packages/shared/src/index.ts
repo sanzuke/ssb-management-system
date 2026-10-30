@@ -12,7 +12,7 @@ export type Health = z.infer<typeof healthSchema>;
 export const positionSchema = z.enum(["GK", "DF", "MF", "FW"]);
 export type Position = z.infer<typeof positionSchema>;
 
-/** Input pembuatan pemain. Skema lengkap menyusul bersama model data. */
+/** Input pembuatan siswa. Skema lengkap menyusul bersama model data. */
 export const playerInputSchema = z.object({
   fullName: z.string().trim().min(1).max(120),
   birthDate: z.iso.date(),
@@ -41,27 +41,27 @@ export const permissions = {
   "master.write": { roles: ["admin_ssb"], desc: "Mengubah KU, periode, dan lokasi" },
   "player.read": {
     roles: ["admin_ssb", "pelatih", "korlas", "orang_tua"],
-    desc: "Melihat pemain (pelatih dan korlas: KU yang ditugaskan; orang tua: anaknya)",
+    desc: "Melihat siswa (pelatih dan korlas: KU yang ditugaskan; orang tua: anaknya)",
   },
-  "player.write": { roles: ["admin_ssb"], desc: "Menambah dan mengubah pemain" },
-  "player.photo": { roles: ["admin_ssb", "pelatih", "korlas"], desc: "Mengunggah dan menghapus foto pemain (pelatih dan korlas: KU yang ditugaskan)" },
+  "player.write": { roles: ["admin_ssb"], desc: "Menambah dan mengubah siswa" },
+  "player.photo": { roles: ["admin_ssb", "pelatih", "korlas"], desc: "Mengunggah dan menghapus foto siswa (pelatih dan korlas: KU yang ditugaskan)" },
   "attendance.record": { roles: ["admin_ssb", "pelatih", "korlas"], desc: "Mencatat absensi latihan" },
   "attendance.read": { roles: ["admin_ssb", "pelatih", "korlas", "orang_tua"], desc: "Melihat absensi (orang tua: anaknya)" },
-  "assessment.write": { roles: ["admin_ssb", "pelatih"], desc: "Mengisi penilaian pemain dan rencana pengembangannya" },
+  "assessment.write": { roles: ["admin_ssb", "pelatih"], desc: "Mengisi penilaian siswa dan rencana pengembangannya" },
   "assessment.read": {
     roles: ["admin_ssb", "pelatih", "korlas", "orang_tua"],
     desc: "Melihat penilaian dan rencana pengembangan (orang tua: anaknya, setelah terbit)",
   },
   "squad.read": {
     roles: ["admin_ssb", "pelatih", "korlas"],
-    desc: "Melihat tabel skuad: rating, enam aspek, dan tren seluruh pemain yang boleh dilihat (pelatih dan korlas: KU yang ditugaskan), termasuk penilaian yang belum terbit",
+    desc: "Melihat tabel skuad: rating, enam aspek, dan tren seluruh siswa yang boleh dilihat (pelatih dan korlas: KU yang ditugaskan), termasuk penilaian yang belum terbit",
   },
-  "badge.read": { roles: ["admin_ssb", "pelatih", "korlas", "orang_tua"], desc: "Melihat lencana pemain (orang tua: anaknya)" },
-  "badge.write": { roles: ["admin_ssb", "pelatih"], desc: "Memberi dan mencabut lencana pemain (pelatih: KU yang ditugaskan)" },
+  "badge.read": { roles: ["admin_ssb", "pelatih", "korlas", "orang_tua"], desc: "Melihat lencana siswa (orang tua: anaknya)" },
+  "badge.write": { roles: ["admin_ssb", "pelatih"], desc: "Memberi dan mencabut lencana siswa (pelatih: KU yang ditugaskan)" },
   "session.manage": { roles: ["admin_ssb"], desc: "Menjadwalkan, mengubah, dan menghapus sesi latihan" },
   "guardian.sessions": {
     roles: ["admin_ssb", "orang_tua"],
-    desc: "Portal orang tua: jadwal KU anak sendiri beserta status kehadiran anak, tanpa daftar pemain lain (admin tidak punya anak, jadi daftarnya kosong)",
+    desc: "Portal orang tua: jadwal KU anak sendiri beserta status kehadiran anak, tanpa daftar siswa lain (admin tidak punya anak, jadi daftarnya kosong)",
   },
   "session.read": { roles: ["admin_ssb", "pelatih", "korlas"], desc: "Melihat jadwal sesi latihan (pelatih dan korlas: KU yang ditugaskan)" },
   "assignment.manage": { roles: ["admin_ssb"], desc: "Menugaskan pelatih dan korlas ke KU per periode" },
@@ -143,7 +143,7 @@ export const invitableRoleSchema = z.enum(["pelatih", "korlas", "orang_tua"]);
 export const createInvitationSchema = z.object({
   role: invitableRoleSchema,
   label: z.string().trim().max(120).optional(),
-  /** Untuk orang tua: pemain yang langsung dihubungkan. */
+  /** Untuk orang tua: siswa yang langsung dihubungkan. */
   playerId: z.uuid().optional(),
 });
 
@@ -275,7 +275,7 @@ export type AgeGroup = z.infer<typeof ageGroupSchema>;
 export type Period = z.infer<typeof periodSchema>;
 export type Location = z.infer<typeof locationSchema>;
 
-// ---- Pemain ----
+// ---- Siswa ----
 
 export const playerStatusSchema = z.enum(["aktif", "cuti", "keluar"]);
 export type PlayerStatus = z.infer<typeof playerStatusSchema>;
@@ -293,8 +293,8 @@ const optInt = (min: number, max: number) =>
 const optNum = (min: number, max: number) => z.number().min(min, `minimal ${min}`).max(max, `maksimal ${max}`).nullable().optional();
 
 /**
- * Biodata pemain. Dipakai untuk membuat dan mengubah (ubah mengirim seluruh isian).
- * `memberNo` (ID siswa) kosong berarti otomatis pada pemain baru dan tetap pada perubahan.
+ * Biodata siswa. Dipakai untuk membuat dan mengubah (ubah mengirim seluruh isian).
+ * `memberNo` (ID siswa) kosong berarti otomatis pada siswa baru dan tetap pada perubahan.
  * WhatsApp orang tua: awalan 8 (nol hilang karena lembar sebar) dilengkapi menjadi 08.
  */
 export const playerFormSchema = z.object({
@@ -368,7 +368,7 @@ export type PlayerSummary = {
   /** Versi foto; null bila belum ada. Dipakai untuk URL `/players/:id/photo?v=<versi>`. */
   photoV: string | null;
 };
-/** Data lengkap pemain selain ringkasan; hanya ada di detail pemain. */
+/** Data lengkap siswa selain ringkasan; hanya ada di detail siswa. */
 export type PlayerExtra = {
   nisn: string | null;
   birthPlace: string | null;
@@ -388,7 +388,7 @@ export type PlayerDetail = PlayerSummary &
     /** Hanya untuk admin SSB. */
     guardians?: { userId: string; name: string; relationship: string | null }[];
   };
-/** Ringkasan per pemain untuk tabel pemain: wali utama (hanya admin SSB) dan penilaian terakhir. */
+/** Ringkasan per siswa untuk tabel pemain: wali utama (hanya admin SSB) dan penilaian terakhir. */
 export type PlayerOverview = {
   playerId: string;
   /** Hanya diisi untuk admin SSB. `total` = jumlah wali yang terhubung; yang ditampilkan wali pertama. */
@@ -419,8 +419,8 @@ export const sessionCreateSchema = sessionInputSchema
 export const attendanceInputSchema = z.object({
   entries: z
     .array(z.object({ playerId: uuidStr, status: attendanceStatusSchema, note: z.string().trim().max(200).nullable().optional() }))
-    .min(1, "minimal satu pemain")
-    .max(200, "maksimal 200 pemain per permintaan"),
+    .min(1, "minimal satu siswa")
+    .max(200, "maksimal 200 siswa per permintaan"),
 });
 
 export type TrainingSession = {
@@ -430,7 +430,7 @@ export type TrainingSession = {
   ageGroup: { id: string; name: string };
   location: { id: string; name: string } | null;
   period: { id: string; name: string } | null;
-  /** Ringkasan absensi: jumlah per status dan pemain aktif yang belum diisi. */
+  /** Ringkasan absensi: jumlah per status dan siswa aktif yang belum diisi. */
   attendance: { hadir: number; izin: number; sakit: number; alpa: number; belum: number };
 };
 export type AttendanceRoster = {
@@ -448,7 +448,7 @@ export type AttendanceSummaryRow = {
   izin: number;
   sakit: number;
   alpa: number;
-  /** hadir + izin + sakit + alpa: sesi yang absensinya tercatat untuk pemain ini. */
+  /** hadir + izin + sakit + alpa: sesi yang absensinya tercatat untuk siswa ini. */
   recorded: number;
   /** hadir / recorded * 100, satu desimal; null bila belum ada catatan. */
   percent: number | null;
@@ -539,10 +539,10 @@ export const positionWeightsInputSchema = z.object({
 });
 export type PositionWeightsInput = z.infer<typeof positionWeightsInputSchema>;
 
-/** Satu baris tabel skuad: penilaian terbaru yang punya skor (termasuk draf) dan tren dari seluruh periode bernilai. Identitas pemain diambil dari `/players`. */
+/** Satu baris tabel skuad: penilaian terbaru yang punya skor (termasuk draf) dan tren dari seluruh periode bernilai. Identitas siswa diambil dari `/players`. */
 export type SquadRow = {
   playerId: string;
-  /** Periode penilaian yang dipakai; null bila pemain belum punya penilaian bernilai. */
+  /** Periode penilaian yang dipakai; null bila siswa belum punya penilaian bernilai. */
   periodName: string | null;
   overall: number | null;
   aspects: { aspect: AssessmentAspect; average: number }[];
@@ -552,7 +552,7 @@ export type SquadRow = {
 /** Rata-rata skor per aspek untuk satu periode, dari seluruh penilaian yang boleh dilihat peran pemanggil. */
 export type AspectSummary = {
   period: { id: string; name: string; startDate: string };
-  /** Jumlah penilaian (pemain) yang dihitung pada periode ini. */
+  /** Jumlah penilaian (siswa) yang dihitung pada periode ini. */
   assessments: number;
   aspects: { aspect: AssessmentAspect; average: number }[];
 };
@@ -564,14 +564,14 @@ export const developmentPlanItemInputSchema = z.object({
   target: z.string().trim().max(200, "maksimal 200 karakter").nullable().optional(),
   note: z.string().trim().max(500, "maksimal 500 karakter").nullable().optional(),
 });
-/** Mengganti seluruh rencana satu pemain pada satu periode; daftar kosong menghapusnya. */
+/** Mengganti seluruh rencana satu siswa pada satu periode; daftar kosong menghapusnya. */
 export const developmentPlanInputSchema = z.object({ items: z.array(developmentPlanItemInputSchema).max(8, "maksimal 8 butir") });
 export type DevelopmentPlanInput = z.infer<typeof developmentPlanInputSchema>;
 export type DevelopmentPlanItem = { id: string; aspect: AssessmentAspect | null; area: string; target: string | null; note: string | null };
 
 // ---- SPP: tarif, tagihan, dan pembayaran ----
 
-/** Tarif SPP per bulan (rupiah) tiap KU; null = belum diatur, pemain KU itu tidak ikut ditagih. */
+/** Tarif SPP per bulan (rupiah) tiap KU; null = belum diatur, siswa KU itu tidak ikut ditagih. */
 export const feeRatesInputSchema = z.object({
   rates: z
     .array(
@@ -585,7 +585,7 @@ export const feeRatesInputSchema = z.object({
 export type FeeRatesInput = z.infer<typeof feeRatesInputSchema>;
 export type FeeRate = { ageGroupId: string; name: string; monthlyFee: number | null; activePlayers: number };
 
-/** Membuat tagihan satu bulan (YYYY-MM) untuk semua pemain aktif di KU yang punya tarif; yang sudah ditagih dilewati. */
+/** Membuat tagihan satu bulan (YYYY-MM) untuk semua siswa aktif di KU yang punya tarif; yang sudah ditagih dilewati. */
 export const generateInvoicesSchema = z.object({
   month: z.string().regex(/^\d{4}-(0[1-9]|1[0-2])$/, "format bulan YYYY-MM"),
   /** Tanggal jatuh tempo di bulan itu. Bila diisi, menimpa pengaturan bawaan SSB. */
@@ -730,7 +730,7 @@ export const whatsappTestSchema = z.object({
 });
 export type WhatsappTestInput = z.infer<typeof whatsappTestSchema>;
 
-/** Tarif SPP khusus satu pemain; menggantikan tarif KU. 0 = tidak ditagih. */
+/** Tarif SPP khusus satu siswa; menggantikan tarif KU. 0 = tidak ditagih. */
 export const playerFeeOverrideSchema = z.object({
   playerId: z.uuid(),
   monthlyFee: z.number().int("harus bilangan bulat").min(0, "tidak boleh negatif").max(100_000_000, "terlalu besar"),

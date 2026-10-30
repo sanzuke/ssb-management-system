@@ -234,7 +234,7 @@ export default function PlayerForm(p: { initial?: PlayerSummary & Partial<Player
       </fieldset>
 
       <button class="tombol utama" type="submit" disabled={form.busy()}>
-        {form.busy() ? "Menyimpan…" : i ? "Simpan perubahan" : "Tambah pemain"}
+        {form.busy() ? "Menyimpan…" : i ? "Simpan perubahan" : "Tambah siswa"}
       </button>
     </form>
   );

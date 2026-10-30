@@ -104,7 +104,7 @@ h2 { font-size: 12pt; margin: 14px 0 6px; padding-bottom: 3px; border-bottom: 2p
 footer { margin-top: 14px; font-size: 8.5pt; color: #56655b; border-top: 1px solid #c9d1c4; padding-top: 6px; }
 `;
 
-/** HTML rapor satu pemain untuk satu periode. Semua teks dari data di-escape; tanpa skrip dan tanpa sumber luar. */
+/** HTML rapor satu siswa untuk satu periode. Semua teks dari data di-escape; tanpa skrip dan tanpa sumber luar. */
 export function reportHtml(d: ReportData): string {
   const a = d.assessment;
   const rows = (aspect: string) => a.scores.filter((s) => s.aspect === aspect);
@@ -134,7 +134,7 @@ export function reportHtml(d: ReportData): string {
       ? `<p class="kosong">Belum ada absensi tercatat pada periode ini.</p>`
       : `<div class="hadir"><div><b>${koma(att.percent)}%</b><span>hadir</span></div><div><b>${att.hadir}</b><span>hadir (kali)</span></div><div><b>${att.izin}</b><span>izin</span></div><div><b>${att.sakit}</b><span>sakit</span></div><div><b>${att.alpa}</b><span>alpa</span></div></div>`;
   return `<!doctype html><html lang="id"><head><meta charset="utf-8"><title>Rapor ${esc(d.player.fullName)} - ${esc(a.period.name)}</title><style>${CSS}</style></head><body>
-<header><div class="ssb">${esc(d.ssbName)}</div><h1>Rapor perkembangan pemain</h1></header>
+<header><div class="ssb">${esc(d.ssbName)}</div><h1>Rapor perkembangan siswa</h1></header>
 <dl class="meta">
 <div><dt>Nama</dt><dd>${esc(d.player.fullName)}</dd></div>
 <div><dt>Periode</dt><dd>${esc(a.period.name)}</dd></div>

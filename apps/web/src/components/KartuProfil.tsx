@@ -15,7 +15,7 @@ const singkat: Record<AssessmentAspect, string> = {
 const koma = (n: number) => String(n).replace(".", ",");
 
 /**
- * Kartu pemain bergaya kartu koleksi (desain Stitch "Statistik Pemain Interaktif"): rata-rata keseluruhan,
+ * Kartu siswa bergaya kartu koleksi (desain Stitch "Statistik Siswa Interaktif"): rata-rata keseluruhan,
  * posisi, KU, foto, nama, dan enam aspek penilaian pada periode yang dipilih.
  */
 export default function KartuProfil(props: { pl: PlayerDetail; nilai: AssessmentView | null; tren?: Tren; children?: JSX.Element }) {

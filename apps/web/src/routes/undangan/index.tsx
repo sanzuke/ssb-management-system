@@ -161,7 +161,7 @@ export default function KelolaUndangan() {
                 <SelectField
                   id="anak"
                   label="Anak yang dihubungkan"
-                  blank="Pilih pemain (opsional)"
+                  blank="Pilih siswa (opsional)"
                   hint="Orang tua langsung terhubung ke anak ini begitu undangan diterima."
                   value={playerId()}
                   onInput={setPlayerId}

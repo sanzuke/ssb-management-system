@@ -288,7 +288,7 @@ export default function Anggota() {
                                 peran() === "admin_ssb"
                                   ? "Admin bisa mengelola semua data, anggota, dan keuangan SSB."
                                   : r.role === "orang_tua"
-                                    ? "Orang tua yang masih terhubung ke anak harus dilepas dulu di profil pemain."
+                                    ? "Orang tua yang masih terhubung ke anak harus dilepas dulu di profil siswa."
                                     : "Penugasan KU tetap berlaku untuk pelatih dan korlas."
                               }
                             />

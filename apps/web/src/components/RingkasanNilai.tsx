@@ -51,7 +51,7 @@ export default function RingkasanNilai(props: {
       fallback={
         <>
           <section class="panel-nilai">
-            <p class="kosong">Belum ada penilaian untuk pemain ini{props.staf ? "." : ", atau belum diterbitkan oleh SSB."}</p>
+            <p class="kosong">Belum ada penilaian untuk siswa ini{props.staf ? "." : ", atau belum diterbitkan oleh SSB."}</p>
             <Show when={props.staf}>
               <A class="tombol utama" href={`/nilai/${props.playerId}`}>
                 Isi penilaian
