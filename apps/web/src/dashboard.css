@@ -3816,3 +3816,39 @@ button.pengguna[aria-expanded="true"] .panah-menu {
   cursor: pointer;
   font-weight: 700;
 }
+
+/* ---- Siswa terbaik (beranda staf) ---- */
+.daftar-peringkat {
+  margin: 0;
+  padding-left: 0;
+  list-style: none;
+}
+.nomor-peringkat {
+  flex: 0 0 1.6rem;
+  color: var(--redup);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+}
+.rating-lencana {
+  --pita: #1b4d36;
+  min-width: 2.6rem;
+  padding: 2px 8px;
+  border-radius: 6px;
+  background: var(--pita);
+  color: #fff;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+}
+.rating-lencana[data-pita="1"],
+.rating-lencana[data-pita="2"] {
+  --pita: #b3372a;
+}
+.rating-lencana[data-pita="3"] {
+  --pita: #dcab1c;
+  color: #3b2d00;
+}
+.rating-lencana[data-pita="4"] {
+  --pita: #3f8f5a;
+}

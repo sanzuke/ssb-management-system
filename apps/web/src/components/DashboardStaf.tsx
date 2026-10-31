@@ -3,7 +3,8 @@ import { createMemo, createResource, For, Show } from "solid-js";
 import { api, roleLabel, type Me } from "~/lib/api";
 import { inisial, type PlayerSummary } from "~/lib/pemain";
 import { hariIni, tambahHari, tanggalSesi } from "~/lib/waktu";
-import type { AttendanceSummary, PlayerOverview, TrainingSession } from "@ssb/shared";
+import { pitaDari } from "@ssb/shared/aspects";
+import type { AttendanceSummary, PlayerOverview, SquadRow, TrainingSession } from "@ssb/shared";
 import Ikon from "./Ikon";
 import Kerangka from "~/components/Kerangka";
 
@@ -24,6 +25,7 @@ export default function DashboardStaf(props: { me: Me }) {
   const [sum] = createResource(() => api<AttendanceSummary>("/attendance/summary").catch(() => null));
   const [sesi] = createResource(() => api<TrainingSession[]>(`/sessions?from=${awal}&to=${akhir}`).catch(() => null));
   const [ringkas] = createResource(() => api<PlayerOverview[]>("/players-overview").catch(() => null));
+  const [skuad] = createResource(() => api<SquadRow[]>("/squad").catch(() => null));
 
   const hari = hariIni();
   const batasPekan = tambahHari(hari, 7);
@@ -52,6 +54,20 @@ export default function DashboardStaf(props: { me: Me }) {
       .sort((a, b) => (a.percent ?? 0) - (b.percent ?? 0))
       .slice(0, 6),
   );
+  // Peringkat memakai penilaian terbaru tiap siswa; hanya periode yang paling banyak dipakai (periode berjalan) supaya nilai lama tidak ikut bersaing.
+  const terbaik = createMemo(() => {
+    const berisi = (skuad() ?? []).filter((r) => r.overall !== null && r.periodName !== null);
+    const hitung = new Map<string, number>();
+    for (const r of berisi) hitung.set(r.periodName!, (hitung.get(r.periodName!) ?? 0) + 1);
+    const periode = [...hitung.entries()].sort((a, b) => b[1] - a[1])[0]?.[0] ?? null;
+    const nama = new Map((players() ?? []).map((p) => [p.id, p]));
+    const baris = berisi
+      .filter((r) => r.periodName === periode && nama.get(r.playerId)?.status === "aktif")
+      .sort((a, b) => b.overall! - a.overall! || (nama.get(a.playerId)?.fullName ?? "").localeCompare(nama.get(b.playerId)?.fullName ?? "", "id"))
+      .slice(0, 5)
+      .map((r) => ({ r, p: nama.get(r.playerId)! }));
+    return { periode, baris };
+  });
   const gagal = () => players.state === "ready" && players() === null;
 
   const jam = (s: TrainingSession) => [s.startTime ? `jam ${s.startTime}` : null, s.location?.name].filter(Boolean).join(", ");
@@ -189,6 +205,54 @@ export default function DashboardStaf(props: { me: Me }) {
                     )}
                   </For>
                 </ul>
+              </Show>
+            </Show>
+          </section>
+
+          <section class="panel" aria-label="Siswa terbaik">
+            <header class="panel-kepala">
+              <h2>Siswa terbaik</h2>
+              <span class="petunjuk">{terbaik().periode ? `nilai keseluruhan, ${terbaik().periode}` : "nilai keseluruhan"}</span>
+            </header>
+            <Show
+              when={skuad() && players()}
+              fallback={
+                <div class="panel-isi">
+                  <Kerangka />
+                </div>
+              }
+            >
+              <Show when={terbaik().baris.length > 0} fallback={<p class="kosong panel-isi">Belum ada penilaian yang bisa diperingkat.</p>}>
+                <ol class="daftar-tugas daftar-peringkat">
+                  <For each={terbaik().baris}>
+                    {(b, i) => (
+                      <li>
+                        <span class="nomor-peringkat">{i() + 1}</span>
+                        <span class="ortu-foto kecil" aria-hidden="true">
+                          {inisial(b.p.fullName)}
+                        </span>
+                        <div class="tugas-teks">
+                          <A class="profil-baris" href={`/pemain/${b.p.id}`}>
+                            <strong>{b.p.fullName}</strong>
+                          </A>
+                          <span class="petunjuk">
+                            {b.p.ageGroup?.name ?? "Tanpa KU"}
+                            {b.p.position ? ` • ${b.p.position}` : ""}
+                            {b.r.published ? "" : " • belum terbit"}
+                          </span>
+                        </div>
+                        <span class="rating-lencana" data-pita={String(pitaDari(b.r.overall!).kode)} title={pitaDari(b.r.overall!).kata}>
+                          {koma(b.r.overall!)}
+                        </span>
+                      </li>
+                    )}
+                  </For>
+                </ol>
+                <p class="panel-isi petunjuk">
+                  <A class="tautan-kecil" href="/skuad">
+                    Lihat tabel skuad lengkap
+                  </A>
+                </p>
               </Show>
             </Show>
           </section>
