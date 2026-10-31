@@ -62,6 +62,8 @@ export const siteProgramSchema = z.object({
   hasScholarship: z.boolean().default(false),
   /** Foto program (URL gambar yang sudah diunggah); kosong = foto bawaan landing. */
   image: url.optional(),
+  /** KU di Data master yang ditampilkan program ini. Teks program menimpa teks bawaan KU; rentang usia selalu dari KU. */
+  ageGroupId: z.uuid().optional(),
 });
 
 export const siteCoachSchema = z.object({
@@ -172,6 +174,8 @@ export const trialInputSchema = z.object({
   gender: z.enum(["Putra", "Putri"]),
   /** Id program dari konten terbit; tidak dicocokkan keras karena konten bisa berubah setelah formulir dibuka. */
   programId: z.string().trim().max(30).optional(),
+  /** KU dari program yang dipilih (program yang berasal dari KU memuatnya). Id yang tidak dikenal diabaikan, pendaftaran tetap diterima. */
+  ageGroupId: z.uuid().optional(),
   parentName: z.string().trim().min(2).max(120),
   phone: z
     .string()
@@ -200,6 +204,10 @@ export type TrialRow = {
   birthDate: string;
   gender: "Putra" | "Putri";
   programId: string | null;
+  /** KU yang dipilih pendaftar di landing; null bila memilih program tanpa KU. */
+  ageGroup: { id: string; name: string } | null;
+  /** Siswa hasil `convert`; null bila belum dijadikan siswa. */
+  player: { id: string; name: string } | null;
   parentName: string;
   phone: string;
   email: string | null;
@@ -211,3 +219,46 @@ export type TrialRow = {
   adminNote: string | null;
   createdAt: string;
 };
+export type SiteProgram = z.infer<typeof siteProgramSchema>;
+
+/** Isi untuk menjadikan pendaftar trial sebagai siswa dan membuat undangan orang tuanya. */
+export const trialConvertSchema = z.object({ ageGroupId: z.uuid().nullable().optional() });
+export type TrialConvert = z.infer<typeof trialConvertSchema>;
+export type TrialConvertResult = {
+  trial: TrialRow;
+  player: { id: string; name: string };
+  /** Tautan undangan orang tua yang sudah terhubung ke siswa; hanya tampil sekali. */
+  invitation: { url: string; expiresAt: string };
+};
+
+/**
+ * Program di landing diturunkan dari KU di Data master supaya pilihan kategori usia selalu sama dengan master.
+ * Tiap KU menjadi satu program; program buatan admin yang ditautkan ke KU itu (`ageGroupId`) menimpa teksnya,
+ * sedangkan rentang usia selalu dari master. Program tanpa tautan tetap ditampilkan di belakang. Program yang
+ * tertaut ke KU yang sudah dihapus dibuang. Tanpa KU sama sekali, program buatan admin dipakai apa adanya.
+ */
+export function programsFromAgeGroups(ageGroups: { id: string; name: string; minAge: number; maxAge: number }[], own: SiteProgram[]): SiteProgram[] {
+  if (ageGroups.length === 0) return own.filter((p) => !p.ageGroupId);
+  const urut = [...ageGroups].sort((a, b) => a.minAge - b.minAge || a.name.localeCompare(b.name, "id"));
+  const turunan = urut.map((ku): SiteProgram => {
+    const sama = ku.minAge === ku.maxAge;
+    const ageRange = {
+      id: sama ? `Usia ${ku.minAge} tahun` : `Usia ${ku.minAge} sampai ${ku.maxAge} tahun`,
+      en: sama ? `Age ${ku.minAge}` : `Ages ${ku.minAge} to ${ku.maxAge}`,
+    };
+    const timpa = own.find((p) => p.ageGroupId === ku.id);
+    if (timpa) return { ...timpa, ageRange };
+    return {
+      id: `ku-${ku.id.slice(0, 8)}`,
+      code: ku.name.slice(0, 20),
+      name: { id: "Pembinaan sepak bola", en: "Football development" },
+      ageRange,
+      focus: { id: "Pembinaan dasar sepak bola sesuai usia", en: "Age-appropriate football fundamentals" },
+      schedule: { id: "Jadwal diinformasikan setelah pendaftaran", en: "Schedule shared after registration" },
+      curriculum: [],
+      hasScholarship: false,
+      ageGroupId: ku.id,
+    };
+  });
+  return [...turunan, ...own.filter((p) => !p.ageGroupId)];
+}

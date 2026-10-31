@@ -3852,3 +3852,9 @@ button.pengguna[aria-expanded="true"] .panah-menu {
 .rating-lencana[data-pita="4"] {
   --pita: #3f8f5a;
 }
+
+/* ---- Pendaftar: tautan undangan orang tua ---- */
+.tautan-undangan input {
+  width: 100%;
+  font-size: 0.85rem;
+}

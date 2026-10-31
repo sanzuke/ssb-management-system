@@ -1,0 +1,4 @@
+ALTER TABLE "trial_registration" ADD COLUMN "age_group_id" uuid;--> statement-breakpoint
+ALTER TABLE "trial_registration" ADD COLUMN "player_id" uuid;--> statement-breakpoint
+ALTER TABLE "trial_registration" ADD CONSTRAINT "trial_registration_age_group_fk" FOREIGN KEY ("ssb_id","age_group_id") REFERENCES "public"."age_group"("ssb_id","id") ON DELETE SET NULL ("age_group_id") ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "trial_registration" ADD CONSTRAINT "trial_registration_player_fk" FOREIGN KEY ("ssb_id","player_id") REFERENCES "public"."player"("ssb_id","id") ON DELETE SET NULL ("player_id") ON UPDATE no action;

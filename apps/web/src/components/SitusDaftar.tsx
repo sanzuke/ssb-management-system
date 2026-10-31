@@ -1,4 +1,5 @@
-import { Index, Show } from "solid-js";
+import { createResource, Index, Show } from "solid-js";
+import { api } from "~/lib/api";
 import { hariIni } from "~/lib/waktu";
 import { angka, geser, idProgramBaru, isi, type Sunting, ubahDi } from "~/lib/situs";
 import Field from "./Field";
@@ -18,12 +19,15 @@ function Tambah(p: { teks: string; jumlah: number; maks: number; onClick: () => 
 
 export function SitusProgram(p: { s: Sunting }) {
   const { d, ubah, salah } = p.s;
+  const [kus] = createResource(() => api<{ id: string; name: string; minAge: number; maxAge: number }[]>("/age-groups").catch(() => []));
   return (
     <section class="master" aria-label="Program">
       <h2>Program latihan</h2>
       <HeaderBagian s={p.s} kunci="programs" />
       <p class="petunjuk">
-        Tiap program tampil sebagai tab di halaman. Biaya ditulis apa adanya, mis. "Rp 250.000 / bulan"; kosongkan bila tidak ingin dipajang.
+        Tiap KU di Data master otomatis menjadi satu program, jadi pilihan kategori usia di formulir trial selalu sama dengan master. Di sini Anda mengisi teks
+        dan foto program: pilih KU pada program, maka teksnya menggantikan teks bawaan KU itu dan rentang usianya otomatis dari master. Program tanpa KU tetap
+        tampil di belakang (mis. kelas khusus). Biaya ditulis apa adanya, mis. "Rp 250.000 / bulan"; kosongkan bila tidak ingin dipajang.
       </p>
       <Index each={d.programs}>
         {(_, i) => {
@@ -38,6 +42,20 @@ export function SitusProgram(p: { s: Sunting }) {
               hapus={() => ubah((x) => void x.programs.splice(i, 1))}
             >
               <div class="form">
+                <SelectField
+                  id={`prog-${i}-ku`}
+                  label="KU di Data master"
+                  value={d.programs[i]?.ageGroupId ?? ""}
+                  onInput={(v) =>
+                    ubahProgram((b) => {
+                      if (v) b.ageGroupId = v;
+                      else delete b.ageGroupId;
+                    })
+                  }
+                  blank="Tanpa KU (program lepas)"
+                  options={(kus() ?? []).map((k) => ({ value: k.id, label: `${k.name} (usia ${k.minAge} sampai ${k.maxAge})` }))}
+                  error={salah(`${j}.ageGroupId`)}
+                />
                 <Field
                   id={`prog-${i}-id`}
                   label="Kode alamat"

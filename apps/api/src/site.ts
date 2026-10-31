@@ -3,22 +3,28 @@ import { isDeepStrictEqual } from "node:util";
 import { and, desc, eq, sql } from "drizzle-orm";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
-import { schema, withTenant, type Db } from "@ssb/db";
+import { schema, withTenant, type Db, type Tx } from "@ssb/db";
 import {
   emptySiteContent,
+  playerFormSchema,
+  programsFromAgeGroups,
   siteContentSchema,
+  trialConvertSchema,
   trialInputSchema,
   trialStatusSchema,
   trialUpdateSchema,
+  whatsappSchema,
   type SiteAdminView,
   type SiteContent,
   type SitePublicView,
+  type TrialConvertResult,
   type TrialRow,
 } from "@ssb/shared";
 import { requirePermission, type AppEnv } from "./auth/middleware";
-import { ssbIdBySlug } from "./auth/service";
+import { ssbIdBySlug, createInvitation } from "./auth/service";
 import { HttpError } from "./errors";
 import { createRateLimiter } from "./rate-limit";
+import { insertPlayer } from "./players";
 import { zv } from "./validator";
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -37,13 +43,23 @@ function bacaKonten(raw: unknown, fallbackName: string): SiteContent {
 /** jsonb di PostgreSQL menyusun ulang urutan kunci, jadi bandingkan strukturnya, bukan teks JSON-nya. */
 const sama = (a: SiteContent, rawPublished: unknown) => isDeepStrictEqual(a, bacaKonten(rawPublished, ""));
 
-const toTrialRow = (r: typeof schema.trialRegistration.$inferSelect): TrialRow => ({
+/** Pendaftar beserta nama KU yang dipilih dan siswa hasil konversinya (bila ada). */
+const trialSelect = (tx: Tx) =>
+  tx
+    .select({ t: schema.trialRegistration, kuName: schema.ageGroup.name, playerName: schema.player.fullName })
+    .from(schema.trialRegistration)
+    .leftJoin(schema.ageGroup, and(eq(schema.ageGroup.ssbId, schema.trialRegistration.ssbId), eq(schema.ageGroup.id, schema.trialRegistration.ageGroupId)))
+    .leftJoin(schema.player, and(eq(schema.player.ssbId, schema.trialRegistration.ssbId), eq(schema.player.id, schema.trialRegistration.playerId)));
+
+const toTrialRow = ({ t: r, kuName, playerName }: Awaited<ReturnType<typeof trialSelect>>[number]): TrialRow => ({
   id: r.id,
   code: r.code,
   childName: r.childName,
   birthDate: r.birthDate,
   gender: r.gender === "Putri" ? "Putri" : "Putra",
   programId: r.programId,
+  ageGroup: r.ageGroupId && kuName ? { id: r.ageGroupId, name: kuName } : null,
+  player: r.playerId && playerName ? { id: r.playerId, name: playerName } : null,
   parentName: r.parentName,
   phone: r.phone,
   email: r.email,
@@ -57,7 +73,7 @@ const toTrialRow = (r: typeof schema.trialRegistration.$inferSelect): TrialRow =
 });
 
 /** Konten situs dan kotak masuk pendaftar trial, untuk admin SSB. */
-export function siteRoutes(db: Db) {
+export function siteRoutes(db: Db, opts: { webUrl: string }) {
   const baca = async (ssbId: string): Promise<SiteAdminView> =>
     withTenant(db, ssbId, async (tx) => {
       const [s] = await tx.select({ name: schema.ssb.name }).from(schema.ssb).where(eq(schema.ssb.id, ssbId)).limit(1);
@@ -120,9 +136,7 @@ export function siteRoutes(db: Db) {
         const m = c.get("auth")!.member!;
         const status = trialStatusSchema.safeParse(c.req.query("status"));
         const rows = await withTenant(db, m.ssbId, (tx) =>
-          tx
-            .select()
-            .from(schema.trialRegistration)
+          trialSelect(tx)
             .where(status.success ? eq(schema.trialRegistration.status, status.data) : undefined)
             .orderBy(desc(schema.trialRegistration.createdAt))
             .limit(500),
@@ -135,15 +149,71 @@ export function siteRoutes(db: Db) {
         const id = c.req.param("id");
         if (!UUID.test(id)) throw notFound("Pendaftar");
         const b = c.req.valid("json");
-        const [row] = await withTenant(db, m.ssbId, (tx) =>
-          tx
+        const row = await withTenant(db, m.ssbId, async (tx) => {
+          const [u] = await tx
             .update(schema.trialRegistration)
             .set({ ...(b.status ? { status: b.status } : {}), ...(b.adminNote !== undefined ? { adminNote: b.adminNote || null } : {}), updatedAt: new Date() })
             .where(and(eq(schema.trialRegistration.id, id), eq(schema.trialRegistration.ssbId, m.ssbId)))
-            .returning(),
-        );
+            .returning({ id: schema.trialRegistration.id });
+          if (!u) return null;
+          const [r] = await trialSelect(tx).where(eq(schema.trialRegistration.id, id));
+          return r ?? null;
+        });
         if (!row) throw notFound("Pendaftar");
         return c.json(toTrialRow(row));
+      })
+
+      // Menjadikan pendaftar sebagai siswa (KU dari pilihan di landing atau yang dikirim admin) lalu membuat undangan orang tua
+      // yang langsung terhubung ke siswa itu. Satu pendaftar hanya bisa dikonversi sekali.
+      .post("/trials/:id/convert", requirePermission("trial.convert"), zv("json", trialConvertSchema), async (c) => {
+        const m = c.get("auth")!.member!;
+        const id = c.req.param("id");
+        if (!UUID.test(id)) throw notFound("Pendaftar");
+        const b = c.req.valid("json");
+        const dibuat = await withTenant(db, m.ssbId, async (tx) => {
+          const [t] = await tx.select().from(schema.trialRegistration).where(eq(schema.trialRegistration.id, id)).for("update").limit(1);
+          if (!t) throw notFound("Pendaftar");
+          if (t.playerId) throw new HttpError(409, "already_converted", "Pendaftar ini sudah dijadikan siswa");
+          if (t.status === "ditolak") throw new HttpError(409, "rejected", "Pendaftar ini berstatus ditolak. Ubah statusnya dulu bila ingin menerimanya");
+          const ageGroupId = b.ageGroupId !== undefined ? b.ageGroupId : t.ageGroupId;
+          const wa = whatsappSchema.safeParse(t.phone.replace(/[^\d+]/g, ""));
+          const form = playerFormSchema.safeParse({
+            fullName: t.childName,
+            birthDate: t.birthDate,
+            ageGroupId,
+            guardianName: t.parentName,
+            guardianWhatsapp: wa.success ? wa.data : null,
+          });
+          if (!form.success) {
+            throw new HttpError(
+              422,
+              "trial_invalid",
+              `Data pendaftar belum memenuhi syarat siswa: ${form.error.issues.map((i) => `${i.path.join(".")} ${i.message}`).join("; ")}`,
+            );
+          }
+          let playerId: string;
+          try {
+            playerId = await insertPlayer(tx, m.ssbId, form.data);
+          } catch (e) {
+            if ((e as { cause?: { code?: string } })?.cause?.code === "23503" || (e as { code?: string })?.code === "23503") {
+              throw new HttpError(422, "age_group_invalid", "KU tidak ditemukan di SSB ini");
+            }
+            throw e;
+          }
+          await tx
+            .update(schema.trialRegistration)
+            .set({ playerId, ageGroupId: ageGroupId ?? null, status: "diterima", updatedAt: new Date() })
+            .where(eq(schema.trialRegistration.id, id));
+          return { playerId, name: t.childName, label: `Wali ${t.parentName} (${t.code})`.slice(0, 120) };
+        });
+        const inv = await createInvitation(db, m, { role: "orang_tua", label: dibuat.label, playerId: dibuat.playerId });
+        const [row] = await withTenant(db, m.ssbId, (tx) => trialSelect(tx).where(eq(schema.trialRegistration.id, id)));
+        const out: TrialConvertResult = {
+          trial: toTrialRow(row!),
+          player: { id: dibuat.playerId, name: dibuat.name },
+          invitation: { url: `${opts.webUrl}/undangan/${inv.token}`, expiresAt: inv.expiresAt.toISOString() },
+        };
+        return c.json(out, 201);
       })
   );
 }
@@ -176,7 +246,16 @@ export function publicSiteRoutes(db: Db, opts: PublicSiteOptions) {
         if (!s || !row || row.published === null || !row.publishedAt) return null;
         const parsed = siteContentSchema.safeParse(row.published);
         if (!parsed.success) return null;
-        const v: SitePublicView = { slug, ssbName: s.name, publishedAt: row.publishedAt.toISOString(), content: parsed.data };
+        // Program ikut KU di Data master supaya pilihan kategori usia di landing selalu sama dengan master.
+        const kus = await tx
+          .select({ id: schema.ageGroup.id, name: schema.ageGroup.name, minAge: schema.ageGroup.minAge, maxAge: schema.ageGroup.maxAge })
+          .from(schema.ageGroup);
+        const v: SitePublicView = {
+          slug,
+          ssbName: s.name,
+          publishedAt: row.publishedAt.toISOString(),
+          content: { ...parsed.data, programs: programsFromAgeGroups(kus, parsed.data.programs) },
+        };
         return v;
       });
       if (!view) throw gone;
@@ -203,6 +282,9 @@ export function publicSiteRoutes(db: Db, opts: PublicSiteOptions) {
           .where(eq(schema.siteContent.ssbId, ssbId))
           .limit(1);
         if (!live?.ok) return null;
+        // KU yang tidak dikenal (konten berubah setelah formulir dibuka, atau id asal-asalan) diabaikan: pendaftaran tetap diterima.
+        const [ku] = b.ageGroupId ? await tx.select({ id: schema.ageGroup.id }).from(schema.ageGroup).where(eq(schema.ageGroup.id, b.ageGroupId)).limit(1) : [];
+        const ageGroupId = ku?.id ?? null;
         for (let i = 0; i < 5; i++) {
           const kode = buatKode();
           const ins = await tx
@@ -214,6 +296,7 @@ export function publicSiteRoutes(db: Db, opts: PublicSiteOptions) {
               birthDate: b.birthDate,
               gender: b.gender,
               programId: b.programId ?? null,
+              ageGroupId,
               parentName: b.parentName,
               phone: b.phone,
               email: b.email || null,

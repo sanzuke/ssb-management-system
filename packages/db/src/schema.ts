@@ -782,6 +782,10 @@ export const trialRegistration = pgTable(
     birthDate: date("birth_date").notNull(),
     gender: text("gender").notNull(),
     programId: text("program_id"),
+    /** KU yang dipilih di landing (program yang berasal dari KU); kosong bila tidak ada atau KU-nya sudah dihapus. */
+    ageGroupId: uuid("age_group_id"),
+    /** Siswa hasil konversi pendaftar; kosong sebelum dikonversi. */
+    playerId: uuid("player_id"),
     parentName: text("parent_name").notNull(),
     phone: text("phone").notNull(),
     email: text("email"),
@@ -799,6 +803,8 @@ export const trialRegistration = pgTable(
     index("trial_registration_status_idx").on(t.ssbId, t.status, t.createdAt),
     check("trial_registration_status", sql`${t.status} in ('baru', 'dihubungi', 'diterima', 'ditolak')`),
     check("trial_registration_gender", sql`${t.gender} in ('Putra', 'Putri')`),
+    foreignKey({ columns: [t.ssbId, t.ageGroupId], foreignColumns: [ageGroup.ssbId, ageGroup.id], name: "trial_registration_age_group_fk" }),
+    foreignKey({ columns: [t.ssbId, t.playerId], foreignColumns: [player.ssbId, player.id], name: "trial_registration_player_fk" }),
     tenantPolicy("trial_registration"),
   ],
 ).enableRLS();

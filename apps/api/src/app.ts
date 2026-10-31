@@ -90,7 +90,7 @@ export function createApp(
       .route("/", feeRoutes(db, { secret: env.TOKEN_SECRET ?? env.SESSION_SECRET ?? "" }))
       .route("/", feeSettingRoutes(db))
       .route("/", whatsappSettingRoutes(db, { secret: env.TOKEN_SECRET ?? env.SESSION_SECRET ?? "" }))
-      .route("/", siteRoutes(db))
+      .route("/", siteRoutes(db, { webUrl }))
       .route(
         "/",
         publicSiteRoutes(db, {

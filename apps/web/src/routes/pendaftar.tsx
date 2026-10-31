@@ -1,7 +1,7 @@
 import { useNavigate } from "@solidjs/router";
 import { Title } from "@solidjs/meta";
 import { createMemo, createSignal, For, onMount, Show } from "solid-js";
-import type { SiteAdminView, TrialRow, TrialStatus } from "@ssb/shared";
+import type { SiteAdminView, TrialConvertResult, TrialRow, TrialStatus } from "@ssb/shared";
 import KartuPendaftar, { labelStatusTrial } from "~/components/KartuPendaftar";
 import KepalaHalaman from "~/components/KepalaHalaman";
 import Memuat from "~/components/Memuat";
@@ -13,6 +13,7 @@ export default function Pendaftar() {
   const [me, setMe] = createSignal<Me | null>(null);
   const [baris, setBaris] = createSignal<TrialRow[]>([]);
   const [program, setProgram] = createSignal<Record<string, string>>({});
+  const [kus, setKus] = createSignal<{ id: string; name: string }[]>([]);
   const [saring, setSaring] = createSignal<"" | TrialStatus>("");
   const [gagal, setGagal] = createSignal(false);
   const [dimuat, setDimuat] = createSignal(false);
@@ -26,6 +27,7 @@ export default function Pendaftar() {
       setBaris(await api<TrialRow[]>("/trials"));
       // Nama program untuk label; boleh gagal tanpa mengganggu daftar.
       const site = await api<SiteAdminView>("/site").catch(() => null);
+      setKus(await api<{ id: string; name: string }[]>("/age-groups").catch(() => []));
       if (site) setProgram(Object.fromEntries(site.draft.programs.map((p) => [p.id, p.name.id])));
     } catch {
       setGagal(true);
@@ -36,6 +38,12 @@ export default function Pendaftar() {
   const tampil = createMemo(() => baris().filter((b) => !saring() || b.status === saring()));
   const jumlahBaru = () => baris().filter((b) => b.status === "baru").length;
   const ganti = (b: TrialRow) => setBaris((l) => l.map((x) => (x.id === b.id ? b : x)));
+  // Tautan undangan hanya dikirim sekali oleh API, jadi disimpan di sini selama halaman terbuka.
+  const [undangan, setUndangan] = createSignal<Record<string, TrialConvertResult>>({});
+  const jadi = (h: TrialConvertResult) => {
+    setUndangan((u) => ({ ...u, [h.trial.id]: h }));
+    ganti(h.trial);
+  };
 
   return (
     <Show when={me()} fallback={<Memuat halaman />}>
@@ -75,9 +83,12 @@ export default function Pendaftar() {
                 {(b) => (
                   <KartuPendaftar
                     baris={b}
+                    kus={kus()}
                     program={b.programId ? program()[b.programId] : undefined}
                     ssbName={me()?.active?.ssbName ?? "akademi"}
                     onUbah={ganti}
+                    undangan={undangan()[b.id] ?? null}
+                    onJadi={jadi}
                   />
                 )}
               </For>

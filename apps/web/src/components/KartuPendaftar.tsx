@@ -1,5 +1,6 @@
-import { createSignal, Show } from "solid-js";
-import type { TrialRow, TrialStatus } from "@ssb/shared";
+import { A } from "@solidjs/router";
+import { createEffect, createSignal, Show } from "solid-js";
+import type { TrialConvertResult, TrialRow, TrialStatus } from "@ssb/shared";
 import { api, ApiError } from "~/lib/api";
 import { linkWa } from "~/lib/wa";
 import SelectField from "./SelectField";
@@ -24,20 +25,58 @@ function umur(lahir: string): string {
 const tanggal = (iso: string) => new Date(iso).toLocaleString("id-ID", { dateStyle: "medium", timeStyle: "short" });
 
 /** Satu pendaftar trial: data yang dikirim orang tua, tombol hubungi lewat WhatsApp, dan status tindak lanjut. */
-export default function KartuPendaftar(props: { baris: TrialRow; program: string | undefined; ssbName: string; onUbah: (b: TrialRow) => void }) {
+export default function KartuPendaftar(props: {
+  baris: TrialRow;
+  program: string | undefined;
+  /** KU di Data master, untuk memilih KU saat menjadikan pendaftar siswa. */
+  kus: { id: string; name: string }[];
+  ssbName: string;
+  onUbah: (b: TrialRow) => void;
+  /** Hasil konversi (tautan undangan hanya tampil sekali) disimpan oleh halaman agar tidak hilang saat kartu dirender ulang. */
+  undangan: TrialConvertResult | null;
+  onJadi: (hasil: TrialConvertResult) => void;
+}) {
   const [status, setStatus] = createSignal<TrialStatus>(props.baris.status);
   const [catatan, setCatatan] = createSignal(props.baris.adminNote ?? "");
   const [sibuk, setSibuk] = createSignal(false);
   const [galat, setGalat] = createSignal("");
   const [info, setInfo] = createSignal("");
   const berubah = () => status() !== props.baris.status || catatan().trim() !== (props.baris.adminNote ?? "");
+  const [kuPilihan, setKuPilihan] = createSignal(props.baris.ageGroup?.id ?? "");
+  const jadi = () => props.undangan;
+  const [jadiSibuk, setJadiSibuk] = createSignal(false);
+  const [jadiGalat, setJadiGalat] = createSignal("");
   const b = () => props.baris;
+  // Status berubah dari luar (mis. otomatis "Diterima" setelah dijadikan siswa): isian ikut, supaya tombol Simpan tidak mengembalikannya.
+  createEffect(() => setStatus(props.baris.status));
   const wa = () =>
     linkWa(
       b().phone,
       `Halo ${b().parentName}, kami dari ${props.ssbName}. Terima kasih sudah mendaftarkan ${b().childName} untuk trial (kode ${b().code}). Kami ingin mengatur jadwal trialnya.`,
     );
 
+  const jadikanSiswa = async () => {
+    if (jadiSibuk()) return;
+    setJadiSibuk(true);
+    setJadiGalat("");
+    try {
+      const hasil = await api<TrialConvertResult>(`/trials/${encodeURIComponent(b().id)}/convert`, {
+        method: "POST",
+        body: { ageGroupId: kuPilihan() || null },
+      });
+      props.onJadi(hasil);
+    } catch (e) {
+      setJadiGalat(e instanceof ApiError ? e.message : "Tidak bisa terhubung ke server. Coba lagi.");
+    } finally {
+      setJadiSibuk(false);
+    }
+  };
+  const waUndangan = () =>
+    jadi() &&
+    linkWa(
+      b().phone,
+      `Halo ${b().parentName}, terima kasih sudah mendaftar di ${props.ssbName}. ${b().childName} sudah terdaftar. Silakan buat akun orang tua lewat tautan ini untuk melihat jadwal, kehadiran, dan nilai: ${jadi()!.invitation.url}`,
+    );
   const simpan = async () => {
     if (sibuk()) return;
     setSibuk(true);
@@ -68,7 +107,7 @@ export default function KartuPendaftar(props: { baris: TrialRow; program: string
           {b().gender}, {umur(b().birthDate)} (lahir {b().birthDate})
         </dd>
         <dt>Program</dt>
-        <dd>{props.program ?? b().programId ?? "Belum memilih"}</dd>
+        <dd>{[b().ageGroup?.name, props.program].filter(Boolean).join(" · ") || b().programId || "Belum memilih"}</dd>
         <dt>Orang tua</dt>
         <dd>{b().parentName}</dd>
         <dt>Telepon</dt>
@@ -124,6 +163,68 @@ export default function KartuPendaftar(props: { baris: TrialRow; program: string
         <button class="tombol utama" type="button" disabled={sibuk() || !berubah()} onClick={simpan}>
           {sibuk() ? "Menyimpan…" : "Simpan"}
         </button>
+      </div>
+      <div class="form jadi-siswa">
+        <Show
+          when={!b().player}
+          fallback={
+            <Show when={!jadi()}>
+              <div class="info" role="status">
+                Sudah dijadikan siswa:{" "}
+                <A href={`/pemain/${b().player!.id}`}>
+                  <strong>{b().player!.name}</strong>
+                </A>
+                . Untuk tautan undangan orang tua, buka menu Undangan lalu buat ulang tautannya.
+              </div>
+            </Show>
+          }
+        >
+          <Show
+            when={b().status !== "ditolak"}
+            fallback={<p class="petunjuk">Pendaftar yang ditolak tidak bisa dijadikan siswa. Ubah statusnya dulu bila ingin menerimanya.</p>}
+          >
+            <SelectField
+              id={`ku-${b().id}`}
+              label="KU untuk siswa"
+              value={kuPilihan()}
+              onInput={setKuPilihan}
+              blank="Belum ditentukan"
+              options={props.kus.map((k) => ({ value: k.id, label: k.name }))}
+              hint="Terisi dari pilihan orang tua di landing; boleh diganti."
+            />
+            <Show when={jadiGalat()}>
+              <div class="peringatan" role="alert">
+                {jadiGalat()}
+              </div>
+            </Show>
+            <button class="tombol utama-rumput" type="button" disabled={jadiSibuk()} onClick={jadikanSiswa}>
+              {jadiSibuk() ? "Memproses…" : "Jadikan siswa dan undang orang tua"}
+            </button>
+          </Show>
+        </Show>
+        <Show when={jadi()}>
+          {(h) => (
+            <div class="info" role="status">
+              <p>
+                <A href={`/pemain/${h().player.id}`}>
+                  <strong>{h().player.name}</strong>
+                </A>{" "}
+                sudah menjadi siswa. Kirim tautan ini ke orang tua agar bisa membuat akun (berlaku sampai {tanggal(h().invitation.expiresAt)}, hanya tampil
+                sekali):
+              </p>
+              <p class="tautan-undangan">
+                <input type="text" readonly value={h().invitation.url} aria-label="Tautan undangan orang tua" onFocus={(e) => e.currentTarget.select()} />
+              </p>
+              <Show when={waUndangan()}>
+                {(u) => (
+                  <a class="tombol tipis" href={u()} target="_blank" rel="noopener noreferrer">
+                    Kirim lewat WhatsApp
+                  </a>
+                )}
+              </Show>
+            </div>
+          )}
+        </Show>
       </div>
     </article>
   );

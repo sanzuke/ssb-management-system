@@ -81,6 +81,7 @@ export const permissions = {
   },
   "mailbox.manage": { roles: ["admin_ssb"], desc: "Membuat, mereset sandi, dan menghapus kotak surat email akademi di server" },
   "trial.manage": { roles: ["admin_ssb"], desc: "Melihat pendaftar trial dari landing page dan mengubah statusnya" },
+  "trial.convert": { roles: ["admin_ssb"], desc: "Menjadikan pendaftar trial sebagai siswa dan membuat tautan undangan untuk orang tuanya" },
 } as const satisfies Record<string, { roles: readonly UserRole[]; desc: string }>;
 export type Permission = keyof typeof permissions;
 export const can = (role: UserRole, p: Permission) => (permissions[p].roles as readonly UserRole[]).includes(role);

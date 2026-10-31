@@ -121,7 +121,7 @@ const extraColumns = (b: PlayerFormData) => ({
   shoeSize: b.shoeSize ?? null,
 });
 /** Menyimpan satu siswa baru. ID siswa yang diisi dipakai apa adanya; kosong diberi nomor otomatis (unik walau dua siswa dibuat bersamaan). */
-async function insertPlayer(tx: Tx, ssbId: string, b: PlayerFormData): Promise<string> {
+export async function insertPlayer(tx: Tx, ssbId: string, b: PlayerFormData): Promise<string> {
   const memberNo = b.memberNo ?? (await nextMemberNo(tx, ssbId));
   const [p] = await tx
     .insert(schema.player)

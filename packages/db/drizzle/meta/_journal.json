@@ -183,6 +183,13 @@
       "when": 1793357827926,
       "tag": "0025_cedera",
       "breakpoints": true
+    },
+    {
+      "idx": 26,
+      "version": "7",
+      "when": 1793416611292,
+      "tag": "0026_trial_ku",
+      "breakpoints": true
     }
   ]
 }
