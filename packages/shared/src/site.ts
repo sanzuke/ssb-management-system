@@ -40,6 +40,8 @@ export const siteHeroSchema = z.object({
   title: localizedSchema,
   subtitle: localizedSchema,
   primaryCta: localizedSchema,
+  /** Keterangan di kartu pada foto beranda; kolom kosong = teks bawaan landing. */
+  caption: z.object({ title: localizedSchema, time: short, text: localizedSchema }).partial().optional(),
 });
 
 export const siteStatSchema = z.object({ label: localizedSchema, value: short });

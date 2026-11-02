@@ -139,6 +139,34 @@ export function SitusBeranda(p: { s: Sunting }) {
           bawaan="Memakai foto beranda bawaan landing."
         />
         <div class="form">
+          <p class="petunjuk">Keterangan di kartu pada foto beranda. Kolom yang dikosongkan memakai teks bawaan landing.</p>
+          <Lokal
+            id="hero-cap-judul"
+            label="Judul keterangan foto"
+            value={d.hero.caption?.title}
+            onChange={(v) => ubah((x) => (x.hero.caption = { ...x.hero.caption, title: v }))}
+            jalur="hero.caption.title"
+            salah={salah}
+          />
+          <Field
+            id="hero-cap-jam"
+            label="Jam di keterangan foto, mis. 07:30 WIB"
+            value={d.hero.caption?.time ?? ""}
+            onInput={(v) => ubah((x) => (x.hero.caption = { ...x.hero.caption, time: v }))}
+            error={salah("hero.caption.time")}
+            maxlength={200}
+          />
+          <Lokal
+            id="hero-cap-isi"
+            label="Isi keterangan foto"
+            panjang
+            value={d.hero.caption?.text}
+            onChange={(v) => ubah((x) => (x.hero.caption = { ...x.hero.caption, text: v }))}
+            jalur="hero.caption.text"
+            salah={salah}
+          />
+        </div>
+        <div class="form">
           <Lokal
             id="hero-eyebrow"
             label="Label kecil di atas judul (opsional)"
