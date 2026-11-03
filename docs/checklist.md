@@ -220,3 +220,4 @@ Belum dirancang; tiap butir perlu keputusan lingkup sebelum dikerjakan.
 - [ ] Donasi: **(butuh keputusan)** tampil di landing, dicatat per SSB, dan apakah ada laporan penggunaan dana ke donatur
 - [ ] Statistik orang tua: admin bisa menginput manual riwayat bermain bola orang tua (mis. klub, level, tahun) karena ada orang tua yang pernah bermain; **(butuh keputusan)** apakah tampil di profil pemain atau di landing, dan persetujuannya (UU PDP)
 - [ ] Payment gateway: **(butuh keputusan)** penyedia (Midtrans, Xendit, dll). Dipakai untuk SPP, donasi, dan merchant; menggantikan pencatatan pembayaran manual dan membuka WhatsApp otomatis
+- [ ] Kalender akademik: **(butuh keputusan)** isi (libur, pekan ujian/rapor, turnamen, acara akademi), siapa yang menyunting (admin), dan tampil di mana (portal orang tua, jadwal pelatih, landing)
