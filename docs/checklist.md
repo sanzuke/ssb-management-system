@@ -211,3 +211,12 @@ Detail di `docs/konsep-fm.md`. Dikerjakan di cabang `feat/profil-ala-fm`.
 - [ ] Proyeksi perkembangan khusus pelatih
 - [ ] Laporan seleksi untuk pendaftar trial
 - [ ] Putuskan: orang tua melihat Rating Umum sebagai angka atau hanya pita dan kata **(butuh keputusan)**
+
+## P. Fitur usulan berikutnya (catatan pengguna, 3 Nov 2026)
+
+Belum dirancang; tiap butir perlu keputusan lingkup sebelum dikerjakan.
+
+- [ ] Merchant: **(butuh keputusan)** bentuknya (toko perlengkapan SSB, mitra/sponsor, atau penjual pihak ketiga) dan alur pesanan
+- [ ] Donasi: **(butuh keputusan)** tampil di landing, dicatat per SSB, dan apakah ada laporan penggunaan dana ke donatur
+- [ ] Statistik orang tua: admin bisa menginput manual riwayat bermain bola orang tua (mis. klub, level, tahun) karena ada orang tua yang pernah bermain; **(butuh keputusan)** apakah tampil di profil pemain atau di landing, dan persetujuannya (UU PDP)
+- [ ] Payment gateway: **(butuh keputusan)** penyedia (Midtrans, Xendit, dll). Dipakai untuk SPP, donasi, dan merchant; menggantikan pencatatan pembayaran manual dan membuka WhatsApp otomatis
