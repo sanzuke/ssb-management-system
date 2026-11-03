@@ -129,7 +129,7 @@ export const siteContentSchema = z.object({
     .partial()
     .optional(),
   /** Foto bagian di landing (URL gambar yang sudah diunggah); kosong = foto bawaan. */
-  images: z.object({ hero: url, matches: url }).partial().optional(),
+  images: z.object({ hero: url, community: url, matches: url }).partial().optional(),
   /** Tautan media sosial yang ditampilkan di footer. */
   social: z.object({ instagram: url, youtube: url, facebook: url, tiktok: url }).partial().optional(),
 });

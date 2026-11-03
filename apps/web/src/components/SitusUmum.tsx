@@ -245,6 +245,19 @@ export function SitusCerita(p: { s: Sunting }) {
     <section class="master" aria-label="Cerita">
       <h2>Cerita akademi</h2>
       <p class="petunjuk">Sejarah singkat atau latar belakang yayasan. Kosongkan kedua kolom Indonesia bila bagian ini tidak ingin ditampilkan.</p>
+      <FotoSitus
+        id="cerita-foto"
+        label="Foto cerita akademi"
+        value={d.images?.community || undefined}
+        onChange={(u) =>
+          ubah((x) => {
+            if (u) x.images = { ...x.images, community: u };
+            else if (x.images) delete x.images.community;
+          })
+        }
+        error={salah("images.community")}
+        bawaan="Memakai foto komunitas bawaan landing."
+      />
       <div class="form">
         <Lokal
           id="cerita-judul"
