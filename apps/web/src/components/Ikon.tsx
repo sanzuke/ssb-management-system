@@ -108,7 +108,10 @@ const jalur = {
       <path d="M3 20c0-3.3 2.7-6 6-6 1.5 0 2.8.5 3.8 1.4M17 14v6m-3-3h6" />
     </>
   ),
-} satisfies Record<string, () => JSX.Element>;
+  hapus: () => (
+    <path d="M3 6v2h1.5v12H5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8h1.5V6H16a1 1 0 0 0-1-1H9a1 1 0 0 0-1 1ZM7 8v12a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V8H7Zm2-2h4v12H9V6Z" />
+  ),
+};
 
 export default function Ikon(p: { nama: keyof typeof jalur; ukuran?: number }) {
   return (

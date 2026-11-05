@@ -80,8 +80,9 @@ export const permissions = {
     desc: "Menulis artikel untuk landing page, mengunggah gambarnya, dan menerbitkan artikel sendiri (admin SSB: semua artikel)",
   },
   "mailbox.manage": { roles: ["admin_ssb"], desc: "Membuat, mereset sandi, dan menghapus kotak surat email akademi di server" },
+  "merchandise.manage": { roles: ["admin_ssb"], desc: "Mengelola produk merchandise dan pesanan penjualan" },
+  "trial.convert": { roles: ["admin_ssb"], desc: "Menjadikan pendaftar trial menjadi siswa dan membuat tautan undangan untuk orang tua" },
   "trial.manage": { roles: ["admin_ssb"], desc: "Melihat pendaftar trial dari landing page dan mengubah statusnya" },
-  "trial.convert": { roles: ["admin_ssb"], desc: "Menjadikan pendaftar trial sebagai siswa dan membuat tautan undangan untuk orang tuanya" },
 } as const satisfies Record<string, { roles: readonly UserRole[]; desc: string }>;
 export type Permission = keyof typeof permissions;
 export const can = (role: UserRole, p: Permission) => (permissions[p].roles as readonly UserRole[]).includes(role);
@@ -802,3 +803,84 @@ export const invoiceAmountSchema = z.object({
   amount: z.number().int("harus bilangan bulat").min(1, "minimal 1 rupiah").max(100_000_000, "terlalu besar"),
 });
 export type InvoiceAmountInput = z.infer<typeof invoiceAmountSchema>;
+
+// ---- Merchandise: produk dan pesanan penjualan ----
+
+export const merchandiseStatusSchema = z.enum(["pending", "processing", "shipped", "completed", "cancelled"]);
+export type MerchandiseStatus = z.infer<typeof merchandiseStatusSchema>;
+
+/** Membuat atau mengubah produk merchandise. `id` dikosongkan untuk produk baru. */
+export const merchandiseProductInputSchema = z.object({
+  id: z.string().uuid().optional(),
+  name: z.string().trim().min(2, "minimal 2 karakter").max(100, "maksimal 100 karakter"),
+  description: z.string().trim().max(500, "maksimal 500 karakter").optional(),
+  price: z.number().int("harus bilangan bulat").min(0, "tidak boleh negatif").max(1_000_000_000, "terlalu besar"),
+  hpp: z.number().int("harus bilangan bulat").min(0, "tidak boleh negatif").max(1_000_000_000, "terlalu besar"),
+  stock: z.number().int("harus bilangan bulat").min(0, "tidak boleh negatif").max(1_000_000, "terlalu besar"),
+  imageFileKey: z.string().trim().nullable().optional(),
+  active: z.boolean().default(true),
+});
+export type MerchandiseProductInput = z.infer<typeof merchandiseProductInputSchema>;
+
+/** Baris produk merchandise dalam daftar admin. */
+export type MerchandiseProductRow = {
+  id: string;
+  name: string;
+  description: string;
+  price: number;
+  hpp: number;
+  stock: number;
+  imageFileKey: string | null;
+  active: boolean;
+  createdAt: string;
+  updatedAt: string;
+};
+
+/** Margin keuntungan per unit: harga jual dikurangi harga beli (HPP). */
+export const marginKeuntungan = (price: number, hpp: number) => price - hpp;
+
+/** Pesanan merchandise dari pembeli. */
+export const merchandiseOrderInputSchema = z.object({
+  items: z
+    .array(
+      z.object({
+        productId: z.string().uuid(),
+        quantity: z.number().int().min(1, "minimal 1"),
+      }),
+    )
+    .min(1, "minimal satu produk"),
+  buyerName: z.string().trim().min(2, "minimal 2 karakter").max(100, "maksimal 100 karakter"),
+  buyerWhatsapp: z.string().trim().min(8, "minimal 8 angka").max(15, "maksimal 15 angka"),
+  shippingAddress: z.string().trim().min(5, "minimal 5 karakter").max(300, "maksimal 300 karakter"),
+});
+export type MerchandiseOrderInput = z.infer<typeof merchandiseOrderInputSchema>;
+
+/** Baris pesanan merchandise dalam daftar admin. */
+export type MerchandiseOrderRow = {
+  id: string;
+  buyerName: string;
+  buyerWhatsapp: string;
+  shippingAddress: string;
+  total: number;
+  status: MerchandiseStatus;
+  adminNote: string | null;
+  createdAt: string;
+  updatedAt: string;
+  items: MerchandiseOrderItemRow[];
+};
+
+/** Satu item produk dalam pesanan merchandise. */
+export type MerchandiseOrderItemRow = {
+  id: string;
+  productId: string | null;
+  productName: string;
+  unitPrice: number;
+  quantity: number;
+};
+
+/** Ubah status pesanan merchandise (admin). */
+export const merchandiseOrderStatusSchema = z.object({
+  status: merchandiseStatusSchema,
+  adminNote: z.string().trim().max(300, "maksimal 300 karakter").nullable().optional(),
+});
+export type MerchandiseOrderStatusInput = z.infer<typeof merchandiseOrderStatusSchema>;

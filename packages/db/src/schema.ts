@@ -856,11 +856,127 @@ export const sitePost = pgTable(
   },
   (t) => [
     unique("site_post_ssb_slug").on(t.ssbId, t.slug),
+    unique("site_post_ssb_id").on(t.ssbId, t.id),
     index("site_post_list_idx").on(t.ssbId, t.status, t.publishedAt),
     foreignKey({ columns: [t.ssbId, t.coverMediaId], foreignColumns: [siteMedia.ssbId, siteMedia.id], name: "site_post_cover_fk" }).onDelete("set null"),
     foreignKey({ columns: [t.ssbId, t.authorId], foreignColumns: [appUser.ssbId, appUser.id], name: "site_post_author_fk" }).onDelete("set null"),
     check("site_post_status", sql`${t.status} in ('draft', 'published')`),
     check("site_post_published_pair", sql`(${t.status} = 'published') = (${t.publishedAt} is not null)`),
     tenantPolicy("site_post"),
+  ],
+).enableRLS();
+
+/** Galeri foto artikel: satu baris per foto pada satu artikel. Urut menurut sort_order; satu foto ditandai cover. */
+export const siteArticleGallery = pgTable(
+  "site_article_gallery",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    ssbId: ssbId().references(() => ssb.id, { onDelete: "cascade" }),
+    postId: uuid("post_id").notNull(),
+    mediaId: uuid("media_id").notNull(),
+    sortOrder: integer("sort_order").notNull().default(0),
+    isCover: boolean("is_cover").notNull().default(false),
+    createdAt: createdAt(),
+  },
+  (t) => [
+    unique("site_article_gallery_ssb_id").on(t.ssbId, t.id),
+    index("site_article_gallery_post_idx").on(t.ssbId, t.postId, t.sortOrder),
+    foreignKey({ columns: [t.ssbId, t.postId], foreignColumns: [sitePost.ssbId, sitePost.id], name: "site_article_gallery_post_id" }).onDelete("cascade"),
+    foreignKey({ columns: [t.ssbId, t.mediaId], foreignColumns: [siteMedia.ssbId, siteMedia.id], name: "site_article_gallery_media_id" }).onDelete("set null"),
+    tenantPolicy("site_article_gallery"),
+  ],
+).enableRLS();
+
+/** Produk merchandise yang dijual SSB (jersi, tas, sepatu, dan sejenisnya). */
+export const merchandiseProduct = pgTable(
+  "merchandise_product",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    ssbId: ssbId().references(() => ssb.id, { onDelete: "cascade" }),
+    /** Nama produk, mis. "Jersi Liga KU-10" atau "Tas olahraga SSB". */
+    name: text("name").notNull(),
+    /** Deskripsi singkat produk. */
+    description: text("description").notNull().default(""),
+    /** Harga jual ke konsumen dalam rupiah. */
+    price: integer("price").notNull(),
+    /** Harga beli dari vendor dalam rupiah, untuk perhitungan margin keuntungan. */
+    hpp: integer("hpp").notNull(),
+    /** Jumlah stok yang tersedia; 0 berarti produk habis dijual. */
+    stock: integer("stock").notNull().default(0),
+    imageFileKey: text("image_file_key"),
+    /** Produk yang aktif dapat dipesan; nonaktif disembunyikan dari publik. */
+    active: boolean("active").notNull().default(true),
+    createdAt: createdAt(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    unique("merchandise_product_ssb_id").on(t.ssbId, t.id),
+    index("merchandise_product_active_idx").on(t.ssbId, t.active),
+    check("merchandise_product_price_non_negative", sql`${t.price} >= 0`),
+    check("merchandise_product_hpp_non_negative", sql`${t.hpp} >= 0`),
+    check("merchandise_product_stock_non_negative", sql`${t.stock} >= 0`),
+    tenantPolicy("merchandise_product"),
+  ],
+).enableRLS();
+
+/** Pesanan merchandise dari pembeli (orang tua atau publik). */
+export const merchandiseOrder = pgTable(
+  "merchandise_order",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    ssbId: ssbId().references(() => ssb.id, { onDelete: "cascade" }),
+    /** Nama pembeli. */
+    buyerName: text("buyer_name").notNull(),
+    /** Nomor WhatsApp pembeli untuk konfirmasi dan pengiriman. */
+    buyerWhatsapp: text("buyer_whatsapp").notNull(),
+    /** Alamat pengiriman produk. */
+    shippingAddress: text("shipping_address").notNull(),
+    /** Total harga pesanan dalam rupiah. */
+    total: integer("total").notNull(),
+    /** Status pesanan: menunggu pembayaran, diproses, dikirim, selesai, dibatalkan. */
+    status: text("status").notNull().default("pending"),
+    /** Catatan admin mengenai pesanan. */
+    adminNote: text("admin_note"),
+    createdAt: createdAt(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    unique("merchandise_order_ssb_id").on(t.ssbId, t.id),
+    check("merchandise_order_total_non_negative", sql`${t.total} >= 0`),
+    check("merchandise_order_status", sql`${t.status} in ('pending', 'processing', 'shipped', 'completed', 'cancelled')`),
+    index("merchandise_order_status_idx").on(t.ssbId, t.status),
+    tenantPolicy("merchandise_order"),
+  ],
+).enableRLS();
+
+/** Satu item produk dalam sebuah pesanan merchandise. */
+export const merchandiseOrderItem = pgTable(
+  "merchandise_order_item",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    ssbId: ssbId().references(() => ssb.id, { onDelete: "cascade" }),
+    orderId: uuid("order_id").notNull(),
+    productId: uuid("product_id").notNull(),
+    /** Nama produk saat dipesan (disalin untuk riwayat jika produk kemudian diubah). */
+    productName: text("product_name").notNull(),
+    /** Harga per satuan saat dipesan (disalin untuk riwayat). */
+    unitPrice: integer("unit_price").notNull(),
+    /** Jumlah kuantitas yang dipesan. */
+    quantity: integer("quantity").notNull(),
+    createdAt: createdAt(),
+  },
+  (t) => [
+    unique("merchandise_order_item_ssb_id").on(t.ssbId, t.id),
+    foreignKey({
+      columns: [t.ssbId, t.orderId],
+      foreignColumns: [merchandiseOrder.ssbId, merchandiseOrder.id],
+      name: "merchandise_order_item_order_fk",
+    }).onDelete("cascade"),
+    foreignKey({
+      columns: [t.ssbId, t.productId],
+      foreignColumns: [merchandiseProduct.ssbId, merchandiseProduct.id],
+      name: "merchandise_order_item_product_fk",
+    }).onDelete("set null"),
+    tenantPolicy("merchandise_order_item"),
   ],
 ).enableRLS();

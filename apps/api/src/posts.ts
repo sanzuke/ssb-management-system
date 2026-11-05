@@ -95,13 +95,18 @@ const toAdminRow = (r: PostRow, m: Member, base: string): PostAdminRow => ({
   canEdit: canEdit(m, r.authorId),
 });
 
-const toAdminDetail = (r: PostRow, m: Member, base: string): PostAdminDetail => ({
+const toAdminDetail = (r: PostRow, m: Member, base: string, gallery: Array<{ id: string; isCover: boolean }> = []): PostAdminDetail => ({
   ...toAdminRow(r, m, base),
   excerpt: bi(r.excerptId, r.excerptEn),
   body: bi(r.bodyId, r.bodyEn),
   coverMediaId: r.coverMediaId,
   coverAlt: r.coverAlt,
   mediaBase: base,
+  galleryMedia: gallery.map((g) => ({
+    id: g.id,
+    url: `${base}${g.id}`,
+    isCover: g.isCover,
+  })),
 });
 
 /** Kolom artikel dari isian; en kosong disimpan sebagai null. */
@@ -117,6 +122,30 @@ const columns = (b: PostInput) => ({
   coverAlt: b.coverAlt,
 });
 
+/** Simpan (ganti seluruh) galeri foto artikel. Foto pertama jadi cover default bila coverMediaId kosong. */
+async function simpanGaleri(tx: Tx, ssbId: string, postId: string, mediaIds: string[], coverMediaId: string | null): Promise<void> {
+  await tx.delete(schema.siteArticleGallery).where(eq(schema.siteArticleGallery.postId, postId));
+  if (mediaIds.length === 0) return;
+  const rows = mediaIds.map((mediaId, i) => ({
+    ssbId,
+    postId,
+    mediaId,
+    sortOrder: i,
+    isCover: mediaId === coverMediaId || (i === 0 && !coverMediaId),
+  }));
+  await tx.insert(schema.siteArticleGallery).values(rows);
+}
+
+/** Ambil daftar foto galeri artikel, urut menurut sort_order. */
+async function loadGallery(tx: Tx, postId: string): Promise<Array<{ id: string; isCover: boolean }>> {
+  const rows = await tx
+    .select({ mediaId: schema.siteArticleGallery.mediaId, isCover: schema.siteArticleGallery.isCover })
+    .from(schema.siteArticleGallery)
+    .where(eq(schema.siteArticleGallery.postId, postId))
+    .orderBy(schema.siteArticleGallery.sortOrder);
+  return rows.map((r) => ({ id: r.mediaId!, isCover: r.isCover }));
+}
+
 async function ssbSlugOf(tx: Tx, ssbId: string): Promise<string> {
   const [d] = await tx.select({ slug: schema.ssbDirectory.slug }).from(schema.ssbDirectory).where(eq(schema.ssbDirectory.ssbId, ssbId)).limit(1);
   if (!d) throw notFound("SSB");
@@ -126,11 +155,12 @@ async function ssbSlugOf(tx: Tx, ssbId: string): Promise<string> {
 /** Validasi rujukan gambar dan slug sebelum menyimpan; melempar 400 dengan pesan per kolom. */
 async function checkInput(tx: Tx, b: PostInput, ownId?: string): Promise<void> {
   const fields: Record<string, string> = {};
-  const ids = [...new Set([...mediaIdsIn(b.body.id), ...mediaIdsIn(b.body.en ?? ""), ...(b.coverMediaId ? [b.coverMediaId] : [])])];
+  const ids = [...new Set([...mediaIdsIn(b.body.id), ...mediaIdsIn(b.body.en ?? ""), ...(b.coverMediaId ? [b.coverMediaId] : []), ...b.galleryMediaIds])];
   const gone = new Set(await missingMedia(tx, ids));
   if (b.coverMediaId && gone.has(b.coverMediaId)) fields.coverMediaId = "gambar sampul tidak ditemukan";
   if (mediaIdsIn(b.body.id).some((id) => gone.has(id))) fields["body.id"] = "ada gambar di isi yang tidak ditemukan";
   if (mediaIdsIn(b.body.en ?? "").some((id) => gone.has(id))) fields["body.en"] = "ada gambar di isi yang tidak ditemukan";
+  if (b.galleryMediaIds.some((id) => gone.has(id))) fields["galleryMediaIds"] = "ada foto galeri yang tidak ditemukan";
   if (b.slug) {
     const clash = await tx
       .select({ id: schema.sitePost.id })
@@ -178,7 +208,10 @@ export function postRoutes(db: Db, opts: PostOptions) {
             .values({ ssbId: m.ssbId, slug, ...columns(b), authorId: m.userId, authorName: m.name })
             .returning();
           if (!row) throw new HttpError(500, "insert_failed", "Gagal menyimpan artikel");
-          return toAdminDetail(row, m, mediaBaseFor(opts.publicApiUrl, await ssbSlugOf(tx, m.ssbId)));
+          await simpanGaleri(tx, m.ssbId, row.id, b.galleryMediaIds, b.coverMediaId);
+          const base = mediaBaseFor(opts.publicApiUrl, await ssbSlugOf(tx, m.ssbId));
+          const gallery = await loadGallery(tx, row.id);
+          return toAdminDetail(row, m, base, gallery);
         });
         return c.json(out, 201);
       })
@@ -226,7 +259,9 @@ export function postRoutes(db: Db, opts: PostOptions) {
         const out = await withTenant(db, m.ssbId, async (tx) => {
           const [row] = await tx.select().from(schema.sitePost).where(eq(schema.sitePost.id, id)).limit(1);
           if (!row) throw notFound("Artikel");
-          return toAdminDetail(row, m, mediaBaseFor(opts.publicApiUrl, await ssbSlugOf(tx, m.ssbId)));
+          const base = mediaBaseFor(opts.publicApiUrl, await ssbSlugOf(tx, m.ssbId));
+          const gallery = await loadGallery(tx, id);
+          return toAdminDetail(row, m, base, gallery);
         });
         return c.json(out);
       })
@@ -245,7 +280,10 @@ export function postRoutes(db: Db, opts: PostOptions) {
             .where(eq(schema.sitePost.id, id))
             .returning();
           if (!row) throw notFound("Artikel");
-          return toAdminDetail(row, m, mediaBaseFor(opts.publicApiUrl, await ssbSlugOf(tx, m.ssbId)));
+          await simpanGaleri(tx, m.ssbId, id, b.galleryMediaIds, b.coverMediaId);
+          const base = mediaBaseFor(opts.publicApiUrl, await ssbSlugOf(tx, m.ssbId));
+          const gallery = await loadGallery(tx, id);
+          return toAdminDetail(row, m, base, gallery);
         });
         return c.json(out);
       })
@@ -276,7 +314,9 @@ export function postRoutes(db: Db, opts: PostOptions) {
         .where(eq(schema.sitePost.id, id))
         .returning();
       if (!row) throw notFound("Artikel");
-      return toAdminDetail(row, m, mediaBaseFor(opts.publicApiUrl, await ssbSlugOf(tx, m.ssbId)));
+      const base = mediaBaseFor(opts.publicApiUrl, await ssbSlugOf(tx, m.ssbId));
+      const gallery = await loadGallery(tx, id);
+      return toAdminDetail(row, m, base, gallery);
     });
     return c.json(out);
   }
@@ -306,8 +346,9 @@ export async function loadPublicPost(db: Db, ssbId: string, slug: string, public
     const ok = new Set(have.map((x) => x.id));
     const resolve = (id: string) => (ok.has(id.toLowerCase()) ? `${base}${id.toLowerCase()}` : null);
     const blocksId: Block[] = parseMarkdown(r.bodyId, resolve);
+    const gallery = await loadGallery(tx, r.id);
     const out: PublicPost = {
-      ...summaryOf(r, base),
+      ...summaryOf(r, base, gallery),
       publishedAt: r.publishedAt.toISOString(),
       updatedAt: r.updatedAt.toISOString(),
       blocks: r.bodyEn ? { id: blocksId, en: parseMarkdown(r.bodyEn, resolve) } : { id: blocksId },
@@ -316,7 +357,7 @@ export async function loadPublicPost(db: Db, ssbId: string, slug: string, public
   });
 }
 
-export const summaryOf = (r: PostRow, base: string): PublicPostSummary => ({
+export const summaryOf = (r: PostRow, base: string, gallery: Array<{ id: string; isCover: boolean }> = []): PublicPostSummary => ({
   slug: r.slug,
   title: bi(r.titleId, r.titleEn),
   excerpt: bi(r.excerptId, r.excerptEn),
@@ -325,6 +366,7 @@ export const summaryOf = (r: PostRow, base: string): PublicPostSummary => ({
   coverAlt: r.coverAlt,
   publishedAt: (r.publishedAt ?? r.createdAt).toISOString(),
   authorName: r.authorName,
+  galleryUrls: gallery.map((g) => `${base}${g.id}`),
 });
 
 export async function loadPublicList(db: Db, ssbId: string, ssbSlug: string, publicApiUrl: string, page: number, pageSize: number): Promise<PublicPostList> {
@@ -339,7 +381,11 @@ export async function loadPublicList(db: Db, ssbId: string, ssbSlug: string, pub
       .orderBy(desc(schema.sitePost.publishedAt))
       .limit(pageSize)
       .offset((page - 1) * pageSize);
-    return { items: rows.map((r) => summaryOf(r, base)), total: tot?.n ?? 0, page, pageSize };
+    const galleryByPost = new Map<string, Array<{ id: string; isCover: boolean }>>();
+    for (const r of rows) {
+      galleryByPost.set(r.id, await loadGallery(tx, r.id));
+    }
+    return { items: rows.map((r) => summaryOf(r, base, galleryByPost.get(r.id) ?? [])), total: tot?.n ?? 0, page, pageSize };
   });
 }
 

@@ -1,6 +1,7 @@
 import { useNavigate } from "@solidjs/router";
-import { createSignal, onCleanup, onMount, Show } from "solid-js";
+import { createSignal, onCleanup, onMount, Show, For } from "solid-js";
 import { createStore, produce } from "solid-js/store";
+import Ikon from "./Ikon";
 import { type PostAdminDetail, type PostInput, type PostMedia, POST_MEDIA_MAX_BYTES } from "@ssb/shared";
 import { api, ApiError } from "~/lib/api";
 import ArtikelIsi from "./ArtikelIsi";
@@ -18,9 +19,10 @@ type Isian = {
   coverMediaId: string | null;
   coverUrl: string | null;
   coverAlt: string;
+  galleryMediaIds: string[];
 };
 
-type Tempat = "id" | "en" | "sampul";
+type Tempat = "id" | "en" | "sampul" | "galeri";
 
 const TIPE_GAMBAR = ["image/jpeg", "image/png", "image/webp"];
 const waktu = (iso: string) => new Date(iso).toLocaleString("id-ID", { dateStyle: "medium", timeStyle: "short" });
@@ -37,6 +39,7 @@ const dariDetail = (a: PostAdminDetail | null): Isian => ({
   coverMediaId: a?.coverMediaId ?? null,
   coverUrl: a?.coverUrl ?? null,
   coverAlt: a?.coverAlt ?? "",
+  galleryMediaIds: a?.galleryMedia.map((g) => g.id) ?? [],
 });
 
 /** Teks English opsional: kosong dihilangkan agar landing memakai Indonesia. */
@@ -53,6 +56,7 @@ const keInput = (f: Isian): PostInput => ({
   category: f.category.trim(),
   coverMediaId: f.coverMediaId,
   coverAlt: f.coverAlt.trim(),
+  galleryMediaIds: f.galleryMediaIds,
 });
 
 /** Editor artikel: `awal` null = artikel baru. Dirender setelah artikel selesai dimuat. */
@@ -72,6 +76,7 @@ export default function ArtikelEditor(props: { awal: PostAdminDetail | null }) {
   const [mengunggah, setMengunggah] = createSignal<Tempat | null>(null);
   const [galatUnggah, setGalatUnggah] = createSignal<{ tempat: Tempat; pesan: string } | null>(null);
   let berkasSampul: HTMLInputElement | undefined;
+  let berkasGaleri: HTMLInputElement | undefined;
 
   const bisaUbah = () => detail()?.canEdit ?? true;
   const terbit = () => detail()?.status === "published";
@@ -251,7 +256,70 @@ export default function ArtikelEditor(props: { awal: PostAdminDetail | null }) {
     setInfo("");
   };
 
-  const mediaUrl = (id: string) => (mediaBase() ? mediaBase() + id : null);
+  /** Unggah foto tambahan ke galeri artikel. */
+  const pilihGaleri = async (e: Event) => {
+    const input = e.currentTarget as HTMLInputElement;
+    const file = input.files?.[0];
+    input.value = "";
+    if (!file) return;
+    const media = await unggah(file, "galeri");
+    if (!media) return;
+    setF(
+      produce((x) => {
+        if (!x.galleryMediaIds.includes(media.id)) x.galleryMediaIds = [...x.galleryMediaIds, media.id];
+      }),
+    );
+    setBelumSimpan(true);
+    setInfo("");
+  };
+
+  /** Hapus foto dari galeri. Jika foto itu sampul, kosongkan sampul atau pindahkan ke foto berikutnya. */
+  const hapusDariGaleri = (id: string) => {
+    setF(
+      produce((x) => {
+        x.galleryMediaIds = x.galleryMediaIds.filter((g) => g !== id);
+        if (x.coverMediaId === id) {
+          x.coverMediaId = x.galleryMediaIds.length > 0 ? (x.galleryMediaIds[0] ?? null) : null;
+          x.coverUrl = x.coverMediaId ? (mediaUrl(x.coverMediaId) ?? null) : null;
+        }
+      }),
+    );
+    setBelumSimpan(true);
+    setInfo("");
+  };
+
+  /** Pilih foto galeri mana yang jadi sampul utama. */
+  const setSampulGaleri = (id: string) => {
+    setF(
+      produce((x) => {
+        x.coverMediaId = id;
+        const g = x.galleryMediaIds.find((g) => g === id);
+        x.coverUrl = g ? mediaUrl(id) : null;
+      }),
+    );
+    setBelumSimpan(true);
+    setInfo("");
+  };
+
+  /** Pindah foto galeri satu posisi ke atas atau bawah. */
+  const pindahGaleri = (id: string, arah: -1 | 1) => {
+    setF(
+      produce((x) => {
+        const i = x.galleryMediaIds.indexOf(id);
+        if (i < 0) return;
+        const j = i + arah;
+        if (j < 0 || j >= x.galleryMediaIds.length) return;
+        const daftar = [...(x.galleryMediaIds ?? [])];
+        if (daftar[i] === undefined || daftar[j] === undefined) return;
+        [daftar[i], daftar[j]] = [daftar[j], daftar[i]];
+        x.galleryMediaIds = daftar;
+      }),
+    );
+    setBelumSimpan(true);
+    setInfo("");
+  };
+
+  const mediaUrl = (id: string): string | null => (mediaBase() ? mediaBase() + id : null);
   const galatDi = (t: Tempat) => (galatUnggah()?.tempat === t ? galatUnggah()?.pesan : "") ?? "";
 
   return (
@@ -497,6 +565,74 @@ export default function ArtikelEditor(props: { awal: PostAdminDetail | null }) {
             hint="Deskripsi singkat foto untuk pembaca layar dan saat gambar gagal dimuat."
             maxlength={200}
           />
+
+          <h2>Galeri foto artikel</h2>
+          <div class="galeri-artikel">
+            <p class="petunjuk">
+              Foto galeri akan tampil di landing sebagai carousel/header foto dengan thumbnail di bawahnya. Foto pertama (atau foto sampul di atas) jadi foto
+              utama.
+            </p>
+            <div class="daftar-galeri">
+              <Show when={f.galleryMediaIds.length > 0} fallback={<p class="kosong">Belum ada foto galeri. Unggah foto di bawah.</p>}>
+                <For each={f.galleryMediaIds}>
+                  {(id) => {
+                    const url = mediaUrl(id);
+                    const adalahSampul = f.coverMediaId === id;
+                    return (
+                      <div class="item-galeri">
+                        <Show when={url} fallback={<div class="placeholder-galeri" />}>
+                          {(u) => <img class="thumb-galeri" src={u()} alt="" loading="lazy" />}
+                        </Show>
+                        <div class="aksi-item-galeri">
+                          <Show when={bisaUbah()}>
+                            <button
+                              class={adalahSampul ? "tombol aktif" : "tombol tipis"}
+                              type="button"
+                              disabled={!bisaUbah() || mengunggah() !== null}
+                              onClick={() => setSampulGaleri(id)}
+                            >
+                              {adalahSampul ? "Sampul utama" : "Jadikan sampul"}
+                            </button>
+                            <button class="tombol tipis" type="button" onClick={() => pindahGaleri(id, -1)} disabled={f.galleryMediaIds[0] === id}>
+                              ↑
+                            </button>
+                            <button
+                              class="tombol tipis"
+                              type="button"
+                              onClick={() => pindahGaleri(id, 1)}
+                              disabled={f.galleryMediaIds[f.galleryMediaIds.length - 1] === id}
+                            >
+                              ↓
+                            </button>
+                            <button class="tombol bahaya tipis" type="button" aria-label="Hapus foto" onClick={() => hapusDariGaleri(id)}>
+                              <Ikon nama="hapus" ukuran={16} />
+                            </button>
+                          </Show>
+                          <Show when={!bisaUbah()}>
+                            <span class="petunjuk">Read-only</span>
+                          </Show>
+                        </div>
+                      </div>
+                    );
+                  }}
+                </For>
+              </Show>
+            </div>
+            <Show when={bisaUbah()}>
+              <div class="butir-aksi">
+                <button class="tombol tipis" type="button" disabled={mengunggah() !== null} onClick={() => berkasGaleri?.click()}>
+                  {mengunggah() === "galeri" ? "Mengunggah…" : "Tambah foto galeri"}
+                </button>
+                <input ref={berkasGaleri} type="file" accept="image/jpeg,image/png,image/webp" hidden onChange={pilihGaleri} />
+              </div>
+              <span class="petunjuk">JPG, PNG, atau WebP, maksimal 5 MB. Foto pertama jadi sampul utama bila belum ada foto sampul.</span>
+            </Show>
+            <Show when={galatDi("galeri")}>
+              <span class="pesan-salah" role="alert">
+                {galatDi("galeri")}
+              </span>
+            </Show>
+          </div>
         </section>
       </aside>
     </div>

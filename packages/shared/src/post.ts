@@ -34,6 +34,8 @@ export const postInputSchema = z.object({
   category: z.string().trim().max(40).default(""),
   coverMediaId: z.string().uuid().nullable().default(null),
   coverAlt: z.string().trim().max(200).default(""),
+  /** Id media foto galeri artikel, urutan menentukan tampilan; foto pertama jadi cover default bila coverMediaId kosong. */
+  galleryMediaIds: z.array(z.string().uuid()).default([]),
 });
 export type PostInput = z.infer<typeof postInputSchema>;
 
@@ -62,6 +64,8 @@ export type PostAdminDetail = PostAdminRow & {
   coverAlt: string;
   /** Awalan alamat gambar artikel (berakhiran "/"); alamat gambar = mediaBase + id. Dipakai pratinjau editor. */
   mediaBase: string;
+  /** Foto galeri artikel, urut menurut sort_order; salah satu ditandai isCover. */
+  galleryMedia: Array<{ id: string; url: string; isCover: boolean }>;
 };
 
 /** Hasil unggah gambar artikel. Sisipkan `markdown` ke isi, atau pakai `id` sebagai `coverMediaId`. */
@@ -77,6 +81,8 @@ export type PublicPostSummary = {
   coverAlt: string;
   publishedAt: string;
   authorName: string;
+  /** URL foto galeri artikel, urut menurut sort_order. Dipakai landing untuk carousel/header foto dengan thumbnail. */
+  galleryUrls: string[];
 };
 
 /** Artikel lengkap di API publik; isi sudah diurai menjadi blok aman (lihat markdown.ts). */

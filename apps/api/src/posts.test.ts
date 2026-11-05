@@ -297,7 +297,17 @@ run("artikel landing page (database)", () => {
     expect(res.headers.get("cache-control")).toContain("max-age");
     const list = await json<PublicPostList>(res);
     expect(list.total).toBe(1);
-    expect(Object.keys(list.items[0]!).sort()).toEqual(["authorName", "category", "coverAlt", "coverUrl", "excerpt", "publishedAt", "slug", "title"]);
+    expect(Object.keys(list.items[0]!).sort()).toEqual([
+      "authorName",
+      "category",
+      "coverAlt",
+      "coverUrl",
+      "excerpt",
+      "galleryUrls",
+      "publishedAt",
+      "slug",
+      "title",
+    ]);
     const detail = await json<PublicPost>(await call("GET", `/public/site/${a.slug}/posts/${satu.slug}`));
     expect(detail.blocks.id.map((b) => b.t)).toEqual(["p", "p"]);
     expect(detail.blocks.en).toBeUndefined();

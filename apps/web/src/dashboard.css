@@ -293,6 +293,121 @@
   background: #edf1e7;
   color: var(--rumput);
 }
+/* ---- Tabel generic ---- */
+.tabel {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 8px;
+}
+.tabel th,
+.tabel td {
+  padding: 8px 10px;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+}
+.tabel thead th {
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--muted);
+  background: var(--surface);
+}
+.tabel tbody tr:hover {
+  background: #f6f8f2;
+}
+.tabel td.col-kiri,
+.tabel th.col-kiri {
+  text-align: left;
+}
+.tabel td.col-tengah,
+.tabel th.col-tengah {
+  text-align: center;
+}
+.tabel td.col-kanan,
+.tabel th.col-kanan {
+  text-align: right;
+}
+
+/* ---- Chip status ---- */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  border: 1px solid var(--border);
+  color: var(--tinta);
+}
+.chip.berhasil {
+  background: #eef6ee;
+  border-color: #b8d8bd;
+  color: #1e5038;
+}
+.chip.peringatan {
+  background: #fdf3e3;
+  border-color: #f0c98e;
+  color: #8a6400;
+}
+.chip.bahaya {
+  background: #fbeaea;
+  border-color: #e3b3b3;
+  color: #a33333;
+}
+
+/* ---- Grup aksi ---- */
+.butir-aksi {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-top: 12px;
+}
+.butir-aksi.aksi-situs {
+  justify-content: flex-end;
+}
+
+/* ---- Status kosong ---- */
+.kosong {
+  color: var(--muted);
+  font-size: 0.9rem;
+  text-align: center;
+  padding: 16px;
+}
+
+/* ---- Peringatan/error ---- */
+.peringatan {
+  background: #fdecea;
+  border: 1px solid #e3b3b3;
+  color: #a33333;
+  padding: 10px 14px;
+  border-radius: 8px;
+  margin-bottom: 12px;
+}
+
+/* ---- Info ---- */
+.info {
+  background: #eef6ee;
+  border: 1px solid #b8d8bd;
+  color: #1e5038;
+  padding: 10px 14px;
+  border-radius: 8px;
+  margin-bottom: 12px;
+}
+
+/* ---- Foto produk pratinjau ---- */
+.foto-produk {
+  margin-top: 6px;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+}
+.pratinjau-foto {
+  width: 100%;
+  max-height: 200px;
+  object-fit: cover;
+  display: block;
+}
 
 .sel-kontak {
   min-width: 10rem;
@@ -3137,6 +3252,60 @@ button.pengguna[aria-expanded="true"] .panah-menu {
   max-height: 260px;
   border-radius: var(--radius);
   object-fit: cover;
+}
+.galeri-artikel {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.daftar-galeri {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 10px;
+}
+.item-galeri {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  background: var(--surface);
+}
+.thumb-galeri {
+  width: 100%;
+  height: 140px;
+  object-fit: cover;
+  display: block;
+}
+.placeholder-galeri {
+  width: 100%;
+  height: 140px;
+  border-radius: var(--radius);
+  background: var(--muted);
+}
+.aksi-item-galeri {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  display: flex;
+  gap: 4px;
+  z-index: 2;
+  background: rgba(0, 0, 0, 0.6);
+  padding: 4px;
+  border-radius: 4px;
+  backdrop-filter: blur(2px);
+}
+.aksi-item-galeri .tombol {
+  color: #fff;
+  border-color: rgba(255, 255, 255, 0.5);
+  padding: 2px 6px;
+  font-size: 0.85rem;
+}
+.aksi-item-galeri .tombol.aktif {
+  background: var(--accent);
+  border-color: var(--accent);
 }
 .isi-kepala {
   display: flex;

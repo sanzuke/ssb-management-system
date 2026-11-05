@@ -1,0 +1,205 @@
+/* artikel-galeri.css
+ * Styling carousel/header foto + thumbnail untuk artikel landing page.
+ * Salin ke repo landing (ssb-family-united), misal assets/css/artikel-galeri.css
+ */
+
+.artikel-galeri {
+  max-width: 1000px;
+  margin: 0 auto 32px auto;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+/* Foto utama (header / carousel) */
+.galeri-utama {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  background: #f3f4f6;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.foto-utama {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: opacity 0.3s ease;
+}
+
+/* Tombol navigasi kiri-kanan */
+.nav-prev,
+.nav-next {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(255, 255, 255, 0.85);
+  border: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 24px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  transition:
+    background 0.2s,
+    transform 0.1s;
+}
+
+.nav-prev:hover,
+.nav-next:hover {
+  background: #ffffff;
+  transform: translateY(-50%) scale(1.05);
+}
+
+.nav-prev:active,
+.nav-next:active {
+  transform: translateY(-50%) scale(0.95);
+}
+
+.nav-prev {
+  left: 12px;
+}
+.nav-next {
+  right: 12px;
+}
+
+/* Indikator titik di bawah foto utama */
+.indikator {
+  position: absolute;
+  bottom: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 8px;
+  z-index: 10;
+}
+
+.titik {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.5);
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  transition:
+    background 0.2s,
+    transform 0.1s;
+}
+
+.titik:hover {
+  background: rgba(255, 255, 255, 0.8);
+}
+
+.titik.aktif {
+  background: #ffffff;
+  transform: scale(1.2);
+}
+
+/* Thumbnail di bawah foto utama */
+.thumbnail-bawah {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  padding: 12px 0;
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 #f1f5f9;
+}
+
+.thumbnail-bawah::-webkit-scrollbar {
+  height: 6px;
+}
+
+.thumbnail-bawah::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 3px;
+}
+
+.thumbnail-bawah::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 3px;
+}
+
+.thumbnail {
+  flex: 0 0 auto;
+  width: 110px;
+  height: 62px;
+  border: 3px solid transparent;
+  border-radius: 8px;
+  overflow: hidden;
+  cursor: pointer;
+  background: #f8fafc;
+  transition:
+    border-color 0.2s,
+    transform 0.1s;
+}
+
+.thumbnail:hover {
+  border-color: #94a3b8;
+  transform: scale(1.03);
+}
+
+.thumbnail.aktif {
+  border-color: #2563eb;
+  transform: scale(1.08);
+  box-shadow: 0 2px 6px rgba(37, 99, 235, 0.3);
+}
+
+.thumbnail-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* Tidak ada foto */
+.kosong {
+  text-align: center;
+  color: #64748b;
+  padding: 40px 0;
+  font-size: 14px;
+}
+
+/* Responsif */
+@media (max-width: 640px) {
+  .artikel-galeri {
+    margin: 0 auto 24px auto;
+  }
+  .galeri-utama {
+    aspect-ratio: 4 / 3;
+    border-radius: 8px;
+  }
+  .thumbnail {
+    width: 80px;
+    height: 45px;
+  }
+  .nav-prev,
+  .nav-next {
+    width: 32px;
+    height: 32px;
+    font-size: 20px;
+  }
+  .titik {
+    width: 8px;
+    height: 8px;
+  }
+}
+
+@media (max-width: 480px) {
+  .artikel-galeri {
+    margin: 0 auto 20px auto;
+  }
+  .galeri-utama {
+    border-radius: 6px;
+  }
+  .thumbnail {
+    width: 64px;
+    height: 36px;
+  }
+}

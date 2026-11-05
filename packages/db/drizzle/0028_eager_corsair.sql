@@ -1,0 +1,2 @@
+ALTER TABLE "merchandise_product" ADD COLUMN "hpp" integer NOT NULL;--> statement-breakpoint
+ALTER TABLE "merchandise_product" ADD CONSTRAINT "merchandise_product_hpp_non_negative" CHECK ("merchandise_product"."hpp" >= 0);

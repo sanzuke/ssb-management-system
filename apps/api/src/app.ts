@@ -25,6 +25,7 @@ import { sessionRoutes } from "./sessions";
 import { assessmentRoutes } from "./assessments";
 import { badgeRoutes } from "./badges";
 import { injuryRoutes } from "./injuries";
+import { merchandiseRoutes } from "./merchandise";
 import { positionWeightRoutes } from "./position-weights";
 import type { Env } from "./env";
 import { createLogger, requestLogger, type Logger } from "./logger";
@@ -124,6 +125,8 @@ export function createApp(
       .route("/", badgeRoutes(db))
       .route("/", injuryRoutes(db))
       .route("/", positionWeightRoutes(db))
+      .route("/", merchandiseRoutes(db))
+      .route("/", memberRoutes(db))
       // Daftar anggota SSB sendiri; hanya admin SSB.
       .get("/users", requirePermission("user.list"), async (c) => {
         const m = c.get("auth")!.member!;

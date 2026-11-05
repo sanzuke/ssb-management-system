@@ -475,6 +475,13 @@ export default function DashboardAdmin(props: { me: Me }) {
                   <small>Persentase hadir per siswa</small>
                 </span>
               </A>
+              <A class="pintasan-item" href="/merchandise">
+                <Ikon nama="kartu" />
+                <span>
+                  <strong>Merchandise</strong>
+                  <small>Produk dan pesanan penjualan</small>
+                </span>
+              </A>
             </div>
           </section>
 

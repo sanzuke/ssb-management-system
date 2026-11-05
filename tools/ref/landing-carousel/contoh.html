@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Detail Artikel · SSB App</title>
+  <link rel="stylesheet" href="artikel-galeri.css">
+  <style>
+    body { font-family: system-ui, -apple-system, sans-serif; margin: 0; padding: 0; color: #334155; }
+    article { max-width: 1000px; margin: 40px auto; padding: 0 16px; }
+    h1 { font-size: 28px; margin-bottom: 12px; }
+    .petunjuk { color: #64748b; font-size: 14px; margin-bottom: 24px; }
+    .isi-artikel { line-height: 1.7; margin-top: 24px; }
+    .isi-artikel p { margin-bottom: 16px; }
+  </style>
+</head>
+<body>
+
+<article>
+  <h1>Prestasi Pemain KU-13 di Liga Antar SSB</h1>
+  <p class="petunjuk">Diterbitkan 15 Okt 2026 &bull; Kategori: Prestasi</p>
+
+  <!-- Container galeri foto -->
+  <!-- data-gallery-urls berisi array JSON dari API publik SSB MS -->
+  <div
+    id="galeri-foto"
+    data-artikel-galeri
+    data-cover-url="https://api.ssb-ms.zukelabs.web.id/public/site/ssb/media/uuid-1"
+    data-cover-alt="Pemain KU-13 bertanding di lapangan"
+    data-gallery-urls='[
+      "https://api.ssb-ms.zukelabs.web.id/public/site/ssb/media/uuid-1",
+      "https://api.ssb-ms.zukelabs.web.id/public/site/ssb/media/uuid-2",
+      "https://api.ssb-ms.zukelabs.web.id/public/site/ssb/media/uuid-3"
+    ]'
+  ></div>
+
+  <div class="isi-artikel">
+    <p>Isi artikel di sini...</p>
+    <p>Berita lengkap tentang prestasi pemain KU-13 di liga antar SSB...</p>
+  </div>
+</article>
+
+<script src="artikel-galeri.js"></script>
+</body>
+</html>

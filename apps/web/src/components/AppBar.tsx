@@ -96,6 +96,10 @@ export default function AppBar(props: { me: Me }) {
             <Ikon nama="surat" />
             <span>Email</span>
           </A>
+          <A class="tombol tipis menu" href="/merchandise">
+            <Ikon nama="kartu" />
+            <span>Merchandise</span>
+          </A>
         </Show>
         <Show when={props.me.active?.role === "admin_ssb" || props.me.active?.role === "orang_tua"}>
           <A class="tombol tipis menu" href="/spp">
