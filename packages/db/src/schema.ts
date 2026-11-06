@@ -980,3 +980,216 @@ export const merchandiseOrderItem = pgTable(
     tenantPolicy("merchandise_order_item"),
   ],
 ).enableRLS();
+
+/**
+ * Kalender akademi: pertandingan, acara, libur, dan kegiatan lain. Beda dari `training_session` (jadwal latihan per KU).
+ * `is_public` menentukan apakah kegiatan tampil di landing page. Kegiatan satu hari bila `end_date` kosong.
+ */
+export const calendarEvent = pgTable(
+  "calendar_event",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    ssbId: ssbId().references(() => ssb.id, { onDelete: "cascade" }),
+    title: text("title").notNull(),
+    description: text("description").notNull().default(""),
+    eventType: text("event_type").notNull().default("acara"),
+    startDate: date("start_date").notNull(),
+    endDate: date("end_date"),
+    startTime: time("start_time"),
+    endTime: time("end_time"),
+    location: text("location").notNull().default(""),
+    isPublic: boolean("is_public").notNull().default(true),
+    createdBy: uuid("created_by"),
+    createdAt: createdAt(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    unique("calendar_event_ssb_id").on(t.ssbId, t.id),
+    index("calendar_event_date_idx").on(t.ssbId, t.startDate),
+    foreignKey({ columns: [t.ssbId, t.createdBy], foreignColumns: [appUser.ssbId, appUser.id], name: "calendar_event_created_by_fk" }).onDelete("set null"),
+    check("calendar_event_type", sql`${t.eventType} in ('pertandingan', 'latihan', 'acara', 'libur', 'lainnya')`),
+    check("calendar_event_dates", sql`${t.endDate} is null or ${t.endDate} >= ${t.startDate}`),
+    tenantPolicy("calendar_event"),
+  ],
+).enableRLS();
+
+/**
+ * Kampanye penggalangan dana (crowdfunding) untuk satu kegiatan atau kebutuhan akademi. Dana masuk lewat transfer manual ke
+ * `payment_info`, lalu admin mengonfirmasi tiap sumbangan; yang terkumpul dihitung dari sumbangan berstatus `diterima`.
+ * Boleh dikaitkan ke kegiatan di kalender. Hanya kampanye `aktif` yang bisa menerima sumbangan baru.
+ */
+export const fundraisingCampaign = pgTable(
+  "fundraising_campaign",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    ssbId: ssbId().references(() => ssb.id, { onDelete: "cascade" }),
+    title: text("title").notNull(),
+    description: text("description").notNull().default(""),
+    calendarEventId: uuid("calendar_event_id"),
+    /** Target dana dalam rupiah; kosong = tanpa target. */
+    targetAmount: integer("target_amount"),
+    /** Batas akhir menerima sumbangan (termasuk hari itu); kosong = tanpa batas. */
+    deadline: date("deadline"),
+    status: text("status").notNull().default("draft"),
+    /** Tampil di landing page. Draf tidak pernah tampil di landing. */
+    isPublic: boolean("is_public").notNull().default(true),
+    /** Rekening dan petunjuk transfer untuk kampanye ini. */
+    paymentInfo: text("payment_info").notNull().default(""),
+    createdBy: uuid("created_by"),
+    createdAt: createdAt(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    unique("fundraising_campaign_ssb_id").on(t.ssbId, t.id),
+    index("fundraising_campaign_status_idx").on(t.ssbId, t.status),
+    foreignKey({ columns: [t.ssbId, t.calendarEventId], foreignColumns: [calendarEvent.ssbId, calendarEvent.id], name: "fundraising_campaign_event_fk" }).onDelete("set null"),
+    foreignKey({ columns: [t.ssbId, t.createdBy], foreignColumns: [appUser.ssbId, appUser.id], name: "fundraising_campaign_created_by_fk" }).onDelete("set null"),
+    check("fundraising_campaign_status", sql`${t.status} in ('draft', 'aktif', 'selesai')`),
+    check("fundraising_campaign_target", sql`${t.targetAmount} is null or ${t.targetAmount} > 0`),
+    tenantPolicy("fundraising_campaign"),
+  ],
+).enableRLS();
+
+/**
+ * Satu sumbangan atau komitmen sponsor pada kampanye. Dibuat orang tua (status `menunggu`) atau dicatat admin untuk
+ * sumbangan di luar aplikasi (langsung `diterima`). `received_on` terisi tepat bila status `diterima`.
+ * Nama donatur disalin saat dibuat supaya tetap tampil walau akunnya kemudian dikeluarkan.
+ */
+export const fundraisingPledge = pgTable(
+  "fundraising_pledge",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    ssbId: ssbId().references(() => ssb.id, { onDelete: "cascade" }),
+    campaignId: uuid("campaign_id").notNull(),
+    donorId: uuid("donor_id"),
+    donorName: text("donor_name").notNull(),
+    donorWhatsapp: text("donor_whatsapp"),
+    kind: text("kind").notNull().default("donasi"),
+    amount: integer("amount").notNull(),
+    message: text("message").notNull().default(""),
+    /** Nama disembunyikan dari tampilan publik dan anggota lain; admin tetap melihatnya. */
+    isAnonymous: boolean("is_anonymous").notNull().default(false),
+    status: text("status").notNull().default("menunggu"),
+    receivedOn: date("received_on"),
+    adminNote: text("admin_note"),
+    createdAt: createdAt(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    unique("fundraising_pledge_ssb_id").on(t.ssbId, t.id),
+    index("fundraising_pledge_campaign_idx").on(t.ssbId, t.campaignId, t.status),
+    index("fundraising_pledge_donor_idx").on(t.ssbId, t.donorId),
+    foreignKey({ columns: [t.ssbId, t.campaignId], foreignColumns: [fundraisingCampaign.ssbId, fundraisingCampaign.id], name: "fundraising_pledge_campaign_fk" }).onDelete("cascade"),
+    foreignKey({ columns: [t.ssbId, t.donorId], foreignColumns: [appUser.ssbId, appUser.id], name: "fundraising_pledge_donor_fk" }).onDelete("set null"),
+    check("fundraising_pledge_kind", sql`${t.kind} in ('donasi', 'sponsor')`),
+    check("fundraising_pledge_status", sql`${t.status} in ('menunggu', 'diterima', 'ditolak')`),
+    check("fundraising_pledge_amount", sql`${t.amount} between 1 and 1000000000`),
+    check("fundraising_pledge_received_pair", sql`(${t.status} = 'diterima') = (${t.receivedOn} is not null)`),
+    tenantPolicy("fundraising_pledge"),
+  ],
+).enableRLS();
+
+/**
+ * Statistik laga satu siswa pada satu periode, diisi pelatih. Dasar komponen performa laga di indeks nilai (MVI).
+ * Tidak menyimpan menit bermain: tidak dipakai rumus.
+ */
+export const playerMatchStat = pgTable(
+  "player_match_stat",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    ssbId: ssbId().references(() => ssb.id, { onDelete: "cascade" }),
+    playerId: uuid("player_id").notNull(),
+    periodId: uuid("period_id").notNull(),
+    matchesPlayed: integer("matches_played").notNull().default(0),
+    goals: integer("goals").notNull().default(0),
+    assists: integer("assists").notNull().default(0),
+    starts: integer("starts").notNull().default(0),
+    yellowCards: integer("yellow_cards").notNull().default(0),
+    redCards: integer("red_cards").notNull().default(0),
+    recordedBy: uuid("recorded_by"),
+    createdAt: createdAt(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    unique("player_match_stat_ssb_id").on(t.ssbId, t.id),
+    unique("player_match_stat_player_period").on(t.ssbId, t.playerId, t.periodId),
+    foreignKey({ columns: [t.ssbId, t.playerId], foreignColumns: [player.ssbId, player.id], name: "player_match_stat_player_fk" }).onDelete("cascade"),
+    foreignKey({ columns: [t.ssbId, t.periodId], foreignColumns: [period.ssbId, period.id], name: "player_match_stat_period_fk" }).onDelete("cascade"),
+    foreignKey({ columns: [t.ssbId, t.recordedBy], foreignColumns: [appUser.ssbId, appUser.id], name: "player_match_stat_recorded_by_fk" }).onDelete("set null"),
+    check("player_match_stat_range", sql`${t.matchesPlayed} between 0 and 200 and ${t.goals} between 0 and 500 and ${t.assists} between 0 and 500`),
+    check("player_match_stat_within_matches", sql`${t.starts} between 0 and ${t.matchesPlayed} and ${t.yellowCards} between 0 and ${t.matchesPlayed} and ${t.redCards} between 0 and ${t.matchesPlayed}`),
+    tenantPolicy("player_match_stat"),
+  ],
+).enableRLS();
+
+/**
+ * Hasil tes kebugaran satu siswa pada satu tanggal, diisi pelatih. Metrik boleh sebagian, tetapi minimal satu terisi.
+ * Yang terbaru dalam 12 bulan sebelum akhir periode dipakai untuk komponen kebugaran di indeks nilai.
+ */
+export const playerPhysicalTest = pgTable(
+  "player_physical_test",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    ssbId: ssbId().references(() => ssb.id, { onDelete: "cascade" }),
+    playerId: uuid("player_id").notNull(),
+    testedOn: date("tested_on").notNull(),
+    /** Lari 30 m, detik. */
+    speed30m: real("speed_30m"),
+    /** Lari zig-zag, detik. */
+    zigZag: real("zig_zag"),
+    /** Lompat vertikal, cm. */
+    verticalJump: real("vertical_jump"),
+    /** Level bleep test, boleh pecahan (mis. 7,5). */
+    bleepLevel: real("bleep_level"),
+    note: text("note"),
+    recordedBy: uuid("recorded_by"),
+    createdAt: createdAt(),
+  },
+  (t) => [
+    unique("player_physical_test_ssb_id").on(t.ssbId, t.id),
+    unique("player_physical_test_player_day").on(t.ssbId, t.playerId, t.testedOn),
+    index("player_physical_test_player_idx").on(t.ssbId, t.playerId, t.testedOn),
+    foreignKey({ columns: [t.ssbId, t.playerId], foreignColumns: [player.ssbId, player.id], name: "player_physical_test_player_fk" }).onDelete("cascade"),
+    foreignKey({ columns: [t.ssbId, t.recordedBy], foreignColumns: [appUser.ssbId, appUser.id], name: "player_physical_test_recorded_by_fk" }).onDelete("set null"),
+    check("player_physical_test_any", sql`${t.speed30m} is not null or ${t.zigZag} is not null or ${t.verticalJump} is not null or ${t.bleepLevel} is not null`),
+    check("player_physical_test_range", sql`(${t.speed30m} is null or ${t.speed30m} between 3 and 15) and (${t.zigZag} is null or ${t.zigZag} between 5 and 40) and (${t.verticalJump} is null or ${t.verticalJump} between 5 and 100) and (${t.bleepLevel} is null or ${t.bleepLevel} between 1 and 21)`),
+    tenantPolicy("player_physical_test"),
+  ],
+).enableRLS();
+
+/**
+ * Hasil indeks nilai (MVI) satu siswa pada satu periode: foto saat dihitung, bukan nilai yang berubah sendiri.
+ * `mvi` dan `category` kosong bila data belum cukup; `breakdown` berisi skor, bobot, dan keterangan tiap komponen.
+ * Tidak ada nilai uang. KU dicatat saat dihitung karena siswa bisa pindah KU.
+ */
+export const playerMarketValue = pgTable(
+  "player_market_value",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    ssbId: ssbId().references(() => ssb.id, { onDelete: "cascade" }),
+    playerId: uuid("player_id").notNull(),
+    periodId: uuid("period_id").notNull(),
+    ageGroupId: uuid("age_group_id").notNull(),
+    mvi: integer("mvi"),
+    category: text("category"),
+    /** Persen bobot yang datanya tersedia. */
+    coverage: integer("coverage").notNull(),
+    breakdown: jsonb("breakdown").notNull(),
+    computedBy: uuid("computed_by"),
+    computedAt: timestamp("computed_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    unique("player_market_value_ssb_id").on(t.ssbId, t.id),
+    unique("player_market_value_player_period").on(t.ssbId, t.playerId, t.periodId),
+    index("player_market_value_group_idx").on(t.ssbId, t.ageGroupId, t.periodId),
+    foreignKey({ columns: [t.ssbId, t.playerId], foreignColumns: [player.ssbId, player.id], name: "player_market_value_player_fk" }).onDelete("cascade"),
+    foreignKey({ columns: [t.ssbId, t.periodId], foreignColumns: [period.ssbId, period.id], name: "player_market_value_period_fk" }).onDelete("cascade"),
+    foreignKey({ columns: [t.ssbId, t.ageGroupId], foreignColumns: [ageGroup.ssbId, ageGroup.id], name: "player_market_value_age_group_fk" }).onDelete("cascade"),
+    foreignKey({ columns: [t.ssbId, t.computedBy], foreignColumns: [appUser.ssbId, appUser.id], name: "player_market_value_computed_by_fk" }).onDelete("set null"),
+    check("player_market_value_range", sql`${t.mvi} is null or ${t.mvi} between 0 and 100`),
+    check("player_market_value_pair", sql`(${t.mvi} is null) = (${t.category} is null)`),
+    check("player_market_value_category", sql`${t.category} is null or ${t.category} in ('Sangat Rendah', 'Rendah', 'Baik', 'Sangat Baik', 'Elit')`),
+    check("player_market_value_coverage", sql`${t.coverage} between 0 and 100`),
+    tenantPolicy("player_market_value"),
+  ],
+).enableRLS();

@@ -35,5 +35,12 @@ Endpoint dijaga dengan `requirePermission(<izin>)`. Pembatasan data per baris (p
 | `post.write` | Menulis artikel untuk landing page, mengunggah gambarnya, dan menerbitkan artikel sendiri (admin SSB: semua artikel) | ya | ya | ya | - |
 | `mailbox.manage` | Membuat, mereset sandi, dan menghapus kotak surat email akademi di server | ya | - | - | - |
 | `merchandise.manage` | Mengelola produk merchandise dan pesanan penjualan | ya | - | - | - |
+| `calendar.read` | Melihat kalender akademi: pertandingan, acara, dan libur | ya | ya | ya | ya |
+| `calendar.manage` | Menambah, mengubah, dan menghapus kegiatan di kalender akademi, termasuk menandainya tampil di landing page | ya | - | - | - |
+| `fundraising.read` | Melihat kampanye donasi yang aktif atau selesai, dana terkumpul, dan sumbangan yang sudah diterima (nama donatur anonim disembunyikan) | ya | ya | ya | ya |
+| `fundraising.pledge` | Menyumbang atau menjadi sponsor pada kampanye yang aktif; sumbangan menunggu konfirmasi admin | ya | ya | ya | ya |
+| `fundraising.manage` | Membuat dan mengubah kampanye donasi, mengonfirmasi atau menolak sumbangan, dan mencatat sumbangan di luar aplikasi | ya | - | - | - |
+| `mvi.read` | Melihat indeks nilai siswa (admin, pelatih, korlas: angka dan rincian, pelatih dan korlas untuk KU yang ditugaskan; orang tua: hanya kategori anaknya, setelah penilaian periode itu terbit) | ya | ya | ya | ya |
+| `mvi.write` | Mengisi statistik laga dan tes kebugaran siswa, dan menghitung ulang indeks nilai (pelatih: KU yang ditugaskan) | ya | ya | - | - |
 | `trial.convert` | Menjadikan pendaftar trial menjadi siswa dan membuat tautan undangan untuk orang tua | ya | - | - | - |
 | `trial.manage` | Melihat pendaftar trial dari landing page dan mengubah statusnya | ya | - | - | - |

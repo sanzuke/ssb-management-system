@@ -47,6 +47,10 @@ describe("matriks izin (tanpa database)", () => {
       "GET /public/site/:slug/posts",
       "GET /public/site/:slug/posts/:postSlug",
       "GET /public/site/:slug/media/:id",
+      // Kalender akademi di landing: hanya kegiatan yang ditandai publik.
+      "GET /public/site/:slug/calendar",
+      // Kampanye donasi di landing: hanya yang bertanda publik, tanpa rekening dan tanpa donatur anonim.
+      "GET /public/site/:slug/fundraising",
       "GET /public/seo/:slug/berita",
       "GET /public/seo/:slug/berita/:postSlug",
       "GET /public/seo/:slug/sitemap.xml",

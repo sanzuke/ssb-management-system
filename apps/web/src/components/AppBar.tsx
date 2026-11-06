@@ -50,7 +50,19 @@ export default function AppBar(props: { me: Me }) {
             <Ikon nama="absen" />
             <span>Kehadiran</span>
           </A>
+          <A class="tombol tipis menu" href="/kalender">
+            <Ikon nama="kalender" />
+            <span>Kalender</span>
+          </A>
+          <A class="tombol tipis menu" href="/donasi">
+            <Ikon nama="kartu" />
+            <span>Donasi</span>
+          </A>
           <Show when={staf()}>
+            <A class="tombol tipis menu" href="/indeks">
+              <Ikon nama="indikator" />
+              <span>Indeks nilai</span>
+            </A>
             <A class="tombol tipis menu" href="/skuad">
               <Ikon nama="indikator" />
               <span>Skuad</span>

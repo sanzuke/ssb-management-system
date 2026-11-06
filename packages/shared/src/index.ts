@@ -81,6 +81,25 @@ export const permissions = {
   },
   "mailbox.manage": { roles: ["admin_ssb"], desc: "Membuat, mereset sandi, dan menghapus kotak surat email akademi di server" },
   "merchandise.manage": { roles: ["admin_ssb"], desc: "Mengelola produk merchandise dan pesanan penjualan" },
+  "calendar.read": { roles: ["admin_ssb", "pelatih", "korlas", "orang_tua"], desc: "Melihat kalender akademi: pertandingan, acara, dan libur" },
+  "calendar.manage": { roles: ["admin_ssb"], desc: "Menambah, mengubah, dan menghapus kegiatan di kalender akademi, termasuk menandainya tampil di landing page" },
+  "fundraising.read": {
+    roles: ["admin_ssb", "pelatih", "korlas", "orang_tua"],
+    desc: "Melihat kampanye donasi yang aktif atau selesai, dana terkumpul, dan sumbangan yang sudah diterima (nama donatur anonim disembunyikan)",
+  },
+  "fundraising.pledge": { roles: ["admin_ssb", "pelatih", "korlas", "orang_tua"], desc: "Menyumbang atau menjadi sponsor pada kampanye yang aktif; sumbangan menunggu konfirmasi admin" },
+  "fundraising.manage": {
+    roles: ["admin_ssb"],
+    desc: "Membuat dan mengubah kampanye donasi, mengonfirmasi atau menolak sumbangan, dan mencatat sumbangan di luar aplikasi",
+  },
+  "mvi.read": {
+    roles: ["admin_ssb", "pelatih", "korlas", "orang_tua"],
+    desc: "Melihat indeks nilai siswa (admin, pelatih, korlas: angka dan rincian, pelatih dan korlas untuk KU yang ditugaskan; orang tua: hanya kategori anaknya, setelah penilaian periode itu terbit)",
+  },
+  "mvi.write": {
+    roles: ["admin_ssb", "pelatih"],
+    desc: "Mengisi statistik laga dan tes kebugaran siswa, dan menghitung ulang indeks nilai (pelatih: KU yang ditugaskan)",
+  },
   "trial.convert": { roles: ["admin_ssb"], desc: "Menjadikan pendaftar trial menjadi siswa dan membuat tautan undangan untuk orang tua" },
   "trial.manage": { roles: ["admin_ssb"], desc: "Melihat pendaftar trial dari landing page dan mengubah statusnya" },
 } as const satisfies Record<string, { roles: readonly UserRole[]; desc: string }>;
@@ -884,3 +903,238 @@ export const merchandiseOrderStatusSchema = z.object({
   adminNote: z.string().trim().max(300, "maksimal 300 karakter").nullable().optional(),
 });
 export type MerchandiseOrderStatusInput = z.infer<typeof merchandiseOrderStatusSchema>;
+
+// ---- Kalender akademi: pertandingan, acara, libur ----
+
+export const calendarEventTypeSchema = z.enum(["pertandingan", "latihan", "acara", "libur", "lainnya"]);
+export type CalendarEventType = z.infer<typeof calendarEventTypeSchema>;
+
+/** Membuat atau mengubah kegiatan kalender. Satu hari bila `endDate` kosong; jam boleh kosong (sepanjang hari). */
+export const calendarEventInputSchema = z
+  .object({
+    title: z.string().trim().min(2, "minimal 2 karakter").max(120, "maksimal 120 karakter"),
+    description: z.string().trim().max(1000, "maksimal 1000 karakter").default(""),
+    eventType: calendarEventTypeSchema.default("acara"),
+    startDate: isoDate,
+    endDate: z.preprocess(emptyToNull, isoDate.nullable().optional()),
+    startTime: z.preprocess(emptyToNull, timeHm.nullable().optional()),
+    endTime: z.preprocess(emptyToNull, timeHm.nullable().optional()),
+    location: z.string().trim().max(160, "maksimal 160 karakter").default(""),
+    isPublic: z.boolean().default(true),
+  })
+  .refine((v) => !v.endDate || v.endDate >= v.startDate, { path: ["endDate"], message: "tidak boleh sebelum tanggal mulai" })
+  .refine((v) => !v.endTime || !!v.startTime, { path: ["endTime"], message: "isi jam mulai lebih dulu" })
+  .refine((v) => !v.endTime || !v.startTime || (v.endDate && v.endDate > v.startDate) || v.endTime >= v.startTime, {
+    path: ["endTime"],
+    message: "tidak boleh sebelum jam mulai",
+  });
+export type CalendarEventInput = z.infer<typeof calendarEventInputSchema>;
+
+/** Rentang tanggal untuk daftar kegiatan: kegiatan yang beririsan dengan rentang ini. Tanpa batas, daftar dimulai hari ini. */
+export const calendarRangeSchema = z
+  .object({ from: isoDate.optional(), to: isoDate.optional() })
+  .refine((v) => !v.from || !v.to || v.to >= v.from, { path: ["to"], message: "tidak boleh sebelum tanggal awal" });
+export type CalendarRange = z.infer<typeof calendarRangeSchema>;
+
+/** Kegiatan kalender seperti dibaca landing page (hanya yang bertanda publik). */
+export type PublicCalendarEvent = {
+  id: string;
+  title: string;
+  description: string;
+  eventType: CalendarEventType;
+  startDate: string;
+  endDate: string | null;
+  startTime: string | null;
+  endTime: string | null;
+  location: string;
+};
+
+/** Baris kegiatan kalender di aplikasi (anggota SSB). */
+export type CalendarEventRow = PublicCalendarEvent & { isPublic: boolean };
+
+// ---- Donasi: penggalangan dana (crowdfunding) per kegiatan ----
+
+export const fundraisingStatusSchema = z.enum(["draft", "aktif", "selesai"]);
+export type FundraisingStatus = z.infer<typeof fundraisingStatusSchema>;
+export const pledgeKindSchema = z.enum(["donasi", "sponsor"]);
+export type PledgeKind = z.infer<typeof pledgeKindSchema>;
+export const pledgeStatusSchema = z.enum(["menunggu", "diterima", "ditolak"]);
+export type PledgeStatus = z.infer<typeof pledgeStatusSchema>;
+
+/** Batas nominal sumbangan satu kali, dalam rupiah (sama dengan batas kolom di database). */
+export const PLEDGE_MAX = 1_000_000_000;
+const pledgeAmount = z.number().int("harus bilangan bulat").min(1, "minimal 1 rupiah").max(PLEDGE_MAX, "terlalu besar");
+
+/** Membuat atau mengubah kampanye. Hanya kampanye `aktif` yang menerima sumbangan baru; draf tidak tampil di landing. */
+export const fundraisingCampaignInputSchema = z.object({
+  title: z.string().trim().min(3, "minimal 3 karakter").max(120, "maksimal 120 karakter"),
+  description: z.string().trim().max(2000, "maksimal 2000 karakter").default(""),
+  calendarEventId: z.preprocess(emptyToNull, uuidStr.nullable().optional()),
+  targetAmount: z.number().int("harus bilangan bulat").min(1, "minimal 1 rupiah").max(2_000_000_000, "terlalu besar").nullable().optional(),
+  deadline: z.preprocess(emptyToNull, isoDate.nullable().optional()),
+  status: fundraisingStatusSchema.default("draft"),
+  isPublic: z.boolean().default(true),
+  paymentInfo: z.string().trim().max(1000, "maksimal 1000 karakter").default(""),
+});
+export type FundraisingCampaignInput = z.infer<typeof fundraisingCampaignInputSchema>;
+
+/** Anggota menyumbang atau menjadi sponsor. Nama diambil dari akunnya; admin mengonfirmasi setelah transfer diterima. */
+export const pledgeInputSchema = z.object({
+  kind: pledgeKindSchema.default("donasi"),
+  amount: pledgeAmount,
+  message: z.string().trim().max(300, "maksimal 300 karakter").default(""),
+  isAnonymous: z.boolean().default(false),
+});
+export type PledgeInput = z.infer<typeof pledgeInputSchema>;
+
+/** Admin mencatat sumbangan atau sponsor di luar aplikasi (tunai, transfer langsung, perusahaan); langsung berstatus diterima. */
+export const donationRecordSchema = pledgeInputSchema.extend({
+  donorName: z.string().trim().min(2, "minimal 2 karakter").max(120, "maksimal 120 karakter"),
+  donorWhatsapp: z.preprocess(emptyToNull, whatsappSchema.nullable().optional()),
+  receivedOn: isoDate,
+  adminNote: optText(300),
+});
+export type DonationRecordInput = z.infer<typeof donationRecordSchema>;
+
+/** Admin menerima atau menolak sumbangan yang menunggu. Tanggal terima bawaannya hari ini (WIB). */
+export const pledgeDecisionSchema = z.object({
+  status: z.enum(["diterima", "ditolak"]),
+  receivedOn: z.preprocess(emptyToNull, isoDate.nullable().optional()),
+  adminNote: optText(300),
+});
+export type PledgeDecisionInput = z.infer<typeof pledgeDecisionSchema>;
+
+/** Kegiatan kalender yang dikaitkan ke kampanye. */
+export type FundraisingEventRef = { id: string; title: string; startDate: string };
+
+/** Kampanye dengan ringkasan dana. `raised` dan `supporters` dihitung dari sumbangan yang sudah diterima. */
+export type FundraisingCampaignRow = {
+  id: string;
+  title: string;
+  description: string;
+  event: FundraisingEventRef | null;
+  targetAmount: number | null;
+  raised: number;
+  supporters: number;
+  deadline: string | null;
+  status: FundraisingStatus;
+  /** Aktif dan belum lewat batas akhir: boleh menerima sumbangan baru. */
+  open: boolean;
+  isPublic: boolean;
+  paymentInfo: string;
+};
+
+/**
+ * Satu sumbangan. `donorName` kosong bila donatur anonim dan pembacanya bukan admin atau pemiliknya.
+ * `donorWhatsapp` dan `adminNote` hanya dikirim ke admin.
+ */
+export type FundraisingPledgeRow = {
+  id: string;
+  campaignId: string;
+  kind: PledgeKind;
+  amount: number;
+  message: string;
+  isAnonymous: boolean;
+  donorName: string | null;
+  status: PledgeStatus;
+  receivedOn: string | null;
+  createdAt: string;
+  mine: boolean;
+  donorWhatsapp?: string | null;
+  adminNote?: string | null;
+};
+
+/** Detail kampanye: admin melihat semua sumbangan; anggota lain melihat yang sudah diterima dan miliknya sendiri. */
+export type FundraisingDetail = { campaign: FundraisingCampaignRow; pledges: FundraisingPledgeRow[] };
+
+/** Kampanye di landing page: tanpa info rekening, nominal tiap donatur, atau donatur anonim. */
+export type PublicFundraising = {
+  id: string;
+  title: string;
+  description: string;
+  event: Omit<FundraisingEventRef, "id"> | null;
+  targetAmount: number | null;
+  raised: number;
+  supporters: number;
+  deadline: string | null;
+  open: boolean;
+  sponsors: { name: string; kind: PledgeKind }[];
+};
+
+// ---- Indeks nilai pemain (MVI): rumus di ./market-value; tanpa nilai uang ----
+export * from "./market-value";
+import type { MviCategory, MviComponent } from "./market-value";
+
+const hitungan = (max: number) => z.number().int("harus bilangan bulat").min(0, "minimal 0").max(max, `maksimal ${max}`);
+
+/** Statistik laga satu siswa pada satu periode (diganti seluruhnya tiap disimpan). Starter, kartu kuning, dan kartu merah tidak melebihi jumlah laga. */
+export const matchStatInputSchema = z
+  .object({
+    matchesPlayed: hitungan(200),
+    goals: hitungan(500),
+    assists: hitungan(500),
+    starts: hitungan(200),
+    yellowCards: hitungan(200),
+    redCards: hitungan(200),
+  })
+  .superRefine((v, ctx) => {
+    for (const k of ["starts", "yellowCards", "redCards"] as const) {
+      if (v[k] > v.matchesPlayed) ctx.addIssue({ code: "custom", path: [k], message: "tidak boleh melebihi jumlah laga" });
+    }
+  });
+export type MatchStatInput = z.infer<typeof matchStatInputSchema>;
+
+const metrik = (min: number, max: number) => z.preprocess(emptyToNull, z.number().min(min, `minimal ${min}`).max(max, `maksimal ${max}`).nullable().optional());
+
+/** Hasil tes kebugaran pada satu tanggal; metrik boleh sebagian, minimal satu terisi. */
+export const physicalTestInputSchema = z
+  .object({
+    testedOn: isoDate.refine(sampaiHariIni, "tidak boleh di masa depan").refine((d) => d >= "2000-01-01", "terlalu lama"),
+    speed30m: metrik(3, 15),
+    zigZag: metrik(5, 40),
+    verticalJump: metrik(5, 100),
+    bleepLevel: metrik(1, 21),
+    note: optText(200),
+  })
+  .refine((v) => [v.speed30m, v.zigZag, v.verticalJump, v.bleepLevel].some((x) => x !== null && x !== undefined), { path: ["speed30m"], message: "isi minimal satu hasil tes" });
+export type PhysicalTestInput = z.infer<typeof physicalTestInputSchema>;
+
+/** Menghitung ulang indeks seluruh siswa aktif satu KU pada satu periode. */
+export const mviComputeSchema = z.object({ ageGroupId: uuidStr, periodId: uuidStr });
+export type MviComputeInput = z.infer<typeof mviComputeSchema>;
+
+export type MatchStatRow = MatchStatInput & { periodId: string; updatedAt: string };
+export type PhysicalTestRow = { id: string; testedOn: string; speed30m: number | null; zigZag: number | null; verticalJump: number | null; bleepLevel: number | null; note: string | null };
+
+/** Satu komponen indeks: skor 0 sampai 100 (null bila datanya belum ada), bobot, dan keterangan sumber datanya. */
+export type MviComponentRow = { key: MviComponent; label: string; weight: number; score: number | null; detail: string };
+
+/** Indeks satu siswa pada satu periode, untuk staf. */
+export type MviResult = {
+  period: { id: string; name: string };
+  ageGroup: { id: string; name: string };
+  mvi: number | null;
+  category: MviCategory | null;
+  coverage: number;
+  components: MviComponentRow[];
+  computedAt: string;
+};
+
+/** Yang dilihat orang tua: kategori anaknya saja, hanya untuk periode yang penilaiannya sudah terbit. */
+export type MviGuardianResult = { period: { id: string; name: string }; category: MviCategory };
+
+export type MviRankingRow = {
+  playerId: string;
+  fullName: string;
+  position: Position | null;
+  mvi: number | null;
+  category: MviCategory | null;
+  coverage: number;
+  kurang: MviComponent[];
+  computedAt: string | null;
+};
+/** Peringkat satu KU pada satu periode; siswa yang belum pernah dihitung muncul dengan `computedAt` kosong. */
+export type MviRanking = { ageGroup: { id: string; name: string }; period: { id: string; name: string }; rows: MviRankingRow[] };
+
+/** Jawaban `GET /players/:id/market-value`: staf menerima angka dan rincian, orang tua hanya kategori. */
+export type MviPlayerView = { role: "staff"; items: MviResult[] } | { role: "guardian"; items: MviGuardianResult[] };

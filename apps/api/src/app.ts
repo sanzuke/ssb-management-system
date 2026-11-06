@@ -26,6 +26,9 @@ import { assessmentRoutes } from "./assessments";
 import { badgeRoutes } from "./badges";
 import { injuryRoutes } from "./injuries";
 import { merchandiseRoutes } from "./merchandise";
+import { calendarRoutes } from "./calendar";
+import { fundraisingRoutes } from "./fundraising";
+import { marketValueRoutes } from "./market-value";
 import { positionWeightRoutes } from "./position-weights";
 import type { Env } from "./env";
 import { createLogger, requestLogger, type Logger } from "./logger";
@@ -126,6 +129,9 @@ export function createApp(
       .route("/", injuryRoutes(db))
       .route("/", positionWeightRoutes(db))
       .route("/", merchandiseRoutes(db))
+      .route("/", calendarRoutes(db))
+      .route("/", fundraisingRoutes(db))
+      .route("/", marketValueRoutes(db))
       .route("/", memberRoutes(db))
       // Daftar anggota SSB sendiri; hanya admin SSB.
       .get("/users", requirePermission("user.list"), async (c) => {

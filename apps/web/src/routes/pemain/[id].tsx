@@ -6,6 +6,7 @@ import CederaPemain from "~/components/CederaPemain";
 import LencanaPemain from "~/components/LencanaPemain";
 import PosisiPemain from "~/components/PosisiPemain";
 import RingkasanNilai from "~/components/RingkasanNilai";
+import IndeksNilai from "~/components/IndeksNilai";
 import KepalaHalaman from "~/components/KepalaHalaman";
 import { createSignal, For, onMount, Show } from "solid-js";
 import PlayerForm from "~/components/PlayerForm";
@@ -205,6 +206,7 @@ export default function DetailPemain() {
                   staf={me()!.active!.role !== "orang_tua"}
                 />
                 <PosisiPemain nilai={terpilih()} usia={usia(pl()!.birthDate)} utama={pl()!.position} />
+                <IndeksNilai playerId={pl()!.id} />
                 <CederaPemain playerId={pl()!.id} daftar={cedera()} onUbah={setCedera} bisaUbah={["admin_ssb", "pelatih"].includes(me()!.active!.role)} />
                 <div id="data">
                   <Show

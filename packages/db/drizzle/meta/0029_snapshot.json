@@ -1,6 +1,6 @@
 {
-  "id": "db197e14-5c49-4f66-b0c3-0c12f86f1d51",
-  "prevId": "3f1cf5f8-98d5-4559-b9b5-edb84162dc5e",
+  "id": "3219f134-1db4-4cfa-9a8f-0d7bb0402e6d",
+  "prevId": "310208c1-d8aa-43bf-895a-183bf7af7a79",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -995,6 +995,190 @@
         }
       },
       "checkConstraints": {},
+      "isRLSEnabled": true
+    },
+    "public.calendar_event": {
+      "name": "calendar_event",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "ssb_id": {
+          "name": "ssb_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "title": {
+          "name": "title",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "description": {
+          "name": "description",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "''"
+        },
+        "event_type": {
+          "name": "event_type",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'acara'"
+        },
+        "start_date": {
+          "name": "start_date",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "end_date": {
+          "name": "end_date",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "start_time": {
+          "name": "start_time",
+          "type": "time",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "end_time": {
+          "name": "end_time",
+          "type": "time",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "location": {
+          "name": "location",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "''"
+        },
+        "is_public": {
+          "name": "is_public",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": true
+        },
+        "created_by": {
+          "name": "created_by",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "calendar_event_date_idx": {
+          "name": "calendar_event_date_idx",
+          "columns": [
+            {
+              "expression": "ssb_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "start_date",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "calendar_event_ssb_id_ssb_id_fk": {
+          "name": "calendar_event_ssb_id_ssb_id_fk",
+          "tableFrom": "calendar_event",
+          "tableTo": "ssb",
+          "columnsFrom": [
+            "ssb_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "calendar_event_created_by_fk": {
+          "name": "calendar_event_created_by_fk",
+          "tableFrom": "calendar_event",
+          "tableTo": "app_user",
+          "columnsFrom": [
+            "ssb_id",
+            "created_by"
+          ],
+          "columnsTo": [
+            "ssb_id",
+            "id"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "calendar_event_ssb_id": {
+          "name": "calendar_event_ssb_id",
+          "nullsNotDistinct": false,
+          "columns": [
+            "ssb_id",
+            "id"
+          ]
+        }
+      },
+      "policies": {
+        "calendar_event_tenant": {
+          "name": "calendar_event_tenant",
+          "as": "PERMISSIVE",
+          "for": "ALL",
+          "to": [
+            "ssb_app"
+          ],
+          "using": "ssb_id = nullif(current_setting('app.ssb_id', true), '')::uuid",
+          "withCheck": "ssb_id = nullif(current_setting('app.ssb_id', true), '')::uuid"
+        }
+      },
+      "checkConstraints": {
+        "calendar_event_type": {
+          "name": "calendar_event_type",
+          "value": "\"calendar_event\".\"event_type\" in ('pertandingan', 'latihan', 'acara', 'libur', 'lainnya')"
+        },
+        "calendar_event_dates": {
+          "name": "calendar_event_dates",
+          "value": "\"calendar_event\".\"end_date\" is null or \"calendar_event\".\"end_date\" >= \"calendar_event\".\"start_date\""
+        }
+      },
       "isRLSEnabled": true
     },
     "public.coach_assignment": {
@@ -2111,6 +2295,12 @@
           "primaryKey": false,
           "notNull": true
         },
+        "hpp": {
+          "name": "hpp",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
         "stock": {
           "name": "stock",
           "type": "integer",
@@ -2211,6 +2401,10 @@
         "merchandise_product_price_non_negative": {
           "name": "merchandise_product_price_non_negative",
           "value": "\"merchandise_product\".\"price\" >= 0"
+        },
+        "merchandise_product_hpp_non_negative": {
+          "name": "merchandise_product_hpp_non_negative",
+          "value": "\"merchandise_product\".\"hpp\" >= 0"
         },
         "merchandise_product_stock_non_negative": {
           "name": "merchandise_product_stock_non_negative",
