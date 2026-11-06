@@ -65,19 +65,12 @@ export default function Merchandise() {
       <Title>Merchandise · SSB App</Title>
       <main class="halaman lebar">
         <KepalaHalaman chip="Merchandise" judul="Produk dan Pesanan">
-          <div class="tombol-bar">
-            <button
-              class={tab() === "produk" ? "tombol utama" : "tombol tipis"}
-              type="button"
-              onClick={() => setTab("produk")}
-            >
+          {/* biome-ignore lint/a11y/useSemanticElements: fieldset merusak tata letak tombol segmen */}
+          <div class="segmen" role="group" aria-label="Bagian merchandise">
+            <button type="button" aria-pressed={tab() === "produk"} onClick={() => setTab("produk")}>
               Produk
             </button>
-            <button
-              class={tab() === "pesanan" ? "tombol utama" : "tombol tipis"}
-              type="button"
-              onClick={() => setTab("pesanan")}
-            >
+            <button type="button" aria-pressed={tab() === "pesanan"} onClick={() => setTab("pesanan")}>
               Pesanan
             </button>
           </div>
