@@ -188,6 +188,27 @@ export const trialInputSchema = z.object({
   preferredSession: z.string().trim().max(100).optional(),
   applyScholarship: z.boolean().default(false),
   notes: z.string().trim().max(1000).optional(),
+  // Data siswa seperti di lembar data siswa SSB (bentuk dan batas sama dengan `playerFormSchema`); disalin ke siswa saat dikonversi.
+  birthPlace: z.string().trim().max(80).optional(),
+  nisn: z
+    .string()
+    .trim()
+    .regex(/^\d{10}$/, "NISN terdiri dari 10 angka")
+    .or(z.literal(""))
+    .optional(),
+  school: z.string().trim().max(120).optional(),
+  /** Posisi favorit. */
+  position: z.enum(["GK", "DF", "MF", "FW"]).optional(),
+  heightCm: z.number().int("harus bilangan bulat").min(50).max(230).optional(),
+  weightKg: z.number().min(10).max(200).optional(),
+  jerseySize: z.string().trim().max(10).optional(),
+  shoeSize: z.number().min(15).max(50).optional(),
+  /** Riwayat penyakit, alergi, atau cedera; menjadi catatan medis siswa. */
+  medicalNote: z.string().trim().max(500).optional(),
+  /** Persetujuan perjanjian komitmen dan fakta integritas: wajib. */
+  commitmentAccepted: z.literal(true, "Perjanjian komitmen dan fakta integritas harus disetujui"),
+  /** Izin foto dan video untuk dokumentasi dan promosi akademi: opsional. */
+  mediaConsent: z.boolean().default(false),
   /** Kolom jebakan bot: manusia tidak melihatnya, jadi harus kosong. API menjawab seolah berhasil bila terisi. */
   website: z.string().max(200).optional(),
 });
@@ -217,6 +238,18 @@ export type TrialRow = {
   preferredSession: string | null;
   applyScholarship: boolean;
   notes: string | null;
+  birthPlace: string | null;
+  nisn: string | null;
+  school: string | null;
+  position: "GK" | "DF" | "MF" | "FW" | null;
+  heightCm: number | null;
+  weightKg: number | null;
+  jerseySize: string | null;
+  shoeSize: number | null;
+  medicalNote: string | null;
+  /** Null pada pendaftar lama, sebelum perjanjian ada di formulir. */
+  commitmentAcceptedAt: string | null;
+  mediaConsent: boolean;
   status: TrialStatus;
   adminNote: string | null;
   createdAt: string;

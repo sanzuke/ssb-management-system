@@ -67,6 +67,17 @@ const toTrialRow = ({ t: r, kuName, playerName }: Awaited<ReturnType<typeof tria
   preferredSession: r.preferredSession,
   applyScholarship: r.applyScholarship,
   notes: r.notes,
+  birthPlace: r.birthPlace,
+  nisn: r.nisn,
+  school: r.school,
+  position: r.position,
+  heightCm: r.heightCm,
+  weightKg: r.weightKg,
+  jerseySize: r.jerseySize,
+  shoeSize: r.shoeSize,
+  medicalNote: r.medicalNote,
+  commitmentAcceptedAt: r.commitmentAcceptedAt?.toISOString() ?? null,
+  mediaConsent: r.mediaConsent,
   status: trialStatusSchema.catch("baru").parse(r.status),
   adminNote: r.adminNote,
   createdAt: r.createdAt.toISOString(),
@@ -183,6 +194,15 @@ export function siteRoutes(db: Db, opts: { webUrl: string }) {
             ageGroupId,
             guardianName: t.parentName,
             guardianWhatsapp: wa.success ? wa.data : null,
+            birthPlace: t.birthPlace,
+            nisn: t.nisn,
+            school: t.school,
+            position: t.position,
+            heightCm: t.heightCm,
+            weightKg: t.weightKg,
+            jerseySize: t.jerseySize,
+            shoeSize: t.shoeSize,
+            medicalNote: t.medicalNote,
           });
           if (!form.success) {
             throw new HttpError(
@@ -195,9 +215,9 @@ export function siteRoutes(db: Db, opts: { webUrl: string }) {
           try {
             playerId = await insertPlayer(tx, m.ssbId, form.data);
           } catch (e) {
-            if ((e as { cause?: { code?: string } })?.cause?.code === "23503" || (e as { code?: string })?.code === "23503") {
-              throw new HttpError(422, "age_group_invalid", "KU tidak ditemukan di SSB ini");
-            }
+            const code = (e as { cause?: { code?: string } })?.cause?.code ?? (e as { code?: string })?.code;
+            if (code === "23503") throw new HttpError(422, "age_group_invalid", "KU tidak ditemukan di SSB ini");
+            if (code === "23505") throw new HttpError(409, "nisn_taken", "NISN pendaftar ini sudah dipakai siswa lain");
             throw e;
           }
           await tx
@@ -304,6 +324,17 @@ export function publicSiteRoutes(db: Db, opts: PublicSiteOptions) {
               preferredSession: b.preferredSession || null,
               applyScholarship: b.applyScholarship,
               notes: b.notes || null,
+              birthPlace: b.birthPlace || null,
+              nisn: b.nisn || null,
+              school: b.school || null,
+              position: b.position ?? null,
+              heightCm: b.heightCm ?? null,
+              weightKg: b.weightKg ?? null,
+              jerseySize: b.jerseySize || null,
+              shoeSize: b.shoeSize ?? null,
+              medicalNote: b.medicalNote || null,
+              commitmentAcceptedAt: new Date(),
+              mediaConsent: b.mediaConsent,
             })
             .onConflictDoNothing()
             .returning({ code: schema.trialRegistration.code });

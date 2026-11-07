@@ -45,7 +45,7 @@ Satu dokumen JSON per SSB (kolom `jsonb`), dengan dua salinan: draf dan terbit. 
 Semua teks punya kolom ID dan EN. Tabel baru:
 
 - `site_content` (sudah ada, migrasi 0020): `ssb_id` (PK, FK ke `ssb`), `draft` (jsonb), `published` (jsonb, kosong = belum terbit), `published_at`, `published_by`, `updated_at`. RLS per SSB.
-- `trial_registration` (sudah ada, migrasi 0020; migrasi 0026 menambah `age_group_id` dan `player_id`, keduanya `ON DELETE SET NULL`): `id`, `ssb_id`, `code` (TRL-XXXXXX, unik per SSB), data anak dan orang tua, program pilihan, KU yang dipilih, siswa hasil konversi, ajukan beasiswa, catatan, `status` (baru, dihubungi, diterima, ditolak), `admin_note`, `created_at`. RLS per SSB.
+- `trial_registration` (sudah ada, migrasi 0020; migrasi 0026 menambah `age_group_id` dan `player_id`, keduanya `ON DELETE SET NULL`; migrasi 0032 menambah data siswa seperti di lembar data siswa: `birth_place`, `nisn`, `school`, `position` (posisi favorit), `height_cm`, `weight_kg`, `jersey_size`, `shoe_size`, `medical_note` (riwayat penyakit, alergi, cedera), lalu `commitment_accepted_at` (persetujuan perjanjian komitmen dan fakta integritas) dan `media_consent` (izin foto dan video)): `id`, `ssb_id`, `code` (TRL-XXXXXX, unik per SSB), data anak dan orang tua, program pilihan, KU yang dipilih, siswa hasil konversi, ajukan beasiswa, catatan, `status` (baru, dihubungi, diterima, ditolak), `admin_note`, `created_at`. RLS per SSB. Data kesehatan tidak pernah keluar lewat API publik; hanya `GET /trials` (admin) yang membacanya.
 - `site_gallery` (belum): `id`, `ssb_id`, `path`, `caption`, `sort`, `published`. Foto memakai penyimpanan yang sama dengan foto pemain, tetapi jalur baca publiknya hanya untuk galeri. Ditunda: landing sekarang memakai foto yang ikut ter-build.
 - `site_domain` (belum): memetakan domain ke SSB. Ditunda: satu landing satu domain, dan landing memakai kode SSB di alamat API.
 
@@ -56,14 +56,14 @@ Bagian publik tanpa sesi. Kode SSB (`slug`) di alamat menentukan SSB-nya; tidak 
 | Endpoint | Izin | Fungsi |
 |---|---|---|
 | `GET /public/site/:slug` | publik | Konten terbit (`{ slug, ssbName, publishedAt, content }`), cache 60 detik; 404 bila belum terbit. `content.programs` diturunkan dari KU di Data master (satu program per KU; program admin yang ditautkan lewat `ageGroupId` menimpa teksnya, rentang usia selalu dari master; program tanpa tautan tetap di belakang) |
-| `POST /public/site/:slug/trial` | publik, batas laju | Pendaftaran trial (boleh membawa `ageGroupId` dari program yang dipilih; id yang tidak dikenal atau milik SSB lain diabaikan); 201 `{ code }`; hanya diterima bila situs terbit; 5 per jam per IP dan 100 per jam per SSB (429); kolom jebakan `website` terisi dijawab 201 tanpa menyimpan |
+| `POST /public/site/:slug/trial` | publik, batas laju | Pendaftaran trial (boleh membawa `ageGroupId` dari program yang dipilih; id yang tidak dikenal atau milik SSB lain diabaikan). Wajib `commitmentAccepted: true` (perjanjian komitmen dan fakta integritas); `mediaConsent` opsional; data siswa (tempat lahir, NISN, sekolah, posisi, tinggi, berat, ukuran jersey dan sepatu, riwayat kesehatan) opsional dengan batas yang sama seperti `playerFormSchema`. 201 `{ code }`; hanya diterima bila situs terbit; 5 per jam per IP dan 100 per jam per SSB (429); kolom jebakan `website` terisi dijawab 201 tanpa menyimpan |
 | `GET /site` | `site.manage` | Draf, `dirty` (ada perubahan belum terbit), `published`, `publishedAt` |
 | `PUT /site` | `site.manage` | Simpan draf (divalidasi `siteContentSchema`) |
 | `POST /site/publish` | `site.manage` | Salin draf menjadi versi terbit; 409 bila belum ada draf |
 | `POST /site/unpublish` | `site.manage` | Tarik dari publik; draf tetap |
 | `GET /trials?status=` | `trial.manage` | Kotak masuk pendaftar, terbaru dulu |
 | `PATCH /trials/:id` | `trial.manage` | Ubah status dan catatan admin |
-| `POST /trials/:id/convert` | `trial.convert` | Menjadikan pendaftar siswa (KU dari pilihan landing atau `{ ageGroupId }`), status Diterima, dan membuat tautan undangan orang tua yang terhubung ke siswa (`{ trial, player, invitation: { url, expiresAt } }`, tautan hanya tampil sekali); 409 `already_converted` atau `rejected`, 422 bila data belum memenuhi syarat siswa |
+| `POST /trials/:id/convert` | `trial.convert` | Menjadikan pendaftar siswa (KU dari pilihan landing atau `{ ageGroupId }`; tempat lahir, NISN, sekolah, posisi, tinggi, berat, jersey, sepatu, dan riwayat kesehatan ikut disalin ke siswa), status Diterima, dan membuat tautan undangan orang tua yang terhubung ke siswa (`{ trial, player, invitation: { url, expiresAt } }`, tautan hanya tampil sekali); 409 `already_converted`, `rejected`, atau `nisn_taken` (NISN sudah dipakai siswa lain), 422 bila data belum memenuhi syarat siswa |
 | `POST/DELETE /site/gallery` | `site.manage` | Unggah dan hapus foto galeri (belum) |
 
 Izin baru: `site.manage` dan `trial.manage` (admin SSB), serta `trial.convert` (admin SSB).
@@ -77,6 +77,7 @@ Di server, Nginx untuk `app.familyunitedfa.com` meneruskan `/api/public/` langsu
 - **Konten situs:** editor per bagian, bahasa ID dan EN, pratinjau draf, tombol Terbitkan, dan penanda perubahan yang belum terbit.
 - **Galeri:** unggah, urutkan, tandai terbit.
 - **Pendaftar:** daftar trial dengan status, KU pilihan, tombol hubungi lewat WhatsApp, dan "Jadikan siswa dan undang orang tua" (siswa dibuat, tautan undangan orang tua tampil sekali dengan tombol kirim lewat WhatsApp).
+- **Halaman pendaftaran di landing** (`/daftar`, menggantikan modal): empat langkah (Data Pribadi, Kesehatan, Komitmen, Konfirmasi) dengan isian mengikuti lembar data siswa. Tombol "Daftar" di seluruh situs membuka halaman ini, dan tombol di kartu program membawa `?program=<id>` agar programnya terpilih. Jenis kelamin hanya ada di pendaftaran (tabel siswa belum punya kolomnya).
 - **Artikel:** daftar, editor teks visual (Tiptap) dengan tab Markdown dan Pratinjau, tata letak lebar penuh dua kolom, unggah sampul dan gambar isi, simpan draf, terbitkan, tarik, dan hapus.
 
 ## Landing dan build

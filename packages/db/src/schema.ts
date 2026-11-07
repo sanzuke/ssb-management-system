@@ -793,6 +793,21 @@ export const trialRegistration = pgTable(
     preferredSession: text("preferred_session"),
     applyScholarship: boolean("apply_scholarship").notNull().default(false),
     notes: text("notes"),
+    /** Data siswa yang diisi orang tua; disalin ke siswa saat pendaftar dikonversi. Bentuk dan batasnya sama dengan `player`. */
+    birthPlace: text("birth_place"),
+    nisn: text("nisn"),
+    school: text("school"),
+    position: playerPosition("position"),
+    heightCm: smallint("height_cm"),
+    weightKg: real("weight_kg"),
+    jerseySize: text("jersey_size"),
+    shoeSize: real("shoe_size"),
+    /** Riwayat penyakit, alergi, atau cedera; menjadi catatan medis siswa. Data kesehatan: tidak pernah keluar lewat API publik. */
+    medicalNote: text("medical_note"),
+    /** Saat orang tua menyetujui perjanjian komitmen dan fakta integritas; kosong pada pendaftar lama sebelum kolom ini ada. */
+    commitmentAcceptedAt: timestamp("commitment_accepted_at", { withTimezone: true }),
+    /** Izin memakai foto dan video siswa untuk dokumentasi dan promosi akademi. */
+    mediaConsent: boolean("media_consent").notNull().default(false),
     status: text("status").notNull().default("baru"),
     adminNote: text("admin_note"),
     createdAt: createdAt(),
@@ -803,6 +818,9 @@ export const trialRegistration = pgTable(
     index("trial_registration_status_idx").on(t.ssbId, t.status, t.createdAt),
     check("trial_registration_status", sql`${t.status} in ('baru', 'dihubungi', 'diterima', 'ditolak')`),
     check("trial_registration_gender", sql`${t.gender} in ('Putra', 'Putri')`),
+    check("trial_registration_height_range", sql`${t.heightCm} between 50 and 230`),
+    check("trial_registration_weight_range", sql`${t.weightKg} between 10 and 200`),
+    check("trial_registration_shoe_size_range", sql`${t.shoeSize} between 15 and 50`),
     foreignKey({ columns: [t.ssbId, t.ageGroupId], foreignColumns: [ageGroup.ssbId, ageGroup.id], name: "trial_registration_age_group_fk" }),
     foreignKey({ columns: [t.ssbId, t.playerId], foreignColumns: [player.ssbId, player.id], name: "trial_registration_player_fk" }),
     tenantPolicy("trial_registration"),

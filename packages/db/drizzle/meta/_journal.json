@@ -225,6 +225,13 @@
       "when": 1793919013436,
       "tag": "0031_indeks_nilai",
       "breakpoints": true
+    },
+    {
+      "idx": 32,
+      "version": "7",
+      "when": 1794001258866,
+      "tag": "0032_pendaftaran_data_siswa",
+      "breakpoints": true
     }
   ]
 }

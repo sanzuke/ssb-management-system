@@ -83,6 +83,7 @@ run("landing page: konten situs dan pendaftaran trial", () => {
     parentName: "Bambang",
     phone: "081234567890",
     programId: "u-12",
+    commitmentAccepted: true,
     ...extra,
   });
   let ip = 0;

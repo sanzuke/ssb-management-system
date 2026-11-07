@@ -39,7 +39,15 @@ run("program dari KU dan konversi pendaftar trial menjadi siswa", () => {
       "POST",
       `/public/site/${slug}/trial`,
       undefined,
-      { childName: "Raffaza Haris", birthDate: "2015-06-12", gender: "Putra", parentName: "Hendra Gunawan", phone: "+62 812-3456-7890", ...body },
+      {
+        childName: "Raffaza Haris",
+        birthDate: "2015-06-12",
+        gender: "Putra",
+        parentName: "Hendra Gunawan",
+        phone: "+62 812-3456-7890",
+        commitmentAccepted: true,
+        ...body,
+      },
       { "x-real-ip": `10.1.0.${++ip}` },
     );
 
@@ -162,6 +170,59 @@ run("program dari KU dan konversi pendaftar trial menjadi siswa", () => {
 
     expect((await json(call("POST", `/trials/${trial!.id}/convert`, w.admin, {}))).error.code).toBe("already_converted");
     expect((await json<{ id: string }[]>(call("GET", "/players", w.admin))).length).toBe(1);
+  });
+
+  test("pendaftaran: perjanjian komitmen wajib, batas data siswa dijaga, dan data siswa ikut tersalin saat konversi", async () => {
+    const w = await world("dat");
+    // Tanpa persetujuan, atau persetujuan false, ditolak dan tidak ada yang tersimpan.
+    for (const commitmentAccepted of [undefined, false]) {
+      const res = await postTrial(w.slug, { commitmentAccepted });
+      expect(res.status).toBe(400);
+    }
+    for (const buruk of [{ heightCm: 20 }, { weightKg: 500 }, { shoeSize: 5 }, { nisn: "123" }, { position: "ST" }, { medicalNote: "x".repeat(501) }]) {
+      expect([JSON.stringify(buruk), (await postTrial(w.slug, buruk)).status]).toEqual([JSON.stringify(buruk), 400]);
+    }
+    expect(await json<TrialRow[]>(call("GET", "/trials", w.admin))).toEqual([]);
+
+    const ok = await postTrial(w.slug, {
+      ageGroupId: w.ku10,
+      birthPlace: "Bandung",
+      nisn: "0123456789",
+      school: "SDN 1 Padasuka",
+      position: "MF",
+      heightCm: 142,
+      weightKg: 35.5,
+      jerseySize: "m",
+      shoeSize: 36,
+      medicalNote: "Asma ringan, alergi udang",
+      mediaConsent: true,
+    });
+    expect(ok.status).toBe(201);
+    const [trial] = await json<TrialRow[]>(call("GET", "/trials", w.admin));
+    expect(trial).toMatchObject({ birthPlace: "Bandung", nisn: "0123456789", position: "MF", heightCm: 142, weightKg: 35.5, mediaConsent: true });
+    expect(trial!.commitmentAcceptedAt).toMatch(/^\d{4}-\d{2}-\d{2}T/);
+
+    const out = await json<TrialConvertResult>(call("POST", `/trials/${trial!.id}/convert`, w.admin, {}));
+    const detail = await json(call("GET", `/players/${out.player.id}`, w.admin));
+    expect(detail).toMatchObject({
+      birthPlace: "Bandung",
+      nisn: "0123456789",
+      school: "SDN 1 Padasuka",
+      position: "MF",
+      heightCm: 142,
+      weightKg: 35.5,
+      jerseySize: "M",
+      shoeSize: 36,
+      medicalNote: "Asma ringan, alergi udang",
+    });
+
+    // NISN yang sudah dipakai siswa lain: konversi ditolak dengan pesan jelas, pendaftar tetap belum menjadi siswa.
+    await postTrial(w.slug, { childName: "Kembar NISN", nisn: "0123456789" });
+    const kembar = (await json<TrialRow[]>(call("GET", "/trials", w.admin))).find((t) => t.childName === "Kembar NISN")!;
+    const tolak = await call("POST", `/trials/${kembar.id}/convert`, w.admin, {});
+    expect(tolak.status).toBe(409);
+    expect((await json(tolak)).error.code).toBe("nisn_taken");
+    expect((await json<TrialRow[]>(call("GET", "/trials", w.admin))).find((t) => t.childName === "Kembar NISN")!.player).toBeNull();
   });
 
   test("konversi: KU boleh diisi admin saat pendaftar tanpa KU; ditolak tidak bisa; data tidak sah ditolak tanpa membuat siswa", async () => {

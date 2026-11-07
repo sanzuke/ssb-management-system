@@ -133,6 +133,36 @@ export default function KartuPendaftar(props: {
           <dt>Sesi pilihan</dt>
           <dd>{b().preferredSession}</dd>
         </Show>
+        <Show when={b().birthPlace || b().school || b().nisn}>
+          <dt>Sekolah dan identitas</dt>
+          <dd>
+            {[b().birthPlace && `Lahir di ${b().birthPlace}`, b().school, b().nisn && `NISN ${b().nisn}`].filter(Boolean).join(" · ")}
+          </dd>
+        </Show>
+        <Show when={b().position || b().heightCm || b().weightKg || b().jerseySize || b().shoeSize}>
+          <dt>Fisik dan perlengkapan</dt>
+          <dd>
+            {[
+              b().position && `Posisi favorit ${b().position}`,
+              b().heightCm && `${b().heightCm} cm`,
+              b().weightKg && `${String(b().weightKg).replace(".", ",")} kg`,
+              b().jerseySize && `Jersey ${b().jerseySize}`,
+              b().shoeSize && `Sepatu ${String(b().shoeSize).replace(".", ",")}`,
+            ]
+              .filter(Boolean)
+              .join(" · ")}
+          </dd>
+        </Show>
+        <Show when={b().medicalNote}>
+          <dt>Riwayat kesehatan</dt>
+          <dd>{b().medicalNote}</dd>
+        </Show>
+        <dt>Persetujuan</dt>
+        <dd>
+          {b().commitmentAcceptedAt ? `Komitmen disetujui ${tanggal(b().commitmentAcceptedAt!)}` : "Komitmen: belum ada (pendaftar lama)"}
+          {" · "}
+          {b().mediaConsent ? "Foto dan video diizinkan" : "Foto dan video tidak diizinkan"}
+        </dd>
         <dt>Beasiswa</dt>
         <dd>{b().applyScholarship ? "Mengajukan" : "Tidak"}</dd>
         <Show when={b().notes}>
