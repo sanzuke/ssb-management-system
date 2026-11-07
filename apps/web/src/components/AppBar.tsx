@@ -1,16 +1,26 @@
 import { A, useLocation } from "@solidjs/router";
-import { createEffect, Show } from "solid-js";
+import { createEffect, createSignal, For, Show } from "solid-js";
 import { roleLabel, type Me } from "~/lib/api";
 import { mintaKeluar } from "./DialogKeluar";
 import Ikon from "./Ikon";
 
+type Butir = { href: string; label: string; ikon: Parameters<typeof Ikon>[0]["nama"]; end?: boolean };
+type Grup = { grup: string; ikon: Butir["ikon"]; butir: Butir[] };
+/** Satu baris menu: tautan biasa, atau grup yang punya submenu. */
+type Baris = Butir | Grup;
+
+const adalahGrup = (b: Baris): b is Grup => "grup" in b;
+/** Halaman yang sedang dibuka termasuk tautan ini (beranda hanya cocok persis). */
+const cocok = (path: string, b: Butir) => (b.end ? path === b.href : path === b.href || path.startsWith(`${b.href}/`));
+
 /**
- * Navigasi akun. Di HP berupa bilah atas; di layar lebar (dashboard.css) menjadi sidebar kiri
- * seperti desain Stitch "Data Siswa - Admin".
+ * Navigasi akun. Di HP berupa bilah atas dengan deretan pil yang bisa digeser (submenu diratakan);
+ * di layar lebar (dashboard.css) menjadi sidebar kiri dengan grup yang bisa dibuka dan ditutup.
  */
 export default function AppBar(props: { me: Me }) {
   const lokasi = useLocation();
   let daftarMenu: HTMLElement | undefined;
+  const [terbuka, setTerbuka] = createSignal<Set<string>>(new Set());
 
   // Di HP menu bisa digeser; menu halaman yang sedang dibuka dibawa ke tengah supaya selalu terlihat.
   createEffect(() => {
@@ -22,7 +32,75 @@ export default function AppBar(props: { me: Me }) {
     const n = (props.me.active?.ssbName ?? "").length;
     return n > 32 ? "sangat" : n > 18 ? "panjang" : undefined;
   };
-  const staf = () => ["admin_ssb", "pelatih", "korlas"].includes(props.me.active?.role ?? "");
+
+  const role = () => props.me.active?.role;
+  const staf = () => ["admin_ssb", "pelatih", "korlas"].includes(role() ?? "");
+  const admin = () => role() === "admin_ssb";
+  const ortu = () => role() === "orang_tua";
+
+  /**
+   * Menu menurut peran. Grup yang hanya punya satu butir diratakan jadi tautan biasa, jadi peran dengan menu
+   * sedikit (orang tua, pelatih) tidak mendapat grup berisi satu baris.
+   */
+  const menu = (): Baris[] => {
+    const grup = (nama: string, ikon: Butir["ikon"], butir: (Butir | false)[]): Baris[] => {
+      const ada = butir.filter((b): b is Butir => b !== false);
+      return ada.length > 1 ? [{ grup: nama, ikon, butir: ada }] : ada;
+    };
+    return [
+      { href: "/", label: "Beranda", ikon: "beranda", end: true },
+      ...grup("Akademik", "pemain", [
+        { href: "/pemain", label: ortu() ? "Anak" : "Siswa", ikon: "pemain" },
+        { href: "/kehadiran", label: "Kehadiran", ikon: "absen" },
+        staf() && { href: "/jadwal", label: "Jadwal", ikon: "kalender" },
+        staf() && { href: "/indeks", label: "Indeks nilai", ikon: "indikator" },
+        staf() && { href: "/skuad", label: "Skuad", ikon: "indikator" },
+        staf() && { href: "/indikator", label: "Indikator", ikon: "indikator" },
+      ]),
+      ...grup("Kegiatan", "kalender", [
+        { href: "/kalender", label: "Kalender", ikon: "kalender" },
+        { href: "/donasi", label: "Donasi", ikon: "kartu" },
+      ]),
+      ...grup("Keuangan", "kartu", [
+        (admin() || ortu()) && { href: "/spp", label: "SPP", ikon: "kartu" },
+        admin() && { href: "/merchandise", label: "Merchandise", ikon: "kartu" },
+      ]),
+      ...grup("Situs dan pendaftaran", "bola", [
+        admin() && { href: "/situs", label: "Konten situs", ikon: "bola" },
+        staf() && { href: "/artikel", label: "Artikel", ikon: "daftar" },
+        admin() && { href: "/pendaftar", label: "Pendaftar", ikon: "profil" },
+        admin() && { href: "/undangan", label: "Undangan", ikon: "surat" },
+      ]),
+      ...grup("Pesan", "surat", [
+        admin() && { href: "/whatsapp", label: "WhatsApp", ikon: "surat" },
+        admin() && { href: "/email", label: "Email", ikon: "surat" },
+      ]),
+      ...grup("Pengelolaan", "master", [
+        admin() && { href: "/anggota", label: "Anggota", ikon: "profil" },
+        staf() && { href: "/master", label: "Data master", ikon: "master" },
+      ]),
+      { href: "/akun", label: "Akun", ikon: "akun" },
+    ];
+  };
+
+  const berisiAktif = (g: Grup) => g.butir.some((b) => cocok(lokasi.pathname, b));
+  const bukaDi = (g: Grup) => terbuka().has(g.grup) || berisiAktif(g);
+  const ganti = (g: Grup) =>
+    setTerbuka((s) => {
+      const n = new Set(s);
+      // Grup yang memuat halaman aktif selalu terbuka, jadi yang bisa diubah hanya yang lain.
+      if (bukaDi(g)) n.delete(g.grup);
+      else n.add(g.grup);
+      return n;
+    });
+
+  const Tautan = (p: { b: Butir }) => (
+    <A class="tombol tipis menu" href={p.b.href} end={p.b.end}>
+      <Ikon nama={p.b.ikon} />
+      <span>{p.b.label}</span>
+    </A>
+  );
+
   return (
     <header class="bar">
       <div class="merek-bar">
@@ -38,91 +116,33 @@ export default function AppBar(props: { me: Me }) {
       </div>
       <nav class="aksi" aria-label="Menu utama" ref={daftarMenu}>
         <Show when={props.me.active}>
-          <A class="tombol tipis menu" href="/" end>
-            <Ikon nama="beranda" />
-            <span>Beranda</span>
-          </A>
-          <A class="tombol tipis menu" href="/pemain">
-            <Ikon nama="pemain" />
-            <span>{props.me.active!.role === "orang_tua" ? "Anak" : "Siswa"}</span>
-          </A>
-          <A class="tombol tipis menu" href="/kehadiran">
-            <Ikon nama="absen" />
-            <span>Kehadiran</span>
-          </A>
-          <A class="tombol tipis menu" href="/kalender">
-            <Ikon nama="kalender" />
-            <span>Kalender</span>
-          </A>
-          <A class="tombol tipis menu" href="/donasi">
-            <Ikon nama="kartu" />
-            <span>Donasi</span>
-          </A>
-          <Show when={staf()}>
-            <A class="tombol tipis menu" href="/indeks">
-              <Ikon nama="indikator" />
-              <span>Indeks nilai</span>
-            </A>
-            <A class="tombol tipis menu" href="/skuad">
-              <Ikon nama="indikator" />
-              <span>Skuad</span>
-            </A>
-          </Show>
+          <For each={menu()}>
+            {(b) =>
+              adalahGrup(b) ? (
+                <div class="grup-menu" classList={{ "berisi-aktif": berisiAktif(b) }}>
+                  <button
+                    class="grup-menu-kepala"
+                    type="button"
+                    aria-expanded={bukaDi(b)}
+                    aria-controls={`grup-${b.grup.replace(/\s+/g, "-")}`}
+                    onClick={() => ganti(b)}
+                  >
+                    <Ikon nama={b.ikon} />
+                    <span>{b.grup}</span>
+                    <span class="panah-grup" aria-hidden="true">
+                      <Ikon nama="panahBawah" />
+                    </span>
+                  </button>
+                  <div class="grup-menu-isi" id={`grup-${b.grup.replace(/\s+/g, "-")}`} hidden={!bukaDi(b)}>
+                    <For each={b.butir}>{(t) => <Tautan b={t} />}</For>
+                  </div>
+                </div>
+              ) : (
+                <Tautan b={b} />
+              )
+            }
+          </For>
         </Show>
-        <Show when={staf()}>
-          <A class="tombol tipis menu" href="/jadwal">
-            <Ikon nama="kalender" />
-            <span>Jadwal</span>
-          </A>
-          <A class="tombol tipis menu" href="/artikel">
-            <Ikon nama="daftar" />
-            <span>Artikel</span>
-          </A>
-          <A class="tombol tipis menu" href="/master">
-            <Ikon nama="master" />
-            <span>Data master</span>
-          </A>
-          <A class="tombol tipis menu" href="/indikator">
-            <Ikon nama="indikator" />
-            <span>Indikator</span>
-          </A>
-        </Show>
-        <Show when={props.me.active?.role === "admin_ssb"}>
-          <A class="tombol tipis menu" href="/anggota">
-            <Ikon nama="profil" />
-            <span>Anggota</span>
-          </A>
-          <A class="tombol tipis menu" href="/situs">
-            <Ikon nama="bola" />
-            <span>Konten situs</span>
-          </A>
-          <A class="tombol tipis menu" href="/pendaftar">
-            <Ikon nama="profil" />
-            <span>Pendaftar</span>
-          </A>
-          <A class="tombol tipis menu" href="/undangan">
-            <Ikon nama="surat" />
-            <span>Undangan</span>
-          </A>
-          <A class="tombol tipis menu" href="/email">
-            <Ikon nama="surat" />
-            <span>Email</span>
-          </A>
-          <A class="tombol tipis menu" href="/merchandise">
-            <Ikon nama="kartu" />
-            <span>Merchandise</span>
-          </A>
-        </Show>
-        <Show when={props.me.active?.role === "admin_ssb" || props.me.active?.role === "orang_tua"}>
-          <A class="tombol tipis menu" href="/spp">
-            <Ikon nama="kartu" />
-            <span>SPP</span>
-          </A>
-        </Show>
-        <A class="tombol tipis menu" href="/akun">
-          <Ikon nama="akun" />
-          <span>Akun</span>
-        </A>
       </nav>
       <div class="aksi bawah">
         <Show when={props.me.memberships.length > 1}>

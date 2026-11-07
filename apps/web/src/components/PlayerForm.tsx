@@ -1,5 +1,5 @@
-import { documentStatusLabel, type DocumentStatus, type PlayerExtra } from "@ssb/shared";
-import { createSignal, Show } from "solid-js";
+import { DOCUMENT_LABEL_MAX, DOCUMENT_MAX_BYTES, documentStatusLabel, type DocumentStatus, type PlayerExtra } from "@ssb/shared";
+import { createSignal, For, Show } from "solid-js";
 import AreaField from "~/components/AreaField";
 import Field from "~/components/Field";
 import SelectField from "~/components/SelectField";
@@ -16,7 +16,19 @@ const angka = (s: string): number | string | null => {
   return Number.isFinite(n) ? n : t;
 };
 
-/** Formulir data siswa, dipakai untuk menambah dan mengubah. Urutan isian mengikuti lembar data siswa SSB. */
+const FOTO_MAX = 2 * 1024 * 1024;
+const DOK_TIPE = ["application/pdf", "image/jpeg", "image/png", "image/webp"];
+const DOK_ACCEPT = DOK_TIPE.join(",");
+const BERKAS = [
+  { kind: "kartu_keluarga", label: "Kartu Keluarga" },
+  { kind: "akta_kelahiran", label: "Akta Kelahiran" },
+  { kind: "nisn", label: "NISN" },
+] as const;
+
+/**
+ * Formulir data siswa, dipakai untuk menambah dan mengubah. Urutan isian mengikuti lembar data siswa SSB.
+ * Saat menambah siswa, berkas (foto, KK, akta, NISN, raport) boleh dipilih sekalian dan diunggah setelah siswa tersimpan.
+ */
 export default function PlayerForm(p: { initial?: PlayerSummary & Partial<PlayerExtra>; ageGroups: AgeGroup[]; onSaved: (saved: PlayerSummary) => void }) {
   const i = p.initial;
   const [memberNo, setMemberNo] = createSignal(i?.memberNo ?? "");
@@ -37,6 +49,72 @@ export default function PlayerForm(p: { initial?: PlayerSummary & Partial<Player
   const [medicalNote, setMedicalNote] = createSignal(i?.medicalNote ?? "");
   const [school, setSchool] = createSignal(i?.school ?? "");
   const [status, setStatus] = createSignal(i?.status ?? "aktif");
+  const [foto, setFoto] = createSignal<File | null>(null);
+  const [berkas, setBerkasState] = createSignal<Partial<Record<"kartu_keluarga" | "akta_kelahiran" | "nisn", File>>>({});
+  const setBerkas = (k: "kartu_keluarga" | "akta_kelahiran" | "nisn", f: File | null) =>
+    setBerkasState((b) => {
+      const n = { ...b };
+      if (f) n[k] = f;
+      else delete n[k];
+      return n;
+    });
+  const [raport, setRaport] = createSignal<File | null>(null);
+  const [raportLabel, setRaportLabel] = createSignal("");
+  const [fileError, setFileError] = createSignal("");
+  const [dibuat, setDibuat] = createSignal<PlayerSummary | null>(null);
+  const [gagalUnggah, setGagalUnggah] = createSignal<string[]>([]);
+
+  /** Ambil berkas dari isian; yang tipe atau ukurannya salah ditolak di sini dan isiannya dikosongkan. */
+  const pilih = (set: (f: File | null) => void, e: Event, maks: number) => {
+    const input = e.currentTarget as HTMLInputElement;
+    const f = input.files?.[0] ?? null;
+    setFileError("");
+    if (f && !DOK_TIPE.includes(f.type)) {
+      input.value = "";
+      set(null);
+      return setFileError("Berkas harus berformat PDF, JPG, PNG, atau WebP.");
+    }
+    if (f && f.size > maks) {
+      input.value = "";
+      set(null);
+      return setFileError(`Berkas terlalu besar. Maksimal ${maks / 1024 / 1024} MB.`);
+    }
+    set(f);
+  };
+
+  /** Unggah semua berkas terpilih satu per satu; mengembalikan nama berkas yang gagal beserta alasannya. */
+  const unggahSemua = async (id: string): Promise<string[]> => {
+    const kirim = async (url: string, method: string, body: FormData) => {
+      const res = await fetch(`/api${url}`, { method, credentials: "same-origin", body });
+      if (!res.ok) return (await res.json().catch(() => null))?.error?.message ?? "gagal diunggah";
+      return null;
+    };
+    const gagal: string[] = [];
+    const f = foto();
+    if (f) {
+      const b = new FormData();
+      b.set("file", f);
+      const m = await kirim(`/players/${encodeURIComponent(id)}/photo`, "PUT", b).catch(() => "tidak bisa terhubung");
+      if (m) gagal.push(`Foto: ${m}`);
+    }
+    const dok: { kind: string; label: string; file: File; ket?: string }[] = [
+      ...BERKAS.flatMap((x) => (berkas()[x.kind] ? [{ kind: x.kind, label: x.label, file: berkas()[x.kind]! }] : [])),
+      ...(raport() ? [{ kind: "raport", label: "Raport", file: raport()!, ket: raportLabel().trim() }] : []),
+    ];
+    for (const d of dok) {
+      if (d.kind === "raport" && !d.ket) {
+        gagal.push("Raport: keterangan wajib diisi");
+        continue;
+      }
+      const b = new FormData();
+      b.set("kind", d.kind);
+      if (d.ket) b.set("label", d.ket);
+      b.set("file", d.file);
+      const m = await kirim(`/players/${encodeURIComponent(id)}/documents`, "POST", b).catch(() => "tidak bisa terhubung");
+      if (m) gagal.push(`${d.label}: ${m}`);
+    }
+    return gagal;
+  };
 
   const form = createSubmit(async () => {
     const body = {
@@ -60,7 +138,12 @@ export default function PlayerForm(p: { initial?: PlayerSummary & Partial<Player
       status: status(),
     };
     const saved = await api<PlayerSummary>(i ? `/players/${i.id}` : "/players", { method: i ? "PATCH" : "POST", body });
-    p.onSaved(saved);
+    if (i) return p.onSaved(saved);
+    // Siswa baru: unggah berkas yang dipilih. Siswa sudah tersimpan, jadi kegagalan unggah tidak membatalkannya.
+    const gagal = await unggahSemua(saved.id);
+    if (gagal.length === 0) return p.onSaved(saved);
+    setDibuat(saved);
+    setGagalUnggah(gagal);
   });
 
   return (
@@ -233,9 +316,60 @@ export default function PlayerForm(p: { initial?: PlayerSummary & Partial<Player
         />
       </fieldset>
 
-      <button class="tombol utama" type="submit" disabled={form.busy()}>
-        {form.busy() ? "Menyimpan…" : i ? "Simpan perubahan" : "Tambah siswa"}
-      </button>
+      <Show when={!i}>
+        <fieldset class="bagian-form">
+          <legend>Unggah berkas (boleh nanti)</legend>
+          <p class="petunjuk">Berkas diunggah setelah siswa tersimpan; yang dikosongkan bisa diunggah kapan saja dari profil siswa. PDF, JPG, PNG, atau WebP.</p>
+          <Show when={fileError()}>
+            <div class="peringatan" role="alert">
+              {fileError()}
+            </div>
+          </Show>
+          <div class="field">
+            <label for="berkas-foto">Foto (maksimal 2 MB, hanya gambar)</label>
+            <input id="berkas-foto" type="file" accept="image/jpeg,image/png,image/webp" onChange={(e) => pilih(setFoto, e, FOTO_MAX)} />
+          </div>
+          <For each={BERKAS}>
+            {(b) => (
+              <div class="field">
+                <label for={`berkas-${b.kind}`}>{b.label} (maksimal 5 MB)</label>
+                <input id={`berkas-${b.kind}`} type="file" accept={DOK_ACCEPT} onChange={(e) => pilih((f) => setBerkas(b.kind, f), e, DOCUMENT_MAX_BYTES)} />
+              </div>
+            )}
+          </For>
+          <div class="field">
+            <label for="berkas-raport">Raport (maksimal 5 MB; raport lain bisa ditambah dari profil siswa)</label>
+            <input id="berkas-raport" type="file" accept={DOK_ACCEPT} onChange={(e) => pilih(setRaport, e, DOCUMENT_MAX_BYTES)} />
+          </div>
+          <Show when={raport()}>
+            <Field id="berkas-raport-label" label="Keterangan raport" placeholder="mis. Semester 1 2025/2026" maxlength={DOCUMENT_LABEL_MAX} value={raportLabel()} onInput={setRaportLabel} />
+          </Show>
+        </fieldset>
+      </Show>
+
+      <Show
+        when={dibuat()}
+        fallback={
+          <button class="tombol utama" type="submit" disabled={form.busy()}>
+            {form.busy() ? "Menyimpan…" : i ? "Simpan perubahan" : "Tambah siswa"}
+          </button>
+        }
+      >
+        {(s) => (
+          <div class="peringatan" role="alert">
+            <p>
+              <strong>{s().fullName} sudah ditambahkan</strong>, tetapi ada berkas yang belum terunggah:
+            </p>
+            <ul>
+              <For each={gagalUnggah()}>{(m) => <li>{m}</li>}</For>
+            </ul>
+            <p>Unggah ulang dari kartu Berkas siswa di profilnya.</p>
+            <button class="tombol utama" type="button" onClick={() => p.onSaved(s())}>
+              Buka profil siswa
+            </button>
+          </div>
+        )}
+      </Show>
     </form>
   );
 }

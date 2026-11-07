@@ -532,9 +532,23 @@ export const whatsappSetting = pgTable(
     countryCode: text("country_code").notNull().default("62"),
     /** Aktifkan pengiriman pengingat tagihan otomatis lewat Fonnte. */
     autoReminder: boolean("auto_reminder").notNull().default(false),
+    /** Kirim pesan konfirmasi ke orang tua saat anak mendaftar trial. Pengaturan saja; pengiriman otomatisnya belum dijalankan. */
+    trialReplyEnabled: boolean("trial_reply_enabled").notNull().default(false),
+    /** Templat pesan konfirmasi pendaftar trial; null = templat bawaan di packages/shared. */
+    trialReplyTemplate: text("trial_reply_template"),
+    /** Beri tahu admin lewat WhatsApp saat ada pendaftar trial baru. */
+    trialNotifyEnabled: boolean("trial_notify_enabled").notNull().default(false),
+    /** Nomor WhatsApp admin penerima pemberitahuan pendaftar baru (angka saja). */
+    trialNotifyNumber: text("trial_notify_number"),
     updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
   },
-  (t) => [check("whatsapp_setting_country_code", sql`${t.countryCode} ~ '^[0-9]{1,4}$'`), tenantPolicy("whatsapp_setting")],
+  (t) => [
+    check("whatsapp_setting_country_code", sql`${t.countryCode} ~ '^[0-9]{1,4}$'`),
+    check("whatsapp_setting_trial_template", sql`${t.trialReplyTemplate} is null or char_length(${t.trialReplyTemplate}) between 1 and 1000`),
+    check("whatsapp_setting_trial_number", sql`${t.trialNotifyNumber} is null or ${t.trialNotifyNumber} ~ '^[0-9]{8,15}$'`),
+    check("whatsapp_setting_trial_notify_pair", sql`${t.trialNotifyEnabled} = false or ${t.trialNotifyNumber} is not null`),
+    tenantPolicy("whatsapp_setting"),
+  ],
 ).enableRLS();
 
 /** Tagihan SPP satu pemain untuk satu bulan. Jumlah terbayar dihitung dari tabel payment; tagihan dibatalkan lewat voided_at. */

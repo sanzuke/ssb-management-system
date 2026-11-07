@@ -246,6 +246,13 @@
       "when": 1794066359134,
       "tag": "0034_berkas_siswa",
       "breakpoints": true
+    },
+    {
+      "idx": 35,
+      "version": "7",
+      "when": 1794067506320,
+      "tag": "0035_wa_pendaftar_trial",
+      "breakpoints": true
     }
   ]
 }

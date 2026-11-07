@@ -792,6 +792,51 @@ export type WhatsappSettings = {
   autoReminder: boolean;
 };
 
+/** Kata yang boleh dipakai di pesan untuk pendaftar trial; diisi dari data pendaftar saat pesan dibuat. */
+export const TRIAL_WA_PLACEHOLDERS = [
+  { key: "wali", desc: "Nama orang tua" },
+  { key: "anak", desc: "Nama anak" },
+  { key: "kode", desc: "Kode pendaftaran (TRL-...)" },
+  { key: "ssb", desc: "Nama akademi" },
+] as const;
+export const TRIAL_REPLY_TEMPLATE_MAX = 1000;
+export const DEFAULT_TRIAL_REPLY_TEMPLATE =
+  "Halo {wali}, terima kasih sudah mendaftarkan {anak} untuk trial di {ssb} (kode {kode}). Kami akan menghubungi Anda untuk mengatur jadwal trialnya.";
+/** Isi templat dengan data pendaftar. Kata yang tidak dikenal dibiarkan apa adanya supaya salah ketik terlihat. */
+export function renderTrialMessage(template: string, v: Record<(typeof TRIAL_WA_PLACEHOLDERS)[number]["key"], string>): string {
+  return template.replace(/\{(\w+)\}/g, (all, k: string) => (k in v ? v[k as keyof typeof v] : all));
+}
+/** Kata di templat yang bukan salah satu kata yang dikenal, untuk peringatan di layar pengaturan. */
+export const unknownTrialPlaceholders = (template: string): string[] => {
+  const known = new Set<string>(TRIAL_WA_PLACEHOLDERS.map((p) => p.key));
+  return [...new Set([...template.matchAll(/\{(\w+)\}/g)].map((m) => m[1]!))].filter((k) => !known.has(k));
+};
+
+/**
+ * Pengaturan WhatsApp untuk pendaftar trial (token Fonnte dipakai bersama pengaturan SPP).
+ * Templat kosong berarti memakai templat bawaan.
+ */
+export const trialWaSettingsSchema = z
+  .object({
+    replyEnabled: z.boolean(),
+    replyTemplate: z.preprocess(emptyToNull, z.string().trim().max(TRIAL_REPLY_TEMPLATE_MAX, `maksimal ${TRIAL_REPLY_TEMPLATE_MAX} karakter`).nullable().optional()),
+    notifyEnabled: z.boolean(),
+    notifyNumber: z.preprocess(emptyToNull, whatsappSchema.nullable().optional()),
+  })
+  .refine((b) => !b.notifyEnabled || !!b.notifyNumber, { path: ["notifyNumber"], message: "isi nomor admin dulu" });
+export type TrialWaSettingsInput = z.infer<typeof trialWaSettingsSchema>;
+export type TrialWaSettings = {
+  /** Token Fonnte sudah tersimpan (diisi di SPP > Pengaturan). Pesan tidak bisa dikirim tanpa ini. */
+  hasToken: boolean;
+  replyEnabled: boolean;
+  /** Templat yang berlaku (bawaan bila belum diubah). */
+  replyTemplate: string;
+  /** True bila templat masih bawaan. */
+  replyTemplateDefault: boolean;
+  notifyEnabled: boolean;
+  notifyNumber: string | null;
+};
+
 /** Hasil pengiriman pesan lewat Fonnte. */
 export type WaSendResult = {
   ok: boolean;

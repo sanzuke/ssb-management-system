@@ -133,6 +133,7 @@ run("matriks izin per endpoint (database)", () => {
     { method: "GET", path: "/fees/player-overrides", perm: "fee.manage" },
     { method: "GET", path: "/fees/public-info", perm: "invoice.read" },
     { method: "GET", path: "/whatsapp/settings", perm: "fee.manage" },
+    { method: "GET", path: "/whatsapp/trial-settings", perm: "trial.manage" },
     { method: "GET", path: "/site", perm: "site.manage" },
     { method: "GET", path: "/trials", perm: "trial.manage" },
     { method: "GET", path: "/posts", perm: "post.write" },

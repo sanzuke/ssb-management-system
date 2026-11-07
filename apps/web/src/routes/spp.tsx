@@ -1,4 +1,4 @@
-import { useNavigate, useSearchParams } from "@solidjs/router";
+import { A, useNavigate, useSearchParams } from "@solidjs/router";
 import { Title } from "@solidjs/meta";
 import { createSignal, onMount, Show } from "solid-js";
 import KepalaHalaman from "~/components/KepalaHalaman";
@@ -7,7 +7,6 @@ import SppPengingat from "~/components/SppPengingat";
 import SppPengaturan from "~/components/SppPengaturan";
 import SppOrtu from "~/components/SppOrtu";
 import SppTarifKhusus from "~/components/SppTarifKhusus";
-import WhatsappPengaturan from "~/components/WhatsappPengaturan";
 import Memuat from "~/components/Memuat";
 import { getMe, type Me } from "~/lib/api";
 
@@ -62,7 +61,9 @@ export default function Spp() {
           </Show>
           <Show when={tab() === "pengaturan"}>
             <SppPengaturan />
-            <WhatsappPengaturan />
+            <p class="petunjuk">
+              Token Fonnte dan pengiriman WhatsApp otomatis diatur di menu <A href="/whatsapp">WhatsApp</A>.
+            </p>
           </Show>
         </Show>
       </main>

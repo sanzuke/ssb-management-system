@@ -290,7 +290,7 @@ export function feeRoutes(db: Db, opts: { secret: string }) {
         const m = c.get("auth")!.member!;
         const id = idOr404(c.req.param("id"), "Tagihan");
         const token = await tokenFonnte(db, m.ssbId, opts.secret);
-        if (!token) throw new HttpError(409, "no_token", "Token API Fonnte belum diisi. Isi di tab Pengaturan dulu.");
+        if (!token) throw new HttpError(409, "no_token", "Token API Fonnte belum diisi. Isi di menu WhatsApp dulu.");
         const pengaturan = await bacaPengaturan(db, m.ssbId);
         const wa = await bacaWhatsapp(db, m.ssbId);
         const [ssb] = await withTenant(db, m.ssbId, (tx) => tx.select({ name: schema.ssb.name }).from(schema.ssb).limit(1));

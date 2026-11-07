@@ -11,7 +11,7 @@ type ProfilFonnte = { device: string; deviceStatus: string; name: string; quota:
  * Fonnte satu kali; server menyimpannya terenkripsi dan tidak pernah
  * mengirimkannya kembali ke peramban.
  */
-export default function WhatsappPengaturan() {
+export default function WhatsappPengaturan(props: { onTersimpan?: () => void }) {
   const [pengaturan, { refetch: muat }] = createResource(async () => api<WhatsappSettings>("/whatsapp/settings").catch(() => null));
   const [token, setToken] = createSignal("");
   const [kodeNegara, setKodeNegara] = createSignal("62");
@@ -59,6 +59,7 @@ export default function WhatsappPengaturan() {
       setToken("");
       setPesan("Pengaturan WhatsApp disimpan.");
       await muat();
+      props.onTersimpan?.();
     });
   };
 
@@ -79,10 +80,11 @@ export default function WhatsappPengaturan() {
 
   return (
     <section class="master" aria-label="Pengaturan WhatsApp">
-      <h2>Pengiriman WhatsApp (Fonnte)</h2>
+      <h2>Koneksi Fonnte dan pengingat SPP</h2>
       <p class="petunjuk">
-        Tempelkan token API Fonnte di bawah, lalu tekan Periksa Token. Token disimpan terenkripsi di server dan tidak pernah dikembalikan ke peramban. Setelah
-        token aktif, tombol kirim di tab Pengingat bisa mengirim pesan tanpa perlu menekan kirim di WhatsApp.
+        Tempelkan token API Fonnte di bawah, lalu tekan Periksa token. Token disimpan terenkripsi di server dan tidak pernah dikembalikan ke peramban, dan
+        dipakai untuk semua pesan WhatsApp SSB ini. Setelah token aktif, tombol Kirim otomatis di SPP, tab Pengingat, bisa mengirim pesan tanpa perlu menekan
+        kirim di WhatsApp.
       </p>
       <Show when={galat()}>
         <div class="peringatan" role="alert">

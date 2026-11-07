@@ -69,6 +69,7 @@ const jalur = {
   ),
   ulang: () => <path d="M4 12a8 8 0 0 1 14-5.300L20 9M20 4v5h-5M20 12a8 8 0 0 1-14 5.300L4 15M4 20v-5h5" />,
   tambah: () => <path d="M12 5v14M5 12h14" />,
+  panahBawah: () => <path d="m6 9 6 6 6-6" />,
   profil: () => (
     <>
       <circle cx="12" cy="12" r="9" />

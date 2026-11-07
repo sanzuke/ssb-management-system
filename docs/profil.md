@@ -76,7 +76,7 @@ Di server, Nginx untuk `app.familyunitedfa.com` meneruskan `/api/public/` langsu
 
 - **Konten situs:** editor per bagian, bahasa ID dan EN, pratinjau draf, tombol Terbitkan, dan penanda perubahan yang belum terbit.
 - **Galeri:** unggah, urutkan, tandai terbit.
-- **Pendaftar:** daftar trial dengan status, KU pilihan, tombol hubungi lewat WhatsApp, dan "Jadikan siswa dan undang orang tua" (siswa dibuat, tautan undangan orang tua tampil sekali dengan tombol kirim lewat WhatsApp).
+- **Pendaftar:** tabel pendaftar trial dengan tab status (dan jumlahnya), pencarian, saringan KU, dan halaman; tiap baris punya tombol WhatsApp dan Detail. Detail membuka dialog berisi seluruh data, status, catatan internal, dan "Jadikan siswa dan undang orang tua" (siswa dibuat, tautan undangan orang tua tampil sekali dengan tombol kirim lewat WhatsApp).
 - **Halaman pendaftaran di landing** (`/daftar`, menggantikan modal): empat langkah (Data Pribadi, Kesehatan, Komitmen, Konfirmasi) dengan isian mengikuti lembar data siswa. Tombol "Daftar" di seluruh situs membuka halaman ini, dan tombol di kartu program membawa `?program=<id>` agar programnya terpilih. Jenis kelamin hanya ada di pendaftaran (tabel siswa belum punya kolomnya).
 - **Artikel:** daftar, editor teks visual (Tiptap) dengan tab Markdown dan Pratinjau, tata letak lebar penuh dua kolom, unggah sampul dan gambar isi, simpan draf, terbitkan, tarik, dan hapus.
 

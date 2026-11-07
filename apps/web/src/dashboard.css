@@ -4027,3 +4027,204 @@ button.pengguna[aria-expanded="true"] .panah-menu {
   width: 100%;
   font-size: 0.85rem;
 }
+
+/* ---- Tabel pendaftar trial ---- */
+.tab-status .hitung {
+  margin-left: 4px;
+  padding: 0 7px;
+  border-radius: 999px;
+  background: rgba(20, 32, 26, 0.08);
+  font-size: 0.8rem;
+}
+.tab-status button[aria-pressed="true"] .hitung {
+  background: rgba(255, 255, 255, 0.22);
+}
+.tabel-pendaftar td {
+  white-space: nowrap;
+}
+.tabel-pendaftar td strong,
+.tabel-pendaftar td .petunjuk {
+  display: block;
+}
+.tabel-pendaftar .sel-kontak {
+  min-width: 11rem;
+}
+.tabel-pendaftar tr.baris-baru td:first-child {
+  box-shadow: inset 3px 0 0 var(--kuning-tua);
+}
+.tabel-pendaftar .tautan-baris {
+  display: block;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.tabel-pendaftar .tautan-baris:hover strong {
+  text-decoration: underline;
+}
+.tabel-pendaftar .status-trial {
+  display: inline-block;
+}
+.aksi-baris-tabel {
+  display: inline-flex;
+  gap: 8px;
+}
+.aksi-baris-tabel .tombol {
+  width: auto;
+}
+.status-trial.diterima {
+  background: #dcebd3;
+  color: var(--rumput);
+}
+.status-trial.ditolak {
+  background: #f4d9d4;
+  color: #8a2a1c;
+}
+.dialog-detail {
+  width: min(46rem, calc(100vw - 24px));
+  max-height: calc(100dvh - 32px);
+  padding: 0;
+  border: 0;
+  border-radius: 16px;
+  background: #fff;
+  color: var(--tinta);
+  box-shadow: 0 16px 48px rgba(20, 32, 26, 0.4);
+}
+.dialog-detail::backdrop {
+  background: rgba(20, 32, 26, 0.55);
+  backdrop-filter: blur(2px);
+}
+.dialog-detail-bilah {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--garis);
+  background: #fff;
+}
+.dialog-detail .tombol {
+  width: auto;
+}
+.dialog-detail .jadi-siswa .tombol,
+.dialog-detail .form > .tombol.utama {
+  width: 100%;
+}
+.dialog-detail .kartu-pendaftar {
+  border: 0;
+  border-radius: 0;
+}
+@media (max-width: 899px) {
+  .tabel-pendaftar td {
+    white-space: normal;
+  }
+  .tabel-pendaftar td.tengah {
+    margin-left: auto;
+  }
+  .tabel-pendaftar td.kanan {
+    flex-basis: 100%;
+    margin-left: 0;
+  }
+  .tabel-pendaftar td.sel-kontak {
+    flex-basis: auto;
+  }
+}
+
+/* ---- Pengaturan WhatsApp pendaftar ---- */
+.master .form > h3 {
+  margin: 16px 0 0;
+  font-size: 1.05rem;
+}
+.pratinjau-wa {
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: #e7f6dc;
+  border: 1px solid #c9e4b6;
+}
+.pratinjau-wa p {
+  margin: 4px 0 0;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+/* ---- Submenu (grup) di menu utama ---- */
+/* HP: grup diratakan menjadi deretan pil biasa; judul grup disembunyikan dan isinya selalu tampil. */
+@media (max-width: 1023.98px) {
+  .bar .grup-menu,
+  .bar .grup-menu-isi,
+  .bar .grup-menu-isi[hidden] {
+    display: contents;
+  }
+  .bar .grup-menu-kepala {
+    display: none;
+  }
+}
+
+/* Layar lebar: judul grup bisa dibuka dan ditutup; isinya menjorok dengan garis di kiri. */
+@media (min-width: 1024px) {
+  .bar .grup-menu-kepala {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    min-height: 44px;
+    padding: 8px 12px;
+    border: 0;
+    border-radius: 8px;
+    background: none;
+    color: var(--redup);
+    font: inherit;
+    font-weight: 700;
+    text-align: left;
+    cursor: pointer;
+  }
+  .bar .grup-menu-kepala:hover {
+    background: #eef1e8;
+    color: var(--tinta);
+  }
+  .bar .grup-menu-kepala:focus-visible {
+    outline: 3px solid var(--kuning);
+    outline-offset: -2px;
+  }
+  .bar .grup-menu.berisi-aktif > .grup-menu-kepala {
+    color: var(--rumput);
+  }
+  .bar .panah-grup {
+    display: inline-flex;
+    margin-left: auto;
+    transition: transform 0.15s ease;
+  }
+  .bar .grup-menu-kepala[aria-expanded="true"] .panah-grup {
+    transform: rotate(180deg);
+  }
+  .bar .grup-menu-isi {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    margin: 2px 0 6px 22px;
+    padding-left: 10px;
+    border-left: 2px solid var(--garis);
+  }
+  .bar .grup-menu-isi[hidden] {
+    display: none;
+  }
+  .bar .grup-menu-isi .tombol.tipis.menu {
+    min-height: 38px;
+    padding: 6px 10px;
+    font-size: 0.95rem;
+  }
+  .bar .grup-menu-isi .menu svg {
+    display: none;
+  }
+}
+@media (min-width: 1024px) and (prefers-reduced-motion: reduce) {
+  .bar .panah-grup {
+    transition: none;
+  }
+}

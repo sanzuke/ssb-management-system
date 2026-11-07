@@ -57,7 +57,7 @@ export default function SppPengingat(props: { ssbName: string }) {
       <h2>Pengingat tagihan</h2>
       <p class="petunjuk">
         Daftar tagihan yang sudah lewat jatuh tempo atau segera jatuh tempo. Tombol WhatsApp membuka pesan yang sudah terisi; Anda tinggal menekan kirim. Bila
-        token Fonnte sudah diisi, tombol <strong>Kirim otomatis</strong> mengirim pesan langsung dari server tanpa perlu membuka WhatsApp.
+        token Fonnte sudah diisi di menu <A href="/whatsapp">WhatsApp</A>, tombol <strong>Kirim otomatis</strong> mengirim pesan langsung dari server tanpa perlu membuka WhatsApp.
       </p>
       <div class="pengingat-atur">
         <SelectField

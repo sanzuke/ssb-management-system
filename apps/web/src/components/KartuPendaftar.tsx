@@ -14,7 +14,7 @@ export const labelStatusTrial: Record<TrialStatus, string> = {
 };
 const opsiStatus = (Object.keys(labelStatusTrial) as TrialStatus[]).map((v) => ({ value: v, label: labelStatusTrial[v] }));
 
-function umur(lahir: string): string {
+export function umur(lahir: string): string {
   const l = new Date(`${lahir}T00:00:00`);
   const n = new Date();
   let t = n.getFullYear() - l.getFullYear();

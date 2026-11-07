@@ -1,7 +1,7 @@
 import { eq } from "drizzle-orm";
 import { Hono } from "hono";
 import { schema, withTenant, type Db } from "@ssb/db";
-import { whatsappSettingsSchema, whatsappTestSchema, type WhatsappSettings } from "@ssb/shared";
+import { DEFAULT_TRIAL_REPLY_TEMPLATE, trialWaSettingsSchema, whatsappSettingsSchema, whatsappTestSchema, type TrialWaSettings, type WhatsappSettings } from "@ssb/shared";
 import { requirePermission, type AppEnv } from "./auth/middleware";
 import { dekripsi, enkripsi } from "./crypto";
 import { HttpError } from "./errors";
@@ -29,6 +29,21 @@ export async function tokenFonnte(db: Db, ssbId: string, secret: string): Promis
     const [row] = await tx.select().from(schema.whatsappSetting).where(eq(schema.whatsappSetting.ssbId, ssbId)).limit(1);
     if (!row?.tokenEncrypted) return null;
     return dekripsi(secret, row.tokenEncrypted);
+  });
+}
+
+/** Pengaturan pesan untuk pendaftar trial milik satu SSB; templat bawaan dipakai bila belum diubah. */
+export async function bacaTrialWa(db: Db, ssbId: string): Promise<TrialWaSettings> {
+  return withTenant(db, ssbId, async (tx) => {
+    const [row] = await tx.select().from(schema.whatsappSetting).where(eq(schema.whatsappSetting.ssbId, ssbId)).limit(1);
+    return {
+      hasToken: !!row?.tokenEncrypted,
+      replyEnabled: row?.trialReplyEnabled ?? false,
+      replyTemplate: row?.trialReplyTemplate ?? DEFAULT_TRIAL_REPLY_TEMPLATE,
+      replyTemplateDefault: row?.trialReplyTemplate == null,
+      notifyEnabled: row?.trialNotifyEnabled ?? false,
+      notifyNumber: row?.trialNotifyNumber ?? null,
+    };
   });
 }
 
@@ -65,7 +80,14 @@ export function whatsappSettingRoutes(db: Db, opts: { secret: string }) {
               .values({ ssbId: m.ssbId, tokenEncrypted: null, countryCode: b.countryCode, autoReminder: false, updatedAt: new Date() })
               .onConflictDoUpdate({
                 target: schema.whatsappSetting.ssbId,
-                set: { tokenEncrypted: null, countryCode: b.countryCode, autoReminder: false, updatedAt: new Date() },
+                set: {
+                  tokenEncrypted: null,
+                  countryCode: b.countryCode,
+                  autoReminder: false,
+                  trialReplyEnabled: false,
+                  trialNotifyEnabled: false,
+                  updatedAt: new Date(),
+                },
               });
             return;
           }
@@ -112,6 +134,35 @@ export function whatsappSettingRoutes(db: Db, opts: { secret: string }) {
         });
         if (!hasil.ok) throw new HttpError(422, "fonnte_rejected", hasil.reason);
         return c.json({ ok: true, ids: hasil.ids });
+      })
+
+      // Pengaturan pesan untuk pendaftar trial. Hanya menyimpan pengaturan; pengiriman otomatisnya belum dijalankan server.
+      .get("/whatsapp/trial-settings", requirePermission("trial.manage"), async (c) => {
+        return c.json(await bacaTrialWa(db, c.get("auth")!.member!.ssbId));
+      })
+      .put("/whatsapp/trial-settings", requirePermission("trial.manage"), zv("json", trialWaSettingsSchema), async (c) => {
+        const m = c.get("auth")!.member!;
+        const b = c.req.valid("json");
+        const sekarang = await bacaTrialWa(db, m.ssbId);
+        if ((b.replyEnabled || b.notifyEnabled) && !sekarang.hasToken) {
+          throw new HttpError(409, "no_token", "Token API Fonnte belum diisi. Isi di menu WhatsApp dulu.");
+        }
+        // Templat yang sama dengan bawaan disimpan kosong, supaya perubahan bawaan di versi berikut ikut berlaku.
+        const templat = b.replyTemplate && b.replyTemplate !== DEFAULT_TRIAL_REPLY_TEMPLATE ? b.replyTemplate : null;
+        const nilai = {
+          trialReplyEnabled: b.replyEnabled,
+          trialReplyTemplate: templat,
+          trialNotifyEnabled: b.notifyEnabled,
+          trialNotifyNumber: b.notifyNumber ?? null,
+          updatedAt: new Date(),
+        };
+        await withTenant(db, m.ssbId, (tx) =>
+          tx
+            .insert(schema.whatsappSetting)
+            .values({ ssbId: m.ssbId, ...nilai })
+            .onConflictDoUpdate({ target: schema.whatsappSetting.ssbId, set: nilai }),
+        );
+        return c.json(await bacaTrialWa(db, m.ssbId));
       })
   );
 }
