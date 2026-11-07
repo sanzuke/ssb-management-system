@@ -44,7 +44,15 @@ export const permissions = {
     desc: "Melihat siswa (pelatih dan korlas: KU yang ditugaskan; orang tua: anaknya)",
   },
   "player.write": { roles: ["admin_ssb"], desc: "Menambah dan mengubah siswa" },
-  "player.photo": { roles: ["admin_ssb", "pelatih", "korlas"], desc: "Mengunggah dan menghapus foto siswa (pelatih dan korlas: KU yang ditugaskan)" },
+  "player.photo": {
+    roles: ["admin_ssb", "pelatih", "korlas", "orang_tua"],
+    desc: "Mengunggah dan menghapus foto siswa (pelatih dan korlas: KU yang ditugaskan; orang tua: anaknya)",
+  },
+  "document.read": {
+    roles: ["admin_ssb", "orang_tua"],
+    desc: "Melihat berkas siswa: kartu keluarga, akta kelahiran, NISN, raport (orang tua: anaknya). Data pribadi keluarga, tidak untuk pelatih dan korlas",
+  },
+  "document.write": { roles: ["admin_ssb", "orang_tua"], desc: "Mengunggah, mengganti, dan menghapus berkas siswa (orang tua: anaknya)" },
   "attendance.record": { roles: ["admin_ssb", "pelatih", "korlas"], desc: "Mencatat absensi latihan" },
   "attendance.read": { roles: ["admin_ssb", "pelatih", "korlas", "orang_tua"], desc: "Melihat absensi (orang tua: anaknya)" },
   "assessment.write": { roles: ["admin_ssb", "pelatih"], desc: "Mengisi penilaian siswa dan rencana pengembangannya" },
@@ -1187,3 +1195,27 @@ export type MviRanking = { ageGroup: { id: string; name: string }; period: { id:
 
 /** Jawaban `GET /players/:id/market-value`: staf menerima angka dan rincian, orang tua hanya kategori. */
 export type MviPlayerView = { role: "staff"; items: MviResult[] } | { role: "guardian"; items: MviGuardianResult[] };
+
+// ---- Berkas siswa ----
+export const playerDocumentKindSchema = z.enum(["kartu_keluarga", "akta_kelahiran", "nisn", "raport"]);
+export type PlayerDocumentKind = z.infer<typeof playerDocumentKindSchema>;
+export const playerDocumentKindLabel: Record<PlayerDocumentKind, string> = {
+  kartu_keluarga: "Kartu Keluarga",
+  akta_kelahiran: "Akta Kelahiran",
+  nisn: "NISN",
+  raport: "Raport",
+};
+/** Batas ukuran satu berkas (PDF atau gambar) dan jumlah raport per siswa. */
+export const DOCUMENT_MAX_BYTES = 5 * 1024 * 1024;
+export const RAPORT_MAX = 12;
+export const DOCUMENT_LABEL_MAX = 60;
+export type PlayerDocument = {
+  id: string;
+  kind: PlayerDocumentKind;
+  /** Keterangan; wajib untuk raport (mis. "Semester 1 2025/2026"). */
+  label: string | null;
+  originalName: string;
+  mime: "application/pdf" | "image/jpeg" | "image/png" | "image/webp";
+  sizeBytes: number;
+  uploadedAt: string;
+};

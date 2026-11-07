@@ -727,6 +727,40 @@ export const playerInjury = pgTable(
 ).enableRLS();
 
 /**
+ * Berkas siswa (kartu keluarga, akta kelahiran, NISN, raport). Isi berkas ada di penyimpanan berkas (`file_key`), bukan di database.
+ * Selain raport, satu siswa punya paling banyak satu berkas per jenis (mengunggah ulang mengganti); raport boleh banyak, diberi `label`.
+ */
+export const playerDocument = pgTable(
+  "player_document",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    ssbId: ssbId().references(() => ssb.id, { onDelete: "cascade" }),
+    playerId: uuid("player_id").notNull(),
+    kind: text("kind").notNull(),
+    label: text("label"),
+    fileKey: text("file_key").notNull(),
+    mime: text("mime").notNull(),
+    originalName: text("original_name").notNull(),
+    sizeBytes: integer("size_bytes").notNull(),
+    uploadedBy: uuid("uploaded_by"),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    unique("player_document_ssb_id").on(t.ssbId, t.id),
+    check("player_document_kind", sql`${t.kind} in ('kartu_keluarga', 'akta_kelahiran', 'nisn', 'raport')`),
+    check("player_document_mime", sql`${t.mime} in ('application/pdf', 'image/jpeg', 'image/png', 'image/webp')`),
+    check("player_document_size", sql`${t.sizeBytes} between 1 and 5242880`),
+    check("player_document_label", sql`${t.label} is null or char_length(${t.label}) <= 60`),
+    check("player_document_raport_label", sql`${t.kind} <> 'raport' or ${t.label} is not null`),
+    uniqueIndex("player_document_one_per_kind").on(t.ssbId, t.playerId, t.kind).where(sql`${t.kind} <> 'raport'`),
+    index("player_document_player").on(t.ssbId, t.playerId, t.createdAt),
+    foreignKey({ columns: [t.ssbId, t.playerId], foreignColumns: [player.ssbId, player.id], name: "player_document_player_fk" }).onDelete("cascade"),
+    foreignKey({ columns: [t.ssbId, t.uploadedBy], foreignColumns: [appUser.ssbId, appUser.id], name: "player_document_uploaded_by_fk" }).onDelete("set null"),
+    tenantPolicy("player_document"),
+  ],
+).enableRLS();
+
+/**
  * Bobot indikator per posisi buatan SSB untuk kecocokan posisi. Hanya menyimpan yang berbeda dari bobot awal di
  * packages/shared (`defaultPositionWeights`); baris yang tidak ada berarti memakai bobot awal. Bobot 0 berarti indikator tidak dihitung.
  */

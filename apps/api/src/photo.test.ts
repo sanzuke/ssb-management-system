@@ -149,7 +149,7 @@ run("foto pemain: API dan batas data per role", () => {
     expect(existsSync(join(dir, ssbId, files[0]!))).toBe(false);
   });
 
-  test("batas role: pelatih hanya KU-nya, orang tua hanya melihat anaknya dan tidak bisa mengunggah", async () => {
+  test("batas role: pelatih hanya KU-nya, orang tua hanya anaknya (boleh mengunggah foto anaknya saja)", async () => {
     const { admin } = await ssbTunggal();
     const k10 = (await json(await call("POST", "/age-groups", admin, { name: "KU-12", minAge: 11, maxAge: 12 }))).id;
     const k12 = (await json(await call("POST", "/age-groups", admin, { name: "KU-14", minAge: 13, maxAge: 14 }))).id;
@@ -167,8 +167,10 @@ run("foto pemain: API dan batas data per role", () => {
 
     expect((await get(a.id, ortu.cookie)).status).toBe(200);
     expect((await json(await call("GET", `/players/${a.id}`, ortu.cookie))).photoV).toMatch(/^[0-9a-f]{8}$/);
-    expect((await upload(a.id, ortu.cookie, PNG)).status).toBe(403);
-    expect((await call("DELETE", `/players/${a.id}/photo`, ortu.cookie)).status).toBe(403);
+    expect((await upload(a.id, ortu.cookie, PNG)).status).toBe(200);
+    expect((await upload(b.id, ortu.cookie, PNG)).status).toBe(404); // bukan anaknya
+    expect((await call("DELETE", `/players/${b.id}/photo`, ortu.cookie)).status).toBe(404);
+    expect((await call("DELETE", `/players/${a.id}/photo`, ortu.cookie)).status).toBe(204);
     expect((await get(b.id, ortu.cookie)).status).toBe(404);
     expect((await get(a.id, "")).status).toBe(401);
   });

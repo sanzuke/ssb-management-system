@@ -21,6 +21,7 @@ import type { Mailer } from "./mail";
 import { passwordResetRoutes } from "./password-reset";
 import { masterRoutes } from "./master";
 import { playerRoutes } from "./players";
+import { documentRoutes } from "./documents";
 import { sessionRoutes } from "./sessions";
 import { assessmentRoutes } from "./assessments";
 import { badgeRoutes } from "./badges";
@@ -90,6 +91,7 @@ export function createApp(
       .route("/invitations", invitationRoutes(db, { secureCookie, webUrl }))
       .route("/", masterRoutes(db))
       .route("/", playerRoutes(db, { uploadDir: env.UPLOAD_DIR ?? "./uploads" }))
+      .route("/", documentRoutes(db, { uploadDir: env.UPLOAD_DIR ?? "./uploads" }))
       .route("/", sessionRoutes(db))
       .route("/", feeRoutes(db, { secret: env.TOKEN_SECRET ?? env.SESSION_SECRET ?? "" }))
       .route("/", feeSettingRoutes(db))

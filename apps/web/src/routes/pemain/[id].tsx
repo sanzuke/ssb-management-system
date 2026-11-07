@@ -2,6 +2,7 @@ import { A, useNavigate, useParams } from "@solidjs/router";
 import { hitungTren } from "@ssb/shared/aspects";
 import { Title } from "@solidjs/meta";
 import KartuProfil from "~/components/KartuProfil";
+import BerkasSiswa from "~/components/BerkasSiswa";
 import CederaPemain from "~/components/CederaPemain";
 import LencanaPemain from "~/components/LencanaPemain";
 import PosisiPemain from "~/components/PosisiPemain";
@@ -35,7 +36,6 @@ export default function DetailPemain() {
   const [guardianError, setGuardianError] = createSignal("");
 
   const admin = () => me()?.active?.role === "admin_ssb";
-  const bisaFoto = () => me()?.active?.role !== "orang_tua";
   const [fotoBusy, setFotoBusy] = createSignal(false);
   const [fotoError, setFotoError] = createSignal("");
 
@@ -169,19 +169,17 @@ export default function DetailPemain() {
               <div class="profil-kiri">
                 <KartuProfil pl={pl()!} nilai={terpilih()} tren={tren()} cedera={cedera().find((c) => !c.recoveredOn)?.bodyPart ?? null}>
                   <div class="foto-kelola">
-                    <Show when={bisaFoto()}>
-                      {/* biome-ignore lint/a11y/noLabelWithoutControl: input berkas tersembunyi ada di dalam label */}
-                      <label class="tombol tombol-kecil" aria-disabled={fotoBusy()}>
-                        {fotoBusy() ? "Mengunggah…" : pl()!.photoV ? "Ganti foto" : "Unggah foto"}
-                        <input type="file" accept="image/jpeg,image/png,image/webp" disabled={fotoBusy()} onChange={unggahFoto} />
-                      </label>
-                      <Show when={pl()!.photoV}>
-                        <button class="tombol tipis tombol-kecil" type="button" disabled={fotoBusy()} onClick={hapusFoto}>
-                          Hapus foto
-                        </button>
-                      </Show>
-                      <span class="petunjuk">JPG, PNG, atau WebP, maksimal 2 MB. Foto persegi dengan wajah di tengah paling pas.</span>
+                    {/* biome-ignore lint/a11y/noLabelWithoutControl: input berkas tersembunyi ada di dalam label */}
+                    <label class="tombol tombol-kecil" aria-disabled={fotoBusy()}>
+                      {fotoBusy() ? "Mengunggah…" : pl()!.photoV ? "Ganti foto" : "Unggah foto"}
+                      <input type="file" accept="image/jpeg,image/png,image/webp" disabled={fotoBusy()} onChange={unggahFoto} />
+                    </label>
+                    <Show when={pl()!.photoV}>
+                      <button class="tombol tipis tombol-kecil" type="button" disabled={fotoBusy()} onClick={hapusFoto}>
+                        Hapus foto
+                      </button>
                     </Show>
+                    <span class="petunjuk">JPG, PNG, atau WebP, maksimal 2 MB. Foto persegi dengan wajah di tengah paling pas.</span>
                   </div>
                   <Show when={fotoError()}>
                     <div class="peringatan" role="alert">
@@ -350,6 +348,10 @@ export default function DetailPemain() {
                         </form>
                       </Show>
                     </section>
+                  </Show>
+
+                  <Show when={["admin_ssb", "orang_tua"].includes(me()!.active!.role)}>
+                    <BerkasSiswa playerId={pl()!.id} />
                   </Show>
 
                   <Show when={me()!.active!.role !== "orang_tua"}>
