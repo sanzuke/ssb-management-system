@@ -200,6 +200,7 @@ export default function DonasiDetail() {
                                 <strong>{p.donorName ?? "Anonim"}</strong>
                                 {p.mine ? " (Anda)" : ""}
                                 {p.isAnonymous && (admin() || p.mine) ? " • disembunyikan" : ""}
+                                {p.fromLanding ? " • dari landing" : ""}
                                 <Show when={p.message}>
                                   <div class="petunjuk">“{p.message}”</div>
                                 </Show>
@@ -207,7 +208,12 @@ export default function DonasiDetail() {
                                   <div class="petunjuk">{[p.donorWhatsapp, p.adminNote].filter(Boolean).join(" • ")}</div>
                                 </Show>
                               </td>
-                              <td>{labelJenis[p.kind]}</td>
+                              <td>
+                                {labelJenis[p.kind]}
+                                <Show when={p.packageName}>
+                                  <div class="petunjuk">{p.packageName}</div>
+                                </Show>
+                              </td>
                               <td>{rupiah(p.amount)}</td>
                               <td>
                                 <span class="lencana-status" data-s={warnaLencana(p.status)}>

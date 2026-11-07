@@ -1,4 +1,4 @@
-import { createSignal, Show } from "solid-js";
+import { createSignal, Index, Show } from "solid-js";
 import AreaField from "~/components/AreaField";
 import Field from "~/components/Field";
 import SelectField from "~/components/SelectField";
@@ -18,6 +18,12 @@ export default function KampanyeForm(p: { initial?: FundraisingCampaignRow; even
   const [status, setStatus] = createSignal<string>(i?.status ?? "draft");
   const [paymentInfo, setPaymentInfo] = createSignal(i?.paymentInfo ?? "");
   const [isPublic, setIsPublic] = createSignal(i?.isPublic ?? true);
+  const [paket, setPaket] = createSignal<{ name: string; amount: string; description: string }[]>(
+    (i?.packages ?? []).map((k) => ({ name: k.name, amount: String(k.amount), description: k.description })),
+  );
+  const ubahPaket = (n: number, patch: Partial<{ name: string; amount: string; description: string }>) =>
+    setPaket((l) => l.map((k, idx) => (idx === n ? { ...k, ...patch } : k)));
+  const galatPaket = () => Object.entries(form.fields()).filter(([k]) => k.startsWith("packages")).map(([, v]) => v);
 
   // Kegiatan yang sudah dikaitkan tetap muncul sebagai pilihan walau tanggalnya di luar daftar.
   const pilihan = () => {
@@ -36,6 +42,7 @@ export default function KampanyeForm(p: { initial?: FundraisingCampaignRow; even
       status: status(),
       paymentInfo: paymentInfo(),
       isPublic: isPublic(),
+      packages: paket().map((k) => ({ name: k.name, amount: angka(k.amount), description: k.description })),
     };
     const saved = await api<FundraisingCampaignRow>(i ? `/fundraising/${i.id}` : "/fundraising", { method: i ? "PUT" : "POST", body });
     p.onSaved(saved);
@@ -94,9 +101,42 @@ export default function KampanyeForm(p: { initial?: FundraisingCampaignRow; even
         maxlength={1000}
         value={paymentInfo()}
         onInput={setPaymentInfo}
-        hint="Hanya terlihat anggota yang login, tidak tampil di landing."
+        hint="Terlihat anggota yang login. Di landing, donatur melihatnya hanya setelah mengirim donasi (bersama nominal yang harus ditransfer), supaya mudah mencocokkan transfer."
         error={form.fields().paymentInfo}
       />
+      <fieldset>
+        <legend>Paket donasi di landing (maksimal 8, boleh dikosongkan)</legend>
+        <p class="petunjuk">Donatur memilih paket atau mengisi nominal sendiri (minimal Rp 10.000). Contoh: Paket Bola Rp 50.000, Paket Jersey Rp 150.000.</p>
+        <Index each={paket()}>
+          {(k, n) => (
+            <div class="form">
+              <Field id={`kp-paket-nama-${n}`} label={`Nama paket ${n + 1}`} maxlength={60} value={k().name} onInput={(v) => ubahPaket(n, { name: v })} />
+              <Field
+                id={`kp-paket-nominal-${n}`}
+                label="Nominal, rupiah"
+                type="number"
+                inputmode="numeric"
+                value={k().amount}
+                onInput={(v) => ubahPaket(n, { amount: v })}
+              />
+              <Field id={`kp-paket-ket-${n}`} label="Keterangan (opsional)" maxlength={200} value={k().description} onInput={(v) => ubahPaket(n, { description: v })} />
+              <button class="tombol tipis" type="button" onClick={() => setPaket((l) => l.filter((_, idx) => idx !== n))}>
+                Hapus paket {n + 1}
+              </button>
+            </div>
+          )}
+        </Index>
+        <Show when={galatPaket().length > 0}>
+          <div class="peringatan" role="alert">
+            {galatPaket().join("; ")}
+          </div>
+        </Show>
+        <Show when={paket().length < 8}>
+          <button class="tombol" type="button" onClick={() => setPaket((l) => [...l, { name: "", amount: "", description: "" }])}>
+            Tambah paket
+          </button>
+        </Show>
+      </fieldset>
       <label class="centang">
         <input type="checkbox" checked={isPublic()} onChange={(e) => setIsPublic(e.currentTarget.checked)} />
         Tampilkan di landing page (setelah aktif)

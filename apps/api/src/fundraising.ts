@@ -6,6 +6,7 @@ import {
   fundraisingCampaignInputSchema,
   pledgeDecisionSchema,
   pledgeInputSchema,
+  publicPledgeInputSchema,
   type FundraisingCampaignRow,
   type FundraisingDetail,
   type FundraisingPledgeRow,
@@ -13,11 +14,13 @@ import {
   type PledgeKind,
   type PledgeStatus,
   type PublicFundraising,
+  type PublicPledgeResult,
 } from "@ssb/shared";
 import { requirePermission, type AppEnv, type Member } from "./auth/middleware";
 import { ssbIdBySlug } from "./auth/service";
 import { HttpError } from "./errors";
 import { todayWib } from "./fees";
+import { createRateLimiter } from "./rate-limit";
 import { zv } from "./validator";
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -31,6 +34,8 @@ const idOr404 = (v: string, what: string) => {
 const MAX_PENDING_PER_DONOR = 5;
 /** Jumlah nama sponsor dan donatur yang ditampilkan di landing per kampanye. */
 const PUBLIC_SUPPORTERS = 12;
+/** Sumbangan dari landing yang menunggu konfirmasi per nomor WhatsApp per kampanye. */
+const MAX_PUBLIC_PENDING = 5;
 
 type Campaign = typeof schema.fundraisingCampaign.$inferSelect;
 type Pledge = typeof schema.fundraisingPledge.$inferSelect;
@@ -80,6 +85,7 @@ async function campaignRows(tx: Tx, rows: Campaign[]): Promise<FundraisingCampai
       open: isOpen(r),
       isPublic: r.isPublic,
       paymentInfo: r.paymentInfo,
+      packages: r.packages,
       createdAt: r.createdAt.getTime(),
     }))
     .sort((a, b) => Number(b.open) - Number(a.open) || b.createdAt - a.createdAt)
@@ -101,6 +107,8 @@ function toPledge(r: Pledge, m: Member): FundraisingPledgeRow {
     receivedOn: r.receivedOn,
     createdAt: r.createdAt.toISOString(),
     mine,
+    packageName: r.packageName,
+    fromLanding: r.fromLanding,
     ...(admin ? { donorWhatsapp: r.donorWhatsapp, adminNote: r.adminNote } : {}),
   };
 }
@@ -128,10 +136,15 @@ async function acceptedCount(tx: Tx, campaignId: string): Promise<number> {
  * Donasi (crowdfunding) per kegiatan. Dana masuk lewat transfer manual dan dikonfirmasi admin; semua anggota melihat kampanye
  * dan boleh menyumbang atau menjadi sponsor, admin mengelola kampanye serta mencatat sumbangan di luar aplikasi.
  */
-export function fundraisingRoutes(db: Db) {
+export type FundraisingOptions = { pledgeLimit?: { perIp: number; perSsb: number; windowMs: number } };
+
+export function fundraisingRoutes(db: Db, opts: FundraisingOptions = {}) {
   const campaigns = schema.fundraisingCampaign;
   const pledges = schema.fundraisingPledge;
   const member = (c: { get: (k: "auth") => { member?: Member } | undefined }) => c.get("auth")!.member!;
+  const lim = opts.pledgeLimit ?? { perIp: 10, perSsb: 200, windowMs: 60 * 60 * 1000 };
+  const perIp = createRateLimiter({ limit: lim.perIp, windowMs: lim.windowMs });
+  const perSsb = createRateLimiter({ limit: lim.perSsb, windowMs: lim.windowMs });
 
   return (
     new Hono<AppEnv>()
@@ -173,6 +186,7 @@ export function fundraisingRoutes(db: Db) {
               status: b.status,
               isPublic: b.isPublic,
               paymentInfo: b.paymentInfo,
+              packages: b.packages,
               createdBy: m.userId,
             })
             .returning();
@@ -203,6 +217,7 @@ export function fundraisingRoutes(db: Db) {
               status: b.status,
               isPublic: b.isPublic,
               paymentInfo: b.paymentInfo,
+              packages: b.packages,
               updatedAt: new Date(),
             })
             .where(eq(campaigns.id, id))
@@ -353,6 +368,7 @@ export function fundraisingRoutes(db: Db) {
             supporters: f.supporters,
             deadline: f.deadline,
             open: f.open,
+            packages: f.packages,
             sponsors: supporters
               .filter((s) => s.campaignId === f.id)
               .slice(0, PUBLIC_SUPPORTERS)
@@ -361,6 +377,55 @@ export function fundraisingRoutes(db: Db) {
         });
         c.header("cache-control", "public, max-age=60");
         return c.json(out);
+      })
+
+      // Donasi dari landing tanpa akun: paket atau nominal bebas. Masuk berstatus menunggu; petunjuk transfer dikirim di jawaban ini
+      // (bukan di daftar kampanye publik) dan admin mengonfirmasi seperti sumbangan anggota.
+      .post("/public/site/:slug/fundraising/:id/pledge", zv("json", publicPledgeInputSchema), async (c) => {
+        const slug = c.req.param("slug").toLowerCase();
+        const id = idOr404(c.req.param("id"), "Kampanye");
+        const b = c.req.valid("json");
+        // Kolom jebakan terisi berarti bot: jawab seolah berhasil tanpa menyimpan.
+        if (b.website) {
+          const decoy: PublicPledgeResult = { campaignTitle: "", kind: b.kind, amount: b.amount ?? 0, packageName: null, paymentInfo: "" };
+          return c.json(decoy, 201);
+        }
+        const ssbId = await ssbIdBySlug(db, slug);
+        if (!ssbId) throw notFound("Situs");
+        const ip = c.req.header("x-real-ip") ?? "tak-dikenal";
+        if (!perIp.allow(`${slug}|${ip}`) || !perSsb.allow(slug)) {
+          throw new HttpError(429, "rate_limited", "Terlalu banyak permintaan. Coba lagi nanti atau hubungi sekretariat");
+        }
+        const out = await withTenant(db, ssbId, async (tx): Promise<PublicPledgeResult> => {
+          const camp = await loadCampaign(tx, id);
+          if (!camp.isPublic || camp.status === "draft") throw notFound("Kampanye");
+          if (!isOpen(camp)) throw new HttpError(409, "conflict", "Kampanye ini sedang tidak menerima donasi");
+          const pkg = b.packageName ? camp.packages.find((p) => p.name.toLowerCase() === b.packageName!.toLowerCase()) : undefined;
+          if (b.packageName && !pkg) throw new HttpError(400, "validation", "Periksa kembali isian Anda", { packageName: "paket tidak ditemukan" });
+          const amount = pkg ? pkg.amount : b.amount!;
+          const [pending] = await tx
+            .select({ n: sql<number>`count(*)::int` })
+            .from(pledges)
+            .where(and(eq(pledges.campaignId, id), eq(pledges.fromLanding, true), eq(pledges.donorWhatsapp, b.donorWhatsapp), eq(pledges.status, "menunggu")));
+          if ((pending?.n ?? 0) >= MAX_PUBLIC_PENDING) {
+            throw new HttpError(429, "too_many", "Masih ada beberapa donasi dari nomor ini yang menunggu konfirmasi. Tunggu hingga dikonfirmasi.");
+          }
+          await tx.insert(pledges).values({
+            ssbId,
+            campaignId: id,
+            donorId: null,
+            donorName: b.donorName,
+            donorWhatsapp: b.donorWhatsapp,
+            kind: b.kind,
+            amount,
+            packageName: pkg?.name ?? null,
+            fromLanding: true,
+            message: b.message,
+            isAnonymous: b.isAnonymous,
+          });
+          return { campaignTitle: camp.title, kind: b.kind, amount, packageName: pkg?.name ?? null, paymentInfo: camp.paymentInfo };
+        });
+        return c.json(out, 201);
       })
   );
 }

@@ -965,6 +965,17 @@ export type PledgeStatus = z.infer<typeof pledgeStatusSchema>;
 export const PLEDGE_MAX = 1_000_000_000;
 const pledgeAmount = z.number().int("harus bilangan bulat").min(1, "minimal 1 rupiah").max(PLEDGE_MAX, "terlalu besar");
 
+/** Nominal terendah untuk donasi dengan nominal bebas dari landing (paket boleh lebih kecil bila admin menetapkannya). */
+export const PUBLIC_PLEDGE_MIN = 10_000;
+
+/** Satu paket donasi pada kampanye, mis. "Paket Jersey" Rp 150.000. */
+export const donationPackageSchema = z.object({
+  name: z.string().trim().min(2, "minimal 2 karakter").max(60, "maksimal 60 karakter"),
+  amount: pledgeAmount,
+  description: z.string().trim().max(200, "maksimal 200 karakter").default(""),
+});
+export type DonationPackage = z.infer<typeof donationPackageSchema>;
+
 /** Membuat atau mengubah kampanye. Hanya kampanye `aktif` yang menerima sumbangan baru; draf tidak tampil di landing. */
 export const fundraisingCampaignInputSchema = z.object({
   title: z.string().trim().min(3, "minimal 3 karakter").max(120, "maksimal 120 karakter"),
@@ -975,6 +986,11 @@ export const fundraisingCampaignInputSchema = z.object({
   status: fundraisingStatusSchema.default("draft"),
   isPublic: z.boolean().default(true),
   paymentInfo: z.string().trim().max(1000, "maksimal 1000 karakter").default(""),
+  packages: z
+    .array(donationPackageSchema)
+    .max(8, "maksimal 8 paket")
+    .refine((l) => new Set(l.map((p) => p.name.toLowerCase())).size === l.length, "nama paket tidak boleh kembar")
+    .default([]),
 });
 export type FundraisingCampaignInput = z.infer<typeof fundraisingCampaignInputSchema>;
 
@@ -986,6 +1002,33 @@ export const pledgeInputSchema = z.object({
   isAnonymous: z.boolean().default(false),
 });
 export type PledgeInput = z.infer<typeof pledgeInputSchema>;
+
+/**
+ * Donasi dari landing tanpa akun: memilih paket (`packageName`, nominal diambil dari paket) atau mengisi nominal bebas (`amount`).
+ * WhatsApp wajib agar admin bisa menghubungi dan mencocokkan transfer. `website` adalah kolom jebakan bot.
+ */
+export const publicPledgeInputSchema = z
+  .object({
+    kind: pledgeKindSchema.default("donasi"),
+    packageName: z.string().trim().max(60).optional(),
+    amount: z.number().int("harus bilangan bulat").min(PUBLIC_PLEDGE_MIN, `minimal ${PUBLIC_PLEDGE_MIN.toLocaleString("id-ID")} rupiah`).max(PLEDGE_MAX, "terlalu besar").optional(),
+    donorName: z.string().trim().min(2, "minimal 2 karakter").max(120, "maksimal 120 karakter"),
+    donorWhatsapp: whatsappSchema,
+    message: z.string().trim().max(300, "maksimal 300 karakter").default(""),
+    isAnonymous: z.boolean().default(false),
+    website: z.string().max(200).optional(),
+  })
+  .refine((v) => v.packageName || v.amount !== undefined, { message: "Pilih paket atau isi nominal", path: ["amount"] });
+export type PublicPledgeInput = z.input<typeof publicPledgeInputSchema>;
+
+/** Jawaban setelah donasi dari landing diterima: petunjuk transfer baru dibuka di sini, tidak di daftar kampanye publik. */
+export type PublicPledgeResult = {
+  campaignTitle: string;
+  kind: PledgeKind;
+  amount: number;
+  packageName: string | null;
+  paymentInfo: string;
+};
 
 /** Admin mencatat sumbangan atau sponsor di luar aplikasi (tunai, transfer langsung, perusahaan); langsung berstatus diterima. */
 export const donationRecordSchema = pledgeInputSchema.extend({
@@ -1022,6 +1065,7 @@ export type FundraisingCampaignRow = {
   open: boolean;
   isPublic: boolean;
   paymentInfo: string;
+  packages: DonationPackage[];
 };
 
 /**
@@ -1040,6 +1084,9 @@ export type FundraisingPledgeRow = {
   receivedOn: string | null;
   createdAt: string;
   mine: boolean;
+  packageName: string | null;
+  /** Dikirim donatur umum lewat landing (tanpa akun). */
+  fromLanding: boolean;
   donorWhatsapp?: string | null;
   adminNote?: string | null;
 };
@@ -1058,6 +1105,8 @@ export type PublicFundraising = {
   supporters: number;
   deadline: string | null;
   open: boolean;
+  /** Paket pilihan donatur; kosong = hanya nominal bebas. */
+  packages: DonationPackage[];
   sponsors: { name: string; kind: PledgeKind }[];
 };
 

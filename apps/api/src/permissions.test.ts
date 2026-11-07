@@ -51,6 +51,8 @@ describe("matriks izin (tanpa database)", () => {
       "GET /public/site/:slug/calendar",
       // Kampanye donasi di landing: hanya yang bertanda publik, tanpa rekening dan tanpa donatur anonim.
       "GET /public/site/:slug/fundraising",
+      // Donasi dari landing tanpa akun: berstatus menunggu sampai admin mengonfirmasi; dibatasi laju dan kolom jebakan bot.
+      "POST /public/site/:slug/fundraising/:id/pledge",
       "GET /public/seo/:slug/berita",
       "GET /public/seo/:slug/berita/:postSlug",
       "GET /public/seo/:slug/sitemap.xml",

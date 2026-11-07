@@ -6,11 +6,13 @@ import {
   donationRecordSchema,
   fundraisingCampaignInputSchema,
   pledgeInputSchema,
+  publicPledgeInputSchema,
   type CalendarEventRow,
   type FundraisingCampaignRow,
   type FundraisingDetail,
   type FundraisingPledgeRow,
   type PublicFundraising,
+  type PublicPledgeResult,
 } from "@ssb/shared";
 import { createApp, type AppType } from "./app";
 
@@ -35,6 +37,24 @@ describe("isian donasi", () => {
     expect(gagal(pledgeInputSchema, { amount: 1000, kind: "hibah" })).not.toBeNull();
     expect(gagal(donationRecordSchema, { amount: 1000 })?.map((m) => m.split(":")[0]).sort()).toEqual(["donorName", "receivedOn"]);
     expect(gagal(donationRecordSchema, { amount: 1000, donorName: "PT Maju", receivedOn: "2031-01-02", kind: "sponsor" })).toBeNull();
+  });
+
+  test("paket: maksimal 8, nama unik tanpa membedakan huruf besar, nominal bulat; donasi publik wajib WhatsApp dan paket atau nominal", () => {
+    const paket = (name: string, amount = 50_000) => ({ name, amount });
+    expect(fundraisingCampaignInputSchema.parse({ title: "Seragam turnamen" }).packages).toEqual([]);
+    expect(fundraisingCampaignInputSchema.parse({ title: "Seragam turnamen", packages: [paket("Paket Bola")] }).packages).toEqual([{ name: "Paket Bola", amount: 50_000, description: "" }]);
+    expect(gagal(fundraisingCampaignInputSchema, { title: "Seragam turnamen", packages: [paket("Paket Bola"), paket("paket bola", 70_000)] })).not.toBeNull();
+    expect(gagal(fundraisingCampaignInputSchema, { title: "Seragam turnamen", packages: Array.from({ length: 9 }, (_, i) => paket(`Paket ${i}`)) })).not.toBeNull();
+    expect(gagal(fundraisingCampaignInputSchema, { title: "Seragam turnamen", packages: [paket("Paket Bola", 0)] })).not.toBeNull();
+    expect(gagal(fundraisingCampaignInputSchema, { title: "Seragam turnamen", packages: [paket("P")] })).not.toBeNull();
+
+    const donatur = { donorName: "Budi Santoso", donorWhatsapp: "081234567890" };
+    expect(publicPledgeInputSchema.parse({ ...donatur, amount: 25_000 })).toMatchObject({ kind: "donasi", amount: 25_000, isAnonymous: false, message: "" });
+    expect(gagal(publicPledgeInputSchema, donatur)?.[0]).toMatch(/^amount:/); // tanpa paket dan nominal
+    expect(gagal(publicPledgeInputSchema, { ...donatur, amount: 9_999 })).not.toBeNull(); // di bawah batas nominal bebas
+    expect(gagal(publicPledgeInputSchema, { donorName: "Budi", amount: 25_000 })).not.toBeNull(); // tanpa WhatsApp
+    expect(gagal(publicPledgeInputSchema, { ...donatur, donorWhatsapp: "abc", amount: 25_000 })).not.toBeNull();
+    expect(gagal(publicPledgeInputSchema, { ...donatur, packageName: "Paket Bola" })).toBeNull();
   });
 });
 
@@ -223,8 +243,77 @@ run("donasi crowdfunding (database)", () => {
     expect([res.status, res.headers.get("cache-control")]).toEqual([200, "public, max-age=60"]);
     const list = await json<PublicFundraising[]>(res);
     expect(list.map((k) => [k.title, k.open])).toEqual([["Terbuka", true], ["Selesai", false]]);
-    expect(Object.keys(list[0]!).sort()).toEqual(["deadline", "description", "event", "id", "open", "raised", "sponsors", "supporters", "targetAmount", "title"]);
+    expect(Object.keys(list[0]!).sort()).toEqual(["deadline", "description", "event", "id", "open", "packages", "raised", "sponsors", "supporters", "targetAmount", "title"]);
     expect((await call("GET", "/public/site/tidak-ada-sama-sekali/fundraising")).status).toBe(404);
+  });
+
+  test("donasi publik dari landing: paket atau nominal bebas, menunggu konfirmasi, rekening hanya di jawaban, dan batas kampanye dijaga", async () => {
+    const a = await daftar("lp");
+    const b = await daftar("lq");
+    const paket = [
+      { name: "Paket Jersey", amount: 150_000, description: "Satu jersey siswa" },
+      { name: "Paket Bola", amount: 50_000 },
+    ];
+    const k = await kampanye(a.admin, { title: "Jersey siswa", status: "aktif", packages: paket });
+    expect(k.packages).toHaveLength(2);
+    const pub = (slug: string, id: string, body: object) => call("POST", `/public/site/${slug}/fundraising/${id}/pledge`, undefined, body);
+    const donatur = { donorName: "Budi Santoso", donorWhatsapp: "081234567890" };
+
+    // Daftar publik membawa paket tetapi tidak rekening.
+    const list = await json<PublicFundraising[]>(await call("GET", `/public/site/${a.slug}/fundraising`));
+    expect(list[0]!.packages.map((p) => [p.name, p.amount])).toEqual([["Paket Jersey", 150_000], ["Paket Bola", 50_000]]);
+    expect(JSON.stringify(list)).not.toContain("BCA 123");
+
+    // Paket: nominal diambil dari paket (nominal kiriman diabaikan), petunjuk transfer ada di jawaban.
+    const res = await pub(a.slug, k.id, { ...donatur, packageName: "paket jersey", amount: 20_000, message: "Semangat" });
+    expect(res.status).toBe(201);
+    expect(await json<PublicPledgeResult>(res)).toEqual({ campaignTitle: "Jersey siswa", kind: "donasi", amount: 150_000, packageName: "Paket Jersey", paymentInfo: "BCA 123 a.n. SSB" });
+    expect((await pub(a.slug, k.id, { ...donatur, amount: 25_000, kind: "sponsor", isAnonymous: true })).status).toBe(201);
+
+    // Isian salah ditolak: paket tidak ada, tanpa paket dan nominal, nominal terlalu kecil, WhatsApp tak sah.
+    expect(await json<{ error: { fields: Record<string, string> } }>(await pub(a.slug, k.id, { ...donatur, packageName: "Paket Hantu" }))).toMatchObject({ error: { fields: { packageName: "paket tidak ditemukan" } } });
+    for (const buruk of [{}, { amount: 5000 }, { amount: 25_000, donorWhatsapp: "abc" }]) {
+      expect([JSON.stringify(buruk), (await pub(a.slug, k.id, { ...donatur, ...buruk })).status]).toEqual([JSON.stringify(buruk), 400]);
+    }
+
+    // Admin melihat dua sumbangan menunggu dari landing; dana belum dihitung sebelum dikonfirmasi.
+    const d = await detail(a.admin, k.id);
+    expect(d.campaign).toMatchObject({ raised: 0, supporters: 0 });
+    expect(d.pledges.map((p) => [p.amount, p.packageName, p.fromLanding, p.status, p.donorWhatsapp, p.isAnonymous]).sort()).toEqual([
+      [150_000, "Paket Jersey", true, "menunggu", "081234567890", false],
+      [25_000, null, true, "menunggu", "081234567890", true],
+    ]);
+    await call("PATCH", `/fundraising/pledges/${d.pledges.find((p) => p.amount === 150_000)!.id}`, a.admin, { status: "diterima" });
+    expect((await detail(a.admin, k.id)).campaign).toMatchObject({ raised: 150_000, supporters: 1 });
+
+    // Paket diubah kemudian: sumbangan lama tetap mencatat nama paketnya.
+    await call("PUT", `/fundraising/${k.id}`, a.admin, { title: "Jersey siswa", status: "aktif", packages: [{ name: "Paket Baru", amount: 75_000 }] });
+    expect((await detail(a.admin, k.id)).pledges.some((p) => p.packageName === "Paket Jersey")).toBe(true);
+
+    // Kolom jebakan bot: dijawab 201 tetapi tidak disimpan.
+    expect((await pub(a.slug, k.id, { ...donatur, amount: 30_000, website: "http://spam" })).status).toBe(201);
+    expect((await detail(a.admin, k.id)).pledges).toHaveLength(2);
+
+    // Kampanye selesai, draf, tidak publik, atau milik SSB lain tidak menerima donasi publik.
+    const selesai = await kampanye(a.admin, { status: "selesai" });
+    const draf = await kampanye(a.admin, { status: "draft" });
+    const internal = await kampanye(a.admin, { status: "aktif", isPublic: false });
+    expect((await pub(a.slug, selesai.id, { ...donatur, amount: 25_000 })).status).toBe(409);
+    expect((await pub(a.slug, draf.id, { ...donatur, amount: 25_000 })).status).toBe(404);
+    expect((await pub(a.slug, internal.id, { ...donatur, amount: 25_000 })).status).toBe(404);
+    expect((await pub(b.slug, k.id, { ...donatur, amount: 25_000 })).status).toBe(404);
+    expect((await pub("tidak-ada-sama-sekali", k.id, { ...donatur, amount: 25_000 })).status).toBe(404);
+    expect((await pub(a.slug, "bukan-uuid", { ...donatur, amount: 25_000 })).status).toBe(404);
+    expect(await json<FundraisingCampaignRow[]>(await call("GET", "/fundraising", b.admin))).toEqual([]);
+  });
+
+  test("donasi publik: satu nomor WhatsApp paling banyak 5 donasi menunggu per kampanye", async () => {
+    const a = await daftar("lr");
+    const k = await kampanye(a.admin, { status: "aktif" });
+    const kirim = (wa: string) => call("POST", `/public/site/${a.slug}/fundraising/${k.id}/pledge`, undefined, { donorName: "Budi", donorWhatsapp: wa, amount: 20_000 });
+    for (let i = 0; i < 5; i++) expect((await kirim("081111111111")).status).toBe(201);
+    expect((await kirim("081111111111")).status).toBe(429);
+    expect((await kirim("082222222222")).status).toBe(201); // nomor lain tidak terpengaruh
   });
 
   test("data uang dijaga: kampanye atau sumbangan yang sudah diterima tidak bisa dihapus atau dijadikan draf", async () => {

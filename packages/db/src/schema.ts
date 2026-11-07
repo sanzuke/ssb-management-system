@@ -1053,6 +1053,8 @@ export const fundraisingCampaign = pgTable(
     isPublic: boolean("is_public").notNull().default(true),
     /** Rekening dan petunjuk transfer untuk kampanye ini. */
     paymentInfo: text("payment_info").notNull().default(""),
+    /** Paket donasi pilihan untuk donatur di landing: nama, nominal rupiah, dan keterangan. Maksimal 8, nama unik. */
+    packages: jsonb("packages").$type<{ name: string; amount: number; description: string }[]>().notNull().default(sql`'[]'::jsonb`),
     createdBy: uuid("created_by"),
     createdAt: createdAt(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
@@ -1085,6 +1087,10 @@ export const fundraisingPledge = pgTable(
     kind: text("kind").notNull().default("donasi"),
     amount: integer("amount").notNull(),
     message: text("message").notNull().default(""),
+    /** Nama paket yang dipilih saat menyumbang (salinan; paket boleh berubah kemudian); kosong = nominal bebas. */
+    packageName: text("package_name"),
+    /** Dikirim donatur umum lewat landing tanpa akun (donor_id kosong, kontak WhatsApp wajib). */
+    fromLanding: boolean("from_landing").notNull().default(false),
     /** Nama disembunyikan dari tampilan publik dan anggota lain; admin tetap melihatnya. */
     isAnonymous: boolean("is_anonymous").notNull().default(false),
     status: text("status").notNull().default("menunggu"),
