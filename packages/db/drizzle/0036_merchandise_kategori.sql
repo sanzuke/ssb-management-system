@@ -1,0 +1,1 @@
+ALTER TABLE "merchandise_product" ADD COLUMN "category" text DEFAULT 'lainnya' NOT NULL;

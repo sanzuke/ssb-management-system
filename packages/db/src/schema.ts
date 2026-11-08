@@ -969,6 +969,8 @@ export const merchandiseProduct = pgTable(
     hpp: integer("hpp").notNull(),
     /** Jumlah stok yang tersedia; 0 berarti produk habis dijual. */
     stock: integer("stock").notNull().default(0),
+    /** Kategori (kode dari packages/shared); tanpa CHECK supaya daftar kategori bisa ditambah tanpa migrasi. */
+    category: text("category").notNull().default("lainnya"),
     imageFileKey: text("image_file_key"),
     /** Produk yang aktif dapat dipesan; nonaktif disembunyikan dari publik. */
     active: boolean("active").notNull().default(true),

@@ -2,10 +2,11 @@ import { A, useNavigate, useParams } from "@solidjs/router";
 import { Title } from "@solidjs/meta";
 import { createSignal, onMount, Show } from "solid-js";
 import type { Me, MerchandiseProductRow } from "@ssb/shared";
-import { merchandiseProductInputSchema, type MerchandiseProductInput } from "@ssb/shared";
+import { merchandiseCategories, merchandiseProductInputSchema, type MerchandiseProductInput } from "@ssb/shared";
 import KepalaHalaman from "~/components/KepalaHalaman";
 import Memuat from "~/components/Memuat";
 import Field from "~/components/Field";
+import SelectField from "~/components/SelectField";
 import { api, ApiError, getMe } from "~/lib/api";
 
 export default function MerchandiseProduk() {
@@ -21,6 +22,7 @@ export default function MerchandiseProduk() {
     price: 0,
     hpp: 0,
     stock: 0,
+    category: "lainnya",
     imageFileKey: null,
     active: true,
   });
@@ -58,6 +60,7 @@ export default function MerchandiseProduk() {
         price: p.price,
         hpp: p.hpp,
         stock: p.stock,
+        category: p.category,
         imageFileKey: p.imageFileKey,
         active: p.active,
       });
@@ -185,6 +188,14 @@ export default function MerchandiseProduk() {
               onInput={(v) => isi("hpp", Number.parseInt(v, 10) || 0)}
               required
               hint="Harga beli dari vendor untuk perhitungan margin"
+            />
+            <SelectField
+              id="kategori"
+              label="Kategori"
+              value={values().category}
+              onInput={(v) => isi("category", v)}
+              options={merchandiseCategories.map((c) => ({ value: c.code, label: c.label }))}
+              hint="Dipakai untuk menyaring produk di landing page dan di daftar admin"
             />
             <Field
               id="stok"

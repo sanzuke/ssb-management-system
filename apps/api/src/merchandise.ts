@@ -6,8 +6,11 @@ import {
   merchandiseOrderStatusSchema,
   merchandiseProductInputSchema,
   type MerchandiseOrderRow,
+  merchandiseCategorySchema,
+  type MerchandiseCategory,
   type MerchandiseOrderStatusInput,
   type MerchandiseProductInput,
+  type MerchandisePublicProduct,
   type MerchandiseProductRow,
   type MerchandiseStatus,
 } from "@ssb/shared";
@@ -25,6 +28,9 @@ const idOr404 = (v: string, what: string) => {
   return v;
 };
 
+/** Kategori dari database; kode yang tidak dikenal (mis. kategori yang sudah dihapus dari daftar) dibaca sebagai "lainnya". */
+const kategoriDari = (v: string): MerchandiseCategory => merchandiseCategorySchema.catch("lainnya").parse(v);
+
 function toProductRow(r: typeof schema.merchandiseProduct.$inferSelect): MerchandiseProductRow {
   return {
     id: r.id,
@@ -33,11 +39,17 @@ function toProductRow(r: typeof schema.merchandiseProduct.$inferSelect): Merchan
     price: r.price,
     hpp: r.hpp,
     stock: r.stock,
+    category: kategoriDari(r.category),
     imageFileKey: r.imageFileKey,
     active: r.active,
     createdAt: r.createdAt.toISOString(),
     updatedAt: r.updatedAt.toISOString(),
   };
+}
+
+/** Produk untuk publik: tanpa harga modal (HPP), status, dan waktu ubah. Satu-satunya bentuk yang boleh keluar lewat rute tanpa login. */
+function toPublicProduct(r: typeof schema.merchandiseProduct.$inferSelect): MerchandisePublicProduct {
+  return { id: r.id, name: r.name, description: r.description, price: r.price, stock: r.stock, category: kategoriDari(r.category), imageFileKey: r.imageFileKey };
 }
 
 function toOrderRow(
@@ -91,7 +103,7 @@ export function merchandiseRoutes(db: Db) {
             .where(eq(schema.merchandiseProduct.active, true))
             .orderBy(desc(schema.merchandiseProduct.createdAt));
         });
-        return c.json(rows.map(toProductRow));
+        return c.json(rows.map(toPublicProduct));
       })
 
       /** Buat pesanan publik (tanpa sesi). */
@@ -179,6 +191,7 @@ export function merchandiseRoutes(db: Db) {
                 price: b.price,
                 hpp: b.hpp,
                 stock: b.stock,
+                category: b.category,
                 imageFileKey: b.imageFileKey ?? null,
                 active: b.active,
               })
@@ -214,6 +227,7 @@ export function merchandiseRoutes(db: Db) {
                 price: b.price,
                 hpp: b.hpp,
                 stock: b.stock,
+                category: b.category,
                 imageFileKey: b.imageFileKey ?? null,
                 active: b.active,
                 updatedAt: new Date(),

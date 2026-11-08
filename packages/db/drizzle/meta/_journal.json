@@ -253,6 +253,13 @@
       "when": 1794067506320,
       "tag": "0035_wa_pendaftar_trial",
       "breakpoints": true
+    },
+    {
+      "idx": 36,
+      "version": "7",
+      "when": 1794115879958,
+      "tag": "0036_merchandise_kategori",
+      "breakpoints": true
     }
   ]
 }

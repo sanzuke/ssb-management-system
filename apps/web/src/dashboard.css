@@ -4029,14 +4029,14 @@ button.pengguna[aria-expanded="true"] .panah-menu {
 }
 
 /* ---- Tabel pendaftar trial ---- */
-.tab-status .hitung {
+.tab-periode .hitung {
   margin-left: 4px;
   padding: 0 7px;
   border-radius: 999px;
   background: rgba(20, 32, 26, 0.08);
   font-size: 0.8rem;
 }
-.tab-status button[aria-pressed="true"] .hitung {
+.tab-periode button[aria-pressed="true"] .hitung {
   background: rgba(255, 255, 255, 0.22);
 }
 .tabel-pendaftar td {

@@ -1,7 +1,7 @@
 import { useNavigate } from "@solidjs/router";
 import { Title } from "@solidjs/meta";
 import { createSignal, onMount, Show, For } from "solid-js";
-import type { MerchandiseOrderRow, MerchandiseProductRow } from "@ssb/shared";
+import { merchandiseCategories, merchandiseCategoryLabel, type MerchandiseCategory, type MerchandiseOrderRow, type MerchandiseProductRow } from "@ssb/shared";
 import KepalaHalaman from "~/components/KepalaHalaman";
 import { api, ApiError, getMe } from "~/lib/api";
 
@@ -23,6 +23,8 @@ const statusBadge: Record<string, string> = {
 
 export default function Merchandise() {
   const nav = useNavigate();
+  const [kategori, setKategori] = createSignal<"" | MerchandiseCategory>("");
+  const tampilProduk = () => produk().filter((p) => !kategori() || p.category === kategori());
   const [me, setMe] = createSignal<{ active: { role: string } | null } | null>(null);
   const [produk, setProduk] = createSignal<MerchandiseProductRow[]>([]);
   const [pesanan, setPesanan] = createSignal<MerchandiseOrderRow[]>([]);
@@ -90,10 +92,24 @@ export default function Merchandise() {
                 Tambah produk
               </button>
             </div>
+            {/* biome-ignore lint/a11y/useSemanticElements: pilihan saringan kategori */}
+            <div class="tab-periode" role="group" aria-label="Saring kategori">
+              <button type="button" aria-pressed={kategori() === ""} onClick={() => setKategori("")}>
+                Semua <span class="hitung">{produk().length}</span>
+              </button>
+              <For each={merchandiseCategories}>
+                {(c) => (
+                  <button type="button" aria-pressed={kategori() === c.code} onClick={() => setKategori(c.code)}>
+                    {c.label} <span class="hitung">{produk().filter((p) => p.category === c.code).length}</span>
+                  </button>
+                )}
+              </For>
+            </div>
             <table class="tabel">
               <thead>
                 <tr>
                   <th>Nama produk</th>
+                  <th>Kategori</th>
                   <th>Harga</th>
                   <th>Stok</th>
                   <th>Status</th>
@@ -102,19 +118,20 @@ export default function Merchandise() {
               </thead>
               <tbody>
                 <Show
-                  when={produk().length > 0}
+                  when={tampilProduk().length > 0}
                   fallback={
                     <tr>
-                      <td colSpan={5} class="kosong">
-                        Belum ada produk merchandise. Tambahkan produk pertama.
+                      <td colSpan={6} class="kosong">
+                        {kategori() ? "Belum ada produk di kategori ini." : "Belum ada produk merchandise. Tambahkan produk pertama."}
                       </td>
                     </tr>
                   }
                 >
-                  <For each={produk()}>
+                  <For each={tampilProduk()}>
                     {(p) => (
                       <tr>
                         <td>{p.name}</td>
+                        <td>{merchandiseCategoryLabel[p.category]}</td>
                         <td>{formatRupiah(p.price)}</td>
                         <td>{p.stock}</td>
                         <td>

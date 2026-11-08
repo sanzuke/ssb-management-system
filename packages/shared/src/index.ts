@@ -881,6 +881,16 @@ export type InvoiceAmountInput = z.infer<typeof invoiceAmountSchema>;
 export const merchandiseStatusSchema = z.enum(["pending", "processing", "shipped", "completed", "cancelled"]);
 export type MerchandiseStatus = z.infer<typeof merchandiseStatusSchema>;
 
+/** Kategori produk merchandise. Kode disimpan di database tanpa CHECK, jadi daftar ini bisa ditambah tanpa migrasi. */
+export const merchandiseCategories = [
+  { code: "jersey", label: "Jersey" },
+  { code: "aksesori", label: "Aksesori" },
+  { code: "lainnya", label: "Lainnya" },
+] as const;
+export type MerchandiseCategory = (typeof merchandiseCategories)[number]["code"];
+export const merchandiseCategorySchema = z.enum(merchandiseCategories.map((c) => c.code) as [MerchandiseCategory, ...MerchandiseCategory[]]);
+export const merchandiseCategoryLabel = Object.fromEntries(merchandiseCategories.map((c) => [c.code, c.label])) as Record<MerchandiseCategory, string>;
+
 /** Membuat atau mengubah produk merchandise. `id` dikosongkan untuk produk baru. */
 export const merchandiseProductInputSchema = z.object({
   id: z.string().uuid().optional(),
@@ -889,10 +899,14 @@ export const merchandiseProductInputSchema = z.object({
   price: z.number().int("harus bilangan bulat").min(0, "tidak boleh negatif").max(1_000_000_000, "terlalu besar"),
   hpp: z.number().int("harus bilangan bulat").min(0, "tidak boleh negatif").max(1_000_000_000, "terlalu besar"),
   stock: z.number().int("harus bilangan bulat").min(0, "tidak boleh negatif").max(1_000_000, "terlalu besar"),
+  category: merchandiseCategorySchema.default("lainnya"),
   imageFileKey: z.string().trim().nullable().optional(),
   active: z.boolean().default(true),
 });
 export type MerchandiseProductInput = z.infer<typeof merchandiseProductInputSchema>;
+
+/** Produk merchandise untuk publik (landing): tanpa harga modal (HPP). */
+export type MerchandisePublicProduct = { id: string; name: string; description: string; price: number; stock: number; category: MerchandiseCategory; imageFileKey: string | null };
 
 /** Baris produk merchandise dalam daftar admin. */
 export type MerchandiseProductRow = {
@@ -902,6 +916,7 @@ export type MerchandiseProductRow = {
   price: number;
   hpp: number;
   stock: number;
+  category: MerchandiseCategory;
   imageFileKey: string | null;
   active: boolean;
   createdAt: string;
