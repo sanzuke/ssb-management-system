@@ -11,3 +11,6 @@ uploads/
 
 # Kredensial server, jangan di-commit
 docs/krendensial.txt
+
+# Kunci akun layanan Firebase (rahasia, jangan di-commit)
+*-firebase-adminsdk-*.json

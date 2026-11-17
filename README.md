@@ -10,6 +10,7 @@ Status saat ini: MVP, modul SPP, dan integrasi WhatsApp sudah dibangun. Lihat `d
 docs/               Dokumen rancangan dan catatan checkpoint
 apps/api/           Hono di Bun (API)
 apps/web/           SolidStart (PWA)
+apps/mobile/        Flutter (aplikasi pelatih dan orang tua; lihat docs/mobile-rancangan.md)
 packages/shared/    Skema Zod dan tipe yang dipakai bersama
 packages/db/        Skema Drizzle, migrasi, dan RLS (lihat docs/database.md)
 tools/bench/        Skrip benchmark untuk keputusan tech stack
@@ -23,6 +24,8 @@ Dokumen rancangan:
 | `docs/checklist.md` | Daftar kerja terukur per bagian, dengan kriteria selesai |
 | `docs/profil.md` | Landing page akademi: situs terpisah, konten diatur di SSB MS |
 | `docs/mobile.md` | PWA dan aplikasi native untuk pelatih dan orang tua (fase 2-3) |
+| `docs/mobile-rancangan.md` | Layar, alur, dan tahapan aplikasi Flutter untuk pelatih dan orang tua |
+| `docs/push.md` | Notifikasi push mobile lewat FCM: konfigurasi, perangkat, dan daftar peristiwa |
 | `docs/email.md` | Email domain akademi di server zukelabs, termasuk daftar record DNS |
 | `docs/spp.md` | Modul tagihan SPP dan pembayaran manual |
 | `docs/fonnte.md` | Pengiriman WhatsApp lewat Fonnte |

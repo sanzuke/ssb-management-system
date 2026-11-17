@@ -13,7 +13,8 @@
       "!**/*.sql",
       "!**/*.json",
       "!**/routeTree.gen.ts",
-      "!tools/bench"
+      "!tools/bench",
+      "!apps/mobile"
     ]
   },
   "formatter": {
