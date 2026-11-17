@@ -10,6 +10,7 @@ import { listMemberships } from "./auth/service";
 import type { Logger } from "./logger";
 import type { Mailer } from "./mail";
 import { zv } from "./validator";
+import { clientIp, createRateLimiter } from "./rate-limit";
 
 /** Tautan dari email berlaku 1 jam; tautan buatan admin 24 jam karena diteruskan manual. */
 export const RESET_TTL_EMAIL_MS = 60 * 60 * 1000;
@@ -39,6 +40,8 @@ export async function issuePasswordReset(db: Db, accountId: string, opts: { ttlM
 
 export function passwordResetRoutes(db: Db, opts: { webUrl: string; mailer: Mailer | null; logger: Logger }) {
   const url = (token: string) => `${opts.webUrl}/reset-sandi/${token}`;
+  const perEmail = createRateLimiter({ limit: 10, windowMs: 15 * 60 * 1000 });
+  const perIp = createRateLimiter({ limit: 30, windowMs: 15 * 60 * 1000 });
 
   return (
     new Hono<AppEnv>()
@@ -49,6 +52,9 @@ export function passwordResetRoutes(db: Db, opts: { webUrl: string; mailer: Mail
       // Pencarian dan pengiriman berjalan di belakang agar waktu respons juga tidak membedakan.
       .post("/auth/forgot-password", zv("json", forgotPasswordSchema), (c) => {
         const { email } = c.req.valid("json");
+        // Setiap permintaan dihitung (tidak ada "gagal" di sini), dan jawabannya sama untuk email yang ada maupun tidak.
+        const ip = clientIp(c);
+        if (!perEmail.allow(`${ip}|${email}`) || !perIp.allow(ip)) throw new HttpError(429, "rate_limited", "Terlalu banyak permintaan. Coba lagi dalam beberapa menit");
         const mailer = opts.mailer;
         if (mailer) {
           void (async () => {

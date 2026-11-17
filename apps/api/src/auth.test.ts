@@ -125,6 +125,28 @@ run("autentikasi, akun global, dan undangan", () => {
     expect(new Set(bodies).size).toBe(1);
   });
 
+  test("token bearer: login tanpa cookie, dipakai di header, dan dicabut saat logout", async () => {
+    const a = await register("bearer");
+    const res = await post("/auth/token", { email: a.email, password: PASS });
+    expect(res.status).toBe(200);
+    expect(res.headers.getSetCookie()).toHaveLength(0);
+    const { token, selected } = await json<{ token: string; selected: boolean }>(res);
+    expect(selected).toBe(true);
+
+    const bearer = { authorization: `Bearer ${token}` };
+    const me = await app.request("/auth/me", { headers: bearer });
+    expect(me.status).toBe(200);
+    expect(await json(me)).toMatchObject({ email: a.email, active: { role: "admin_ssb" } });
+
+    const bad = await post("/auth/token", { email: a.email, password: "salah-salah-salah" });
+    expect(bad.status).toBe(401);
+    expect((await app.request("/auth/me", { headers: { authorization: "Bearer palsu" } })).status).toBe(401);
+
+    const out = await app.request("/auth/logout", { method: "POST", headers: { ...bearer, "content-type": "application/json" }, body: "{}" });
+    expect(out.status).toBe(200);
+    expect((await app.request("/auth/me", { headers: bearer })).status).toBe(401);
+  });
+
   test("tanpa sesi: 401; sesi palsu: 401", async () => {
     expect((await get("/auth/me")).status).toBe(401);
     expect((await get("/users")).status).toBe(401);
@@ -309,6 +331,34 @@ run("autentikasi, akun global, dan undangan", () => {
     // Akun Google-only menambahkan kata sandi tanpa kata sandi lama, lalu bisa login dengan email.
     expect((await post("/auth/change-password", { newPassword: "kata-sandi-baru-123" }, again.cookie)).status).toBe(200);
     expect((await post("/auth/login", { email, password: "kata-sandi-baru-123" })).status).toBe(200);
+  });
+
+  test("Google mobile: kode sekali pakai ditukar token; tanpa cookie, tidak bisa dipakai ulang, salah atau kedaluwarsa ditolak", async () => {
+    const email = `g-mob-${uid}@uji.test`;
+    const r = await googleFlow(`intent=register&ssbName=SSB+Mobile&slug=mobile-${uid}&mobile=1`, { sub: `sub-mob-${uid}`, email });
+    expect(r.cookie).toBeUndefined();
+    expect(r.location.startsWith("ssbapp://auth?code=")).toBe(true);
+    const code = new URL(r.location).searchParams.get("code")!;
+
+    const ok = await post("/auth/mobile-exchange", { code });
+    expect(ok.status).toBe(200);
+    const body = await json<{ token: string; selected: boolean; memberships: { ssbId: string }[] }>(ok);
+    expect(body.selected).toBe(true);
+    ssbIds.push(body.memberships[0]!.ssbId);
+    const me = await app.request("/auth/me", { headers: { authorization: `Bearer ${body.token}` } });
+    expect(await json(me)).toMatchObject({ email, active: { role: "admin_ssb" } });
+
+    expect((await post("/auth/mobile-exchange", { code })).status).toBe(400);
+    expect((await post("/auth/mobile-exchange", { code: "kode-palsu-kode-palsu-kode-palsu" })).status).toBe(400);
+
+    const again = await googleFlow("intent=login&mobile=1", { sub: `sub-mob-${uid}`, email });
+    const code2 = new URL(again.location).searchParams.get("code")!;
+    const [acc] = await db.select().from(schema.account).where(eq(schema.account.email, email));
+    await db.update(schema.mobileLoginCode).set({ expiresAt: new Date(Date.now() - 1000) }).where(eq(schema.mobileLoginCode.accountId, acc!.id));
+    expect((await post("/auth/mobile-exchange", { code: code2 })).status).toBe(400);
+
+    const denied = await googleFlow("intent=login&mobile=1", { email: `g-tidak-ada-${uid}@uji.test` });
+    expect(denied.location).toContain("ssbapp://auth?error=akun_belum_terdaftar");
   });
 
   test("Google: login akun yang belum terdaftar ditolak dan tidak membuat akun", async () => {

@@ -12,6 +12,7 @@ Tabel `account` sengaja tanpa RLS karena dicari sebelum konteks tenant ada. Kean
 
 - `POST /auth/register-ssb`: akun baru + SSB + admin pertama dalam satu transaksi, lalu login.
 - `POST /auth/login`: email + kata sandi, kode SSB opsional. Satu keanggotaan langsung terpilih; bila banyak dan tanpa kode SSB, sesi belum punya SSB aktif sampai `POST /auth/select`. Semua sebab gagal menghasilkan respons yang sama dan hash tetap diverifikasi (hash tiruan bila akun tidak ada).
+- `POST /auth/token`: sama dengan login, tetapi untuk klien non-browser (aplikasi mobile): token sesi dikembalikan di body dan tidak ada cookie. Dikirim sebagai `Authorization: Bearer <token>`; bentuk sesinya identik dengan cookie.
 - `POST /auth/logout`, `GET /auth/me`, `POST /auth/select`, `POST /auth/ssb` (akun membuat SSB tambahan), `POST /auth/change-password` (mencabut sesi lain; akun yang hanya login Google boleh menambahkan kata sandi tanpa kata sandi lama).
 - `GET /users`: contoh endpoint khusus `admin_ssb`.
 

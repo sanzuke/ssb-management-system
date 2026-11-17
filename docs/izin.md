@@ -30,6 +30,7 @@ Endpoint dijaga dengan `requirePermission(<izin>)`. Pembatasan data per baris (p
 | `injury.write` | Mencatat cedera, mengubah perkiraan pulih dan catatannya, dan menandai pulih (pelatih: KU yang ditugaskan) | ya | ya | - | - |
 | `session.manage` | Menjadwalkan, mengubah, dan menghapus sesi latihan | ya | - | - | - |
 | `guardian.sessions` | Portal orang tua: jadwal KU anak sendiri beserta status kehadiran anak, tanpa daftar siswa lain (admin tidak punya anak, jadi daftarnya kosong) | ya | - | - | ya |
+| `absence.request` | Mengajukan izin atau sakit untuk latihan anak sendiri lewat aplikasi (hanya orang tua; admin tidak punya anak, jadi tidak memegang izin ini) | - | - | - | ya |
 | `session.read` | Melihat jadwal sesi latihan (pelatih dan korlas: KU yang ditugaskan) | ya | ya | ya | - |
 | `assignment.manage` | Menugaskan pelatih dan korlas ke KU per periode | ya | - | - | - |
 | `report.publish` | Menerbitkan rapor ke orang tua (wewenang korlas: menunggu keputusan) | ya | - | ya | - |

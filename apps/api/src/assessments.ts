@@ -23,6 +23,7 @@ import { requirePermission, type AppEnv, type Member } from "./auth/middleware";
 import { isUniqueViolation } from "./auth/service";
 import { visibleTo as playersVisibleTo } from "./players";
 import { activeInjuries } from "./injuries";
+import { type Notifier } from "./push";
 import { zv } from "./validator";
 import { reportHtml } from "./report/html";
 import { renderPdf, reportUnavailable } from "./report/pdf";
@@ -104,13 +105,13 @@ async function planItems(tx: Tx, playerId: string, periodId: string): Promise<De
   return rows.map((r) => ({ ...r, aspect: r.aspect as AssessmentAspect | null }));
 }
 
-export function assessmentRoutes(db: Db) {
+export function assessmentRoutes(db: Db, opts: { notifier: Notifier }) {
   const member = (c: { get: (k: "auth") => any }) => c.get("auth")!.member as Member;
 
   /** Siswa yang boleh dilihat peran ini (sama dengan daftar siswa); di luar batas dijawab 404. */
   const visiblePlayer = async (tx: Tx, m: Member, id: string) => {
     const [p] = await tx
-      .select({ id: schema.player.id, ageGroupId: schema.player.ageGroupId })
+      .select({ id: schema.player.id, ageGroupId: schema.player.ageGroupId, fullName: schema.player.fullName })
       .from(schema.player)
       .where(and(eq(schema.player.id, id), playersVisibleTo(m)))
       .limit(1);
@@ -544,11 +545,12 @@ export function assessmentRoutes(db: Db) {
     const m = member(c);
     const playerId = idOf(c.req.param("playerId"), "Siswa");
     const periodId = idOf(c.req.param("periodId"), "Periode");
-    const out = await withTenant(db, m.ssbId, async (tx) => {
-      await visiblePlayer(tx, m, playerId);
+    const { view, firstTime, playerName, periodName } = await withTenant(db, m.ssbId, async (tx) => {
+      const p = await visiblePlayer(tx, m, playerId);
       const [a] = await tx
-        .select({ id: A.id, publishedAt: A.publishedAt })
+        .select({ id: A.id, publishedAt: A.publishedAt, periodName: schema.period.name })
         .from(A)
+        .innerJoin(schema.period, and(eq(schema.period.ssbId, A.ssbId), eq(schema.period.id, A.periodId)))
         .where(and(eq(A.playerId, playerId), eq(A.periodId, periodId)))
         .limit(1);
       if (!a) throw notFound("Penilaian");
@@ -556,8 +558,17 @@ export function assessmentRoutes(db: Db) {
         .update(A)
         .set({ publishedAt: on ? (a.publishedAt ?? sql`now()`) : null })
         .where(eq(A.id, a.id));
-      return (await views(tx, eq(A.id, a.id), false))[0]!;
+      return { view: (await views(tx, eq(A.id, a.id), false))[0]!, firstTime: on && !a.publishedAt, playerName: p.fullName, periodName: a.periodName };
     });
-    return c.json(out);
+    // Hanya penerbitan pertama yang memberi tahu orang tua; menerbitkan ulang yang sudah terbit tidak mengirim lagi.
+    if (firstTime) {
+      opts.notifier.toGuardiansOfPlayers(m.ssbId, [playerId], () => ({
+        type: "report_published",
+        title: "Rapor baru tersedia",
+        body: `Rapor ${playerName} periode ${periodName} sudah terbit`,
+        route: `/siswa/${playerId}/rapor`,
+      }));
+    }
+    return c.json(view);
   }
 }

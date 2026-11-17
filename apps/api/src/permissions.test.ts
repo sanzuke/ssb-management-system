@@ -11,10 +11,11 @@ const roles = userRoleSchema.options;
 const env = { NODE_ENV: "test" as const, ALLOWED_ORIGINS: "http://localhost:3001", WEB_URL: "http://web.test", SESSION_SECRET: "x".repeat(40) };
 
 describe("matriks izin (tanpa database)", () => {
-  test("setiap izin punya paling sedikit satu role, dan admin SSB memegang semuanya", () => {
+  test("setiap izin punya paling sedikit satu role, dan admin SSB memegang semuanya kecuali ajuan izin yang khusus orang tua", () => {
     for (const p of Object.keys(permissions) as Permission[]) {
       expect(permissions[p].roles.length).toBeGreaterThan(0);
-      expect(can("admin_ssb", p)).toBe(true);
+      // Admin tidak punya anak, jadi `absence.request` sengaja hanya untuk orang tua.
+      expect(can("admin_ssb", p)).toBe(p !== "absence.request");
     }
   });
 
@@ -33,6 +34,9 @@ describe("matriks izin (tanpa database)", () => {
       "GET /auth/google/callback",
       "POST /auth/register-ssb",
       "POST /auth/login",
+      // Login untuk klien non-browser dan penukaran kode login Google mobile; keduanya dibatasi laju.
+      "POST /auth/token",
+      "POST /auth/mobile-exchange",
       "POST /auth/logout",
       "GET /auth/features",
       "POST /auth/forgot-password",
@@ -132,6 +136,7 @@ run("matriks izin per endpoint (database)", () => {
     { method: "GET", path: "/fees/settings", perm: "fee.manage" },
     { method: "GET", path: "/fees/player-overrides", perm: "fee.manage" },
     { method: "GET", path: "/fees/public-info", perm: "invoice.read" },
+    { method: "GET", path: "/guardian/absence-requests", perm: "absence.request" },
     { method: "GET", path: "/whatsapp/settings", perm: "fee.manage" },
     { method: "GET", path: "/whatsapp/trial-settings", perm: "trial.manage" },
     { method: "GET", path: "/site", perm: "site.manage" },

@@ -34,6 +34,7 @@ export const playerStatus = pgEnum("player_status", ["aktif", "cuti", "keluar"])
 export const playerPosition = pgEnum("player_position", ["GK", "DF", "MF", "FW"]);
 export const assessmentAspect = pgEnum("assessment_aspect", ["technical", "physical", "tactical", "mental", "movement", "game_intelligence"]);
 export const attendanceStatus = pgEnum("attendance_status", ["hadir", "izin", "sakit", "alpa"]);
+export const absenceKind = pgEnum("absence_kind", ["izin", "sakit"]);
 export const paymentMethod = pgEnum("payment_method", ["tunai", "transfer", "lainnya"]);
 
 /** Syarat tenant: baris hanya terlihat bila ssb_id sama dengan konteks transaksi. */
@@ -290,6 +291,8 @@ export const trainingSession = pgTable(
     sessionDate: date("session_date").notNull(),
     startTime: time("start_time"),
     locationId: uuid("location_id"),
+    /** Kapan pengingat "latihan 30 menit lagi" dikirim ke pelatih; kosong = belum. Dikosongkan lagi bila jadwal sesi diubah. */
+    reminderSentAt: timestamp("reminder_sent_at", { withTimezone: true }),
   },
   (t) => [
     unique("training_session_ssb_id").on(t.ssbId, t.id),
@@ -321,6 +324,38 @@ export const attendance = pgTable(
     foreignKey({ columns: [t.ssbId, t.recordedBy], foreignColumns: [appUser.ssbId, appUser.id], name: "attendance_recorded_by_fk" }),
     index("attendance_player_idx").on(t.ssbId, t.playerId),
     tenantPolicy("attendance"),
+  ],
+).enableRLS();
+
+/**
+ * Pengajuan izin atau sakit dari orang tua (aplikasi mobile) untuk satu sesi latihan anaknya. Hanya informasi
+ * bagi pelatih; absensi resmi tetap dicatat pelatih di `attendance`. Satu pengajuan per (sesi, siswa):
+ * mengajukan lagi memperbarui yang ada. `created_by` memakai `ON DELETE SET NULL (created_by)` yang ditulis
+ * manual di migrasi (jangan terima hasil `db:generate` yang mengembalikannya ke SET NULL seluruh kolom).
+ */
+export const absenceRequest = pgTable(
+  "absence_request",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    ssbId: ssbId(),
+    sessionId: uuid("session_id").notNull(),
+    playerId: uuid("player_id").notNull(),
+    kind: absenceKind("kind").notNull(),
+    note: text("note"),
+    createdBy: uuid("created_by"),
+    createdAt: createdAt(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    unique("absence_request_session_player").on(t.sessionId, t.playerId),
+    check("absence_request_note", sql`${t.note} is null or char_length(${t.note}) <= 200`),
+    foreignKey({ columns: [t.ssbId, t.sessionId], foreignColumns: [trainingSession.ssbId, trainingSession.id], name: "absence_request_session_fk" }).onDelete(
+      "cascade",
+    ),
+    foreignKey({ columns: [t.ssbId, t.playerId], foreignColumns: [player.ssbId, player.id], name: "absence_request_player_fk" }).onDelete("cascade"),
+    foreignKey({ columns: [t.ssbId, t.createdBy], foreignColumns: [appUser.ssbId, appUser.id], name: "absence_request_created_by_fk" }).onDelete("set null"),
+    index("absence_request_player_idx").on(t.ssbId, t.playerId),
+    tenantPolicy("absence_request"),
   ],
 ).enableRLS();
 
@@ -460,6 +495,52 @@ export const userSession = pgTable(
 );
 
 /**
+ * Perangkat penerima notifikasi push (token FCM). Milik akun, bukan SSB: satu akun bisa punya beberapa
+ * perangkat dan satu token hanya boleh terikat ke satu akun. Sengaja TANPA RLS seperti `user_session`;
+ * dicari lewat token atau akun, dan pengirim push menelusuri akun penerima dari konteks tenant lebih dulu.
+ */
+export const pushDevice = pgTable(
+  "push_device",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    accountId: uuid("account_id")
+      .notNull()
+      .references(() => account.id, { onDelete: "cascade" }),
+    token: text("token").notNull().unique(),
+    platform: text("platform").notNull(),
+    createdAt: createdAt(),
+    lastSeenAt: timestamp("last_seen_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [index("push_device_account_idx").on(t.accountId), check("push_device_platform", sql`${t.platform} in ('android', 'ios', 'web')`)],
+);
+
+/**
+ * Kode sekali pakai untuk menyelesaikan login Google di aplikasi mobile (dialihkan ke ssbapp://auth?code=...).
+ * Hanya hash kode yang disimpan. Sengaja TANPA RLS seperti `user_session`: dicari lewat hash kode sebelum
+ * konteks tenant ada. Sesi baru dibuat saat kode ditukar, jadi tidak ada token yang tersimpan di sini.
+ */
+export const mobileLoginCode = pgTable(
+  "mobile_login_code",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    codeHash: text("code_hash").notNull().unique(),
+    accountId: uuid("account_id")
+      .notNull()
+      .references(() => account.id, { onDelete: "cascade" }),
+    // SSB aktif yang akan dipakai sesi; kosong bila akun belum memilih SSB.
+    ssbId: uuid("ssb_id"),
+    userId: uuid("user_id"),
+    createdAt: createdAt(),
+    expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+    usedAt: timestamp("used_at", { withTimezone: true }),
+  },
+  (t) => [
+    foreignKey({ columns: [t.ssbId, t.userId], foreignColumns: [appUser.ssbId, appUser.id], name: "mobile_login_code_user_fk" }).onDelete("cascade"),
+    check("mobile_login_code_membership_pair", sql`(${t.ssbId} is null) = (${t.userId} is null)`),
+  ],
+);
+
+/**
  * Pengaturan SPP milik satu SSB. Satu baris per SSB; dibuat otomatis saat
  * admin pertama kali menyimpan pengaturan. Menyimpan tanggal jatuh tempo
  * bawaan, templat pesan pengingat, info rekening, dan jeda antar pengingat.
@@ -532,7 +613,7 @@ export const whatsappSetting = pgTable(
     countryCode: text("country_code").notNull().default("62"),
     /** Aktifkan pengiriman pengingat tagihan otomatis lewat Fonnte. */
     autoReminder: boolean("auto_reminder").notNull().default(false),
-    /** Kirim pesan konfirmasi ke orang tua saat anak mendaftar trial. Pengaturan saja; pengiriman otomatisnya belum dijalankan. */
+    /** Kirim pesan konfirmasi ke orang tua saat anak mendaftar trial (apps/api/src/trial-notify.ts). */
     trialReplyEnabled: boolean("trial_reply_enabled").notNull().default(false),
     /** Templat pesan konfirmasi pendaftar trial; null = templat bawaan di packages/shared. */
     trialReplyTemplate: text("trial_reply_template"),

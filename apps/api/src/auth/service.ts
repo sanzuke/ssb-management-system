@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import { and, eq, gt, isNull } from "drizzle-orm";
+import { and, eq, gt, isNull, lt } from "drizzle-orm";
 import { setCookie } from "hono/cookie";
 import type { Context } from "hono";
 import { schema, withAccount, withTenant, type Db } from "@ssb/db";
@@ -45,16 +45,52 @@ export async function ssbIdBySlug(db: Db, slug: string) {
   return d?.ssbId;
 }
 
-/** Membuat sesi untuk akun; ssbId/userId kosong bila belum ada SSB yang dipilih. */
-export async function startSession(db: Db, c: Context, accountId: string, active: { ssbId: string; userId: string } | null, secureCookie: boolean) {
+/** Menyimpan sesi baru dan mengembalikan token mentahnya (hanya hash yang masuk database). */
+export async function createSession(db: Db, accountId: string, active: { ssbId: string; userId: string } | null) {
   const token = newToken();
+  const expiresAt = new Date(Date.now() + SESSION_TTL_MS);
   await db.insert(schema.userSession).values({
     tokenHash: hashToken(token),
     accountId,
     ssbId: active?.ssbId ?? null,
     userId: active?.userId ?? null,
-    expiresAt: new Date(Date.now() + SESSION_TTL_MS),
+    expiresAt,
   });
+  return { token, expiresAt };
+}
+
+/** Kode login mobile berlaku singkat: hanya perlu untuk berpindah dari browser kembali ke aplikasi. */
+export const MOBILE_CODE_TTL_MS = 2 * 60 * 1000;
+
+/** Menyimpan kode sekali pakai (hanya hash-nya) dan mengembalikan kode mentahnya untuk dikirim lewat tautan ssbapp://. */
+export async function createMobileLoginCode(db: Db, accountId: string, active: { ssbId: string; userId: string } | null) {
+  // Kode lama (dipakai atau kedaluwarsa) dibersihkan saat membuat yang baru; tidak perlu pekerjaan terjadwal.
+  await db.delete(schema.mobileLoginCode).where(lt(schema.mobileLoginCode.expiresAt, new Date(Date.now() - 24 * 60 * 60 * 1000)));
+  const code = newToken();
+  await db.insert(schema.mobileLoginCode).values({
+    codeHash: hashToken(code),
+    accountId,
+    ssbId: active?.ssbId ?? null,
+    userId: active?.userId ?? null,
+    expiresAt: new Date(Date.now() + MOBILE_CODE_TTL_MS),
+  });
+  return code;
+}
+
+/** Menukar kode: update bersyarat membuat pemakaian atomik, jadi hanya satu penukar yang berhasil. */
+export async function consumeMobileLoginCode(db: Db, code: string) {
+  const [row] = await db
+    .update(schema.mobileLoginCode)
+    .set({ usedAt: new Date() })
+    .where(and(eq(schema.mobileLoginCode.codeHash, hashToken(code)), isNull(schema.mobileLoginCode.usedAt), gt(schema.mobileLoginCode.expiresAt, new Date())))
+    .returning();
+  if (!row) return null;
+  return { accountId: row.accountId, active: row.ssbId && row.userId ? { ssbId: row.ssbId, userId: row.userId } : null };
+}
+
+/** Membuat sesi untuk akun; ssbId/userId kosong bila belum ada SSB yang dipilih. */
+export async function startSession(db: Db, c: Context, accountId: string, active: { ssbId: string; userId: string } | null, secureCookie: boolean) {
+  const { token } = await createSession(db, accountId, active);
   setCookie(c, SESSION_COOKIE, token, {
     httpOnly: true,
     sameSite: "Lax",

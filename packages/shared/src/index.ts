@@ -79,6 +79,10 @@ export const permissions = {
     roles: ["admin_ssb", "orang_tua"],
     desc: "Portal orang tua: jadwal KU anak sendiri beserta status kehadiran anak, tanpa daftar siswa lain (admin tidak punya anak, jadi daftarnya kosong)",
   },
+  "absence.request": {
+    roles: ["orang_tua"],
+    desc: "Mengajukan izin atau sakit untuk latihan anak sendiri lewat aplikasi (hanya orang tua; admin tidak punya anak, jadi tidak memegang izin ini)",
+  },
   "session.read": { roles: ["admin_ssb", "pelatih", "korlas"], desc: "Melihat jadwal sesi latihan (pelatih dan korlas: KU yang ditugaskan)" },
   "assignment.manage": { roles: ["admin_ssb"], desc: "Menugaskan pelatih dan korlas ke KU per periode" },
   "report.publish": { roles: ["admin_ssb", "korlas"], desc: "Menerbitkan rapor ke orang tua (wewenang korlas: menunggu keputusan)" },
@@ -459,6 +463,55 @@ export const attendanceInputSchema = z.object({
     .min(1, "minimal satu siswa")
     .max(200, "maksimal 200 siswa per permintaan"),
 });
+
+/** Pengajuan izin atau sakit dari orang tua lewat aplikasi mobile; catatan kosong dianggap tidak ada. */
+export const absenceKindSchema = z.enum(["izin", "sakit"]);
+export type AbsenceKind = z.infer<typeof absenceKindSchema>;
+export const absenceRequestInputSchema = z.object({
+  sessionId: uuidStr,
+  playerId: uuidStr,
+  kind: absenceKindSchema,
+  note: z
+    .string()
+    .trim()
+    .max(200, "maksimal 200 karakter")
+    .transform((v) => v || undefined)
+    .optional(),
+});
+export type AbsenceRequestInput = z.infer<typeof absenceRequestInputSchema>;
+
+/** Pengajuan milik anak sendiri (portal orang tua). */
+export type GuardianAbsenceRequest = {
+  id: string;
+  sessionId: string;
+  sessionDate: string;
+  startTime: string | null;
+  ageGroup: { id: string; name: string };
+  playerId: string;
+  playerName: string;
+  kind: AbsenceKind;
+  note: string | null;
+  createdAt: string;
+};
+/** Pengajuan pada satu sesi (dilihat pelatih saat absensi). */
+export type SessionAbsenceRequest = {
+  id: string;
+  playerId: string;
+  playerName: string;
+  kind: AbsenceKind;
+  note: string | null;
+  createdAt: string;
+};
+
+/** Perangkat untuk notifikasi push (token FCM). */
+export const pushDeviceSchema = z.object({
+  token: z.string().trim().min(10).max(4096),
+  platform: z.enum(["android", "ios", "web"]),
+});
+export const pushDeviceRemoveSchema = z.object({ token: z.string().trim().min(10).max(4096) });
+
+/** Penukaran kode sekali pakai dari login Google di aplikasi mobile. */
+export const mobileExchangeSchema = z.object({ code: z.string().trim().min(10).max(200) });
 
 export type TrainingSession = {
   id: string;

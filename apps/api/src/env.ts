@@ -35,6 +35,8 @@ const envSchema = z
     MAILBOX_SOCKET: z.string().optional(),
     /** Domain email akademi yang dikelola, mis. familyunitedfa.com. Wajib bila MAILBOX_SOCKET diisi. */
     MAILBOX_DOMAIN: z.string().optional(),
+    /** Akun layanan Firebase untuk notifikasi push (FCM HTTP v1): isi JSON-nya, atau jalur ke berkas JSON. Kosong = push tidak aktif. Lihat docs/push.md. */
+    FCM_SERVICE_ACCOUNT: z.string().optional(),
   })
   .superRefine((v, ctx) => {
     const g = [v.GOOGLE_CLIENT_ID, v.GOOGLE_CLIENT_SECRET].filter(Boolean).length;

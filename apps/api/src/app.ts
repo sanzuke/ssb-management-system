@@ -33,8 +33,14 @@ import { marketValueRoutes } from "./market-value";
 import { positionWeightRoutes } from "./position-weights";
 import type { Env } from "./env";
 import { createLogger, requestLogger, type Logger } from "./logger";
+import { absenceRequestRoutes } from "./absence-requests";
+import { createNotifier, pushRoutes, type Pusher } from "./push";
 
 export type AppDeps = { google?: GoogleProvider | null; logger?: Logger; mailer?: Mailer | null; mailboxes?: MailboxAdmin | null };
+  /** Pengirim push (FCM). null/kosong = push tidak aktif; tes memasang pengirim tiruan. */
+  pusher?: Pusher | null;
+  /** Hanya untuk tes: menerima janji pengiriman push yang berjalan di latar belakang. */
+  onLatar?: (selesai: Promise<void>) => void;
 
 export function createApp(
   db: Db,
@@ -71,6 +77,8 @@ export function createApp(
 
   const app = new Hono<AppEnv>();
   const logger = deps.logger ?? createLogger({ silent: env.NODE_ENV === "test" });
+  // Push dikirim di latar belakang oleh pemicu di sesi, rapor, tagihan, dan pengajuan izin; tanpa pengirim semuanya dilewati.
+  const notifier = createNotifier({ db, pusher: deps.pusher ?? null, logger, track: deps.onLatar });
   app.use(requestLogger(logger));
   app.onError(onError);
   app.notFound((c) => c.json(errorBody("not_found", "Tidak ditemukan"), 404));
@@ -92,8 +100,10 @@ export function createApp(
       .route("/", masterRoutes(db))
       .route("/", playerRoutes(db, { uploadDir: env.UPLOAD_DIR ?? "./uploads" }))
       .route("/", documentRoutes(db, { uploadDir: env.UPLOAD_DIR ?? "./uploads" }))
-      .route("/", sessionRoutes(db))
-      .route("/", feeRoutes(db, { secret: env.TOKEN_SECRET ?? env.SESSION_SECRET ?? "" }))
+      .route("/", sessionRoutes(db, { notifier }))
+      .route("/", absenceRequestRoutes(db, { notifier }))
+      .route("/", pushRoutes(db))
+      .route("/", feeRoutes(db, { secret: env.TOKEN_SECRET ?? env.SESSION_SECRET ?? "", notifier }))
       .route("/", feeSettingRoutes(db))
       .route("/", whatsappSettingRoutes(db, { secret: env.TOKEN_SECRET ?? env.SESSION_SECRET ?? "" }))
       .route("/", siteRoutes(db, { webUrl }))
@@ -126,7 +136,7 @@ export function createApp(
         }),
       )
       .route("/", memberRoutes(db))
-      .route("/", assessmentRoutes(db))
+      .route("/", assessmentRoutes(db, { notifier }))
       .route("/", badgeRoutes(db))
       .route("/", injuryRoutes(db))
       .route("/", positionWeightRoutes(db))

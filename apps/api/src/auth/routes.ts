@@ -1,17 +1,73 @@
 import { and, eq, ne } from "drizzle-orm";
 import { Hono } from "hono";
-import { deleteCookie, getCookie } from "hono/cookie";
+import { deleteCookie } from "hono/cookie";
 import { zv } from "../validator";
 import { schema, withTenant, type Db } from "@ssb/db";
-import { changePasswordSchema, loginSchema, registerSsbSchema, selectSsbSchema, ssbInputSchema, updateProfileSchema, type Me } from "@ssb/shared";
+import {
+  changePasswordSchema,
+  loginSchema,
+  mobileExchangeSchema,
+  registerSsbSchema,
+  selectSsbSchema,
+  ssbInputSchema,
+  updateProfileSchema,
+  type Me,
+  type Membership,
+} from "@ssb/shared";
+import type { Context } from "hono";
 import { HttpError } from "../errors";
+import { clientIp, createRateLimiter } from "../rate-limit";
 import { requireAccount, type AppEnv } from "./middleware";
 import { dummyHash, hashPassword, verifyPassword } from "./password";
-import { SESSION_COOKIE, hashToken } from "./session";
-import { createSsb, isUniqueViolation, listMemberships, pickActive, setActive, ssbIdBySlug, startSession } from "./service";
+import { SESSION_COOKIE, hashToken, readSessionToken } from "./session";
+import {
+  consumeMobileLoginCode,
+  createSession,
+  createSsb,
+  isUniqueViolation,
+  listMemberships,
+  pickActive,
+  setActive,
+  ssbIdBySlug,
+  startSession,
+} from "./service";
+
+/** Batas percobaan login gagal: per pasangan alamat+email, dan per alamat saja untuk menebak banyak email. Hanya kegagalan yang dihitung. */
+const LOGIN_WINDOW_MS = 15 * 60 * 1000;
+const LOGIN_FAILS_PER_EMAIL = 10;
+const LOGIN_FAILS_PER_IP = 100;
+const EXCHANGE_FAILS_PER_IP = 20;
+const tooManyAttempts = () => new HttpError(429, "rate_limited", "Terlalu banyak percobaan. Coba lagi dalam beberapa menit");
 
 export function authRoutes(db: Db, opts: { secureCookie: boolean }) {
-  const invalidLogin = () => new HttpError(401, "invalid_credentials", "Email atau kata sandi salah");
+  const emailFails = createRateLimiter({ limit: LOGIN_FAILS_PER_EMAIL, windowMs: LOGIN_WINDOW_MS });
+  const ipFails = createRateLimiter({ limit: LOGIN_FAILS_PER_IP, windowMs: LOGIN_WINDOW_MS });
+  const exchangeFails = createRateLimiter({ limit: EXCHANGE_FAILS_PER_IP, windowMs: LOGIN_WINDOW_MS });
+
+  async function verifyLogin(c: Context, { email, password, slug }: { email: string; password: string; slug?: string | undefined }) {
+    const ip = clientIp(c);
+    const emailKey = `${ip}|${email}`;
+    // Dicek sebelum hash diverifikasi supaya penebak tidak lagi membebani server setelah kena batas.
+    if (!emailFails.open(emailKey) || !ipFails.open(ip)) throw tooManyAttempts();
+    const [acc] = await db.select().from(schema.account).where(eq(schema.account.email, email)).limit(1);
+    // Selalu verifikasi hash, termasuk hash tiruan, agar waktu respons tidak membocorkan akun mana yang ada.
+    const ok = await verifyPassword(password, acc?.passwordHash ?? (await dummyHash()));
+    if (!acc?.passwordHash || !ok) {
+      emailFails.fail(emailKey);
+      ipFails.fail(ip);
+      throw new HttpError(401, "invalid_credentials", "Email atau kata sandi salah");
+    }
+    emailFails.reset(emailKey);
+    const memberships = await listMemberships(db, acc.id);
+    const slugSsbId = slug ? await ssbIdBySlug(db, slug) : undefined;
+    return { acc, memberships, active: pickActive(memberships, slugSsbId) };
+  }
+
+  /** Isi respons login untuk klien non-browser: token di body, tanpa cookie. */
+  async function tokenBody(accountId: string, memberships: Membership[], active: { ssbId: string; userId: string } | null) {
+    const { token, expiresAt } = await createSession(db, accountId, active);
+    return { token, expiresAt: expiresAt.toISOString(), selected: active !== null, memberships };
+  }
 
   return (
     new Hono<AppEnv>()
@@ -33,20 +89,36 @@ export function authRoutes(db: Db, opts: { secureCookie: boolean }) {
       })
 
       .post("/login", zv("json", loginSchema), async (c) => {
-        const { email, password, slug } = c.req.valid("json");
-        const [acc] = await db.select().from(schema.account).where(eq(schema.account.email, email)).limit(1);
-        // Selalu verifikasi hash, termasuk hash tiruan, agar waktu respons tidak membocorkan akun mana yang ada.
-        const ok = await verifyPassword(password, acc?.passwordHash ?? (await dummyHash()));
-        if (!acc?.passwordHash || !ok) throw invalidLogin();
-        const memberships = await listMemberships(db, acc.id);
-        const slugSsbId = slug ? await ssbIdBySlug(db, slug) : undefined;
-        const active = pickActive(memberships, slugSsbId);
+        const { acc, memberships, active } = await verifyLogin(c, c.req.valid("json"));
         await startSession(db, c, acc.id, active, opts.secureCookie);
         return c.json({ ok: true, selected: active !== null, memberships });
       })
 
+      // Login untuk klien non-browser: token dikembalikan di body dan tidak ada cookie yang diset.
+      .post("/token", zv("json", loginSchema), async (c) => {
+        const { acc, memberships, active } = await verifyLogin(c, c.req.valid("json"));
+        return c.json(await tokenBody(acc.id, memberships, active));
+      })
+
+      // Menukar kode sekali pakai dari login Google di aplikasi mobile (ssbapp://auth?code=...) dengan token sesi.
+      // Kode salah, sudah dipakai, atau kedaluwarsa dijawab sama, dan percobaan gagal dibatasi per alamat klien.
+      .post("/mobile-exchange", zv("json", mobileExchangeSchema), async (c) => {
+        const ip = clientIp(c);
+        if (!exchangeFails.open(ip)) throw tooManyAttempts();
+        const claimed = await consumeMobileLoginCode(db, c.req.valid("json").code);
+        if (!claimed) {
+          exchangeFails.fail(ip);
+          throw new HttpError(400, "invalid_code", "Kode login tidak berlaku atau sudah dipakai. Ulangi masuk dengan Google");
+        }
+        const memberships = await listMemberships(db, claimed.accountId);
+        // Keanggotaan bisa saja dicabut dalam dua menit masa berlaku kode; pilih ulang bila sudah tidak ada.
+        const stored = claimed.active && memberships.some((m) => m.ssbId === claimed.active!.ssbId && m.userId === claimed.active!.userId) ? claimed.active : null;
+        return c.json(await tokenBody(claimed.accountId, memberships, stored ?? pickActive(memberships)));
+      })
+
+      // Aplikasi mobile memakai token bearer yang sama dengan isi cookie sesi; logout mencabut sesi itu.
       .post("/logout", async (c) => {
-        const token = getCookie(c, SESSION_COOKIE);
+        const token = readSessionToken(c);
         if (token) await db.delete(schema.userSession).where(eq(schema.userSession.tokenHash, hashToken(token)));
         deleteCookie(c, SESSION_COOKIE, { path: "/" });
         return c.json({ ok: true });

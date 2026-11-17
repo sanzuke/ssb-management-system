@@ -1,11 +1,10 @@
 import type { Logger } from "../logger";
 import { and, eq, gt } from "drizzle-orm";
-import { getCookie } from "hono/cookie";
 import { createMiddleware } from "hono/factory";
 import { schema, withTenant, type Db } from "@ssb/db";
 import { can, type Permission, type UserRole } from "@ssb/shared";
 import { forbidden, HttpError, unauthorized } from "../errors";
-import { SESSION_COOKIE, hashToken } from "./session";
+import { hashToken, readSessionToken } from "./session";
 
 export type Member = { ssbId: string; userId: string; role: UserRole; name: string };
 export type Auth = {
@@ -22,7 +21,7 @@ export type AppEnv = { Variables: { auth?: Auth; reqId?: string; logger?: Logger
 /** Membaca cookie sesi dan mengisi c.var.auth bila sesi masih berlaku. Tidak menolak permintaan. */
 export const loadAuth = (db: Db) =>
   createMiddleware<AppEnv>(async (c, next) => {
-    const token = getCookie(c, SESSION_COOKIE);
+    const token = readSessionToken(c);
     if (token) {
       const sessionHash = hashToken(token);
       const [s] = await db

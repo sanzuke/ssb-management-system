@@ -169,3 +169,10 @@ API: `GET /players/:id/documents` (izin `document.read`), `POST /players/:id/doc
 ## Kategori merchandise (migrasi 0036)
 
 `merchandise_product.category` (teks, bawaan `lainnya`): kode kategori produk dari `merchandiseCategories` di `packages/shared` (`jersey`, `aksesori`, `lainnya`). Sengaja tanpa CHECK di database supaya daftar kategori bisa ditambah tanpa migrasi; yang menjaga isinya adalah validasi `merchandiseCategorySchema` di API (kode tidak dikenal ditolak 400) dan pembacaan memperlakukan kode asing sebagai `lainnya`. Produk lama otomatis `lainnya`. `GET /public/merchandise/products` hanya mengembalikan `id`, `name`, `description`, `price`, `stock`, `category`, dan `imageFileKey`: harga modal (`hpp`), status, dan waktu ubah tidak keluar lewat rute tanpa login (dijaga tes `merchandise-public.test.ts`). Penyaringan per kategori dikerjakan di sisi klien, di halaman Merchandise admin (tab dengan jumlah) dan di landing (hanya kategori yang punya produk).
+
+## Pengajuan izin, perangkat push, dan kode login mobile (migrasi 0037)
+
+- `absence_request`: izin atau sakit yang diajukan orang tua untuk satu siswa pada satu sesi (unik per sesi dan siswa; mengajukan lagi memperbarui). Tabel tenant dengan RLS seperti tabel lain. Dibaca pelatih lewat `GET /sessions/:id/absence-requests`; tidak otomatis mengubah absensi, pelatih memutuskan.
+- `push_device`: token FCM per akun (unik per token, maksimal 10 perangkat per akun). Sengaja tanpa RLS seperti `user_session` karena terikat akun, bukan SSB; token yang pindah ke akun lain ikut berpindah pemilik.
+- `mobile_login_code`: kode sekali pakai (hanya hash) untuk menukar login Google di aplikasi mobile menjadi token; berlaku 2 menit.
+- `training_session.reminder_sent_at`: penanda pengingat "latihan 30 menit lagi" sudah terkirim, agar tidak terkirim dua kali.

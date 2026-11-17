@@ -15,6 +15,10 @@ import { requirePermission, type AppEnv, type Member } from "./auth/middleware";
 import { zv } from "./validator";
 import { visibleTo as playersVisibleTo } from "./players";
 import { activeInjuries } from "./injuries";
+import { tanggalId, type Notifier } from "./push";
+
+/** "Jum, 20 Nov jam 16:00" untuk isi notifikasi. */
+const waktuSesi = (s: { sessionDate: string; startTime: string | null }) => `${tanggalId(s.sessionDate)}${s.startTime ? ` jam ${s.startTime}` : ""}`;
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const ISO = /^\d{4}-\d{2}-\d{2}$/;
@@ -24,7 +28,7 @@ const isFk = (e: unknown) => (e as { code?: string })?.code === "23503" || (e as
 const ts = schema.trainingSession;
 
 /** Admin melihat semua sesi; pelatih dan korlas hanya KU yang ditugaskan pada periode yang mencakup tanggal sesi. */
-function visibleTo(m: Member): SQL | undefined {
+export function visibleTo(m: Member): SQL | undefined {
   if (m.role === "admin_ssb") return undefined;
   if (m.role === "pelatih" || m.role === "korlas") {
     return sql`exists (
@@ -107,7 +111,7 @@ async function periodFor(tx: Tx, date: string) {
   return p?.id ?? null;
 }
 
-export function sessionRoutes(db: Db) {
+export function sessionRoutes(db: Db, opts: { notifier: Notifier }) {
   const member = (c: { get: (k: "auth") => any }) => c.get("auth")!.member as Member;
   const sessionId = (raw: string) => {
     if (!UUID.test(raw)) throw notFound();
@@ -201,6 +205,18 @@ export function sessionRoutes(db: Db) {
             }
             return query(tx, inArray(ts.id, ids));
           });
+          const first = created[0];
+          if (first) {
+            opts.notifier.toGuardiansOfAgeGroup(m.ssbId, first.ageGroup.id, {
+              type: "session_changed",
+              title: created.length > 1 ? "Jadwal latihan baru" : "Latihan baru dijadwalkan",
+              body:
+                created.length > 1
+                  ? `${first.ageGroup.name}: ${created.length} sesi, mulai ${waktuSesi(first)}`
+                  : `${first.ageGroup.name}: ${waktuSesi(first)}${first.location ? ` di ${first.location.name}` : ""}`,
+              route: "/?tab=jadwal",
+            });
+          }
           return c.json(created, 201);
         } catch (e) {
           if (isFk(e)) throw new HttpError(422, "reference_invalid", "KU atau lokasi tidak ditemukan di SSB ini");
@@ -220,6 +236,13 @@ export function sessionRoutes(db: Db) {
               const [a] = await tx.select({ n: sql<number>`count(*)::int` }).from(schema.attendance).where(eq(schema.attendance.sessionId, id));
               if ((a?.n ?? 0) > 0) throw new HttpError(409, "has_attendance", "Sesi ini sudah punya absensi, jadi KU-nya tidak bisa diganti");
             }
+            const timeChanged = cur.sessionDate !== b.sessionDate || (cur.startTime ?? "").slice(0, 5) !== (b.startTime ?? "");
+            const changed = timeChanged || cur.ageGroupId !== b.ageGroupId || cur.locationId !== (b.locationId ?? null);
+            // KU lama dicatat sebelum diubah supaya orang tuanya tahu sesi itu tidak lagi untuk KU mereka.
+            const [oldKu] =
+              cur.ageGroupId !== b.ageGroupId
+                ? await tx.select({ name: schema.ageGroup.name }).from(schema.ageGroup).where(eq(schema.ageGroup.id, cur.ageGroupId)).limit(1)
+                : [];
             await tx
               .update(ts)
               .set({
@@ -228,12 +251,34 @@ export function sessionRoutes(db: Db) {
                 startTime: b.startTime ?? null,
                 locationId: b.locationId ?? null,
                 periodId: await periodFor(tx, b.sessionDate),
+                // Jadwal berubah: pengingat "30 menit lagi" untuk pelatih boleh dikirim lagi.
+                ...(timeChanged ? { reminderSentAt: null } : {}),
               })
               .where(eq(ts.id, id));
-            return (await query(tx, eq(ts.id, id)))[0]!;
+            return {
+              view: (await query(tx, eq(ts.id, id)))[0]!,
+              changed,
+              moved: oldKu ? { ageGroupId: cur.ageGroupId, name: oldKu.name, sessionDate: cur.sessionDate } : null,
+            };
           });
           if (!out) throw notFound();
-          return c.json(out);
+          if (out.changed) {
+            opts.notifier.toGuardiansOfAgeGroup(m.ssbId, out.view.ageGroup.id, {
+              type: "session_changed",
+              title: "Jadwal latihan berubah",
+              body: `${out.view.ageGroup.name}: ${waktuSesi(out.view)}${out.view.location ? ` di ${out.view.location.name}` : ""}`,
+              route: "/?tab=jadwal",
+            });
+            if (out.moved) {
+              opts.notifier.toGuardiansOfAgeGroup(m.ssbId, out.moved.ageGroupId, {
+                type: "session_changed",
+                title: "Jadwal latihan berubah",
+                body: `${out.moved.name}: sesi ${tanggalId(out.moved.sessionDate)} tidak lagi untuk KU ini`,
+                route: "/?tab=jadwal",
+              });
+            }
+          }
+          return c.json(out.view);
         } catch (e) {
           if (isFk(e)) throw new HttpError(422, "reference_invalid", "KU atau lokasi tidak ditemukan di SSB ini");
           throw e;
@@ -243,11 +288,19 @@ export function sessionRoutes(db: Db) {
       .delete("/sessions/:id", requirePermission("session.manage"), async (c) => {
         const m = member(c);
         const id = sessionId(c.req.param("id"));
-        await withTenant(db, m.ssbId, async (tx) => {
+        const gone = await withTenant(db, m.ssbId, async (tx) => {
           const [a] = await tx.select({ n: sql<number>`count(*)::int` }).from(schema.attendance).where(eq(schema.attendance.sessionId, id));
           if ((a?.n ?? 0) > 0) throw new HttpError(409, "has_attendance", "Sesi ini sudah punya absensi dan tidak bisa dihapus");
+          const [info] = await query(tx, eq(ts.id, id));
           const rows = await tx.delete(ts).where(eq(ts.id, id)).returning({ id: ts.id });
-          if (rows.length === 0) throw notFound();
+          if (rows.length === 0 || !info) throw notFound();
+          return info;
+        });
+        opts.notifier.toGuardiansOfAgeGroup(m.ssbId, gone.ageGroup.id, {
+          type: "session_changed",
+          title: "Latihan dibatalkan",
+          body: `${gone.ageGroup.name}: ${waktuSesi(gone)} dibatalkan`,
+          route: "/?tab=jadwal",
         });
         return c.body(null, 204);
       })

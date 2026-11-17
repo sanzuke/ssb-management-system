@@ -17,6 +17,7 @@ import {
   type WaSendResult,
 } from "@ssb/shared";
 import { requirePermission, type AppEnv } from "./auth/middleware";
+import { bulanTahun, rupiah, tanggalId, type Notifier } from "./push";
 import { HttpError } from "./errors";
 import { bacaPengaturan } from "./fee-settings";
 import { kirimFonnte, keFonnte } from "./fonnte";
@@ -41,9 +42,18 @@ export function invoiceStatus(amount: number, paid: number, voided: boolean): In
   return paid > 0 ? "sebagian" : "belum";
 }
 
-export function feeRoutes(db: Db, opts: { secret: string }) {
+export function feeRoutes(db: Db, opts: { secret: string; notifier: Notifier }) {
   const I = schema.invoice;
   const P = schema.payment;
+
+  /** Memberi tahu wali bahwa tagihan masih menunggu pembayaran; satu tagihan, satu notifikasi per akun wali. */
+  const pushPengingat = (ssbId: string, t: InvoiceRow) =>
+    opts.notifier.toGuardiansOfPlayers(ssbId, [t.player.id], (anak) => ({
+      type: "invoice_reminder",
+      title: "Pengingat SPP",
+      body: `SPP ${bulanTahun(t.month)} ${anak.join(", ")}: sisa ${rupiah(t.remaining)}, jatuh tempo ${tanggalId(t.dueOn)}`,
+      route: "/?tab=tagihan",
+    }));
 
   /** Tagihan beserta jumlah terbayar dan riwayat pembayarannya, dengan batas data per role. */
   async function loadInvoices(
@@ -172,7 +182,7 @@ export function feeRoutes(db: Db, opts: { secret: string }) {
         const pengaturan = await bacaPengaturan(db, m.ssbId);
         const bulan = `${month}-01`;
         const jatuhTempo = `${month}-${String(dueDay ?? pengaturan.dueDay).padStart(2, "0")}`;
-        const out = await withTenant(db, m.ssbId, async (tx): Promise<GenerateInvoicesResult> => {
+        const out = await withTenant(db, m.ssbId, async (tx) => {
           const aktif = await tx
             .select({
               id: schema.player.id,
@@ -189,18 +199,26 @@ export function feeRoutes(db: Db, opts: { secret: string }) {
           // Tarif khusus menggantikan tarif KU, termasuk 0 yang berarti tidak ditagih.
           const tarif = aktif.map((p) => ({ id: p.id, fee: p.khusus ?? p.fee }));
           const bertarif = tarif.filter((p): p is { id: string; fee: number } => p.fee !== null && p.fee > 0);
-          let created = 0;
+          const createdFor: string[] = [];
           for (const p of bertarif) {
             const ins = await tx
               .insert(I)
               .values({ ssbId: m.ssbId, playerId: p.id, month: bulan, amount: p.fee, dueOn: jatuhTempo, createdBy: m.userId })
               .onConflictDoNothing({ target: [I.ssbId, I.playerId, I.month], where: sql`${I.voidedAt} is null` })
               .returning({ id: I.id });
-            created += ins.length;
+            if (ins.length > 0) createdFor.push(p.id);
           }
-          return { created, existing: bertarif.length - created, withoutRate: tarif.length - bertarif.length };
+          const result: GenerateInvoicesResult = { created: createdFor.length, existing: bertarif.length - createdFor.length, withoutRate: tarif.length - bertarif.length };
+          return { result, createdFor };
         });
-        return c.json(out, 201);
+        // Orang tua diberi tahu satu kali per akun, walau punya lebih dari satu anak yang ditagih.
+        opts.notifier.toGuardiansOfPlayers(m.ssbId, out.createdFor, (anak) => ({
+          type: "invoice_generated",
+          title: "Tagihan SPP baru",
+          body: `SPP ${bulanTahun(bulan)} ${anak.join(", ")} sudah terbit, jatuh tempo ${tanggalId(jatuhTempo)}`,
+          route: "/?tab=tagihan",
+        }));
+        return c.json(out.result, 201);
       })
 
       // Daftar tagihan. Admin melihat semua (bisa disaring bulan dan siswa); orang tua hanya tagihan anaknya.
@@ -281,6 +299,8 @@ export function feeRoutes(db: Db, opts: { secret: string }) {
         });
         if (res === "none") throw notFound("Tagihan");
         if (res === "void" || res === "lunas") throw new HttpError(409, "not_payable", "Tagihan ini sudah lunas atau dibatalkan, tidak perlu diingatkan");
+        const tagihan = (await loadInvoices(m.ssbId, m, { id }))[0];
+        if (tagihan) pushPengingat(m.ssbId, tagihan);
         return c.json({ lastRemindedAt: res.at!.toISOString(), reminderCount: res.n });
       })
 
@@ -345,6 +365,7 @@ export function feeRoutes(db: Db, opts: { secret: string }) {
               .where(eq(I.id, id));
           });
         }
+        if (sukses > 0) pushPengingat(m.ssbId, tagihan);
         return c.json({
           terkirim: sukses,
           gagal: hasil.length - sukses,
@@ -396,7 +417,14 @@ export function feeRoutes(db: Db, opts: { secret: string }) {
         if (res === "none") throw notFound("Tagihan");
         if (res === "void") throw new HttpError(409, "invoice_void", "Tagihan ini sudah dibatalkan");
         if (typeof res === "object") throw new HttpError(409, "overpaid", `Pembayaran melebihi sisa tagihan (sisa Rp ${res.over.toLocaleString("id-ID")})`);
-        return c.json((await loadInvoices(m.ssbId, m, { id }))[0], 201);
+        const tagihan = (await loadInvoices(m.ssbId, m, { id }))[0]!;
+        opts.notifier.toGuardiansOfPlayers(m.ssbId, [tagihan.player.id], (anak) => ({
+          type: "payment_recorded",
+          title: "Pembayaran SPP diterima",
+          body: `${rupiah(b.amount)} untuk SPP ${bulanTahun(tagihan.month)} ${anak.join(", ")}${tagihan.remaining > 0 ? `, sisa ${rupiah(tagihan.remaining)}` : ", lunas"}`,
+          route: "/?tab=tagihan",
+        }));
+        return c.json(tagihan, 201);
       })
 
       // Koreksi: hapus satu catatan pembayaran.
