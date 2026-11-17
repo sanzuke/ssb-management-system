@@ -36,11 +36,16 @@ import { createLogger, requestLogger, type Logger } from "./logger";
 import { absenceRequestRoutes } from "./absence-requests";
 import { createNotifier, pushRoutes, type Pusher } from "./push";
 
-export type AppDeps = { google?: GoogleProvider | null; logger?: Logger; mailer?: Mailer | null; mailboxes?: MailboxAdmin | null };
+export type AppDeps = {
+  google?: GoogleProvider | null;
+  logger?: Logger;
+  mailer?: Mailer | null;
+  mailboxes?: MailboxAdmin | null;
   /** Pengirim push (FCM). null/kosong = push tidak aktif; tes memasang pengirim tiruan. */
   pusher?: Pusher | null;
   /** Hanya untuk tes: menerima janji pengiriman push yang berjalan di latar belakang. */
   onLatar?: (selesai: Promise<void>) => void;
+};
 
 export function createApp(
   db: Db,
