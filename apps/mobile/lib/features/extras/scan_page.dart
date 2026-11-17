@@ -11,6 +11,7 @@ import '../../core/outbox.dart';
 import '../../core/repo_extras.dart';
 import '../../core/repository.dart';
 import '../../core/session.dart';
+import '../../core/theme.dart';
 import '../../core/widgets.dart';
 import 'attendance_logic.dart';
 
@@ -287,9 +288,9 @@ class _ResultTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final (icon, color) = switch (r.outcome) {
-      _Outcome.ok => (Icons.check_circle, const Color(0xFF2E7D32)),
-      _Outcome.already => (Icons.info_outline, const Color(0xFF1565C0)),
-      _Outcome.error => (Icons.error_outline, const Color(0xFFC62828)),
+      _Outcome.ok => (Icons.check_circle, Brand.hadir),
+      _Outcome.already => (Icons.info_outline, Brand.izin),
+      _Outcome.error => (Icons.error_outline, Brand.alpa),
     };
     return Card(
       child: ListTile(

@@ -4,6 +4,7 @@ import '../../core/format.dart';
 import '../../core/models.dart';
 import '../../core/models_extras.dart';
 import '../../core/repo_extras.dart';
+import '../../core/theme.dart';
 import '../../core/widgets.dart';
 
 /// Rincian satu tagihan SPP: jumlah, sisa, riwayat pembayaran, dan cara membayar.
@@ -55,11 +56,11 @@ class _Body extends StatelessWidget {
   (String, Color) _status(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     return switch (invoice.status) {
-      'lunas' => ('Lunas', const Color(0xFF2E7D32)),
+      'lunas' => ('Lunas', Brand.hadir),
       'dibatalkan' => ('Dibatalkan', scheme.outline),
-      _ when invoice.overdue => ('Menunggak', const Color(0xFFC62828)),
-      'sebagian' => ('Sebagian', const Color(0xFFEF6C00)),
-      _ => ('Belum bayar', const Color(0xFFEF6C00)),
+      _ when invoice.overdue => ('Menunggak', Brand.alpa),
+      'sebagian' => ('Sebagian', Brand.sakit),
+      _ => ('Belum bayar', Brand.sakit),
     };
   }
 

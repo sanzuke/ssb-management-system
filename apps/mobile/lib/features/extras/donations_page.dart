@@ -6,6 +6,7 @@ import 'package:intl/intl.dart';
 import '../../core/format.dart';
 import '../../core/models_extras.dart';
 import '../../core/repo_extras.dart';
+import '../../core/theme.dart';
 import '../../core/widgets.dart';
 
 String _longDate(String iso) => DateFormat('d MMMM yyyy', 'id_ID').format(parseDate(iso));
@@ -14,9 +15,9 @@ String _longDate(String iso) => DateFormat('d MMMM yyyy', 'id_ID').format(parseD
 String _createdDate(String iso) => DateFormat('d MMMM yyyy', 'id_ID').format(DateTime.parse(iso).toLocal());
 
 Color _statusColor(BuildContext context, String status) => switch (status) {
-      'aktif' || 'diterima' => const Color(0xFF2E7D32),
-      'menunggu' => const Color(0xFFEF6C00),
-      'ditolak' => const Color(0xFFC62828),
+      'aktif' || 'diterima' => Brand.hadir,
+      'menunggu' => Brand.sakit,
+      'ditolak' => Brand.alpa,
       _ => Theme.of(context).colorScheme.outline,
     };
 

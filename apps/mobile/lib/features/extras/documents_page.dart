@@ -9,6 +9,7 @@ import '../../core/dialogs.dart';
 import '../../core/format.dart';
 import '../../core/models_extras.dart';
 import '../../core/repo_extras.dart';
+import '../../core/theme.dart';
 import '../../core/widgets.dart';
 
 /// Berkas siswa untuk orang tua: kartu keluarga, akta kelahiran, NISN, dan raport
@@ -260,7 +261,7 @@ class _DocCard extends StatelessWidget {
           children: [
             Row(
               children: [
-                Icon(d == null ? Icons.radio_button_unchecked : Icons.check_circle, color: d == null ? scheme.outline : const Color(0xFF2E7D32), size: 20),
+                Icon(d == null ? Icons.radio_button_unchecked : Icons.check_circle, color: d == null ? scheme.outline : Brand.hadir, size: 20),
                 const SizedBox(width: 8),
                 Expanded(child: Text(title, style: Theme.of(context).textTheme.titleSmall)),
                 if (uploading || deleting) const SizedBox(height: 18, width: 18, child: CircularProgressIndicator(strokeWidth: 2)),

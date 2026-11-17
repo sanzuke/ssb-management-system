@@ -9,6 +9,7 @@ import '../../core/repo_extras.dart';
 import '../../core/repository.dart';
 import '../../core/session.dart';
 import 'kid_selection.dart';
+import '../../core/theme.dart';
 import '../../core/widgets.dart';
 
 class _HomeData {
@@ -538,8 +539,8 @@ class _InvoiceCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     final (label, color) = switch (i.status) {
-      'lunas' => ('Lunas', const Color(0xFF2E7D32)),
-      'sebagian' => (i.overdue ? 'Sebagian, terlambat' : 'Sebagian', const Color(0xFFEF6C00)),
+      'lunas' => ('Lunas', Brand.hadir),
+      'sebagian' => (i.overdue ? 'Sebagian, terlambat' : 'Sebagian', Brand.sakit),
       _ => (i.overdue ? 'Terlambat' : 'Belum bayar', i.overdue ? scheme.error : scheme.primary),
     };
     return Card(

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../core/format.dart';
 import '../../core/models_extras.dart';
 import '../../core/repo_extras.dart';
+import '../../core/theme.dart';
 import '../../core/widgets.dart';
 
 /// Kalender akademi per bulan: pertandingan, acara, dan libur (baca saja; pengelolaan di web).
@@ -110,10 +111,10 @@ class _EventRow extends StatelessWidget {
   final CalendarEvent e;
 
   Color _color(BuildContext context) => switch (e.type) {
-        CalendarEventType.pertandingan => const Color(0xFFC62828),
-        CalendarEventType.latihan => const Color(0xFF2E7D32),
-        CalendarEventType.acara => const Color(0xFF1565C0),
-        CalendarEventType.libur => const Color(0xFFEF6C00),
+        CalendarEventType.pertandingan => Brand.alpa,
+        CalendarEventType.latihan => Brand.hadir,
+        CalendarEventType.acara => Brand.izin,
+        CalendarEventType.libur => Brand.sakit,
         CalendarEventType.lainnya => Theme.of(context).colorScheme.outline,
       };
 
