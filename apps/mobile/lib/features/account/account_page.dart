@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:provider/provider.dart';
 
+import '../../core/dialogs.dart';
 import '../../core/outbox.dart';
 import '../../core/session.dart';
 import '../../core/widgets.dart';
@@ -21,17 +22,18 @@ class _AccountPageState extends State<AccountPage> {
   late final Future<PackageInfo> _info = PackageInfo.fromPlatform();
 
   Future<void> _logout() async {
-    final ok = await showDialog<bool>(
-      context: context,
-      builder: (c) => AlertDialog(
-        title: const Text('Keluar dari akun?'),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(c, false), child: const Text('Batal')),
-          TextButton(onPressed: () => Navigator.pop(c, true), child: const Text('Keluar')),
-        ],
-      ),
+    final pending = context.read<Outbox>().pending;
+    final ok = await showConfirm(
+      context,
+      icon: Icons.logout_rounded,
+      title: 'Keluar dari akun?',
+      message: pending > 0
+          ? 'Ada $pending perubahan yang belum terkirim di perangkat ini dan akan hilang jika Anda keluar. Anda perlu masuk lagi untuk memakai aplikasi.'
+          : 'Anda perlu masuk lagi untuk memakai aplikasi.',
+      confirmLabel: 'Ya, keluar',
+      destructive: true,
     );
-    if (ok == true && mounted) await context.read<SessionController>().logout();
+    if (ok && mounted) await context.read<SessionController>().logout();
   }
 
   Future<void> _toggleNotifications(PushService push, bool value) async {

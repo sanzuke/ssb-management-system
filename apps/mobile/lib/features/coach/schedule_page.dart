@@ -16,9 +16,9 @@ class SchedulePage extends StatelessWidget {
     final repo = context.read<Repository>();
     final now = DateTime.now();
     return LoadView<List<TrainingSession>>(
-      load: () => repo.sessions(from: isoDate(now.subtract(const Duration(days: 7))), to: isoDate(now.add(const Duration(days: 30)))),
+      load: () => repo.sessions(from: isoDate(now.subtract(const Duration(days: 90))), to: isoDate(now.add(const Duration(days: 30)))),
       builder: (context, all) {
-        if (all.isEmpty) return const EmptyState('Belum ada jadwal latihan.');
+        if (all.isEmpty) return const EmptyState('Belum ada jadwal latihan.\nJadwal baru dibuat admin SSB lewat web.');
         final upcoming = all.where((s) => s.date.compareTo(today()) >= 0).toList();
         final past = all.where((s) => s.date.compareTo(today()) < 0).toList().reversed.toList();
         return ListView(

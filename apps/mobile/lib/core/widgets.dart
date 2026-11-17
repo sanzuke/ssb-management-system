@@ -5,6 +5,7 @@ import 'api.dart';
 import 'config.dart';
 import 'format.dart';
 import 'models.dart';
+import 'theme.dart';
 import 'session.dart';
 
 /// Memuat data async dengan indikator, pesan galat + "Coba lagi", dan tarik-untuk-muat-ulang.
@@ -34,7 +35,7 @@ class LoadViewState<T> extends State<LoadView<T>> {
       future: _future,
       builder: (context, snap) {
         if (snap.connectionState != ConnectionState.done) {
-          return const Center(child: CircularProgressIndicator());
+          return const SkeletonList();
         }
         final Widget body;
         if (snap.hasError) {
@@ -60,21 +61,53 @@ class LoadViewState<T> extends State<LoadView<T>> {
   }
 }
 
-/// Teks kosong di tengah layar yang tetap bisa ditarik untuk muat ulang.
+/// Layar kosong dengan ikon dan teks yang tetap bisa ditarik untuk muat ulang.
 class EmptyState extends StatelessWidget {
-  const EmptyState(this.message, {super.key});
+  const EmptyState(this.message, {super.key, this.icon = Icons.inbox_outlined});
 
   final String message;
+  final IconData icon;
 
   @override
-  Widget build(BuildContext context) => ListView(
-        physics: const AlwaysScrollableScrollPhysics(),
-        padding: const EdgeInsets.all(32),
+  Widget build(BuildContext context) {
+    final c = Theme.of(context).colorScheme.outline;
+    return ListView(
+      physics: const AlwaysScrollableScrollPhysics(),
+      padding: const EdgeInsets.all(32),
+      children: [
+        const SizedBox(height: 56),
+        Icon(icon, size: 56, color: Brand.garis),
+        const SizedBox(height: 12),
+        Text(message, textAlign: TextAlign.center, style: TextStyle(color: c, fontSize: 15)),
+      ],
+    );
+  }
+}
+
+/// Kerangka daftar saat data dimuat: menjaga tata letak tetap stabil dan terasa lebih cepat daripada spinner.
+class SkeletonList extends StatelessWidget {
+  const SkeletonList({super.key, this.count = 5});
+
+  final int count;
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      label: 'Memuat',
+      child: ListView(
+        physics: const NeverScrollableScrollPhysics(),
+        padding: const EdgeInsets.all(Space.page),
         children: [
-          const SizedBox(height: 64),
-          Text(message, textAlign: TextAlign.center, style: TextStyle(color: Theme.of(context).colorScheme.outline)),
+          for (var i = 0; i < count; i++)
+            Container(
+              height: 76,
+              margin: const EdgeInsets.only(bottom: Space.gap),
+              decoration: BoxDecoration(color: Brand.garis.withValues(alpha: 0.45), borderRadius: BorderRadius.circular(Space.radius)),
+            ),
         ],
-      );
+      ),
+    );
+  }
 }
 
 /// Foto siswa dari API (butuh token) atau inisial bila belum ada foto.
@@ -100,17 +133,23 @@ class PlayerAvatar extends StatelessWidget {
   }
 }
 
-Color statusColor(BuildContext context, AttendanceStatus? s) {
-  const hadir = Color(0xFF2E7D32);
-  return switch (s) {
-    AttendanceStatus.hadir => hadir,
-    AttendanceStatus.izin => const Color(0xFF1565C0),
-    AttendanceStatus.sakit => const Color(0xFFEF6C00),
-    AttendanceStatus.alpa => const Color(0xFFC62828),
-    null => Theme.of(context).colorScheme.outline,
-  };
-}
+Color statusColor(BuildContext context, AttendanceStatus? s) => switch (s) {
+      AttendanceStatus.hadir => Brand.hadir,
+      AttendanceStatus.izin => Brand.izin,
+      AttendanceStatus.sakit => Brand.sakit,
+      AttendanceStatus.alpa => Brand.alpa,
+      null => Theme.of(context).colorScheme.outline,
+    };
 
+IconData statusIcon(AttendanceStatus? s) => switch (s) {
+      AttendanceStatus.hadir => Icons.check_circle,
+      AttendanceStatus.izin => Icons.mail_outline,
+      AttendanceStatus.sakit => Icons.healing,
+      AttendanceStatus.alpa => Icons.cancel,
+      null => Icons.radio_button_unchecked,
+    };
+
+/// Status kehadiran sebagai ikon + teks, supaya tidak hanya bergantung pada warna.
 class StatusChip extends StatelessWidget {
   const StatusChip(this.status, {super.key});
 
@@ -120,9 +159,16 @@ class StatusChip extends StatelessWidget {
   Widget build(BuildContext context) {
     final c = statusColor(context, status);
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
       decoration: BoxDecoration(color: c.withValues(alpha: 0.12), borderRadius: BorderRadius.circular(20)),
-      child: Text(status?.label ?? 'Belum dicatat', style: TextStyle(color: c, fontSize: 12, fontWeight: FontWeight.w600)),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(statusIcon(status), size: 14, color: c),
+          const SizedBox(width: 4),
+          Text(status?.label ?? 'Belum dicatat', style: TextStyle(color: c, fontSize: 13, fontWeight: FontWeight.w600)),
+        ],
+      ),
     );
   }
 }

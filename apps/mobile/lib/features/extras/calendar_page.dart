@@ -7,7 +7,10 @@ import '../../core/widgets.dart';
 
 /// Kalender akademi per bulan: pertandingan, acara, dan libur (baca saja; pengelolaan di web).
 class CalendarPage extends StatefulWidget {
-  const CalendarPage({super.key});
+  const CalendarPage({super.key, this.embedded = false});
+
+  /// Tanpa bilah judul sendiri, saat dipakai sebagai isi tab.
+  final bool embedded;
 
   @override
   State<CalendarPage> createState() => _CalendarPageState();
@@ -34,7 +37,7 @@ class _CalendarPageState extends State<CalendarPage> {
   Widget build(BuildContext context) {
     final thisMonth = today().substring(0, 7);
     return Scaffold(
-      appBar: AppBar(title: const Text('Kalender akademi')),
+      appBar: widget.embedded ? null : AppBar(title: const Text('Kalender akademi')),
       body: Column(
         children: [
           Padding(

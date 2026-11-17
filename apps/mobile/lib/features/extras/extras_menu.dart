@@ -14,9 +14,10 @@ class ExtrasMenu extends StatelessWidget {
   Widget build(BuildContext context) {
     final items = <({IconData icon, String title, String subtitle, String route})>[
       if (role.isCoach) (icon: Icons.qr_code_scanner, title: 'Pindai kartu QR', subtitle: 'Catat hadir dari kartu siswa', route: '/pindai'),
+      if (role == Role.orangTua) (icon: Icons.receipt_long_outlined, title: 'Tagihan SPP', subtitle: 'Tagihan, jatuh tempo, dan riwayat bayar', route: '/tagihan'),
       if (role == Role.orangTua) (icon: Icons.event_busy_outlined, title: 'Izin latihan', subtitle: 'Ajukan izin atau sakit untuk anak', route: '/izin'),
       (icon: Icons.calendar_month_outlined, title: 'Kalender', subtitle: 'Pertandingan, acara, dan libur', route: '/kalender'),
-      (icon: Icons.volunteer_activism_outlined, title: 'Donasi', subtitle: 'Kampanye penggalangan dana kegiatan', route: '/donasi'),
+      (icon: Icons.volunteer_activism_outlined, title: role == Role.orangTua ? 'Yayasan dan donasi' : 'Donasi', subtitle: 'Kampanye penggalangan dana kegiatan', route: '/donasi'),
     ];
     return Column(
       children: [

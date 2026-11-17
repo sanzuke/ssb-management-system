@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../core/models.dart';
@@ -7,6 +8,7 @@ import 'card_page.dart';
 import 'documents_page.dart';
 import 'donations_page.dart';
 import 'invoice_detail_page.dart';
+import '../parent/parent_home_page.dart' show InvoicesPage;
 import 'scan_page.dart';
 
 /// Rute fitur tambahan: kalender, donasi, berkas, kartu QR, pemindai, izin, rincian tagihan.
@@ -18,6 +20,7 @@ final List<RouteBase> extrasRoutes = [
   GoRoute(path: '/berkas/:id', builder: (_, s) => DocumentsPage(playerId: s.pathParameters['id']!)),
   GoRoute(path: '/kartu/:id', builder: (_, s) => PlayerCardPage(playerId: s.pathParameters['id']!)),
   GoRoute(path: '/izin', builder: (_, _) => const AbsencePage()),
+  GoRoute(path: '/tagihan', builder: (_, _) => Scaffold(appBar: AppBar(title: const Text('Tagihan SPP')), body: const InvoicesPage())),
   // `extra` boleh membawa Invoice dari kartu tagihan; tanpa itu rincian dimuat dari server.
   GoRoute(
     path: '/tagihan/:id',

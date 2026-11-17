@@ -297,7 +297,7 @@ class _Header extends StatelessWidget {
                       Text(s.fullName, style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700)),
                       if (s.memberNo != null) Text(s.memberNo!, style: TextStyle(color: scheme.outline)),
                       const SizedBox(height: 4),
-                      Text([s.ageGroup?.name ?? 'Belum ada KU', ?pos, '${ageOf(s.birthDate)} th'].join(' · ')),
+                      Text([s.ageGroup == null ? 'Belum ada KU' : kuShort(s.ageGroup!.name), ?pos, '${ageOf(s.birthDate)} th'].join(' · ')),
                     ],
                   ),
                 ),

@@ -17,10 +17,11 @@ class TodayPage extends StatelessWidget {
     final repo = context.read<Repository>();
     final name = context.read<SessionController>().me?.name ?? '';
     return LoadView<List<TrainingSession>>(
-      load: () => repo.sessions(from: today(), to: isoDate(DateTime.now().add(const Duration(days: 14)))),
+      load: () => repo.sessions(from: isoDate(DateTime.now().subtract(const Duration(days: 30))), to: isoDate(DateTime.now().add(const Duration(days: 14)))),
       builder: (context, all) {
         final now = all.where((s) => s.date == today()).toList();
-        final next = all.where((s) => s.date != today()).take(5).toList();
+        final next = all.where((s) => s.date.compareTo(today()) > 0).take(5).toList();
+        final recent = all.where((s) => s.date.compareTo(today()) < 0).toList().reversed.take(3).toList();
         return ListView(
           physics: const AlwaysScrollableScrollPhysics(),
           padding: const EdgeInsets.all(16),
@@ -36,6 +37,16 @@ class TodayPage extends StatelessWidget {
               _Heading('Berikutnya'),
               for (final s in next) SessionTile(s),
             ],
+            if (recent.isNotEmpty) ...[
+              const SizedBox(height: 16),
+              _Heading('Latihan terakhir (absensi masih bisa diisi)'),
+              for (final s in recent) SessionTile(s),
+            ],
+            if (all.isEmpty)
+              const Padding(
+                padding: EdgeInsets.only(top: 8),
+                child: Text('Belum ada jadwal dalam sebulan terakhir. Jadwal latihan baru dibuat admin SSB lewat web.'),
+              ),
           ],
         );
       },

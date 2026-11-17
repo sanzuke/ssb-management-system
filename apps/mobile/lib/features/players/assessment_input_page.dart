@@ -303,7 +303,7 @@ class _AssessmentInputPageState extends State<AssessmentInputPage> {
         physics: const AlwaysScrollableScrollPhysics(),
         padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
         children: [
-          Text([p.summary.memberNo, p.summary.ageGroup?.name ?? 'Belum ada KU', 'skala 1 sampai 10'].whereType<String>().join(' · '), style: TextStyle(color: scheme.outline)),
+          Text([p.summary.memberNo, p.summary.ageGroup == null ? 'Belum ada KU' : kuShort(p.summary.ageGroup!.name), 'skala 1 sampai 10'].whereType<String>().join(' · '), style: TextStyle(color: scheme.outline)),
           const SizedBox(height: 12),
           if (pending) const PendingBanner('Menunggu sinyal. Nilai tersimpan di perangkat dan dikirim otomatis begitu ada sinyal.'),
           if (_error != null) _Message(_error!, error: true),

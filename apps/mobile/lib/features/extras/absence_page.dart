@@ -5,6 +5,7 @@ import '../../core/format.dart';
 import '../../core/models.dart';
 import '../../core/models_extras.dart';
 import '../../core/repo_extras.dart';
+import '../../core/dialogs.dart';
 import '../../core/widgets.dart';
 
 /// Pengajuan izin atau sakit untuk sesi latihan anak yang akan datang (orang tua).
@@ -32,18 +33,16 @@ class _AbsencePageState extends State<AbsencePage> {
   }
 
   Future<void> _delete(AbsenceRequest r) async {
-    final ok = await showDialog<bool>(
-      context: context,
-      builder: (c) => AlertDialog(
-        title: const Text('Batalkan pengajuan?'),
-        content: Text('${r.playerName}, ${shortDay(r.sessionDate)}'),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(c, false), child: const Text('Tidak')),
-          TextButton(onPressed: () => Navigator.pop(c, true), child: const Text('Batalkan pengajuan')),
-        ],
-      ),
+    final ok = await showConfirm(
+      context,
+      icon: Icons.event_busy_outlined,
+      title: 'Batalkan pengajuan?',
+      message: '${r.playerName}, ${shortDay(r.sessionDate)}. Pelatih tidak akan lagi melihat pengajuan ini.',
+      confirmLabel: 'Ya, batalkan pengajuan',
+      cancelLabel: 'Tidak',
+      destructive: true,
     );
-    if (ok != true || !mounted) return;
+    if (!ok || !mounted) return;
     try {
       await ExtrasRepository.of(context).deleteAbsenceRequest(r.id);
       _listKey.currentState?.reload();

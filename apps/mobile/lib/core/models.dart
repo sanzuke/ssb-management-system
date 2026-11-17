@@ -207,11 +207,12 @@ class AttendanceRow {
 }
 
 class Invoice {
-  Invoice({required this.id, required this.playerName, required this.month, required this.amount, required this.paid, required this.remaining, required this.dueOn, required this.status, required this.overdue});
+  Invoice({required this.id, required this.playerName, this.playerId = '', required this.month, required this.amount, required this.paid, required this.remaining, required this.dueOn, required this.status, required this.overdue});
 
   factory Invoice.fromJson(Map<String, dynamic> j) => Invoice(
         id: j['id'] as String,
         playerName: (j['player'] as Map)['name'] as String,
+        playerId: ((j['player'] as Map)['id'] as String?) ?? '',
         month: j['month'] as String,
         amount: (j['amount'] as num).toInt(),
         paid: (j['paid'] as num).toInt(),
@@ -223,6 +224,9 @@ class Invoice {
 
   final String id;
   final String playerName;
+
+  /// Id siswa penerima tagihan (untuk menyaring per anak); kosong bila data tidak membawanya.
+  final String playerId;
   final String month;
   final int amount, paid, remaining;
   final String dueOn;

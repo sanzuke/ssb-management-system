@@ -8,6 +8,8 @@ import '../../core/models.dart';
 import '../../core/models_players.dart';
 import '../../core/repo_players.dart';
 import '../../core/repository.dart';
+import '../../core/session.dart';
+import '../../core/theme.dart';
 import '../../core/widgets.dart';
 import 'player_widgets.dart';
 
@@ -41,6 +43,7 @@ class _PlayersPageState extends State<PlayersPage> {
         final all = data.players;
         final q = _q.trim().toLowerCase();
         final list = q.isEmpty ? all : all.where((p) => p.fullName.toLowerCase().contains(q) || (p.memberNo ?? '').toLowerCase().contains(q)).toList();
+        final coach = context.read<SessionController>().role?.isCoach ?? false;
         return ListView(
           physics: const AlwaysScrollableScrollPhysics(),
           padding: const EdgeInsets.all(16),
@@ -60,12 +63,20 @@ class _PlayersPageState extends State<PlayersPage> {
                   contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
                   leading: PlayerAvatar(id: p.id, name: p.fullName, photoV: p.photoV),
                   title: Text(p.fullName),
-                  subtitle: Text([?p.ageGroup?.name, ?p.position, '${ageOf(p.birthDate)} th'].join(' · ')),
+                  subtitle: Text([?(p.ageGroup == null ? null : kuShort(p.ageGroup!.name)), ?p.position, '${ageOf(p.birthDate)} th'].join(' · ')),
                   trailing: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       _RatingChip(data.overview[p.id]),
-                      const Icon(Icons.chevron_right),
+                      // Pintasan untuk pelatih: langsung ke formulir penilaian tanpa membuka profil dulu.
+                      if (coach)
+                        IconButton(
+                          tooltip: 'Isi nilai ${p.fullName}',
+                          icon: const Icon(Icons.edit_note, color: Brand.rumput),
+                          onPressed: () => context.push('/siswa/${Uri.encodeComponent(p.id)}/nilai'),
+                        )
+                      else
+                        const Icon(Icons.chevron_right),
                     ],
                   ),
                   onTap: () => context.push('/siswa/${Uri.encodeComponent(p.id)}', extra: p),

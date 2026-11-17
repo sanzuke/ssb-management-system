@@ -7,7 +7,12 @@ import '../account/account_page.dart';
 import '../coach/schedule_page.dart';
 import '../coach/today_page.dart';
 import '../parent/parent_home_page.dart';
+import '../extras/card_page.dart';
+import '../parent/kid_tab.dart';
+import '../parent/kid_selection.dart';
 import '../players/players_page.dart';
+import '../players/report_page.dart';
+import 'app_header.dart';
 
 class _Tab {
   const _Tab(this.id, this.label, this.icon, this.selectedIcon, this.page);
@@ -34,6 +39,7 @@ class HomeShell extends StatefulWidget {
 class _HomeShellState extends State<HomeShell> {
   int _index = 0;
   String? _pendingTab;
+  final _kid = KidSelection();
 
   @override
   void initState() {
@@ -58,31 +64,54 @@ class _HomeShellState extends State<HomeShell> {
       ];
     }
     return [
-      _Tab('beranda', 'Beranda', Icons.home_outlined, Icons.home, ParentHomePage(onOpenInvoices: () => setState(() => _index = 2))),
-      const _Tab('anak', 'Anak', Icons.child_care_outlined, Icons.child_care, PlayersPage()),
-      const _Tab('tagihan', 'Tagihan', Icons.receipt_long_outlined, Icons.receipt_long, InvoicesPage()),
+      _Tab('beranda', 'Beranda', Icons.home_outlined, Icons.home, ParentHomePage(onOpenInvoices: () => setState(() => _index = 3))),
+      _Tab('kartu', 'Kartu', Icons.badge_outlined, Icons.badge, KidTab(builder: (_, k) => PlayerCardPage(playerId: k.id, embedded: true))),
+      _Tab('rapor', 'Rapor', Icons.analytics_outlined, Icons.analytics, KidTab(builder: (_, k) => ReportPage(playerId: k.id, embedded: true))),
+      const _Tab('spp', 'SPP', Icons.payments_outlined, Icons.payments, InvoicesPage()),
       account,
     ];
   }
 
   @override
   Widget build(BuildContext context) {
-    final role = context.watch<SessionController>().role;
+    final session = context.watch<SessionController>();
+    final role = session.role;
     if (role == null) return const SizedBox.shrink();
     if (role == Role.adminSsb) return const _AdminNotice();
     final tabs = _tabs(role);
     if (_pendingTab != null) {
-      final i = tabs.indexWhere((t) => t.id == _pendingTab);
+      // Tautan lama: `tab=jadwal` di orang tua = Beranda (jadwal terdekat); `tab=tagihan` = tab SPP.
+      final want = switch ((_pendingTab, role.isCoach)) {
+        ('jadwal', false) => 'beranda',
+        ('tagihan', false) => 'spp',
+        (final t, _) => t,
+      };
+      final i = tabs.indexWhere((t) => t.id == want);
       if (i >= 0) _index = i;
       _pendingTab = null;
     }
-    return Scaffold(
-      appBar: AppBar(title: Text(tabs[_index].label)),
-      body: IndexedStack(index: _index, children: [for (final t in tabs) t.page]),
+    final me = session.me;
+    // Pilihan anak dibagi oleh Beranda, Kartu, dan Rapor.
+    return ChangeNotifierProvider<KidSelection>.value(
+      value: _kid,
+      child: Scaffold(
+      body: Column(
+        children: [
+          AppHeader(
+            ssbName: me?.active?.ssbName ?? 'SSB App',
+            userName: me?.name ?? '',
+            roleLabel: role.label,
+            pageLabel: tabs[_index].label,
+            onAccount: () => setState(() => _index = tabs.length - 1),
+          ),
+          Expanded(child: IndexedStack(index: _index, children: [for (final t in tabs) t.page])),
+        ],
+      ),
       bottomNavigationBar: NavigationBar(
         selectedIndex: _index,
         onDestinationSelected: (i) => setState(() => _index = i),
         destinations: [for (final t in tabs) NavigationDestination(icon: Icon(t.icon), selectedIcon: Icon(t.selectedIcon), label: t.label)],
+      ),
       ),
     );
   }

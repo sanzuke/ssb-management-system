@@ -12,13 +12,15 @@ Aplikasi Flutter untuk pelatih/korlas dan orang tua. Admin tetap memakai web. Ra
 
 | Variabel | Fungsi | Bawaan |
 |---|---|---|
-| `API_URL` | Alamat API | Android: `http://10.0.2.2:3000` (emulator ke mesin host); lainnya `http://localhost:3000` |
-| `WEB_URL` | Alamat web untuk "Lupa kata sandi" dan "Punya tautan undangan" | `https://ssb-ms.zukelabs.web.id` |
+| `API_URL` | Alamat API | Rilis: `https://app.familyunitedfa.com/api` (produksi, server fufa). Debug Android: `http://10.0.2.2:3000` (emulator ke mesin host); debug lainnya `http://localhost:3000` |
+| `WEB_URL` | Alamat web untuk "Lupa kata sandi" dan "Punya tautan undangan" | `https://app.familyunitedfa.com` |
 
 Rilis wajib HTTPS: `usesCleartextTraffic` hanya ada di manifest debug Android, dan iOS hanya mengizinkan HTTP ke jaringan lokal (`NSAllowsLocalNetworking`).
 
+`flutter build apk --release` tanpa flag sudah mengarah ke produksi. `ssb-ms.zukelabs.web.id` melayani backend yang sama (satu server dan satu database), jadi tidak ada lingkungan staging terpisah. Untuk mencoba tanpa menyentuh data produksi, jalankan API lokal dan beri `--dart-define=API_URL=http://<ip-komputer>:3000`.
+
 ```
-flutter run --dart-define=API_URL=https://ssb-ms.zukelabs.web.id/api --dart-define=WEB_URL=https://ssb-ms.zukelabs.web.id
+flutter run --release   # produksi; tambahkan --dart-define=API_URL=... untuk alamat lain
 ```
 
 Ponsel fisik tidak bisa memakai `10.0.2.2`; pakai alamat IP komputer di jaringan yang sama atau alamat produksi.

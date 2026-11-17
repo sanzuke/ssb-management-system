@@ -23,9 +23,12 @@ class _ReportData {
 /// Rapor hasil penilaian per periode: skor, radar, catatan, rencana pengembangan, dan unduh PDF
 /// (padanan `HasilNilai` dan halaman penilaian orang tua di web). Orang tua hanya mendapat yang sudah terbit (dijaga server).
 class ReportPage extends StatefulWidget {
-  const ReportPage({super.key, required this.playerId});
+  const ReportPage({super.key, required this.playerId, this.embedded = false});
 
   final String playerId;
+
+  /// Tanpa bilah judul sendiri, saat dipakai sebagai isi tab.
+  final bool embedded;
 
   @override
   State<ReportPage> createState() => _ReportPageState();
@@ -120,7 +123,7 @@ class _ReportPageState extends State<ReportPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(_data == null ? 'Rapor' : 'Rapor ${_data!.player.fullName}')),
+      appBar: widget.embedded ? null : AppBar(title: Text(_data == null ? 'Rapor' : 'Rapor ${_data!.player.fullName}')),
       body: _body(),
     );
   }

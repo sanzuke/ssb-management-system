@@ -44,3 +44,6 @@ String initials(String name) {
   final first = parts.first[0];
   return (parts.length == 1 ? first : first + parts.last[0]).toUpperCase();
 }
+
+/// "KU-10 (Di bawah 10 tahun)" menjadi "KU-10": keterangan usia di dalam kurung terlalu panjang untuk baris kecil.
+String kuShort(String name) => name.split(' (').first;

@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:open_filex/open_filex.dart';
 import 'package:path_provider/path_provider.dart';
 
+import '../../core/dialogs.dart';
 import '../../core/format.dart';
 import '../../core/models_extras.dart';
 import '../../core/repo_extras.dart';
@@ -94,18 +95,15 @@ class _DocumentsPageState extends State<DocumentsPage> {
   }
 
   Future<void> _delete(PlayerDocument d) async {
-    final ok = await showDialog<bool>(
-      context: context,
-      builder: (c) => AlertDialog(
-        title: Text('Hapus ${d.kind.label}${d.label == null ? '' : ' (${d.label})'}?'),
-        content: const Text('Berkas tidak bisa dikembalikan.'),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(c, false), child: const Text('Batal')),
-          TextButton(onPressed: () => Navigator.pop(c, true), child: const Text('Hapus')),
-        ],
-      ),
+    final ok = await showConfirm(
+      context,
+      icon: Icons.delete_outline_rounded,
+      title: 'Hapus ${d.kind.label}${d.label == null ? '' : ' (${d.label})'}?',
+      message: 'Berkas tidak bisa dikembalikan.',
+      confirmLabel: 'Ya, hapus berkas',
+      destructive: true,
     );
-    if (ok != true || !mounted) return;
+    if (!ok || !mounted) return;
     setState(() {
       _busy = d.id;
       _error = null;

@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import 'core/session.dart';
+import 'core/theme.dart';
 import 'features/platform/messenger.dart';
 import 'features/platform/push_service.dart';
 import 'features/auth/login_page.dart';
@@ -59,7 +61,16 @@ class _SsbAppState extends State<SsbApp> {
       debugShowCheckedModeBanner: false,
       scaffoldMessengerKey: rootMessengerKey,
       routerConfig: _router,
-      theme: ThemeData(colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF1B6B3A)), useMaterial3: true),
+      theme: buildTheme(),
+      // Di layar lebar (tablet, web, desktop) isi tetap selebar ponsel agar tidak melar.
+      // Ikon status bar gelap di halaman terang (masuk, awal); bilah hijau memasang ikon terangnya sendiri.
+      builder: (context, child) => AnnotatedRegion<SystemUiOverlayStyle>(
+        value: SystemUiOverlayStyle.dark.copyWith(statusBarColor: Colors.transparent),
+        child: ColoredBox(
+          color: Brand.kapur,
+          child: Center(child: ConstrainedBox(constraints: const BoxConstraints(maxWidth: 640), child: child)),
+        ),
+      ),
     );
   }
 }

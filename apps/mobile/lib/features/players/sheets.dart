@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../core/api.dart';
+import '../../core/dialogs.dart';
 import '../../core/format.dart';
 import '../../core/models_players.dart';
 import '../../core/repo_players.dart';
@@ -274,19 +275,16 @@ class _BadgeSheetState extends State<_BadgeSheet> {
 }
 
 /// Konfirmasi singkat sebelum tindakan yang tidak mudah dibatalkan.
-Future<bool> confirmAction(BuildContext context, {required String title, required String message, required String action}) async {
-  final ok = await showDialog<bool>(
-    context: context,
-    builder: (c) => AlertDialog(
-      title: Text(title),
-      content: Text(message),
-      actions: [
-        TextButton(onPressed: () => Navigator.pop(c, false), child: const Text('Batal')),
-        TextButton(onPressed: () => Navigator.pop(c, true), child: Text(action)),
-      ],
-    ),
+Future<bool> confirmAction(BuildContext context, {required String title, required String message, required String action}) {
+  final destructive = RegExp(r'hapus|cabut|batalkan|tarik', caseSensitive: false).hasMatch(action);
+  return showConfirm(
+    context,
+    icon: destructive ? Icons.delete_outline_rounded : Icons.help_outline_rounded,
+    title: title,
+    message: message,
+    confirmLabel: action,
+    destructive: destructive,
   );
-  return ok ?? false;
 }
 
 /// Pesan galat untuk [ApiException] dengan status tertentu, mis. 403 pada terbit rapor.

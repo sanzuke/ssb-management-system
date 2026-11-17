@@ -41,7 +41,7 @@ class SessionTile extends StatelessWidget {
                   children: [
                     if (showDate) Text('${relativeDay(s.date)} · ${shortDay(s.date)}', style: TextStyle(color: scheme.primary, fontWeight: FontWeight.w600, fontSize: 13)),
                     Text(
-                      sessionLine(ageGroup: s.ageGroup.name, location: s.location?.name, time: s.startTime),
+                      sessionLine(ageGroup: kuShort(s.ageGroup.name), location: s.location?.name, time: s.startTime),
                       style: Theme.of(context).textTheme.titleMedium,
                     ),
                     const SizedBox(height: 6),

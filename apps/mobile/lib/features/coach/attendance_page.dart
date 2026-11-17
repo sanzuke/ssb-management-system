@@ -164,7 +164,7 @@ class _AttendancePageState extends State<AttendancePage> {
         key: _key,
         path: '/sessions/${widget.sessionId}/attendance',
         body: attendanceBody(_marks, _notes),
-        label: 'Absensi ${s.ageGroup.name}, ${shortDay(s.date)}',
+        label: 'Absensi ${kuShort(s.ageGroup.name)}, ${shortDay(s.date)}',
       ));
       if (!mounted) return;
       if (res.queued) {
@@ -187,20 +187,15 @@ class _AttendancePageState extends State<AttendancePage> {
     }
   }
 
-  Future<bool> _confirmLeave() async {
-    final leave = await showDialog<bool>(
-      context: context,
-      builder: (c) => AlertDialog(
-        title: const Text('Perubahan belum disimpan'),
-        content: const Text('Absensi yang Anda tandai akan hilang jika keluar.'),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(c, false), child: const Text('Tetap di sini')),
-          TextButton(onPressed: () => Navigator.pop(c, true), child: const Text('Keluar')),
-        ],
-      ),
-    );
-    return leave ?? false;
-  }
+  Future<bool> _confirmLeave() => showConfirm(
+        context,
+        icon: Icons.warning_amber_rounded,
+        title: 'Perubahan belum disimpan',
+        message: 'Absensi yang Anda tandai akan hilang jika keluar dari layar ini.',
+        confirmLabel: 'Keluar tanpa menyimpan',
+        cancelLabel: 'Tetap di sini',
+        destructive: true,
+      );
 
   @override
   Widget build(BuildContext context) {
@@ -215,21 +210,20 @@ class _AttendancePageState extends State<AttendancePage> {
       },
       child: Scaffold(
         appBar: AppBar(
-          title: Text(s == null ? 'Absensi' : 'Absensi ${s.ageGroup.name}'),
-          actions: [
-            if (r != null)
-              TextButton(onPressed: _saving ? null : _allPresent, child: const Text('Semua hadir')),
-          ],
+          title: Text(s == null ? 'Absensi' : 'Absensi ${kuShort(s.ageGroup.name)}'),
+          actions: const [],
         ),
         body: _body(),
-        floatingActionButton: r == null
+        bottomNavigationBar: r == null
             ? null
-            : FloatingActionButton.extended(
-                onPressed: (!_dirty || _saving) ? null : _save,
-                icon: _saving
-                    ? const SizedBox(height: 18, width: 18, child: CircularProgressIndicator(strokeWidth: 2))
-                    : Icon(!_dirty && _queued ? Icons.cloud_upload_outlined : Icons.save),
-                label: Text(_dirty ? 'Simpan (${_marks.length}/${r.players.length})' : (_queued ? 'Menunggu sinyal' : 'Tersimpan')),
+            : _SaveBar(
+                done: _marks.length,
+                total: r.players.length,
+                dirty: _dirty,
+                queued: _queued,
+                saving: _saving,
+                locked: s!.date.compareTo(today()) > 0,
+                onSave: _save,
               ),
       ),
     );
@@ -249,22 +243,55 @@ class _AttendancePageState extends State<AttendancePage> {
       );
     }
     final r = _roster;
-    if (r == null) return const Center(child: CircularProgressIndicator());
+    if (r == null) return const SkeletonList();
     final s = r.session;
     if (r.players.isEmpty) return const EmptyState('Belum ada siswa aktif di KU ini.');
     final byPlayer = {for (final q in _requests) q.playerId: q};
     final names = {for (final p in r.players) p.playerId};
     final pending = _requests.where((q) => names.contains(q.playerId) && _marks[q.playerId] != q.kind.status).toList();
+    final counts = {for (final st in AttendanceStatus.values) st: r.players.where((p) => _marks[p.playerId] == st).length};
+    final blank = r.players.where((p) => _marks[p.playerId] == null).length;
+    final locked = s.date.compareTo(today()) > 0;
     return ListView(
-      padding: const EdgeInsets.fromLTRB(16, 8, 16, 96),
+      padding: const EdgeInsets.fromLTRB(12, 12, 12, 16),
       children: [
         Padding(
-          padding: const EdgeInsets.only(bottom: 12),
+          padding: const EdgeInsets.fromLTRB(4, 0, 4, 10),
           child: Text(
-            '${dayLabel(s.date)} · ${sessionLine(ageGroup: s.ageGroup.name, location: s.location?.name, time: s.startTime)}',
+            '${dayLabel(s.date)} · ${sessionLine(ageGroup: kuShort(s.ageGroup.name), location: s.location?.name, time: s.startTime)}',
             style: TextStyle(color: Theme.of(context).colorScheme.outline),
           ),
         ),
+        if (locked)
+          Container(
+            margin: const EdgeInsets.only(bottom: 10),
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(color: Brand.merahMuda, borderRadius: BorderRadius.circular(Space.radius), border: Border.all(color: Brand.merah.withValues(alpha: 0.35))),
+            child: const Row(
+              children: [
+                Icon(Icons.lock_clock, color: Brand.merah),
+                SizedBox(width: 10),
+                Expanded(child: Text('Sesi ini belum berlangsung. Absensi baru bisa diisi pada hari latihan.', style: TextStyle(fontWeight: FontWeight.w600))),
+              ],
+            ),
+          ),
+        Row(
+          children: [
+            for (final st in AttendanceStatus.values) ...[
+              Expanded(child: _CountTile(label: st.label.toUpperCase(), value: counts[st] ?? 0, color: statusColor(context, st))),
+              const SizedBox(width: Space.gap),
+            ],
+            Expanded(child: _CountTile(label: 'KOSONG', value: blank, color: Brand.redup)),
+          ],
+        ),
+        const SizedBox(height: Space.gap),
+        FilledButton.icon(
+          style: ledgerButton(),
+          onPressed: (_saving || locked) ? null : _allPresent,
+          icon: const Icon(Icons.done_all, size: 20),
+          label: Text('Tandai semua hadir (${r.players.length} anak)'),
+        ),
+        const SizedBox(height: 12),
         if (_queued && !_dirty)
           _Banner(
             icon: Icons.cloud_upload_outlined,
@@ -287,12 +314,18 @@ class _AttendancePageState extends State<AttendancePage> {
             onAction: () => _applyAll(pending),
           ),
         for (final p in r.players)
-          _PlayerRow(
-            player: p,
-            status: _marks[p.playerId],
-            onMark: (st) => _mark(p.playerId, st),
-            request: byPlayer[p.playerId],
-            onApply: byPlayer[p.playerId] == null ? null : () => _apply(byPlayer[p.playerId]!),
+          IgnorePointer(
+            ignoring: locked,
+            child: Opacity(
+              opacity: locked ? 0.45 : 1,
+              child: _PlayerRow(
+                player: p,
+                status: _marks[p.playerId],
+                onMark: (st) => _mark(p.playerId, st),
+                request: byPlayer[p.playerId],
+                onApply: byPlayer[p.playerId] == null ? null : () => _apply(byPlayer[p.playerId]!),
+              ),
+            ),
           ),
       ],
     );
@@ -342,7 +375,7 @@ class _PlayerRow extends StatelessWidget {
     final q = request;
     return Card(
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(16, 12, 12, 12),
+        padding: const EdgeInsets.all(12),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -353,21 +386,29 @@ class _PlayerRow extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(player.fullName, style: Theme.of(context).textTheme.titleSmall),
-                      if (player.memberNo != null) Text(player.memberNo!, style: TextStyle(color: scheme.outline, fontSize: 12)),
-                      if (player.injured)
-                        Row(children: [
-                          Icon(Icons.healing, size: 14, color: scheme.error),
-                          const SizedBox(width: 4),
-                          Text('Sedang cedera', style: TextStyle(color: scheme.error, fontSize: 12)),
-                        ]),
+                      if (player.memberNo != null) Text(player.memberNo!, style: TextStyle(color: scheme.outline, fontSize: 13)),
                     ],
                   ),
                 ),
-                for (final st in AttendanceStatus.values)
-                  Padding(
-                    padding: const EdgeInsets.only(left: 6),
-                    child: _StatusButton(status: st, selected: status == st, onTap: () => onMark(st)),
+                if (player.injured)
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    decoration: BoxDecoration(color: scheme.errorContainer, borderRadius: BorderRadius.circular(20)),
+                    child: Row(mainAxisSize: MainAxisSize.min, children: [
+                      Icon(Icons.healing, size: 14, color: scheme.error),
+                      const SizedBox(width: 4),
+                      Text('Cedera', style: TextStyle(color: scheme.error, fontSize: 12, fontWeight: FontWeight.w600)),
+                    ]),
                   ),
+              ],
+            ),
+            const SizedBox(height: 10),
+            Row(
+              children: [
+                for (final st in AttendanceStatus.values) ...[
+                  if (st != AttendanceStatus.values.first) const SizedBox(width: Space.gap),
+                  Expanded(child: _StatusButton(status: st, selected: status == st, onTap: () => onMark(st))),
+                ],
               ],
             ),
             if (q != null) ...[
@@ -407,6 +448,7 @@ class _RequestChip extends StatelessWidget {
   }
 }
 
+/// Tombol status selebar kolom: ikon + teks (bukan huruf tunggal), tinggi 48dp, dan tidak bergantung pada warna saja.
 class _StatusButton extends StatelessWidget {
   const _StatusButton({required this.status, required this.selected, required this.onTap});
 
@@ -417,23 +459,109 @@ class _StatusButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final color = statusColor(context, status);
+    final fg = selected ? Colors.white : color;
     return Semantics(
       button: true,
       selected: selected,
       label: status.label,
-      child: InkResponse(
-        onTap: onTap,
-        radius: 28,
-        child: Container(
-          width: 44,
-          height: 44,
-          alignment: Alignment.center,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: selected ? color : Colors.transparent,
-            border: Border.all(color: selected ? color : Theme.of(context).colorScheme.outlineVariant, width: 1.5),
+      excludeSemantics: true,
+      child: Material(
+        color: selected ? color : Colors.transparent,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(Space.radius), side: BorderSide(color: selected ? color : Brand.garis, width: 1.5)),
+        child: InkWell(
+          onTap: onTap,
+          customBorder: RoundedRectangleBorder(borderRadius: BorderRadius.circular(Space.radius)),
+          child: SizedBox(
+            height: Space.touch,
+            child: Center(
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(selected ? Icons.check : statusIcon(status), size: 16, color: fg),
+                    const SizedBox(width: 4),
+                    Text(status.label, style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: fg)),
+                  ],
+                ),
+              ),
+            ),
           ),
-          child: Text(status.label[0], style: TextStyle(fontWeight: FontWeight.w700, color: selected ? Colors.white : color)),
+        ),
+      ),
+    );
+  }
+}
+
+/// Satu kotak ringkasan di atas daftar: jumlah siswa per status.
+class _CountTile extends StatelessWidget {
+  const _CountTile({required this.label, required this.value, required this.color});
+
+  final String label;
+  final int value;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) => Container(
+        padding: const EdgeInsets.symmetric(vertical: 8),
+        decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(Space.radius), border: Border.all(color: Brand.garis)),
+        child: Column(
+          children: [
+            FittedBox(fit: BoxFit.scaleDown, child: Text(label, style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: Brand.redup))),
+            Text('$value', style: TextStyle(fontSize: 22, fontWeight: FontWeight.w800, color: color, fontFeatures: const [FontFeature.tabularFigures()])),
+          ],
+        ),
+      );
+}
+
+/// Bilah simpan yang menempel di bawah: kemajuan "x dari y terdata" dan tombol kuning.
+class _SaveBar extends StatelessWidget {
+  const _SaveBar({required this.done, required this.total, required this.dirty, required this.queued, required this.saving, required this.locked, required this.onSave});
+
+  final int done;
+  final int total;
+  final bool dirty;
+  final bool queued;
+  final bool saving;
+
+  /// Sesi belum berlangsung: server menolak absensi (422), jadi tombol dikunci.
+  final bool locked;
+  final VoidCallback onSave;
+
+  @override
+  Widget build(BuildContext context) {
+    final waiting = !dirty && queued;
+    return Material(
+      color: Colors.white,
+      child: DecoratedBox(
+        decoration: const BoxDecoration(border: Border(top: BorderSide(color: Brand.garis))),
+        child: SafeArea(
+          top: false,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(12, 10, 12, 10),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Row(
+                  children: [
+                    Expanded(child: Text('$done dari $total terdata', style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13))),
+                    if (waiting) const Text('Menunggu sinyal', style: TextStyle(color: Brand.sakit, fontWeight: FontWeight.w700, fontSize: 13)),
+                  ],
+                ),
+                const SizedBox(height: 6),
+                ClipRRect(borderRadius: BorderRadius.circular(4), child: LinearProgressIndicator(value: total == 0 ? 0 : done / total, minHeight: 6, backgroundColor: Brand.garis.withValues(alpha: 0.5), color: Brand.rumput)),
+                const SizedBox(height: 10),
+                SizedBox(
+                  width: double.infinity,
+                  child: FilledButton.icon(
+                    onPressed: (!dirty || saving || locked) ? null : onSave,
+                    icon: saving ? const SizedBox(height: 18, width: 18, child: CircularProgressIndicator(strokeWidth: 2)) : Icon(waiting ? Icons.cloud_upload_outlined : Icons.save_outlined),
+                    label: Text(locked ? 'Belum bisa diisi' : (dirty ? 'Simpan presensi sesi ini' : (waiting ? 'Tersimpan di perangkat' : (done == 0 ? 'Tandai kehadiran dulu' : 'Tersimpan')))),
+                  ),
+                ),
+              ],
+            ),
+          ),
         ),
       ),
     );
